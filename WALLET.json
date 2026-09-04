@@ -1,0 +1,27 @@
+{
+  "repo": "https://github.com/brg444/vaulted-bitcoin-wallet",
+  "role": "Vaulted creates Recovery Kits. This repo is the emergency page if the app is gone.",
+  "libRoot": "src/lib/vault",
+  "libFiles": [
+    "addressNetwork.ts",
+    "hex.ts",
+    "prfEnvelope.ts",
+    "ceremony/directauth.ts",
+    "program/kitBundle.ts",
+    "program/kit.ts",
+    "program/constants.ts",
+    "program/descriptor.ts",
+    "program/trees.ts",
+    "program/context.ts",
+    "program/packet.ts",
+    "program/script.ts",
+    "program/tweak.ts",
+    "constants.ts",
+    "protectionTier.ts",
+    "types.ts",
+    "spendingPolicy.ts",
+    "savingsTree.ts",
+    "setupPlan.ts",
+    "webauthn.ts"
+  ]
+}

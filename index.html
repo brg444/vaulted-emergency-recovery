@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Vaulted emergency recovery</title>
+    <link rel="stylesheet" href="./recover.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <p class="eyebrow">Vaulted</p>
+        <h1>Emergency recovery</h1>
+      </header>
+
+      <nav class="steps" id="steps" aria-label="Recovery steps">
+        <span data-step="ask"><i>1</i> Ask</span>
+        <span data-step="import"><i>2</i> Import</span>
+        <span data-step="review"><i>3</i> Review</span>
+        <span data-step="next"><i>4</i> Next</span>
+      </nav>
+
+      <section class="panel" id="screen-ask">
+        <h2>Is the Vaulted app still working?</h2>
+        <p class="lede">
+          If you can still open Vaulted on this phone, recover there. This page is only for when the
+          app or website is gone.
+        </p>
+        <div class="stack">
+          <button type="button" class="primary" id="ask-yes">Yes, the app still opens</button>
+          <button type="button" class="secondary" id="ask-no">No, I need this page</button>
+        </div>
+      </section>
+
+      <section class="panel" id="screen-app-works" hidden>
+        <h2>Use the Vaulted app</h2>
+        <p class="lede">
+          Open Vaulted, then Recovery. Choose your kit there and follow Face ID. You do not need this
+          emergency page.
+        </p>
+        <button type="button" class="ghost" id="ask-back">Back</button>
+      </section>
+
+      <section class="panel" id="screen-import" hidden>
+        <h2>Choose your Recovery Kit</h2>
+        <p class="lede">Use the file or zip you saved from Vaulted. One button is enough.</p>
+        <input id="file" type="file" accept="application/json,.json,application/zip,.zip" hidden />
+        <button type="button" class="drop-target" id="drop-btn">
+          Choose Recovery Kit
+        </button>
+        <p class="hint">You can also drop the file here.</p>
+        <p class="error" id="parse-error" hidden></p>
+        <details class="advanced">
+          <summary>Paste the file as text</summary>
+          <textarea id="paste" rows="6" placeholder="Only if you already copied the file"></textarea>
+        </details>
+      </section>
+
+      <section class="panel" id="screen-review" hidden>
+        <h2>This is your vault</h2>
+        <p class="next-action" id="next-action"></p>
+        <dl class="facts" id="facts"></dl>
+        <div class="stack">
+          <button type="button" class="primary" id="review-continue">Continue</button>
+          <button type="button" class="ghost" id="review-other">Choose a different file</button>
+        </div>
+      </section>
+
+      <section class="panel" id="screen-next" hidden>
+        <h2 id="next-title">What to do next</h2>
+        <p class="lede" id="next-copy"></p>
+        <p class="note" id="origin-note"></p>
+        <div class="actions">
+          <button type="button" class="primary" id="unlock" hidden>Unlock with Face ID</button>
+          <p class="error" id="unlock-error" hidden></p>
+        </div>
+        <div id="after-unlock" hidden>
+          <p class="ok">Face ID opened this kit. Ordinary savings still need your hardware key.</p>
+          <label class="field">
+            <span>Savings address</span>
+            <input id="savings-address" readonly />
+          </label>
+          <div class="stack">
+            <button type="button" class="secondary" id="copy-address">Copy address</button>
+          </div>
+          <p class="lede">
+            Next: use your hardware to move bitcoin from that address. This phone alone cannot.
+          </p>
+        </div>
+        <details class="advanced" id="laptop-help">
+          <summary>Open this on a laptop</summary>
+          <ol>
+            <li>Use a copy of Vaulted you already trust.</li>
+            <li>Double-click <strong>Recover.command</strong> (Mac), or run <code>pnpm recover:local</code>.</li>
+            <li>
+              If Face ID will not run, this page is using the wrong website name. Open it as the
+              name you originally enrolled on.
+            </li>
+            <li>Choose this kit, then Face ID. Ordinary savings still need hardware.</li>
+          </ol>
+        </details>
+        <button type="button" class="ghost" id="next-other">Choose a different file</button>
+      </section>
+
+      <details class="more">
+        <summary>More detail</summary>
+        <h3>What you should have</h3>
+        <ul>
+          <li><strong>Recovery Kit</strong> — map of the vault, plus a locked copy of this phone’s key</li>
+          <li><strong>This page</strong> — the steps</li>
+          <li><strong>This phone’s passkey</strong> — Face ID, Touch ID, or device PIN</li>
+          <li><strong>Hardware key</strong> — required to move ordinary savings</li>
+          <li><strong>Recovery key</strong> — only if you chose Advanced</li>
+        </ul>
+        <p>The kit is not a seed. An older map-only file cannot unlock with Face ID if Vaulted is gone.</p>
+        <h3>What you can move</h3>
+        <ul>
+          <li><strong>Ordinary savings</strong> — this phone and hardware, no wait</li>
+          <li><strong>A recovery that already started</strong> — wait, then claim with the key that started it</li>
+          <li><strong>Bitcoin still arriving into spending</strong> — this phone, after about 90 days</li>
+          <li><strong>Fast spending</strong> — not phone-only; after a delay you still need two keys</li>
+        </ul>
+        <p>You cannot start a new waiting period after Vaulted is gone.</p>
+        <h3>What this cannot do</h3>
+        <ul>
+          <li>Replace a deleted passkey or lost hardware</li>
+          <li>Spend ordinary savings with the phone alone</li>
+          <li>Start a new recovery clock after Vaulted is gone</li>
+        </ul>
+      </details>
+    </main>
+    <script type="module" src="./recover.ts"></script>
+  </body>
+</html>

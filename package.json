@@ -1,0 +1,27 @@
+{
+  "name": "vaulted-emergency-recovery",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Emergency recovery page for Vaulted. Open a Recovery Kit if the app is gone.",
+  "homepage": "https://github.com/brg444/vaulted-emergency-recovery",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brg444/vaulted-emergency-recovery.git"
+  },
+  "bugs": {
+    "url": "https://github.com/brg444/vaulted-bitcoin-wallet/issues"
+  },
+  "license": "MIT",
+  "scripts": {
+    "start": "bun serve.ts",
+    "test": "bun test",
+    "sync:wallet": "bun scripts/sync-from-wallet.ts"
+  },
+  "dependencies": {
+    "@noble/curves": "^2.0.1",
+    "@noble/hashes": "^2.0.1",
+    "@scure/base": "2.0.0",
+    "@scure/btc-signer": "2.0.1"
+  }
+}
