@@ -132,7 +132,7 @@ function paintNext() {
   if (!kitHasUnlock(kit)) {
     nextTitle.textContent = 'This file cannot unlock'
     nextCopy.textContent =
-      'If the Vaulted app still works, save a new kit from Recovery. An older map-only file cannot use Face ID after the app is gone.'
+      'This file contains public recovery information. Use Recovery in Vaulted with your enrolled passkey, or compatible recovery tools with your keys.'
     originNote.textContent = ''
     hide(unlockBtn)
     laptopHelp.open = false

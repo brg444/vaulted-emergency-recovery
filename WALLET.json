@@ -22,6 +22,8 @@
     "spendingPolicy.ts",
     "savingsTree.ts",
     "setupPlan.ts",
-    "webauthn.ts"
+    "webauthn.ts",
+    "program/connector.ts",
+    "program/connectorEnrollmentCore.ts"
   ]
 }
