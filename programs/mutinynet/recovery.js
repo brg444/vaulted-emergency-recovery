@@ -40,33 +40,575 @@ var init_define_import_meta_env = __esm({
   }
 });
 
-// node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/utils.js
+// node_modules/.pnpm/@scure+base@2.0.0/node_modules/@scure/base/index.js
+var base_exports = {};
+__export(base_exports, {
+  base16: () => base16,
+  base32: () => base32,
+  base32crockford: () => base32crockford,
+  base32hex: () => base32hex,
+  base32hexnopad: () => base32hexnopad,
+  base32nopad: () => base32nopad,
+  base58: () => base58,
+  base58check: () => base58check,
+  base58flickr: () => base58flickr,
+  base58xmr: () => base58xmr,
+  base58xrp: () => base58xrp,
+  base64: () => base64,
+  base64nopad: () => base64nopad,
+  base64url: () => base64url,
+  base64urlnopad: () => base64urlnopad,
+  bech32: () => bech32,
+  bech32m: () => bech32m,
+  bytes: () => bytes,
+  bytesToString: () => bytesToString,
+  createBase58check: () => createBase58check,
+  hex: () => hex,
+  str: () => str,
+  stringToBytes: () => stringToBytes,
+  utf8: () => utf8,
+  utils: () => utils
+});
 function isBytes(a) {
   return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
 }
-function anumber(n, title = "") {
+function abytes(b) {
+  if (!isBytes(b))
+    throw new Error("Uint8Array expected");
+}
+function isArrayOf(isString, arr) {
+  if (!Array.isArray(arr))
+    return false;
+  if (arr.length === 0)
+    return true;
+  if (isString) {
+    return arr.every((item) => typeof item === "string");
+  } else {
+    return arr.every((item) => Number.isSafeInteger(item));
+  }
+}
+function afn(input) {
+  if (typeof input !== "function")
+    throw new Error("function expected");
+  return true;
+}
+function astr(label, input) {
+  if (typeof input !== "string")
+    throw new Error(`${label}: string expected`);
+  return true;
+}
+function anumber(n) {
+  if (!Number.isSafeInteger(n))
+    throw new Error(`invalid integer: ${n}`);
+}
+function aArr(input) {
+  if (!Array.isArray(input))
+    throw new Error("array expected");
+}
+function astrArr(label, input) {
+  if (!isArrayOf(true, input))
+    throw new Error(`${label}: array of strings expected`);
+}
+function anumArr(label, input) {
+  if (!isArrayOf(false, input))
+    throw new Error(`${label}: array of numbers expected`);
+}
+// @__NO_SIDE_EFFECTS__
+function chain(...args) {
+  const id = (a) => a;
+  const wrap3 = (a, b) => (c) => a(b(c));
+  const encode3 = args.map((x) => x.encode).reduceRight(wrap3, id);
+  const decode3 = args.map((x) => x.decode).reduce(wrap3, id);
+  return { encode: encode3, decode: decode3 };
+}
+// @__NO_SIDE_EFFECTS__
+function alphabet(letters) {
+  const lettersA = typeof letters === "string" ? letters.split("") : letters;
+  const len = lettersA.length;
+  astrArr("alphabet", lettersA);
+  const indexes = new Map(lettersA.map((l, i) => [l, i]));
+  return {
+    encode: (digits) => {
+      aArr(digits);
+      return digits.map((i) => {
+        if (!Number.isSafeInteger(i) || i < 0 || i >= len)
+          throw new Error(`alphabet.encode: digit index outside alphabet "${i}". Allowed: ${letters}`);
+        return lettersA[i];
+      });
+    },
+    decode: (input) => {
+      aArr(input);
+      return input.map((letter) => {
+        astr("alphabet.decode", letter);
+        const i = indexes.get(letter);
+        if (i === void 0)
+          throw new Error(`Unknown letter: "${letter}". Allowed: ${letters}`);
+        return i;
+      });
+    }
+  };
+}
+// @__NO_SIDE_EFFECTS__
+function join(separator = "") {
+  astr("join", separator);
+  return {
+    encode: (from) => {
+      astrArr("join.decode", from);
+      return from.join(separator);
+    },
+    decode: (to) => {
+      astr("join.decode", to);
+      return to.split(separator);
+    }
+  };
+}
+// @__NO_SIDE_EFFECTS__
+function padding(bits, chr = "=") {
+  anumber(bits);
+  astr("padding", chr);
+  return {
+    encode(data) {
+      astrArr("padding.encode", data);
+      while (data.length * bits % 8)
+        data.push(chr);
+      return data;
+    },
+    decode(input) {
+      astrArr("padding.decode", input);
+      let end = input.length;
+      if (end * bits % 8)
+        throw new Error("padding: invalid, string should have whole number of bytes");
+      for (; end > 0 && input[end - 1] === chr; end--) {
+        const last = end - 1;
+        const byte = last * bits;
+        if (byte % 8 === 0)
+          throw new Error("padding: invalid, string has too much padding");
+      }
+      return input.slice(0, end);
+    }
+  };
+}
+// @__NO_SIDE_EFFECTS__
+function normalize(fn) {
+  afn(fn);
+  return { encode: (from) => from, decode: (to) => fn(to) };
+}
+function convertRadix(data, from, to) {
+  if (from < 2)
+    throw new Error(`convertRadix: invalid from=${from}, base cannot be less than 2`);
+  if (to < 2)
+    throw new Error(`convertRadix: invalid to=${to}, base cannot be less than 2`);
+  aArr(data);
+  if (!data.length)
+    return [];
+  let pos = 0;
+  const res = [];
+  const digits = Array.from(data, (d) => {
+    anumber(d);
+    if (d < 0 || d >= from)
+      throw new Error(`invalid integer: ${d}`);
+    return d;
+  });
+  const dlen = digits.length;
+  while (true) {
+    let carry = 0;
+    let done = true;
+    for (let i = pos; i < dlen; i++) {
+      const digit = digits[i];
+      const fromCarry = from * carry;
+      const digitBase = fromCarry + digit;
+      if (!Number.isSafeInteger(digitBase) || fromCarry / from !== carry || digitBase - digit !== fromCarry) {
+        throw new Error("convertRadix: carry overflow");
+      }
+      const div = digitBase / to;
+      carry = digitBase % to;
+      const rounded = Math.floor(div);
+      digits[i] = rounded;
+      if (!Number.isSafeInteger(rounded) || rounded * to + carry !== digitBase)
+        throw new Error("convertRadix: carry overflow");
+      if (!done)
+        continue;
+      else if (!rounded)
+        pos = i;
+      else
+        done = false;
+    }
+    res.push(carry);
+    if (done)
+      break;
+  }
+  for (let i = 0; i < data.length - 1 && data[i] === 0; i++)
+    res.push(0);
+  return res.reverse();
+}
+function convertRadix2(data, from, to, padding2) {
+  aArr(data);
+  if (from <= 0 || from > 32)
+    throw new Error(`convertRadix2: wrong from=${from}`);
+  if (to <= 0 || to > 32)
+    throw new Error(`convertRadix2: wrong to=${to}`);
+  if (/* @__PURE__ */ radix2carry(from, to) > 32) {
+    throw new Error(`convertRadix2: carry overflow from=${from} to=${to} carryBits=${/* @__PURE__ */ radix2carry(from, to)}`);
+  }
+  let carry = 0;
+  let pos = 0;
+  const max = powers[from];
+  const mask = powers[to] - 1;
+  const res = [];
+  for (const n of data) {
+    anumber(n);
+    if (n >= max)
+      throw new Error(`convertRadix2: invalid data word=${n} from=${from}`);
+    carry = carry << from | n;
+    if (pos + from > 32)
+      throw new Error(`convertRadix2: carry overflow pos=${pos} from=${from}`);
+    pos += from;
+    for (; pos >= to; pos -= to)
+      res.push((carry >> pos - to & mask) >>> 0);
+    const pow = powers[pos];
+    if (pow === void 0)
+      throw new Error("invalid carry");
+    carry &= pow - 1;
+  }
+  carry = carry << to - pos & mask;
+  if (!padding2 && pos >= from)
+    throw new Error("Excess padding");
+  if (!padding2 && carry > 0)
+    throw new Error(`Non-zero padding: ${carry}`);
+  if (padding2 && pos > 0)
+    res.push(carry >>> 0);
+  return res;
+}
+// @__NO_SIDE_EFFECTS__
+function radix(num2) {
+  anumber(num2);
+  const _256 = 2 ** 8;
+  return {
+    encode: (bytes2) => {
+      if (!isBytes(bytes2))
+        throw new Error("radix.encode input should be Uint8Array");
+      return convertRadix(Array.from(bytes2), _256, num2);
+    },
+    decode: (digits) => {
+      anumArr("radix.decode", digits);
+      return Uint8Array.from(convertRadix(digits, num2, _256));
+    }
+  };
+}
+// @__NO_SIDE_EFFECTS__
+function radix2(bits, revPadding = false) {
+  anumber(bits);
+  if (bits <= 0 || bits > 32)
+    throw new Error("radix2: bits should be in (0..32]");
+  if (/* @__PURE__ */ radix2carry(8, bits) > 32 || /* @__PURE__ */ radix2carry(bits, 8) > 32)
+    throw new Error("radix2: carry overflow");
+  return {
+    encode: (bytes2) => {
+      if (!isBytes(bytes2))
+        throw new Error("radix2.encode input should be Uint8Array");
+      return convertRadix2(Array.from(bytes2), 8, bits, !revPadding);
+    },
+    decode: (digits) => {
+      anumArr("radix2.decode", digits);
+      return Uint8Array.from(convertRadix2(digits, bits, 8, revPadding));
+    }
+  };
+}
+function unsafeWrapper(fn) {
+  afn(fn);
+  return function(...args) {
+    try {
+      return fn.apply(null, args);
+    } catch (e) {
+    }
+  };
+}
+function checksum(len, fn) {
+  anumber(len);
+  afn(fn);
+  return {
+    encode(data) {
+      if (!isBytes(data))
+        throw new Error("checksum.encode: input should be Uint8Array");
+      const sum = fn(data).slice(0, len);
+      const res = new Uint8Array(data.length + len);
+      res.set(data);
+      res.set(sum, data.length);
+      return res;
+    },
+    decode(data) {
+      if (!isBytes(data))
+        throw new Error("checksum.decode: input should be Uint8Array");
+      const payload = data.slice(0, -len);
+      const oldChecksum = data.slice(-len);
+      const newChecksum = fn(payload).slice(0, len);
+      for (let i = 0; i < len; i++)
+        if (newChecksum[i] !== oldChecksum[i])
+          throw new Error("Invalid checksum");
+      return payload;
+    }
+  };
+}
+function bech32Polymod(pre) {
+  const b = pre >> 25;
+  let chk = (pre & 33554431) << 5;
+  for (let i = 0; i < POLYMOD_GENERATORS.length; i++) {
+    if ((b >> i & 1) === 1)
+      chk ^= POLYMOD_GENERATORS[i];
+  }
+  return chk;
+}
+function bechChecksum(prefix2, words, encodingConst = 1) {
+  const len = prefix2.length;
+  let chk = 1;
+  for (let i = 0; i < len; i++) {
+    const c = prefix2.charCodeAt(i);
+    if (c < 33 || c > 126)
+      throw new Error(`Invalid prefix (${prefix2})`);
+    chk = bech32Polymod(chk) ^ c >> 5;
+  }
+  chk = bech32Polymod(chk);
+  for (let i = 0; i < len; i++)
+    chk = bech32Polymod(chk) ^ prefix2.charCodeAt(i) & 31;
+  for (let v of words)
+    chk = bech32Polymod(chk) ^ v;
+  for (let i = 0; i < 6; i++)
+    chk = bech32Polymod(chk);
+  chk ^= encodingConst;
+  return BECH_ALPHABET.encode(convertRadix2([chk % powers[30]], 30, 5, false));
+}
+// @__NO_SIDE_EFFECTS__
+function genBech32(encoding) {
+  const ENCODING_CONST = encoding === "bech32" ? 1 : 734539939;
+  const _words = /* @__PURE__ */ radix2(5);
+  const fromWords = _words.decode;
+  const toWords = _words.encode;
+  const fromWordsUnsafe = unsafeWrapper(fromWords);
+  function encode3(prefix2, words, limit = 90) {
+    astr("bech32.encode prefix", prefix2);
+    if (isBytes(words))
+      words = Array.from(words);
+    anumArr("bech32.encode", words);
+    const plen = prefix2.length;
+    if (plen === 0)
+      throw new TypeError(`Invalid prefix length ${plen}`);
+    const actualLength = plen + 7 + words.length;
+    if (limit !== false && actualLength > limit)
+      throw new TypeError(`Length ${actualLength} exceeds limit ${limit}`);
+    const lowered = prefix2.toLowerCase();
+    const sum = bechChecksum(lowered, words, ENCODING_CONST);
+    return `${lowered}1${BECH_ALPHABET.encode(words)}${sum}`;
+  }
+  function decode3(str2, limit = 90) {
+    astr("bech32.decode input", str2);
+    const slen = str2.length;
+    if (slen < 8 || limit !== false && slen > limit)
+      throw new TypeError(`invalid string length: ${slen} (${str2}). Expected (8..${limit})`);
+    const lowered = str2.toLowerCase();
+    if (str2 !== lowered && str2 !== str2.toUpperCase())
+      throw new Error(`String must be lowercase or uppercase`);
+    const sepIndex = lowered.lastIndexOf("1");
+    if (sepIndex === 0 || sepIndex === -1)
+      throw new Error(`Letter "1" must be present between prefix and data only`);
+    const prefix2 = lowered.slice(0, sepIndex);
+    const data = lowered.slice(sepIndex + 1);
+    if (data.length < 6)
+      throw new Error("Data must be at least 6 characters long");
+    const words = BECH_ALPHABET.decode(data).slice(0, -6);
+    const sum = bechChecksum(prefix2, words, ENCODING_CONST);
+    if (!data.endsWith(sum))
+      throw new Error(`Invalid checksum in ${str2}: expected "${sum}"`);
+    return { prefix: prefix2, words };
+  }
+  const decodeUnsafe = unsafeWrapper(decode3);
+  function decodeToBytes(str2) {
+    const { prefix: prefix2, words } = decode3(str2, false);
+    return { prefix: prefix2, words, bytes: fromWords(words) };
+  }
+  function encodeFromBytes(prefix2, bytes2) {
+    return encode3(prefix2, toWords(bytes2));
+  }
+  return {
+    encode: encode3,
+    decode: decode3,
+    encodeFromBytes,
+    decodeToBytes,
+    decodeUnsafe,
+    fromWords,
+    fromWordsUnsafe,
+    toWords
+  };
+}
+var gcd, radix2carry, powers, utils, base16, base32, base32nopad, base32hex, base32hexnopad, base32crockford, hasBase64Builtin, decodeBase64Builtin, base64, base64nopad, base64url, base64urlnopad, genBase58, base58, base58flickr, base58xrp, XMR_BLOCK_LEN, base58xmr, createBase58check, base58check, BECH_ALPHABET, POLYMOD_GENERATORS, bech32, bech32m, utf8, hasHexBuiltin, hexBuiltin, hex, CODERS, coderTypeError, bytesToString, str, stringToBytes, bytes;
+var init_base = __esm({
+  "node_modules/.pnpm/@scure+base@2.0.0/node_modules/@scure/base/index.js"() {
+    init_define_import_meta_env();
+    gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+    radix2carry = /* @__NO_SIDE_EFFECTS__ */ (from, to) => from + (to - gcd(from, to));
+    powers = /* @__PURE__ */ (() => {
+      let res = [];
+      for (let i = 0; i < 40; i++)
+        res.push(2 ** i);
+      return res;
+    })();
+    utils = {
+      alphabet,
+      chain,
+      checksum,
+      convertRadix,
+      convertRadix2,
+      radix,
+      radix2,
+      join,
+      padding
+    };
+    base16 = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(4), /* @__PURE__ */ alphabet("0123456789ABCDEF"), /* @__PURE__ */ join(""));
+    base32 = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"), /* @__PURE__ */ padding(5), /* @__PURE__ */ join(""));
+    base32nopad = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"), /* @__PURE__ */ join(""));
+    base32hex = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("0123456789ABCDEFGHIJKLMNOPQRSTUV"), /* @__PURE__ */ padding(5), /* @__PURE__ */ join(""));
+    base32hexnopad = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("0123456789ABCDEFGHIJKLMNOPQRSTUV"), /* @__PURE__ */ join(""));
+    base32crockford = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("0123456789ABCDEFGHJKMNPQRSTVWXYZ"), /* @__PURE__ */ join(""), /* @__PURE__ */ normalize((s) => s.toUpperCase().replace(/O/g, "0").replace(/[IL]/g, "1")));
+    hasBase64Builtin = /* @__PURE__ */ (() => typeof Uint8Array.from([]).toBase64 === "function" && typeof Uint8Array.fromBase64 === "function")();
+    decodeBase64Builtin = (s, isUrl) => {
+      astr("base64", s);
+      const re = isUrl ? /^[A-Za-z0-9=_-]+$/ : /^[A-Za-z0-9=+/]+$/;
+      const alphabet2 = isUrl ? "base64url" : "base64";
+      if (s.length > 0 && !re.test(s))
+        throw new Error("invalid base64");
+      return Uint8Array.fromBase64(s, { alphabet: alphabet2, lastChunkHandling: "strict" });
+    };
+    base64 = hasBase64Builtin ? {
+      encode(b) {
+        abytes(b);
+        return b.toBase64();
+      },
+      decode(s) {
+        return decodeBase64Builtin(s, false);
+      }
+    } : /* @__PURE__ */ chain(/* @__PURE__ */ radix2(6), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"), /* @__PURE__ */ padding(6), /* @__PURE__ */ join(""));
+    base64nopad = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(6), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"), /* @__PURE__ */ join(""));
+    base64url = hasBase64Builtin ? {
+      encode(b) {
+        abytes(b);
+        return b.toBase64({ alphabet: "base64url" });
+      },
+      decode(s) {
+        return decodeBase64Builtin(s, true);
+      }
+    } : /* @__PURE__ */ chain(/* @__PURE__ */ radix2(6), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"), /* @__PURE__ */ padding(6), /* @__PURE__ */ join(""));
+    base64urlnopad = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(6), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"), /* @__PURE__ */ join(""));
+    genBase58 = /* @__NO_SIDE_EFFECTS__ */ (abc) => /* @__PURE__ */ chain(/* @__PURE__ */ radix(58), /* @__PURE__ */ alphabet(abc), /* @__PURE__ */ join(""));
+    base58 = /* @__PURE__ */ genBase58("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz");
+    base58flickr = /* @__PURE__ */ genBase58("123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ");
+    base58xrp = /* @__PURE__ */ genBase58("rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz");
+    XMR_BLOCK_LEN = [0, 2, 3, 5, 6, 7, 9, 10, 11];
+    base58xmr = {
+      encode(data) {
+        let res = "";
+        for (let i = 0; i < data.length; i += 8) {
+          const block = data.subarray(i, i + 8);
+          res += base58.encode(block).padStart(XMR_BLOCK_LEN[block.length], "1");
+        }
+        return res;
+      },
+      decode(str2) {
+        let res = [];
+        for (let i = 0; i < str2.length; i += 11) {
+          const slice = str2.slice(i, i + 11);
+          const blockLen = XMR_BLOCK_LEN.indexOf(slice.length);
+          const block = base58.decode(slice);
+          for (let j = 0; j < block.length - blockLen; j++) {
+            if (block[j] !== 0)
+              throw new Error("base58xmr: wrong padding");
+          }
+          res = res.concat(Array.from(block.slice(block.length - blockLen)));
+        }
+        return Uint8Array.from(res);
+      }
+    };
+    createBase58check = (sha2562) => /* @__PURE__ */ chain(checksum(4, (data) => sha2562(sha2562(data))), base58);
+    base58check = createBase58check;
+    BECH_ALPHABET = /* @__PURE__ */ chain(/* @__PURE__ */ alphabet("qpzry9x8gf2tvdw0s3jn54khce6mua7l"), /* @__PURE__ */ join(""));
+    POLYMOD_GENERATORS = [996825010, 642813549, 513874426, 1027748829, 705979059];
+    bech32 = /* @__PURE__ */ genBech32("bech32");
+    bech32m = /* @__PURE__ */ genBech32("bech32m");
+    utf8 = {
+      encode: (data) => new TextDecoder().decode(data),
+      decode: (str2) => new TextEncoder().encode(str2)
+    };
+    hasHexBuiltin = /* @__PURE__ */ (() => typeof Uint8Array.from([]).toHex === "function" && typeof Uint8Array.fromHex === "function")();
+    hexBuiltin = {
+      encode(data) {
+        abytes(data);
+        return data.toHex();
+      },
+      decode(s) {
+        astr("hex", s);
+        return Uint8Array.fromHex(s);
+      }
+    };
+    hex = hasHexBuiltin ? hexBuiltin : /* @__PURE__ */ chain(/* @__PURE__ */ radix2(4), /* @__PURE__ */ alphabet("0123456789abcdef"), /* @__PURE__ */ join(""), /* @__PURE__ */ normalize((s) => {
+      if (typeof s !== "string" || s.length % 2 !== 0)
+        throw new TypeError(`hex.decode: expected string, got ${typeof s} with length ${s.length}`);
+      return s.toLowerCase();
+    }));
+    CODERS = {
+      utf8,
+      hex,
+      base16,
+      base32,
+      base64,
+      base64url,
+      base58,
+      base58xmr
+    };
+    coderTypeError = "Invalid encoding type. Available types: utf8, hex, base16, base32, base64, base64url, base58, base58xmr";
+    bytesToString = (type, bytes2) => {
+      if (typeof type !== "string" || !CODERS.hasOwnProperty(type))
+        throw new TypeError(coderTypeError);
+      if (!isBytes(bytes2))
+        throw new TypeError("bytesToString() expects Uint8Array");
+      return CODERS[type].encode(bytes2);
+    };
+    str = bytesToString;
+    stringToBytes = (type, str2) => {
+      if (!CODERS.hasOwnProperty(type))
+        throw new TypeError(coderTypeError);
+      if (typeof str2 !== "string")
+        throw new TypeError("stringToBytes() expects string");
+      return CODERS[type].decode(str2);
+    };
+    bytes = stringToBytes;
+  }
+});
+
+// node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/utils.js
+function isBytes2(a) {
+  return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
+}
+function anumber2(n, title = "") {
   if (!Number.isSafeInteger(n) || n < 0) {
     const prefix2 = title && `"${title}" `;
     throw new Error(`${prefix2}expected integer >= 0, got ${n}`);
   }
 }
-function abytes(value, length, title = "") {
-  const bytes2 = isBytes(value);
-  const len = value?.length;
+function abytes2(value2, length, title = "") {
+  const bytes2 = isBytes2(value2);
+  const len = value2?.length;
   const needsLen = length !== void 0;
   if (!bytes2 || needsLen && len !== length) {
     const prefix2 = title && `"${title}" `;
     const ofLen = needsLen ? ` of length ${length}` : "";
-    const got = bytes2 ? `length=${len}` : `type=${typeof value}`;
+    const got = bytes2 ? `length=${len}` : `type=${typeof value2}`;
     throw new Error(prefix2 + "expected Uint8Array" + ofLen + ", got " + got);
   }
-  return value;
+  return value2;
 }
 function ahash(h) {
   if (typeof h !== "function" || typeof h.create !== "function")
     throw new Error("Hash must wrapped by utils.createHasher");
-  anumber(h.outputLen);
-  anumber(h.blockLen);
+  anumber2(h.outputLen);
+  anumber2(h.blockLen);
 }
 function aexists(instance, checkFinished = true) {
   if (instance.destroyed)
@@ -75,7 +617,7 @@ function aexists(instance, checkFinished = true) {
     throw new Error("Hash#digest() has already been called");
 }
 function aoutput(out, instance) {
-  abytes(out, void 0, "digestInto() output");
+  abytes2(out, void 0, "digestInto() output");
   const min = instance.outputLen;
   if (out.length < min) {
     throw new Error('"digestInto() output" expected to be of length >=' + min);
@@ -96,8 +638,8 @@ function rotl(word, shift) {
   return word << shift | word >>> 32 - shift >>> 0;
 }
 function bytesToHex(bytes2) {
-  abytes(bytes2);
-  if (hasHexBuiltin)
+  abytes2(bytes2);
+  if (hasHexBuiltin2)
     return bytes2.toHex();
   let hex2 = "";
   for (let i = 0; i < bytes2.length; i++) {
@@ -117,7 +659,7 @@ function asciiToBase16(ch) {
 function hexToBytes(hex2) {
   if (typeof hex2 !== "string")
     throw new Error("hex string expected, got " + typeof hex2);
-  if (hasHexBuiltin)
+  if (hasHexBuiltin2)
     return Uint8Array.fromHex(hex2);
   const hl = hex2.length;
   const al = hl / 2;
@@ -139,7 +681,7 @@ function concatBytes(...arrays) {
   let sum = 0;
   for (let i = 0; i < arrays.length; i++) {
     const a = arrays[i];
-    abytes(a);
+    abytes2(a);
     sum += a.length;
   }
   const res = new Uint8Array(sum);
@@ -165,11 +707,11 @@ function randomBytes(bytesLength = 32) {
     throw new Error("crypto.getRandomValues must be defined");
   return cr2.getRandomValues(new Uint8Array(bytesLength));
 }
-var hasHexBuiltin, hexes, asciis, oidNist;
+var hasHexBuiltin2, hexes, asciis, oidNist;
 var init_utils = __esm({
   "node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/utils.js"() {
     init_define_import_meta_env();
-    hasHexBuiltin = /* @__PURE__ */ (() => (
+    hasHexBuiltin2 = /* @__PURE__ */ (() => (
       // @ts-ignore
       typeof Uint8Array.from([]).toHex === "function" && typeof Uint8Array.fromHex === "function"
     ))();
@@ -215,7 +757,7 @@ var init_md = __esm({
       }
       update(data) {
         aexists(this);
-        abytes(data);
+        abytes2(data);
         const { view: view3, buffer, blockLen } = this;
         const len = data.length;
         for (let pos = 0; pos < len; ) {
@@ -901,8 +1443,8 @@ var utils_exports = {};
 __export(utils_exports, {
   aInRange: () => aInRange,
   abool: () => abool,
-  abytes: () => abytes,
-  anumber: () => anumber,
+  abytes: () => abytes2,
+  anumber: () => anumber2,
   asafenumber: () => asafenumber,
   asciiToBytes: () => asciiToBytes,
   bitGet: () => bitGet,
@@ -919,7 +1461,7 @@ __export(utils_exports, {
   hexToBytes: () => hexToBytes,
   hexToNumber: () => hexToNumber,
   inRange: () => inRange,
-  isBytes: () => isBytes,
+  isBytes: () => isBytes2,
   memoized: () => memoized,
   notImplemented: () => notImplemented,
   numberToBytesBE: () => numberToBytesBE,
@@ -929,25 +1471,25 @@ __export(utils_exports, {
   randomBytes: () => randomBytes,
   validateObject: () => validateObject
 });
-function abool(value, title = "") {
-  if (typeof value !== "boolean") {
+function abool(value2, title = "") {
+  if (typeof value2 !== "boolean") {
     const prefix2 = title && `"${title}" `;
-    throw new Error(prefix2 + "expected boolean, got type=" + typeof value);
+    throw new Error(prefix2 + "expected boolean, got type=" + typeof value2);
   }
-  return value;
+  return value2;
 }
 function abignumber(n) {
   if (typeof n === "bigint") {
     if (!isPosBig(n))
       throw new Error("positive bigint expected, got " + n);
   } else
-    anumber(n);
+    anumber2(n);
   return n;
 }
-function asafenumber(value, title = "") {
-  if (!Number.isSafeInteger(value)) {
+function asafenumber(value2, title = "") {
+  if (!Number.isSafeInteger(value2)) {
     const prefix2 = title && `"${title}" `;
-    throw new Error(prefix2 + "expected safe integer, got type=" + typeof value);
+    throw new Error(prefix2 + "expected safe integer, got type=" + typeof value2);
   }
 }
 function numberToHexUnpadded(num2) {
@@ -963,10 +1505,10 @@ function bytesToNumberBE(bytes2) {
   return hexToNumber(bytesToHex(bytes2));
 }
 function bytesToNumberLE(bytes2) {
-  return hexToNumber(bytesToHex(copyBytes(abytes(bytes2)).reverse()));
+  return hexToNumber(bytesToHex(copyBytes(abytes2(bytes2)).reverse()));
 }
 function numberToBytesBE(n, len) {
-  anumber(len);
+  anumber2(len);
   n = abignumber(n);
   const res = hexToBytes(n.toString(16).padStart(len * 2, "0"));
   if (res.length !== len)
@@ -1015,12 +1557,12 @@ function bitLen(n) {
 function bitGet(n, pos) {
   return n >> BigInt(pos) & _1n;
 }
-function bitSet(n, pos, value) {
-  return n | (value ? _1n : _0n) << BigInt(pos);
+function bitSet(n, pos, value2) {
+  return n | (value2 ? _1n : _0n) << BigInt(pos);
 }
 function createHmacDrbg(hashLen, qByteLen, hmacFn) {
-  anumber(hashLen, "hashLen");
-  anumber(qByteLen, "qByteLen");
+  anumber2(hashLen, "hashLen");
+  anumber2(qByteLen, "qByteLen");
   if (typeof hmacFn !== "function")
     throw new Error("hmacFn must be a function");
   const u8n2 = (len) => new Uint8Array(len);
@@ -1303,7 +1845,7 @@ function FpLegendre(Fp, n) {
 }
 function nLength(n, nBitLength) {
   if (nBitLength !== void 0)
-    anumber(nBitLength);
+    anumber2(nBitLength);
   const _nBitLength = nBitLength !== void 0 ? nBitLength : n.toString(2).length;
   const nByteLength = Math.ceil(_nBitLength / 8);
   return { nBitLength: _nBitLength, nByteLength };
@@ -1322,7 +1864,7 @@ function getMinHashLength(fieldOrder) {
   return length + Math.ceil(length / 2);
 }
 function mapHashToField(key, fieldOrder, isLE = false) {
-  abytes(key);
+  abytes2(key);
   const len = key.length;
   const fieldLen = getFieldBytesLength(fieldOrder);
   const minLen = getMinHashLength(fieldOrder);
@@ -1470,7 +2012,7 @@ var init_modular = __esm({
         return this.isLE ? numberToBytesLE(num2, this.BYTES) : numberToBytesBE(num2, this.BYTES);
       }
       fromBytes(bytes2, skipValidation = false) {
-        abytes(bytes2);
+        abytes2(bytes2);
         const { _lengths: allowedLengths, BYTES, isLE, ORDER, _mod: modFromBytes } = this;
         if (allowedLengths) {
           if (!allowedLengths.includes(bytes2.length) || bytes2.length > BYTES) {
@@ -1746,15 +2288,15 @@ var init_curve = __esm({
 });
 
 // node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/abstract/hash-to-curve.js
-function i2osp(value, length) {
-  asafenumber(value);
+function i2osp(value2, length) {
+  asafenumber(value2);
   asafenumber(length);
-  if (value < 0 || value >= 1 << 8 * length)
-    throw new Error("invalid I2OSP input: " + value);
+  if (value2 < 0 || value2 >= 1 << 8 * length)
+    throw new Error("invalid I2OSP input: " + value2);
   const res = Array.from({ length }).fill(0);
   for (let i = length - 1; i >= 0; i--) {
-    res[i] = value & 255;
-    value >>>= 8;
+    res[i] = value2 & 255;
+    value2 >>>= 8;
   }
   return new Uint8Array(res);
 }
@@ -1766,12 +2308,12 @@ function strxor(a, b) {
   return arr;
 }
 function normDST(DST) {
-  if (!isBytes(DST) && typeof DST !== "string")
+  if (!isBytes2(DST) && typeof DST !== "string")
     throw new Error("DST must be Uint8Array or ascii string");
   return typeof DST === "string" ? asciiToBytes(DST) : DST;
 }
 function expand_message_xmd(msg, DST, lenInBytes, H) {
-  abytes(msg);
+  abytes2(msg);
   asafenumber(lenInBytes);
   DST = normDST(DST);
   if (DST.length > 255)
@@ -1794,7 +2336,7 @@ function expand_message_xmd(msg, DST, lenInBytes, H) {
   return pseudo_random_bytes.slice(0, lenInBytes);
 }
 function expand_message_xof(msg, DST, lenInBytes, k, H) {
-  abytes(msg);
+  abytes2(msg);
   asafenumber(lenInBytes);
   DST = normDST(DST);
   if (DST.length > 255) {
@@ -1805,16 +2347,16 @@ function expand_message_xof(msg, DST, lenInBytes, k, H) {
     throw new Error("expand_message_xof: invalid lenInBytes");
   return H.create({ dkLen: lenInBytes }).update(msg).update(i2osp(lenInBytes, 2)).update(DST).update(i2osp(DST.length, 1)).digest();
 }
-function hash_to_field(msg, count, options) {
-  validateObject(options, {
+function hash_to_field(msg, count, options2) {
+  validateObject(options2, {
     p: "bigint",
     m: "number",
     k: "number",
     hash: "function"
   });
-  const { p, k, m, hash, expand: expand3, DST } = options;
+  const { p, k, m, hash, expand: expand3, DST } = options2;
   asafenumber(hash.outputLen, "valid hash");
-  abytes(msg);
+  abytes2(msg);
   asafenumber(count);
   const log2p = p.toString(2).length;
   const L3 = Math.ceil((log2p + k) / 8);
@@ -1867,16 +2409,16 @@ function createHasher2(Point5, mapToCurve, defaults) {
   return {
     defaults: Object.freeze(defaults),
     Point: Point5,
-    hashToCurve(msg, options) {
-      const opts = Object.assign({}, defaults, options);
+    hashToCurve(msg, options2) {
+      const opts = Object.assign({}, defaults, options2);
       const u = hash_to_field(msg, 2, opts);
       const u0 = map(u[0]);
       const u1 = map(u[1]);
       return clear(u0.add(u1));
     },
-    encodeToCurve(msg, options) {
+    encodeToCurve(msg, options2) {
       const optsDst = defaults.encodeDST ? { DST: defaults.encodeDST } : {};
-      const opts = Object.assign({}, defaults, optsDst, options);
+      const opts = Object.assign({}, defaults, optsDst, options2);
       const u = hash_to_field(msg, 1, opts);
       const u0 = map(u[0]);
       return clear(u0);
@@ -1897,9 +2439,9 @@ function createHasher2(Point5, mapToCurve, defaults) {
     },
     // hash_to_scalar can produce 0: https://www.rfc-editor.org/errata/eid8393
     // RFC 9380, draft-irtf-cfrg-bbs-signatures-08
-    hashToScalar(msg, options) {
+    hashToScalar(msg, options2) {
       const N2 = Point5.Fn.ORDER;
-      const opts = Object.assign({}, defaults, { p: N2, m: 1, DST: _DST_scalar }, options);
+      const opts = Object.assign({}, defaults, { p: N2, m: 1, DST: _DST_scalar }, options2);
       return hash_to_field(msg, 1, opts)[0][0];
     }
   };
@@ -1930,7 +2472,7 @@ var init_hmac = __esm({
       destroyed = false;
       constructor(hash, key) {
         ahash(hash);
-        abytes(key, void 0, "key");
+        abytes2(key, void 0, "key");
         this.iHash = hash.create();
         if (typeof this.iHash.update !== "function")
           throw new Error("Expected instance of class which extends utils.Hash");
@@ -1955,7 +2497,7 @@ var init_hmac = __esm({
       }
       digestInto(out) {
         aexists(this);
-        abytes(out, this.outputLen, "output");
+        abytes2(out, this.outputLen, "output");
         this.finished = true;
         this.iHash.digestInto(out);
         this.oHash.update(out);
@@ -2065,7 +2607,7 @@ function weierstrass(params, extraOpts = {}) {
     }
   }
   function pointFromBytes(bytes2) {
-    abytes(bytes2, void 0, "Point");
+    abytes2(bytes2, void 0, "Point");
     const { publicKey: comp, publicKeyUncompressed: uncomp } = lengths2;
     const length = bytes2.length;
     const head = bytes2[0];
@@ -2132,13 +2674,13 @@ function weierstrass(params, extraOpts = {}) {
     return _splitEndoScalar(k, endo.basises, Fn4.ORDER);
   }
   const toAffineMemo = memoized((p, iz) => {
-    const { X: X2, Y, Z } = p;
+    const { X: X3, Y, Z } = p;
     if (Fp.eql(Z, Fp.ONE))
-      return { x: X2, y: Y };
+      return { x: X3, y: Y };
     const is0 = p.is0();
     if (iz == null)
       iz = is0 ? Fp.ONE : Fp.inv(Z);
-    const x = Fp.mul(X2, iz);
+    const x = Fp.mul(X3, iz);
     const y = Fp.mul(Y, iz);
     const zz = Fp.mul(Z, iz);
     if (is0)
@@ -2182,8 +2724,8 @@ function weierstrass(params, extraOpts = {}) {
     Y;
     Z;
     /** Does NOT validate if the point is valid. Use `.assertValidity()`. */
-    constructor(X2, Y, Z) {
-      this.X = acoord("x", X2);
+    constructor(X3, Y, Z) {
+      this.X = acoord("x", X3);
       this.Y = acoord("y", Y, true);
       this.Z = acoord("z", Z);
       Object.freeze(this);
@@ -2203,7 +2745,7 @@ function weierstrass(params, extraOpts = {}) {
       return new Point5(x, y, Fp.ONE);
     }
     static fromBytes(bytes2) {
-      const P2 = Point5.fromAffine(decodePoint(abytes(bytes2, void 0, "point")));
+      const P2 = Point5.fromAffine(decodePoint(abytes2(bytes2, void 0, "point")));
       P2.assertValidity();
       return P2;
     }
@@ -2243,8 +2785,8 @@ function weierstrass(params, extraOpts = {}) {
     equals(other) {
       aprjpoint(other);
       const { X: X1, Y: Y1, Z: Z1 } = this;
-      const { X: X2, Y: Y2, Z: Z2 } = other;
-      const U1 = Fp.eql(Fp.mul(X1, Z2), Fp.mul(X2, Z1));
+      const { X: X22, Y: Y2, Z: Z2 } = other;
+      const U1 = Fp.eql(Fp.mul(X1, Z2), Fp.mul(X22, Z1));
       const U2 = Fp.eql(Fp.mul(Y1, Z2), Fp.mul(Y2, Z1));
       return U1 && U2;
     }
@@ -2301,20 +2843,20 @@ function weierstrass(params, extraOpts = {}) {
     add(other) {
       aprjpoint(other);
       const { X: X1, Y: Y1, Z: Z1 } = this;
-      const { X: X2, Y: Y2, Z: Z2 } = other;
+      const { X: X22, Y: Y2, Z: Z2 } = other;
       let X3 = Fp.ZERO, Y3 = Fp.ZERO, Z3 = Fp.ZERO;
       const a = CURVE.a;
       const b3 = Fp.mul(CURVE.b, _3n2);
-      let t0 = Fp.mul(X1, X2);
+      let t0 = Fp.mul(X1, X22);
       let t1 = Fp.mul(Y1, Y2);
       let t2 = Fp.mul(Z1, Z2);
       let t3 = Fp.add(X1, Y1);
-      let t4 = Fp.add(X2, Y2);
+      let t4 = Fp.add(X22, Y2);
       t3 = Fp.mul(t3, t4);
       t4 = Fp.add(t0, t1);
       t3 = Fp.sub(t3, t4);
       t4 = Fp.add(X1, Z1);
-      let t5 = Fp.add(X2, Z2);
+      let t5 = Fp.add(X22, Z2);
       t4 = Fp.mul(t4, t5);
       t5 = Fp.add(t0, t2);
       t4 = Fp.sub(t4, t5);
@@ -2544,11 +3086,11 @@ function mapToCurveSimpleSWU(Fp, opts) {
     tv5 = Fp.mul(tv6, B);
     tv2 = Fp.add(tv2, tv5);
     x = Fp.mul(tv1, tv3);
-    const { isValid, value } = sqrtRatio(tv2, tv6);
+    const { isValid, value: value2 } = sqrtRatio(tv2, tv6);
     y = Fp.mul(tv1, u);
-    y = Fp.mul(y, value);
+    y = Fp.mul(y, value2);
     x = Fp.cmov(x, tv3, isValid);
-    y = Fp.cmov(y, value, isValid);
+    y = Fp.cmov(y, value2, isValid);
     const e1 = Fp.isOdd(u) === Fp.isOdd(y);
     y = Fp.cmov(Fp.neg(y), y, e1);
     const tv4_inv = FpInvertBatch(Fp, [tv4], true)[0];
@@ -2573,37 +3115,37 @@ function ecdh(Point5, ecdhOpts = {}) {
     try {
       const num2 = Fn4.fromBytes(secretKey);
       return Fn4.isValidNot0(num2);
-    } catch (error) {
+    } catch (error2) {
       return false;
     }
   }
-  function isValidPublicKey(publicKey, isCompressed) {
+  function isValidPublicKey(publicKey2, isCompressed) {
     const { publicKey: comp, publicKeyUncompressed } = lengths2;
     try {
-      const l = publicKey.length;
+      const l = publicKey2.length;
       if (isCompressed === true && l !== comp)
         return false;
       if (isCompressed === false && l !== publicKeyUncompressed)
         return false;
-      return !!Point5.fromBytes(publicKey);
-    } catch (error) {
+      return !!Point5.fromBytes(publicKey2);
+    } catch (error2) {
       return false;
     }
   }
   function randomSecretKey2(seed = randomBytes_(lengths2.seed)) {
-    return mapHashToField(abytes(seed, lengths2.seed, "seed"), Fn4.ORDER);
+    return mapHashToField(abytes2(seed, lengths2.seed, "seed"), Fn4.ORDER);
   }
   function getPublicKey2(secretKey, isCompressed = true) {
     return Point5.BASE.multiply(Fn4.fromBytes(secretKey)).toBytes(isCompressed);
   }
   function isProbPub(item) {
-    const { secretKey, publicKey, publicKeyUncompressed } = lengths2;
-    if (!isBytes(item))
+    const { secretKey, publicKey: publicKey2, publicKeyUncompressed } = lengths2;
+    if (!isBytes2(item))
       return void 0;
-    if ("_lengths" in Fn4 && Fn4._lengths || secretKey === publicKey)
+    if ("_lengths" in Fn4 && Fn4._lengths || secretKey === publicKey2)
       return void 0;
-    const l = abytes(item, void 0, "key").length;
-    return l === publicKey || l === publicKeyUncompressed;
+    const l = abytes2(item, void 0, "key").length;
+    return l === publicKey2 || l === publicKeyUncompressed;
   }
   function getSharedSecret(secretKeyA, publicKeyB, isCompressed = true) {
     if (isProbPub(secretKeyA) === true)
@@ -2661,7 +3203,7 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
     validateSigFormat(format);
     const size = lengths2.signature;
     const sizer = format === "compact" ? size : format === "recovered" ? size + 1 : void 0;
-    return abytes(bytes2, sizer);
+    return abytes2(bytes2, sizer);
   }
   class Signature2 {
     r;
@@ -2682,7 +3224,7 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
       validateSigLength(bytes2, format);
       let recid;
       if (format === "der") {
-        const { r: r2, s: s2 } = DER.toSig(abytes(bytes2));
+        const { r: r2, s: s2 } = DER.toSig(abytes2(bytes2));
         return new Signature2(r2, s2);
       }
       if (format === "recovered") {
@@ -2716,7 +3258,7 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
       const x = Fp.toBytes(radj);
       const R = Point5.fromBytes(concatBytes(pprefix((recovery & 1) === 0), x));
       const ir = Fn4.inv(radj);
-      const h = bits2int_modN2(abytes(messageHash, void 0, "msgHash"));
+      const h = bits2int_modN2(abytes2(messageHash, void 0, "msgHash"));
       const u1 = Fn4.create(-h * ir);
       const u2 = Fn4.create(s * ir);
       const Q = Point5.BASE.multiplyUnsafe(u1).add(R.multiplyUnsafe(u2));
@@ -2762,8 +3304,8 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
     return Fn4.toBytes(num2);
   }
   function validateMsgAndHash(message, prehash) {
-    abytes(message, void 0, "message");
-    return prehash ? abytes(hash(message), void 0, "prehashed message") : message;
+    abytes2(message, void 0, "message");
+    return prehash ? abytes2(hash(message), void 0, "prehashed message") : message;
   }
   function prepSig(message, secretKey, opts) {
     const { lowS, prehash, extraEntropy } = validateSigOpts(opts, defaultSigOpts);
@@ -2775,7 +3317,7 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
     const seedArgs = [int2octets(d), int2octets(h1int)];
     if (extraEntropy != null && extraEntropy !== false) {
       const e = extraEntropy === true ? randomBytes3(lengths2.secretKey) : extraEntropy;
-      seedArgs.push(abytes(e, void 0, "extraEntropy"));
+      seedArgs.push(abytes2(e, void 0, "extraEntropy"));
     }
     const seed = concatBytes(...seedArgs);
     const m = h1int;
@@ -2807,18 +3349,18 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
     const sig = drbg(seed, k2sig);
     return sig.toBytes(opts.format);
   }
-  function verify(signature, message, publicKey, opts = {}) {
+  function verify(signature, message, publicKey2, opts = {}) {
     const { lowS, prehash, format } = validateSigOpts(opts, defaultSigOpts);
-    publicKey = abytes(publicKey, void 0, "publicKey");
+    publicKey2 = abytes2(publicKey2, void 0, "publicKey");
     message = validateMsgAndHash(message, prehash);
-    if (!isBytes(signature)) {
+    if (!isBytes2(signature)) {
       const end = signature instanceof Signature2 ? ", use sig.toBytes()" : "";
       throw new Error("verify expects Uint8Array signature" + end);
     }
     validateSigLength(signature, format);
     try {
       const sig = Signature2.fromBytes(signature, format);
-      const P2 = Point5.fromBytes(publicKey);
+      const P2 = Point5.fromBytes(publicKey2);
       if (lowS && sig.hasHighS())
         return false;
       const { r, s } = sig;
@@ -2951,7 +3493,7 @@ var init_weierstrass = __esm({
       },
       toSig(bytes2) {
         const { Err: E, _int: int, _tlv: tlv } = DER;
-        const data = abytes(bytes2, void 0, "signature");
+        const data = abytes2(bytes2, void 0, "signature");
         const { v: seqBytes, l: seqLeftBytes } = tlv.decode(48, data);
         if (seqLeftBytes.length)
           throw new E("invalid signature: left bytes after parsing");
@@ -3043,9 +3585,9 @@ function schnorrGetPublicKey(secretKey) {
 }
 function schnorrSign(message, secretKey, auxRand = randomBytes(32)) {
   const { Fn: Fn4 } = Pointk1;
-  const m = abytes(message, void 0, "message");
+  const m = abytes2(message, void 0, "message");
   const { bytes: px, scalar: d } = schnorrGetExtPubKey(secretKey);
-  const a = abytes(auxRand, 32, "auxRand");
+  const a = abytes2(auxRand, 32, "auxRand");
   const t = Fn4.toBytes(d ^ num(taggedHash("BIP0340/aux", a)));
   const rand = taggedHash("BIP0340/nonce", t, px, m);
   const { bytes: rx, scalar: k } = schnorrGetExtPubKey(rand);
@@ -3057,11 +3599,11 @@ function schnorrSign(message, secretKey, auxRand = randomBytes(32)) {
     throw new Error("sign: Invalid signature produced");
   return sig;
 }
-function schnorrVerify(signature, message, publicKey) {
+function schnorrVerify(signature, message, publicKey2) {
   const { Fp, Fn: Fn4, BASE } = Pointk1;
-  const sig = abytes(signature, 64, "signature");
-  const m = abytes(message, void 0, "message");
-  const pub = abytes(publicKey, 32, "publicKey");
+  const sig = abytes2(signature, 64, "signature");
+  const m = abytes2(message, void 0, "message");
+  const pub = abytes2(publicKey2, 32, "publicKey");
   try {
     const P2 = lift_x(num(pub));
     const r = num(sig.subarray(0, 32));
@@ -3076,7 +3618,7 @@ function schnorrVerify(signature, message, publicKey) {
     if (R.is0() || !hasEven(y) || x !== r)
       return false;
     return true;
-  } catch (error) {
+  } catch (error2) {
     return false;
   }
 }
@@ -3470,548 +4012,6 @@ var init_legacy = __esm({
   }
 });
 
-// node_modules/.pnpm/@scure+base@2.0.0/node_modules/@scure/base/index.js
-var base_exports = {};
-__export(base_exports, {
-  base16: () => base16,
-  base32: () => base32,
-  base32crockford: () => base32crockford,
-  base32hex: () => base32hex,
-  base32hexnopad: () => base32hexnopad,
-  base32nopad: () => base32nopad,
-  base58: () => base58,
-  base58check: () => base58check,
-  base58flickr: () => base58flickr,
-  base58xmr: () => base58xmr,
-  base58xrp: () => base58xrp,
-  base64: () => base64,
-  base64nopad: () => base64nopad,
-  base64url: () => base64url,
-  base64urlnopad: () => base64urlnopad,
-  bech32: () => bech32,
-  bech32m: () => bech32m,
-  bytes: () => bytes,
-  bytesToString: () => bytesToString,
-  createBase58check: () => createBase58check,
-  hex: () => hex,
-  str: () => str,
-  stringToBytes: () => stringToBytes,
-  utf8: () => utf8,
-  utils: () => utils
-});
-function isBytes2(a) {
-  return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
-}
-function abytes2(b) {
-  if (!isBytes2(b))
-    throw new Error("Uint8Array expected");
-}
-function isArrayOf(isString, arr) {
-  if (!Array.isArray(arr))
-    return false;
-  if (arr.length === 0)
-    return true;
-  if (isString) {
-    return arr.every((item) => typeof item === "string");
-  } else {
-    return arr.every((item) => Number.isSafeInteger(item));
-  }
-}
-function afn(input) {
-  if (typeof input !== "function")
-    throw new Error("function expected");
-  return true;
-}
-function astr(label, input) {
-  if (typeof input !== "string")
-    throw new Error(`${label}: string expected`);
-  return true;
-}
-function anumber2(n) {
-  if (!Number.isSafeInteger(n))
-    throw new Error(`invalid integer: ${n}`);
-}
-function aArr(input) {
-  if (!Array.isArray(input))
-    throw new Error("array expected");
-}
-function astrArr(label, input) {
-  if (!isArrayOf(true, input))
-    throw new Error(`${label}: array of strings expected`);
-}
-function anumArr(label, input) {
-  if (!isArrayOf(false, input))
-    throw new Error(`${label}: array of numbers expected`);
-}
-// @__NO_SIDE_EFFECTS__
-function chain(...args) {
-  const id = (a) => a;
-  const wrap3 = (a, b) => (c) => a(b(c));
-  const encode3 = args.map((x) => x.encode).reduceRight(wrap3, id);
-  const decode3 = args.map((x) => x.decode).reduce(wrap3, id);
-  return { encode: encode3, decode: decode3 };
-}
-// @__NO_SIDE_EFFECTS__
-function alphabet(letters) {
-  const lettersA = typeof letters === "string" ? letters.split("") : letters;
-  const len = lettersA.length;
-  astrArr("alphabet", lettersA);
-  const indexes = new Map(lettersA.map((l, i) => [l, i]));
-  return {
-    encode: (digits) => {
-      aArr(digits);
-      return digits.map((i) => {
-        if (!Number.isSafeInteger(i) || i < 0 || i >= len)
-          throw new Error(`alphabet.encode: digit index outside alphabet "${i}". Allowed: ${letters}`);
-        return lettersA[i];
-      });
-    },
-    decode: (input) => {
-      aArr(input);
-      return input.map((letter) => {
-        astr("alphabet.decode", letter);
-        const i = indexes.get(letter);
-        if (i === void 0)
-          throw new Error(`Unknown letter: "${letter}". Allowed: ${letters}`);
-        return i;
-      });
-    }
-  };
-}
-// @__NO_SIDE_EFFECTS__
-function join(separator = "") {
-  astr("join", separator);
-  return {
-    encode: (from) => {
-      astrArr("join.decode", from);
-      return from.join(separator);
-    },
-    decode: (to) => {
-      astr("join.decode", to);
-      return to.split(separator);
-    }
-  };
-}
-// @__NO_SIDE_EFFECTS__
-function padding(bits, chr = "=") {
-  anumber2(bits);
-  astr("padding", chr);
-  return {
-    encode(data) {
-      astrArr("padding.encode", data);
-      while (data.length * bits % 8)
-        data.push(chr);
-      return data;
-    },
-    decode(input) {
-      astrArr("padding.decode", input);
-      let end = input.length;
-      if (end * bits % 8)
-        throw new Error("padding: invalid, string should have whole number of bytes");
-      for (; end > 0 && input[end - 1] === chr; end--) {
-        const last = end - 1;
-        const byte = last * bits;
-        if (byte % 8 === 0)
-          throw new Error("padding: invalid, string has too much padding");
-      }
-      return input.slice(0, end);
-    }
-  };
-}
-// @__NO_SIDE_EFFECTS__
-function normalize(fn) {
-  afn(fn);
-  return { encode: (from) => from, decode: (to) => fn(to) };
-}
-function convertRadix(data, from, to) {
-  if (from < 2)
-    throw new Error(`convertRadix: invalid from=${from}, base cannot be less than 2`);
-  if (to < 2)
-    throw new Error(`convertRadix: invalid to=${to}, base cannot be less than 2`);
-  aArr(data);
-  if (!data.length)
-    return [];
-  let pos = 0;
-  const res = [];
-  const digits = Array.from(data, (d) => {
-    anumber2(d);
-    if (d < 0 || d >= from)
-      throw new Error(`invalid integer: ${d}`);
-    return d;
-  });
-  const dlen = digits.length;
-  while (true) {
-    let carry = 0;
-    let done = true;
-    for (let i = pos; i < dlen; i++) {
-      const digit = digits[i];
-      const fromCarry = from * carry;
-      const digitBase = fromCarry + digit;
-      if (!Number.isSafeInteger(digitBase) || fromCarry / from !== carry || digitBase - digit !== fromCarry) {
-        throw new Error("convertRadix: carry overflow");
-      }
-      const div = digitBase / to;
-      carry = digitBase % to;
-      const rounded = Math.floor(div);
-      digits[i] = rounded;
-      if (!Number.isSafeInteger(rounded) || rounded * to + carry !== digitBase)
-        throw new Error("convertRadix: carry overflow");
-      if (!done)
-        continue;
-      else if (!rounded)
-        pos = i;
-      else
-        done = false;
-    }
-    res.push(carry);
-    if (done)
-      break;
-  }
-  for (let i = 0; i < data.length - 1 && data[i] === 0; i++)
-    res.push(0);
-  return res.reverse();
-}
-function convertRadix2(data, from, to, padding2) {
-  aArr(data);
-  if (from <= 0 || from > 32)
-    throw new Error(`convertRadix2: wrong from=${from}`);
-  if (to <= 0 || to > 32)
-    throw new Error(`convertRadix2: wrong to=${to}`);
-  if (/* @__PURE__ */ radix2carry(from, to) > 32) {
-    throw new Error(`convertRadix2: carry overflow from=${from} to=${to} carryBits=${/* @__PURE__ */ radix2carry(from, to)}`);
-  }
-  let carry = 0;
-  let pos = 0;
-  const max = powers[from];
-  const mask = powers[to] - 1;
-  const res = [];
-  for (const n of data) {
-    anumber2(n);
-    if (n >= max)
-      throw new Error(`convertRadix2: invalid data word=${n} from=${from}`);
-    carry = carry << from | n;
-    if (pos + from > 32)
-      throw new Error(`convertRadix2: carry overflow pos=${pos} from=${from}`);
-    pos += from;
-    for (; pos >= to; pos -= to)
-      res.push((carry >> pos - to & mask) >>> 0);
-    const pow = powers[pos];
-    if (pow === void 0)
-      throw new Error("invalid carry");
-    carry &= pow - 1;
-  }
-  carry = carry << to - pos & mask;
-  if (!padding2 && pos >= from)
-    throw new Error("Excess padding");
-  if (!padding2 && carry > 0)
-    throw new Error(`Non-zero padding: ${carry}`);
-  if (padding2 && pos > 0)
-    res.push(carry >>> 0);
-  return res;
-}
-// @__NO_SIDE_EFFECTS__
-function radix(num2) {
-  anumber2(num2);
-  const _256 = 2 ** 8;
-  return {
-    encode: (bytes2) => {
-      if (!isBytes2(bytes2))
-        throw new Error("radix.encode input should be Uint8Array");
-      return convertRadix(Array.from(bytes2), _256, num2);
-    },
-    decode: (digits) => {
-      anumArr("radix.decode", digits);
-      return Uint8Array.from(convertRadix(digits, num2, _256));
-    }
-  };
-}
-// @__NO_SIDE_EFFECTS__
-function radix2(bits, revPadding = false) {
-  anumber2(bits);
-  if (bits <= 0 || bits > 32)
-    throw new Error("radix2: bits should be in (0..32]");
-  if (/* @__PURE__ */ radix2carry(8, bits) > 32 || /* @__PURE__ */ radix2carry(bits, 8) > 32)
-    throw new Error("radix2: carry overflow");
-  return {
-    encode: (bytes2) => {
-      if (!isBytes2(bytes2))
-        throw new Error("radix2.encode input should be Uint8Array");
-      return convertRadix2(Array.from(bytes2), 8, bits, !revPadding);
-    },
-    decode: (digits) => {
-      anumArr("radix2.decode", digits);
-      return Uint8Array.from(convertRadix2(digits, bits, 8, revPadding));
-    }
-  };
-}
-function unsafeWrapper(fn) {
-  afn(fn);
-  return function(...args) {
-    try {
-      return fn.apply(null, args);
-    } catch (e) {
-    }
-  };
-}
-function checksum(len, fn) {
-  anumber2(len);
-  afn(fn);
-  return {
-    encode(data) {
-      if (!isBytes2(data))
-        throw new Error("checksum.encode: input should be Uint8Array");
-      const sum = fn(data).slice(0, len);
-      const res = new Uint8Array(data.length + len);
-      res.set(data);
-      res.set(sum, data.length);
-      return res;
-    },
-    decode(data) {
-      if (!isBytes2(data))
-        throw new Error("checksum.decode: input should be Uint8Array");
-      const payload = data.slice(0, -len);
-      const oldChecksum = data.slice(-len);
-      const newChecksum = fn(payload).slice(0, len);
-      for (let i = 0; i < len; i++)
-        if (newChecksum[i] !== oldChecksum[i])
-          throw new Error("Invalid checksum");
-      return payload;
-    }
-  };
-}
-function bech32Polymod(pre) {
-  const b = pre >> 25;
-  let chk = (pre & 33554431) << 5;
-  for (let i = 0; i < POLYMOD_GENERATORS.length; i++) {
-    if ((b >> i & 1) === 1)
-      chk ^= POLYMOD_GENERATORS[i];
-  }
-  return chk;
-}
-function bechChecksum(prefix2, words, encodingConst = 1) {
-  const len = prefix2.length;
-  let chk = 1;
-  for (let i = 0; i < len; i++) {
-    const c = prefix2.charCodeAt(i);
-    if (c < 33 || c > 126)
-      throw new Error(`Invalid prefix (${prefix2})`);
-    chk = bech32Polymod(chk) ^ c >> 5;
-  }
-  chk = bech32Polymod(chk);
-  for (let i = 0; i < len; i++)
-    chk = bech32Polymod(chk) ^ prefix2.charCodeAt(i) & 31;
-  for (let v of words)
-    chk = bech32Polymod(chk) ^ v;
-  for (let i = 0; i < 6; i++)
-    chk = bech32Polymod(chk);
-  chk ^= encodingConst;
-  return BECH_ALPHABET.encode(convertRadix2([chk % powers[30]], 30, 5, false));
-}
-// @__NO_SIDE_EFFECTS__
-function genBech32(encoding) {
-  const ENCODING_CONST = encoding === "bech32" ? 1 : 734539939;
-  const _words = /* @__PURE__ */ radix2(5);
-  const fromWords = _words.decode;
-  const toWords = _words.encode;
-  const fromWordsUnsafe = unsafeWrapper(fromWords);
-  function encode3(prefix2, words, limit = 90) {
-    astr("bech32.encode prefix", prefix2);
-    if (isBytes2(words))
-      words = Array.from(words);
-    anumArr("bech32.encode", words);
-    const plen = prefix2.length;
-    if (plen === 0)
-      throw new TypeError(`Invalid prefix length ${plen}`);
-    const actualLength = plen + 7 + words.length;
-    if (limit !== false && actualLength > limit)
-      throw new TypeError(`Length ${actualLength} exceeds limit ${limit}`);
-    const lowered = prefix2.toLowerCase();
-    const sum = bechChecksum(lowered, words, ENCODING_CONST);
-    return `${lowered}1${BECH_ALPHABET.encode(words)}${sum}`;
-  }
-  function decode3(str2, limit = 90) {
-    astr("bech32.decode input", str2);
-    const slen = str2.length;
-    if (slen < 8 || limit !== false && slen > limit)
-      throw new TypeError(`invalid string length: ${slen} (${str2}). Expected (8..${limit})`);
-    const lowered = str2.toLowerCase();
-    if (str2 !== lowered && str2 !== str2.toUpperCase())
-      throw new Error(`String must be lowercase or uppercase`);
-    const sepIndex = lowered.lastIndexOf("1");
-    if (sepIndex === 0 || sepIndex === -1)
-      throw new Error(`Letter "1" must be present between prefix and data only`);
-    const prefix2 = lowered.slice(0, sepIndex);
-    const data = lowered.slice(sepIndex + 1);
-    if (data.length < 6)
-      throw new Error("Data must be at least 6 characters long");
-    const words = BECH_ALPHABET.decode(data).slice(0, -6);
-    const sum = bechChecksum(prefix2, words, ENCODING_CONST);
-    if (!data.endsWith(sum))
-      throw new Error(`Invalid checksum in ${str2}: expected "${sum}"`);
-    return { prefix: prefix2, words };
-  }
-  const decodeUnsafe = unsafeWrapper(decode3);
-  function decodeToBytes(str2) {
-    const { prefix: prefix2, words } = decode3(str2, false);
-    return { prefix: prefix2, words, bytes: fromWords(words) };
-  }
-  function encodeFromBytes(prefix2, bytes2) {
-    return encode3(prefix2, toWords(bytes2));
-  }
-  return {
-    encode: encode3,
-    decode: decode3,
-    encodeFromBytes,
-    decodeToBytes,
-    decodeUnsafe,
-    fromWords,
-    fromWordsUnsafe,
-    toWords
-  };
-}
-var gcd, radix2carry, powers, utils, base16, base32, base32nopad, base32hex, base32hexnopad, base32crockford, hasBase64Builtin, decodeBase64Builtin, base64, base64nopad, base64url, base64urlnopad, genBase58, base58, base58flickr, base58xrp, XMR_BLOCK_LEN, base58xmr, createBase58check, base58check, BECH_ALPHABET, POLYMOD_GENERATORS, bech32, bech32m, utf8, hasHexBuiltin2, hexBuiltin, hex, CODERS, coderTypeError, bytesToString, str, stringToBytes, bytes;
-var init_base = __esm({
-  "node_modules/.pnpm/@scure+base@2.0.0/node_modules/@scure/base/index.js"() {
-    init_define_import_meta_env();
-    gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
-    radix2carry = /* @__NO_SIDE_EFFECTS__ */ (from, to) => from + (to - gcd(from, to));
-    powers = /* @__PURE__ */ (() => {
-      let res = [];
-      for (let i = 0; i < 40; i++)
-        res.push(2 ** i);
-      return res;
-    })();
-    utils = {
-      alphabet,
-      chain,
-      checksum,
-      convertRadix,
-      convertRadix2,
-      radix,
-      radix2,
-      join,
-      padding
-    };
-    base16 = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(4), /* @__PURE__ */ alphabet("0123456789ABCDEF"), /* @__PURE__ */ join(""));
-    base32 = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"), /* @__PURE__ */ padding(5), /* @__PURE__ */ join(""));
-    base32nopad = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"), /* @__PURE__ */ join(""));
-    base32hex = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("0123456789ABCDEFGHIJKLMNOPQRSTUV"), /* @__PURE__ */ padding(5), /* @__PURE__ */ join(""));
-    base32hexnopad = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("0123456789ABCDEFGHIJKLMNOPQRSTUV"), /* @__PURE__ */ join(""));
-    base32crockford = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("0123456789ABCDEFGHJKMNPQRSTVWXYZ"), /* @__PURE__ */ join(""), /* @__PURE__ */ normalize((s) => s.toUpperCase().replace(/O/g, "0").replace(/[IL]/g, "1")));
-    hasBase64Builtin = /* @__PURE__ */ (() => typeof Uint8Array.from([]).toBase64 === "function" && typeof Uint8Array.fromBase64 === "function")();
-    decodeBase64Builtin = (s, isUrl) => {
-      astr("base64", s);
-      const re = isUrl ? /^[A-Za-z0-9=_-]+$/ : /^[A-Za-z0-9=+/]+$/;
-      const alphabet2 = isUrl ? "base64url" : "base64";
-      if (s.length > 0 && !re.test(s))
-        throw new Error("invalid base64");
-      return Uint8Array.fromBase64(s, { alphabet: alphabet2, lastChunkHandling: "strict" });
-    };
-    base64 = hasBase64Builtin ? {
-      encode(b) {
-        abytes2(b);
-        return b.toBase64();
-      },
-      decode(s) {
-        return decodeBase64Builtin(s, false);
-      }
-    } : /* @__PURE__ */ chain(/* @__PURE__ */ radix2(6), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"), /* @__PURE__ */ padding(6), /* @__PURE__ */ join(""));
-    base64nopad = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(6), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"), /* @__PURE__ */ join(""));
-    base64url = hasBase64Builtin ? {
-      encode(b) {
-        abytes2(b);
-        return b.toBase64({ alphabet: "base64url" });
-      },
-      decode(s) {
-        return decodeBase64Builtin(s, true);
-      }
-    } : /* @__PURE__ */ chain(/* @__PURE__ */ radix2(6), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"), /* @__PURE__ */ padding(6), /* @__PURE__ */ join(""));
-    base64urlnopad = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(6), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"), /* @__PURE__ */ join(""));
-    genBase58 = /* @__NO_SIDE_EFFECTS__ */ (abc) => /* @__PURE__ */ chain(/* @__PURE__ */ radix(58), /* @__PURE__ */ alphabet(abc), /* @__PURE__ */ join(""));
-    base58 = /* @__PURE__ */ genBase58("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz");
-    base58flickr = /* @__PURE__ */ genBase58("123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ");
-    base58xrp = /* @__PURE__ */ genBase58("rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz");
-    XMR_BLOCK_LEN = [0, 2, 3, 5, 6, 7, 9, 10, 11];
-    base58xmr = {
-      encode(data) {
-        let res = "";
-        for (let i = 0; i < data.length; i += 8) {
-          const block = data.subarray(i, i + 8);
-          res += base58.encode(block).padStart(XMR_BLOCK_LEN[block.length], "1");
-        }
-        return res;
-      },
-      decode(str2) {
-        let res = [];
-        for (let i = 0; i < str2.length; i += 11) {
-          const slice = str2.slice(i, i + 11);
-          const blockLen = XMR_BLOCK_LEN.indexOf(slice.length);
-          const block = base58.decode(slice);
-          for (let j = 0; j < block.length - blockLen; j++) {
-            if (block[j] !== 0)
-              throw new Error("base58xmr: wrong padding");
-          }
-          res = res.concat(Array.from(block.slice(block.length - blockLen)));
-        }
-        return Uint8Array.from(res);
-      }
-    };
-    createBase58check = (sha2562) => /* @__PURE__ */ chain(checksum(4, (data) => sha2562(sha2562(data))), base58);
-    base58check = createBase58check;
-    BECH_ALPHABET = /* @__PURE__ */ chain(/* @__PURE__ */ alphabet("qpzry9x8gf2tvdw0s3jn54khce6mua7l"), /* @__PURE__ */ join(""));
-    POLYMOD_GENERATORS = [996825010, 642813549, 513874426, 1027748829, 705979059];
-    bech32 = /* @__PURE__ */ genBech32("bech32");
-    bech32m = /* @__PURE__ */ genBech32("bech32m");
-    utf8 = {
-      encode: (data) => new TextDecoder().decode(data),
-      decode: (str2) => new TextEncoder().encode(str2)
-    };
-    hasHexBuiltin2 = /* @__PURE__ */ (() => typeof Uint8Array.from([]).toHex === "function" && typeof Uint8Array.fromHex === "function")();
-    hexBuiltin = {
-      encode(data) {
-        abytes2(data);
-        return data.toHex();
-      },
-      decode(s) {
-        astr("hex", s);
-        return Uint8Array.fromHex(s);
-      }
-    };
-    hex = hasHexBuiltin2 ? hexBuiltin : /* @__PURE__ */ chain(/* @__PURE__ */ radix2(4), /* @__PURE__ */ alphabet("0123456789abcdef"), /* @__PURE__ */ join(""), /* @__PURE__ */ normalize((s) => {
-      if (typeof s !== "string" || s.length % 2 !== 0)
-        throw new TypeError(`hex.decode: expected string, got ${typeof s} with length ${s.length}`);
-      return s.toLowerCase();
-    }));
-    CODERS = {
-      utf8,
-      hex,
-      base16,
-      base32,
-      base64,
-      base64url,
-      base58,
-      base58xmr
-    };
-    coderTypeError = "Invalid encoding type. Available types: utf8, hex, base16, base32, base64, base64url, base58, base58xmr";
-    bytesToString = (type, bytes2) => {
-      if (typeof type !== "string" || !CODERS.hasOwnProperty(type))
-        throw new TypeError(coderTypeError);
-      if (!isBytes2(bytes2))
-        throw new TypeError("bytesToString() expects Uint8Array");
-      return CODERS[type].encode(bytes2);
-    };
-    str = bytesToString;
-    stringToBytes = (type, str2) => {
-      if (!CODERS.hasOwnProperty(type))
-        throw new TypeError(coderTypeError);
-      if (typeof str2 !== "string")
-        throw new TypeError("stringToBytes() expects string");
-      return CODERS[type].decode(str2);
-    };
-    bytes = stringToBytes;
-  }
-});
-
 // node_modules/.pnpm/micro-packed@0.8.0/node_modules/micro-packed/index.js
 function equalBytes2(a, b) {
   if (a.length !== b.length)
@@ -4046,14 +4046,14 @@ function isPlainObject(obj) {
 function isNum(num2) {
   return Number.isSafeInteger(num2);
 }
-function checkBounds(value, bits, signed) {
+function checkBounds(value2, bits, signed) {
   if (signed) {
     const signBit = 2n ** (bits - 1n);
-    if (value < -signBit || value >= signBit)
-      throw new Error(`value out of signed bounds. Expected ${-signBit} <= ${value} < ${signBit}`);
+    if (value2 < -signBit || value2 >= signBit)
+      throw new Error(`value out of signed bounds. Expected ${-signBit} <= ${value2} < ${signBit}`);
   } else {
-    if (0n > value || value >= 2n ** bits)
-      throw new Error(`value out of unsigned bounds. Expected 0 <= ${value} < ${2n ** bits}`);
+    if (0n > value2 || value2 >= 2n ** bits)
+      throw new Error(`value out of unsigned bounds. Expected 0 <= ${value2} < ${2n ** bits}`);
   }
 }
 function _wrap(inner) {
@@ -4062,9 +4062,9 @@ function _wrap(inner) {
     encodeStream: inner.encodeStream,
     decodeStream: inner.decodeStream,
     size: inner.size,
-    encode: (value) => {
+    encode: (value2) => {
       const w = new _Writer();
-      inner.encodeStream(w, value);
+      inner.encodeStream(w, value2);
       return w.finish();
     },
     decode: (data, opts = {}) => {
@@ -4082,10 +4082,10 @@ function validate(inner, fn) {
     throw new Error("validate: fn should be function");
   return _wrap({
     size: inner.size,
-    encodeStream: (w, value) => {
+    encodeStream: (w, value2) => {
       let res;
       try {
-        res = fn(value);
+        res = fn(value2);
       } catch (e) {
         throw w.err(e);
       }
@@ -4114,10 +4114,10 @@ function dict() {
         if (!Array.isArray(item) || item.length !== 2)
           throw new Error(`array of two elements expected`);
         const name = item[0];
-        const value = item[1];
+        const value2 = item[1];
         if (to[name] !== void 0)
           throw new Error(`key(${name}) appears twice in struct`);
-        to[name] = value;
+        to[name] = value2;
       }
       return to;
     },
@@ -4195,8 +4195,8 @@ function decimal(precision, round = false) {
       }
       const fracLen = Math.min(fracS.length, precision);
       const frac = BigInt(fracS.slice(0, fracLen)) * 10n ** BigInt(precision - fracLen);
-      const value = int + frac;
-      return neg ? -value : value;
+      const value2 = int + frac;
+      return neg ? -value2 : value2;
     }
   };
 }
@@ -4237,10 +4237,10 @@ function apply(inner, base) {
     throw new Error(`apply: invalid base value ${inner}`);
   return wrap({
     size: inner.size,
-    encodeStream: (w, value) => {
+    encodeStream: (w, value2) => {
       let innerValue;
       try {
-        innerValue = base.decode(value);
+        innerValue = base.decode(value2);
       } catch (e) {
         throw w.err("" + e);
       }
@@ -4262,16 +4262,16 @@ function flagged(path, inner, def2) {
   if (typeof path !== "string" && !isCoder(inner))
     throw new Error(`flagged: wrong path=${path}`);
   return wrap({
-    encodeStream: (w, value) => {
+    encodeStream: (w, value2) => {
       if (typeof path === "string") {
         if (Path.resolve(w.stack, path))
-          inner.encodeStream(w, value);
+          inner.encodeStream(w, value2);
         else if (def2)
           inner.encodeStream(w, def2);
       } else {
-        path.encodeStream(w, !!value);
-        if (!!value)
-          inner.encodeStream(w, value);
+        path.encodeStream(w, !!value2);
+        if (!!value2)
+          inner.encodeStream(w, value2);
         else if (def2)
           inner.encodeStream(w, def2);
       }
@@ -4299,16 +4299,16 @@ function magic(inner, constant, check2 = true) {
     size: inner.size,
     encodeStream: (w, _value) => inner.encodeStream(w, constant),
     decodeStream: (r) => {
-      const value = inner.decodeStream(r);
-      if (check2 && typeof value !== "object" && value !== constant || isBytes3(constant) && !equalBytes2(constant, value)) {
-        throw r.err(`magic: invalid value: ${value} !== ${constant}`);
+      const value2 = inner.decodeStream(r);
+      if (check2 && typeof value2 !== "object" && value2 !== constant || isBytes3(constant) && !equalBytes2(constant, value2)) {
+        throw r.err(`magic: invalid value: ${value2} !== ${constant}`);
       }
       return;
     },
-    validate: (value) => {
-      if (value !== void 0)
-        throw new Error(`magic: wrong value=${typeof value}`);
-      return value;
+    validate: (value2) => {
+      if (value2 !== void 0)
+        throw new Error(`magic: wrong value=${typeof value2}`);
+      return value2;
     }
   });
 }
@@ -4332,10 +4332,10 @@ function struct(fields) {
   }
   return wrap({
     size: sizeof(Object.values(fields)),
-    encodeStream: (w, value) => {
-      w.pushObj(value, (fieldFn) => {
+    encodeStream: (w, value2) => {
+      w.pushObj(value2, (fieldFn) => {
         for (const name in fields)
-          fieldFn(name, () => fields[name].encodeStream(w, value[name]));
+          fieldFn(name, () => fields[name].encodeStream(w, value2[name]));
       });
     },
     decodeStream: (r) => {
@@ -4346,10 +4346,10 @@ function struct(fields) {
       });
       return res;
     },
-    validate: (value) => {
-      if (typeof value !== "object" || value === null)
-        throw new Error(`struct: invalid value ${value}`);
-      return value;
+    validate: (value2) => {
+      if (typeof value2 !== "object" || value2 === null)
+        throw new Error(`struct: invalid value ${value2}`);
+      return value2;
     }
   });
 }
@@ -4362,12 +4362,12 @@ function tuple(fields) {
   }
   return wrap({
     size: sizeof(fields),
-    encodeStream: (w, value) => {
-      if (!Array.isArray(value))
-        throw w.err(`tuple: invalid value ${value}`);
-      w.pushObj(value, (fieldFn) => {
+    encodeStream: (w, value2) => {
+      if (!Array.isArray(value2))
+        throw w.err(`tuple: invalid value ${value2}`);
+      w.pushObj(value2, (fieldFn) => {
         for (let i = 0; i < fields.length; i++)
-          fieldFn(`${i}`, () => fields[i].encodeStream(w, value[i]));
+          fieldFn(`${i}`, () => fields[i].encodeStream(w, value2[i]));
       });
     },
     decodeStream: (r) => {
@@ -4378,12 +4378,12 @@ function tuple(fields) {
       });
       return res;
     },
-    validate: (value) => {
-      if (!Array.isArray(value))
-        throw new Error(`tuple: invalid value ${value}`);
-      if (value.length !== fields.length)
-        throw new Error(`tuple: wrong length=${value.length}, expected ${fields.length}`);
-      return value;
+    validate: (value2) => {
+      if (!Array.isArray(value2))
+        throw new Error(`tuple: invalid value ${value2}`);
+      if (value2.length !== fields.length)
+        throw new Error(`tuple: wrong length=${value2.length}, expected ${fields.length}`);
+      return value2;
     }
   });
 }
@@ -4393,14 +4393,14 @@ function array(len, inner) {
   const _length = lengthCoder(typeof len === "string" ? `../${len}` : len);
   return wrap({
     size: typeof len === "number" && inner.size ? len * inner.size : void 0,
-    encodeStream: (w, value) => {
+    encodeStream: (w, value2) => {
       const _w = w;
-      _w.pushObj(value, (fieldFn) => {
+      _w.pushObj(value2, (fieldFn) => {
         if (!isBytes3(len))
-          _length.encodeStream(w, value.length);
-        for (let i = 0; i < value.length; i++) {
+          _length.encodeStream(w, value2.length);
+        for (let i = 0; i < value2.length; i++) {
           fieldFn(`${i}`, () => {
-            const elm = value[i];
+            const elm = value2[i];
             const startPos = w.pos;
             inner.encodeStream(w, elm);
             if (isBytes3(len)) {
@@ -4442,10 +4442,10 @@ function array(len, inner) {
       });
       return res;
     },
-    validate: (value) => {
-      if (!Array.isArray(value))
-        throw new Error(`array: invalid value ${value}`);
-      return value;
+    validate: (value2) => {
+      if (!Array.isArray(value2))
+        throw new Error(`array: invalid value ${value2}`);
+      return value2;
     }
   });
 }
@@ -4471,11 +4471,11 @@ var init_micro_packed = __esm({
         throw new Error(`lengthCoder: expected null | number | Uint8Array | CoderType, got ${len} (${typeof len})`);
       }
       return {
-        encodeStream(w, value) {
+        encodeStream(w, value2) {
           if (len === null)
             return;
           if (isCoder(len))
-            return len.encodeStream(w, value);
+            return len.encodeStream(w, value2);
           let byteLen;
           if (typeof len === "number")
             byteLen = len;
@@ -4483,8 +4483,8 @@ var init_micro_packed = __esm({
             byteLen = Path.resolve(w.stack, len);
           if (typeof byteLen === "bigint")
             byteLen = Number(byteLen);
-          if (byteLen === void 0 || byteLen !== value)
-            throw w.err(`Wrong length: ${byteLen} len=${len} exp=${value} (${typeof value})`);
+          if (byteLen === void 0 || byteLen !== value2)
+            throw w.err(`Wrong length: ${byteLen} len=${len} exp=${value2} (${typeof value2})`);
         },
         decodeStream(r) {
           let byteLen;
@@ -4521,10 +4521,10 @@ var init_micro_packed = __esm({
         if (pos + len > bsLen)
           throw new Error(`wrong range=${pos}/${len} of ${bsLen}`);
       },
-      set: (bs, chunk, value, allowRewrite = true) => {
-        if (!allowRewrite && (bs[chunk] & value) !== 0)
+      set: (bs, chunk, value2, allowRewrite = true) => {
+        if (!allowRewrite && (bs[chunk] & value2) !== 0)
           return false;
-        bs[chunk] |= value;
+        bs[chunk] |= value2;
         return true;
       },
       pos: (pos, i) => ({
@@ -4878,17 +4878,17 @@ var init_micro_packed = __esm({
         }
         return buf;
       }
-      bits(value, bits) {
+      bits(value2, bits) {
         if (bits > 32)
           throw this.err("writeBits: cannot write more than 32 bits in single call");
-        if (value >= 2 ** bits)
-          throw this.err(`writeBits: value (${value}) >= 2**bits (${bits})`);
+        if (value2 >= 2 ** bits)
+          throw this.err(`writeBits: value (${value2}) >= 2**bits (${bits})`);
         while (bits) {
           const take = Math.min(bits, 8 - this.bitPos);
-          this.bitBuf = this.bitBuf << take | value >> bits - take;
+          this.bitBuf = this.bitBuf << take | value2 >> bits - take;
           this.bitPos += take;
           bits -= take;
-          value &= 2 ** bits - 1;
+          value2 &= 2 ** bits - 1;
           if (this.bitPos === 8) {
             this.bitPos = 0;
             this.buffers.push(new Uint8Array([this.bitBuf]));
@@ -4936,13 +4936,13 @@ var init_micro_packed = __esm({
       const signBit = 2n ** (8n * bLen - 1n);
       return wrap({
         size: sized ? size : void 0,
-        encodeStream: (w, value) => {
-          if (signed && value < 0)
-            value = value | signBit;
+        encodeStream: (w, value2) => {
+          if (signed && value2 < 0)
+            value2 = value2 | signBit;
           const b = [];
           for (let i = 0; i < size; i++) {
-            b.push(Number(value & 255n));
-            value >>= 8n;
+            b.push(Number(value2 & 255n));
+            value2 >>= 8n;
           }
           let res = new Uint8Array(b).reverse();
           if (!sized) {
@@ -4955,8 +4955,8 @@ var init_micro_packed = __esm({
           w.bytes(le ? res.reverse() : res);
         },
         decodeStream: (r) => {
-          const value = r.bytes(sized ? size : Math.min(size, r.leftBytes));
-          const b = le ? value : swapEndianness(value);
+          const value2 = r.bytes(sized ? size : Math.min(size, r.leftBytes));
+          const b = le ? value2 : swapEndianness(value2);
           let res = 0n;
           for (let i = 0; i < b.length; i++)
             res |= BigInt(b[i]) << 8n * BigInt(i);
@@ -4964,11 +4964,11 @@ var init_micro_packed = __esm({
             res = (res ^ signBit) - signBit;
           return res;
         },
-        validate: (value) => {
-          if (typeof value !== "bigint")
-            throw new Error(`bigint: invalid value: ${value}`);
-          checkBounds(value, 8n * bLen, !!signed);
-          return value;
+        validate: (value2) => {
+          if (typeof value2 !== "bigint")
+            throw new Error(`bigint: invalid value: ${value2}`);
+          checkBounds(value2, 8n * bLen, !!signed);
+          return value2;
         }
       });
     };
@@ -4977,32 +4977,32 @@ var init_micro_packed = __esm({
     I64LE = /* @__PURE__ */ bigint(8, true, true);
     view = (len, opts) => wrap({
       size: len,
-      encodeStream: (w, value) => w.writeView(len, (view3) => opts.write(view3, value)),
+      encodeStream: (w, value2) => w.writeView(len, (view3) => opts.write(view3, value2)),
       decodeStream: (r) => r.readView(len, opts.read),
-      validate: (value) => {
-        if (typeof value !== "number")
-          throw new Error(`viewCoder: expected number, got ${typeof value}`);
+      validate: (value2) => {
+        if (typeof value2 !== "number")
+          throw new Error(`viewCoder: expected number, got ${typeof value2}`);
         if (opts.validate)
-          opts.validate(value);
-        return value;
+          opts.validate(value2);
+        return value2;
       }
     });
     intView = (len, signed, opts) => {
       const bits = len * 8;
       const signBit = 2 ** (bits - 1);
-      const validateSigned = (value) => {
-        if (!isNum(value))
-          throw new Error(`sintView: value is not safe integer: ${value}`);
-        if (value < -signBit || value >= signBit) {
-          throw new Error(`sintView: value out of bounds. Expected ${-signBit} <= ${value} < ${signBit}`);
+      const validateSigned = (value2) => {
+        if (!isNum(value2))
+          throw new Error(`sintView: value is not safe integer: ${value2}`);
+        if (value2 < -signBit || value2 >= signBit) {
+          throw new Error(`sintView: value out of bounds. Expected ${-signBit} <= ${value2} < ${signBit}`);
         }
       };
       const maxVal = 2 ** bits;
-      const validateUnsigned = (value) => {
-        if (!isNum(value))
-          throw new Error(`uintView: value is not safe integer: ${value}`);
-        if (0 > value || value >= maxVal) {
-          throw new Error(`uintView: value out of bounds. Expected 0 <= ${value} < ${maxVal}`);
+      const validateUnsigned = (value2) => {
+        if (!isNum(value2))
+          throw new Error(`uintView: value is not safe integer: ${value2}`);
+        if (0 > value2 || value2 >= maxVal) {
+          throw new Error(`uintView: value out of bounds. Expected 0 <= ${value2} < ${maxVal}`);
         }
       };
       return view(len, {
@@ -5013,23 +5013,23 @@ var init_micro_packed = __esm({
     };
     U32LE = /* @__PURE__ */ intView(4, false, {
       read: (view3, pos) => view3.getUint32(pos, true),
-      write: (view3, value) => view3.setUint32(0, value, true)
+      write: (view3, value2) => view3.setUint32(0, value2, true)
     });
     U32BE = /* @__PURE__ */ intView(4, false, {
       read: (view3, pos) => view3.getUint32(pos, false),
-      write: (view3, value) => view3.setUint32(0, value, false)
+      write: (view3, value2) => view3.setUint32(0, value2, false)
     });
     I32LE = /* @__PURE__ */ intView(4, true, {
       read: (view3, pos) => view3.getInt32(pos, true),
-      write: (view3, value) => view3.setInt32(0, value, true)
+      write: (view3, value2) => view3.setInt32(0, value2, true)
     });
     U16LE = /* @__PURE__ */ intView(2, false, {
       read: (view3, pos) => view3.getUint16(pos, true),
-      write: (view3, value) => view3.setUint16(0, value, true)
+      write: (view3, value2) => view3.setUint16(0, value2, true)
     });
     U8 = /* @__PURE__ */ intView(1, false, {
       read: (view3, pos) => view3.getUint8(pos),
-      write: (view3, value) => view3.setUint8(0, value)
+      write: (view3, value2) => view3.setUint8(0, value2)
     });
     createBytes = (len, le = false) => {
       if (typeof le !== "boolean")
@@ -5038,10 +5038,10 @@ var init_micro_packed = __esm({
       const _isb = isBytes3(len);
       return wrap({
         size: typeof len === "number" ? len : void 0,
-        encodeStream: (w, value) => {
+        encodeStream: (w, value2) => {
           if (!_isb)
-            _length.encodeStream(w, value.length);
-          w.bytes(le ? swapEndianness(value) : value);
+            _length.encodeStream(w, value2.length);
+          w.bytes(le ? swapEndianness(value2) : value2);
           if (_isb)
             w.bytes(len);
         },
@@ -5058,30 +5058,30 @@ var init_micro_packed = __esm({
           }
           return le ? swapEndianness(bytes2) : bytes2;
         },
-        validate: (value) => {
-          if (!isBytes3(value))
-            throw new Error(`bytes: invalid value ${value}`);
-          return value;
+        validate: (value2) => {
+          if (!isBytes3(value2))
+            throw new Error(`bytes: invalid value ${value2}`);
+          return value2;
         }
       });
     };
-    string = (len, le = false) => validate(apply(createBytes(len, le), utf8), (value) => {
-      if (typeof value !== "string")
-        throw new Error(`expected string, got ${typeof value}`);
-      return value;
+    string = (len, le = false) => validate(apply(createBytes(len, le), utf8), (value2) => {
+      if (typeof value2 !== "string")
+        throw new Error(`expected string, got ${typeof value2}`);
+      return value2;
     });
-    createHex = (len, options = { isLE: false, with0x: false }) => {
-      let inner = apply(createBytes(len, options.isLE), hex);
-      const prefix2 = options.with0x;
+    createHex = (len, options2 = { isLE: false, with0x: false }) => {
+      let inner = apply(createBytes(len, options2.isLE), hex);
+      const prefix2 = options2.with0x;
       if (typeof prefix2 !== "boolean")
         throw new Error(`hex/with0x: expected boolean, got ${typeof prefix2}`);
       if (prefix2) {
         inner = apply(inner, {
-          encode: (value) => `0x${value}`,
-          decode: (value) => {
-            if (!value.startsWith("0x"))
+          encode: (value2) => `0x${value2}`,
+          decode: (value2) => {
+            if (!value2.startsWith("0x"))
               throw new Error("hex(with0x=true).encode input should start with 0x");
-            return value.slice(2);
+            return value2.slice(2);
           }
         });
       }
@@ -5094,8 +5094,8 @@ var init_micro_packed = __esm({
         throw new Error(`flag/xor: expected boolean, got ${typeof xor}`);
       return wrap({
         size: flagValue.length,
-        encodeStream: (w, value) => {
-          if (!!value !== xor)
+        encodeStream: (w, value2) => {
+          if (!!value2 !== xor)
             w.bytes(flagValue);
         },
         decodeStream: (r) => {
@@ -5107,10 +5107,10 @@ var init_micro_packed = __esm({
           }
           return hasFlag !== xor;
         },
-        validate: (value) => {
-          if (value !== void 0 && typeof value !== "boolean")
-            throw new Error(`flag: expected boolean value or undefined, got ${typeof value}`);
-          return value;
+        validate: (value2) => {
+          if (value2 !== void 0 && typeof value2 !== "boolean")
+            throw new Error(`flag: expected boolean value or undefined, got ${typeof value2}`);
+          return value2;
         }
       });
     };
@@ -5256,11 +5256,11 @@ __export(script_exports, {
 });
 function ScriptNum(bytesLimit = 6, forceMinimal = false) {
   return wrap({
-    encodeStream: (w, value) => {
-      if (value === 0n)
+    encodeStream: (w, value2) => {
+      if (value2 === 0n)
         return;
-      const neg = value < 0;
-      const val = BigInt(value);
+      const neg = value2 < 0;
+      const val = BigInt(value2);
       const nums = [];
       for (let abs = neg ? -val : val; abs; abs >>= 8n)
         nums.push(Number(abs & 0xffn));
@@ -5450,8 +5450,8 @@ var init_script = __esm({
     };
     OPNames = reverseObject(OP);
     Script = wrap({
-      encodeStream: (w, value) => {
-        for (let o of value) {
+      encodeStream: (w, value2) => {
+        for (let o of value2) {
           if (typeof o === "string") {
             if (OP[o] === void 0)
               throw new Error(`Unknown opcode=${o}`);
@@ -5523,20 +5523,20 @@ var init_script = __esm({
       255: [255, 8, 4294967296n, 18446744073709551615n]
     };
     CompactSize = wrap({
-      encodeStream: (w, value) => {
-        if (typeof value === "number")
-          value = BigInt(value);
-        if (0n <= value && value <= 252n)
-          return w.byte(Number(value));
+      encodeStream: (w, value2) => {
+        if (typeof value2 === "number")
+          value2 = BigInt(value2);
+        if (0n <= value2 && value2 <= 252n)
+          return w.byte(Number(value2));
         for (const [flag2, bytes2, start, stop] of Object.values(CSLimits)) {
-          if (start > value || value > stop)
+          if (start > value2 || value2 > stop)
             continue;
           w.byte(flag2);
           for (let i = 0; i < bytes2; i++)
-            w.byte(Number(value >> 8n * BigInt(i) & 0xffn));
+            w.byte(Number(value2 >> 8n * BigInt(i) & 0xffn));
           return;
         }
-        throw w.err(`VarInt too big: ${value}`);
+        throw w.err(`VarInt too big: ${value2}`);
       },
       decodeStream: (r) => {
         const b0 = r.byte();
@@ -5599,10 +5599,10 @@ function PSBTKeyMap(psbtEnum) {
     byType[num2] = [k, kc, vc];
   }
   return wrap({
-    encodeStream: (w, value) => {
+    encodeStream: (w, value2) => {
       let out = [];
       for (const name in psbtEnum) {
-        const val = value[name];
+        const val = value2[name];
         if (val === void 0)
           continue;
         const [type, kc, vc] = psbtEnum[name];
@@ -5614,13 +5614,13 @@ function PSBTKeyMap(psbtEnum) {
             vc.encode(v)
           ]);
           kv.sort((a, b) => compareBytes(a[0], b[0]));
-          for (const [key, value2] of kv)
-            out.push({ key: { key, type }, value: value2 });
+          for (const [key, value3] of kv)
+            out.push({ key: { key, type }, value: value3 });
         }
       }
-      if (value.unknown) {
-        value.unknown.sort((a, b) => compareBytes(a[0].key, b[0].key));
-        for (const [k, v] of value.unknown)
+      if (value2.unknown) {
+        value2.unknown.sort((a, b) => compareBytes(a[0].key, b[0].key));
+        for (const [k, v] of value2.unknown)
           out.push({ key: k, value: v });
       }
       PSBTKeyPair.encodeStream(w, out);
@@ -5632,19 +5632,19 @@ function PSBTKeyMap(psbtEnum) {
       for (const elm of raw2) {
         let name = "unknown";
         let key = elm.key.key;
-        let value = elm.value;
+        let value2 = elm.value;
         if (byType[elm.key.type]) {
           const [_name, kc, vc] = byType[elm.key.type];
           name = _name;
           if (!kc && key.length) {
-            throw new Error(`PSBT: Non-empty key for ${name} (key=${hex.encode(key)} value=${hex.encode(value)}`);
+            throw new Error(`PSBT: Non-empty key for ${name} (key=${hex.encode(key)} value=${hex.encode(value2)}`);
           }
           key = kc ? kc.decode(key) : void 0;
-          value = vc.decode(value);
+          value2 = vc.decode(value2);
           if (!kc) {
             if (out[name])
-              throw new Error(`PSBT: Same keys: ${name} (key=${key} value=${value})`);
-            out[name] = value;
+              throw new Error(`PSBT: Same keys: ${name} (key=${key} value=${value2})`);
+            out[name] = value2;
             noKey[name] = true;
             continue;
           }
@@ -5652,10 +5652,10 @@ function PSBTKeyMap(psbtEnum) {
           key = { type: elm.key.type, key: elm.key.key };
         }
         if (noKey[name])
-          throw new Error(`PSBT: Key type with empty key and no key=${name} val=${value}`);
+          throw new Error(`PSBT: Key type with empty key and no key=${name} val=${value2}`);
         if (!out[name])
           out[name] = [];
-        out[name].push([key, value]);
+        out[name].push([key, value2]);
       }
       return out;
     }
@@ -6115,7 +6115,7 @@ function taprootHashTree(tree, internalPubKey, allowUnknownOutputs = false, cust
     [lH, rH] = [rH, lH];
   return { type: "branch", left, right, hash: tagSchnorr("TapBranch", lH, rH) };
 }
-function p2tr(internalPubKey, tree, network = NETWORK, allowUnknownOutputs = false, customScripts) {
+function p2tr(internalPubKey, tree, network2 = NETWORK, allowUnknownOutputs = false, customScripts) {
   if (!internalPubKey && !tree)
     throw new Error("p2tr: should have pubKey or scriptTree (or both)");
   const pubKey = typeof internalPubKey === "string" ? hex.decode(internalPubKey) : internalPubKey || TAPROOT_UNSPENDABLE_KEY;
@@ -6136,7 +6136,7 @@ function p2tr(internalPubKey, tree, network = NETWORK, allowUnknownOutputs = fal
     return {
       type: "tr",
       script: OutScript.encode({ type: "tr", pubkey: tweakedPubkey }),
-      address: Address(network).encode({ type: "tr", pubkey: tweakedPubkey }),
+      address: Address(network2).encode({ type: "tr", pubkey: tweakedPubkey }),
       // For tests
       tweakedPubkey,
       // PSBT stuff
@@ -6153,7 +6153,7 @@ function p2tr(internalPubKey, tree, network = NETWORK, allowUnknownOutputs = fal
     return {
       type: "tr",
       script: OutScript.encode({ type: "tr", pubkey: tweakedPubkey }),
-      address: Address(network).encode({ type: "tr", pubkey: tweakedPubkey }),
+      address: Address(network2).encode({ type: "tr", pubkey: tweakedPubkey }),
       // For tests
       tweakedPubkey,
       // PSBT stuff
@@ -6193,23 +6193,23 @@ function p2tr_ms(m, pubkeys, allowSamePubkeys = false) {
     script: OutScript.encode({ type: "tr_ms", pubkeys, m })
   };
 }
-function getAddress(type, privKey, network = NETWORK) {
+function getAddress(type, privKey, network2 = NETWORK) {
   if (type === "tr") {
-    return p2tr(pubSchnorr(privKey), void 0, network).address;
+    return p2tr(pubSchnorr(privKey), void 0, network2).address;
   }
   const pubKey = pubECDSA(privKey);
   if (type === "pkh")
-    return p2pkh(pubKey, network).address;
+    return p2pkh(pubKey, network2).address;
   if (type === "wpkh")
-    return p2wpkh(pubKey, network).address;
+    return p2wpkh(pubKey, network2).address;
   throw new Error(`getAddress: unknown type=${type}`);
 }
-function multisig(m, pubkeys, sorted = false, witness = false, network = NETWORK) {
+function multisig(m, pubkeys, sorted = false, witness = false, network2 = NETWORK) {
   const ms = p2ms(m, sorted ? _sortPubkeys(pubkeys) : pubkeys);
-  return witness ? p2wsh(ms, network) : p2sh(ms, network);
+  return witness ? p2wsh(ms, network2) : p2sh(ms, network2);
 }
-function sortedMultisig(m, pubkeys, witness = false, network = NETWORK) {
-  return multisig(m, pubkeys, true, witness, network);
+function sortedMultisig(m, pubkeys, witness = false, network2 = NETWORK) {
+  return multisig(m, pubkeys, true, witness, network2);
 }
 function validateWitness(version2, data) {
   if (data.length < 2 || data.length > 40)
@@ -6219,23 +6219,23 @@ function validateWitness(version2, data) {
   if (version2 === 0 && !(data.length === 20 || data.length === 32))
     throw new Error("Witness: invalid length for version");
 }
-function programToWitness(version2, data, network = NETWORK) {
+function programToWitness(version2, data, network2 = NETWORK) {
   validateWitness(version2, data);
   const coder = version2 === 0 ? bech32 : bech32m;
-  return coder.encode(network.bech32, [version2].concat(coder.toWords(data)));
+  return coder.encode(network2.bech32, [version2].concat(coder.toWords(data)));
 }
 function formatKey(hashed, prefix2) {
   return base58check2.encode(concatBytes3(Uint8Array.from(prefix2), hashed));
 }
-function WIF(network = NETWORK) {
+function WIF(network2 = NETWORK) {
   return {
     encode(privKey) {
       const compressed2 = concatBytes3(privKey, new Uint8Array([1]));
-      return formatKey(compressed2.subarray(0, 33), [network.wif]);
+      return formatKey(compressed2.subarray(0, 33), [network2.wif]);
     },
     decode(wif) {
       let parsed = base58check2.decode(wif);
-      if (parsed[0] !== network.wif)
+      if (parsed[0] !== network2.wif)
         throw new Error("Wrong WIF prefix");
       parsed = parsed.subarray(1);
       if (parsed.length !== 33)
@@ -6246,26 +6246,26 @@ function WIF(network = NETWORK) {
     }
   };
 }
-function Address(network = NETWORK) {
+function Address(network2 = NETWORK) {
   return {
     encode(from) {
       const { type } = from;
       if (type === "wpkh")
-        return programToWitness(0, from.hash, network);
+        return programToWitness(0, from.hash, network2);
       else if (type === "wsh")
-        return programToWitness(0, from.hash, network);
+        return programToWitness(0, from.hash, network2);
       else if (type === "tr")
-        return programToWitness(1, from.pubkey, network);
+        return programToWitness(1, from.pubkey, network2);
       else if (type === "pkh")
-        return formatKey(from.hash, [network.pubKeyHash]);
+        return formatKey(from.hash, [network2.pubKeyHash]);
       else if (type === "sh")
-        return formatKey(from.hash, [network.scriptHash]);
+        return formatKey(from.hash, [network2.scriptHash]);
       throw new Error(`Unknown address type=${type}`);
     },
     decode(address) {
       if (address.length < 14 || address.length > 74)
         throw new Error("Invalid address length");
-      if (network.bech32 && address.toLowerCase().startsWith(`${network.bech32}1`)) {
+      if (network2.bech32 && address.toLowerCase().startsWith(`${network2.bech32}1`)) {
         let res;
         try {
           res = bech32.decode(address);
@@ -6276,7 +6276,7 @@ function Address(network = NETWORK) {
           if (res.words[0] === 0)
             throw new Error(`bech32m: wrong version=${res.words[0]}`);
         }
-        if (res.prefix !== network.bech32)
+        if (res.prefix !== network2.bech32)
           throw new Error(`wrong bech32 prefix=${res.prefix}`);
         const [version2, ...program] = res.words;
         const data2 = bech32.fromWords(program);
@@ -6293,9 +6293,9 @@ function Address(network = NETWORK) {
       const data = base58check2.decode(address);
       if (data.length !== 21)
         throw new Error("Invalid base58 address");
-      if (data[0] === network.pubKeyHash) {
+      if (data[0] === network2.pubKeyHash) {
         return { type: "pkh", hash: data.slice(1) };
-      } else if (data[0] === network.scriptHash) {
+      } else if (data[0] === network2.scriptHash) {
         return {
           type: "sh",
           hash: data.slice(1)
@@ -6520,18 +6520,18 @@ var init_payment = __esm({
         throw new Error("P2PK: invalid publicKey");
       return { type: "pk", script: OutScript.encode({ type: "pk", pubkey }) };
     };
-    p2pkh = (publicKey, network = NETWORK) => {
-      if (!isValidPubkey(publicKey, PubT.ecdsa))
+    p2pkh = (publicKey2, network2 = NETWORK) => {
+      if (!isValidPubkey(publicKey2, PubT.ecdsa))
         throw new Error("P2PKH: invalid publicKey");
-      const hash = hash160(publicKey);
+      const hash = hash160(publicKey2);
       return {
         type: "pkh",
         script: OutScript.encode({ type: "pkh", hash }),
-        address: Address(network).encode({ type: "pkh", hash }),
+        address: Address(network2).encode({ type: "pkh", hash }),
         hash
       };
     };
-    p2sh = (child, network = NETWORK) => {
+    p2sh = (child, network2 = NETWORK) => {
       const cs = child.script;
       if (!isBytes4(cs))
         throw new Error(`Wrong script: ${typeof child.script}, expected Uint8Array`);
@@ -6543,7 +6543,7 @@ var init_payment = __esm({
           type: "sh",
           redeemScript: cs,
           script: OutScript.encode({ type: "sh", hash }),
-          address: Address(network).encode({ type: "sh", hash }),
+          address: Address(network2).encode({ type: "sh", hash }),
           hash,
           witnessScript: child.witnessScript
         };
@@ -6552,12 +6552,12 @@ var init_payment = __esm({
           type: "sh",
           redeemScript: cs,
           script: OutScript.encode({ type: "sh", hash }),
-          address: Address(network).encode({ type: "sh", hash }),
+          address: Address(network2).encode({ type: "sh", hash }),
           hash
         };
       }
     };
-    p2wsh = (child, network = NETWORK) => {
+    p2wsh = (child, network2 = NETWORK) => {
       const cs = child.script;
       if (!isBytes4(cs))
         throw new Error(`Wrong script: ${typeof cs}, expected Uint8Array`);
@@ -6568,20 +6568,20 @@ var init_payment = __esm({
         type: "wsh",
         witnessScript: cs,
         script: OutScript.encode({ type: "wsh", hash }),
-        address: Address(network).encode({ type: "wsh", hash }),
+        address: Address(network2).encode({ type: "wsh", hash }),
         hash
       };
     };
-    p2wpkh = (publicKey, network = NETWORK) => {
-      if (!isValidPubkey(publicKey, PubT.ecdsa))
+    p2wpkh = (publicKey2, network2 = NETWORK) => {
+      if (!isValidPubkey(publicKey2, PubT.ecdsa))
         throw new Error("P2WPKH: invalid publicKey");
-      if (publicKey.length === 65)
+      if (publicKey2.length === 65)
         throw new Error("P2WPKH: uncompressed public key");
-      const hash = hash160(publicKey);
+      const hash = hash160(publicKey2);
       return {
         type: "wpkh",
         script: OutScript.encode({ type: "wpkh", hash }),
-        address: Address(network).encode({ type: "wpkh", hash }),
+        address: Address(network2).encode({ type: "wpkh", hash }),
         hash
       };
     };
@@ -6889,7 +6889,7 @@ var init_transaction = __esm({
     DEFAULT_LOCKTIME = 0;
     DEFAULT_SEQUENCE = 4294967295;
     Decimal = coders.decimal(PRECISION);
-    def = (value, def2) => value === void 0 ? def2 : value;
+    def = (value2, def2) => value2 === void 0 ? def2 : value2;
     SignatureHash = {
       DEFAULT: 0,
       ALL: 1,
@@ -7075,8 +7075,8 @@ var init_transaction = __esm({
         let addInput = true, addOutput = true;
         let inputs = [], outputs = [];
         for (let idx = 0; idx < this.inputs.length; idx++) {
-          const status = this.inputStatus(idx);
-          if (status === "unsigned")
+          const status2 = this.inputStatus(idx);
+          if (status2 === "unsigned")
             continue;
           const { sigInputs, sigOutputs } = this.inputSighash(idx);
           if (sigInputs === SignatureHash.ANYONECANPAY)
@@ -7177,8 +7177,8 @@ var init_transaction = __esm({
         this.checkInputIdx(idx);
         let allowedFields = void 0;
         if (!_ignoreSignStatus) {
-          const status = this.signStatus();
-          if (!status.addInput || status.inputs.includes(idx))
+          const status2 = this.signStatus();
+          if (!status2.addInput || status2.inputs.includes(idx))
             allowedFields = PSBTInputUnsignedKeys;
         }
         this.inputs[idx] = normalizeInput(input, this.inputs[idx], allowedFields, this.opts.disableScriptCheck, this.opts.allowUnknown);
@@ -7192,11 +7192,11 @@ var init_transaction = __esm({
         this.checkOutputIdx(idx);
         return cloneDeep(this.outputs[idx]);
       }
-      getOutputAddress(idx, network = NETWORK) {
+      getOutputAddress(idx, network2 = NETWORK) {
         const out = this.getOutput(idx);
         if (!out.script)
           return;
-        return Address(network).encode(OutScript.decode(out.script));
+        return Address(network2).encode(OutScript.decode(out.script));
       }
       get outputsLength() {
         return this.outputs.length;
@@ -7233,14 +7233,14 @@ var init_transaction = __esm({
         this.checkOutputIdx(idx);
         let allowedFields = void 0;
         if (!_ignoreSignStatus) {
-          const status = this.signStatus();
-          if (!status.addOutput || status.outputs.includes(idx))
+          const status2 = this.signStatus();
+          if (!status2.addOutput || status2.outputs.includes(idx))
             allowedFields = PSBTOutputUnsignedKeys;
         }
         this.outputs[idx] = this.normalizeOutput(output, this.outputs[idx], allowedFields);
       }
-      addOutputAddress(address, amount, network = NETWORK) {
-        return this.addOutput({ script: OutScript.encode(Address(network).decode(address)), amount });
+      addOutputAddress(address, amount, network2 = NETWORK) {
+        return this.addOutput({ script: OutScript.encode(Address(network2).decode(address)), amount });
       }
       // Utils
       get fee() {
@@ -7775,7 +7775,7 @@ function estimateInput(inputType, input, opts) {
   }
   return { weight, hasWitnesses };
 }
-function getScript(o, opts = {}, network = NETWORK) {
+function getScript(o, opts = {}, network2 = NETWORK) {
   let script;
   if ("script" in o && isBytes4(o.script)) {
     script = o.script;
@@ -7783,7 +7783,7 @@ function getScript(o, opts = {}, network = NETWORK) {
   if ("address" in o) {
     if (typeof o.address !== "string")
       throw new Error(`Estimator: wrong output address=${o.address}`);
-    script = OutScript.encode(Address(network).decode(o.address));
+    script = OutScript.encode(Address(network2).decode(o.address));
   }
   if (!script)
     throw new Error("Estimator: wrong output script");
@@ -7852,7 +7852,7 @@ var init_utxo = __esm({
         this.dust = dustBytes * dustFee;
         if (opts.requiredInputs !== void 0 && !Array.isArray(opts.requiredInputs))
           throw new Error(`Estimator: wrong required inputs=${opts.requiredInputs}`);
-        const network = opts.network || NETWORK;
+        const network2 = opts.network || NETWORK;
         let amount = 0n;
         let baseWeight = 32;
         for (const o of outputs) {
@@ -7862,7 +7862,7 @@ var init_utxo = __esm({
         }
         if (typeof opts.changeAddress !== "string")
           throw new Error(`Estimator: wrong change address=${opts.changeAddress}`);
-        let changeWeight = baseWeight + 32 + 4 * VarBytes.encode(OutScript.encode(Address(network).decode(opts.changeAddress))).length;
+        let changeWeight = baseWeight + 32 + 4 * VarBytes.encode(OutScript.encode(Address(network2).decode(opts.changeAddress))).length;
         baseWeight += 4 * CompactSizeLen.encode(outputs.length).length;
         changeWeight += 4 * CompactSizeLen.encode(outputs.length + 1).length;
         this.baseWeight = baseWeight;
@@ -7884,8 +7884,8 @@ var init_utxo = __esm({
           const inputType = getInputType(normalized, opts.allowLegacyWitnessUtxo);
           const prev = getPrevOut(normalized);
           const estimate2 = estimateInput(inputType, normalized, this.opts);
-          const value = prev.amount - opts.feePerByte * BigInt(toVsize(estimate2.weight));
-          return { inputType, normalized, amount: prev.amount, value, estimate: estimate2 };
+          const value2 = prev.amount - opts.feePerByte * BigInt(toVsize(estimate2.weight));
+          return { inputType, normalized, amount: prev.amount, value: value2, estimate: estimate2 };
         });
       }
       checkInputIdx(idx) {
@@ -7968,7 +7968,7 @@ var init_utxo = __esm({
           this.checkInputIdx(idx);
           if (res.has(idx))
             continue;
-          const { estimate: estimate2, amount, value } = this.normalizedInputs[idx];
+          const { estimate: estimate2, amount, value: value2 } = this.normalizedInputs[idx];
           let newWeight = weight + estimate2.weight;
           if (!hasWitnesses && estimate2.hasWitnesses)
             newWeight += 2;
@@ -7976,7 +7976,7 @@ var init_utxo = __esm({
           fee = this.getSatoshi(totalWeight);
           if (exact && amount + inputsAmount > targetAmount + fee + this.dust)
             continue;
-          if (skipNegative && value <= 0n)
+          if (skipNegative && value2 <= 0n)
             continue;
           weight = newWeight;
           if (estimate2.hasWitnesses)
@@ -8239,11 +8239,11 @@ var require_lodash = __commonJS({
     function getValue(object, key) {
       return object == null ? void 0 : object[key];
     }
-    function isHostObject(value) {
+    function isHostObject(value2) {
       var result = false;
-      if (value != null && typeof value.toString != "function") {
+      if (value2 != null && typeof value2.toString != "function") {
         try {
-          result = !!(value + "");
+          result = !!(value2 + "");
         } catch (e) {
         }
       }
@@ -8292,9 +8292,9 @@ var require_lodash = __commonJS({
       var data = this.__data__;
       return nativeCreate ? data[key] !== void 0 : hasOwnProperty.call(data, key);
     }
-    function hashSet(key, value) {
+    function hashSet(key, value2) {
       var data = this.__data__;
-      data[key] = nativeCreate && value === void 0 ? HASH_UNDEFINED : value;
+      data[key] = nativeCreate && value2 === void 0 ? HASH_UNDEFINED : value2;
       return this;
     }
     Hash.prototype.clear = hashClear;
@@ -8333,12 +8333,12 @@ var require_lodash = __commonJS({
     function listCacheHas(key) {
       return assocIndexOf(this.__data__, key) > -1;
     }
-    function listCacheSet(key, value) {
+    function listCacheSet(key, value2) {
       var data = this.__data__, index = assocIndexOf(data, key);
       if (index < 0) {
-        data.push([key, value]);
+        data.push([key, value2]);
       } else {
-        data[index][1] = value;
+        data[index][1] = value2;
       }
       return this;
     }
@@ -8371,8 +8371,8 @@ var require_lodash = __commonJS({
     function mapCacheHas(key) {
       return getMapData(this, key).has(key);
     }
-    function mapCacheSet(key, value) {
-      getMapData(this, key).set(key, value);
+    function mapCacheSet(key, value2) {
+      getMapData(this, key).set(key, value2);
       return this;
     }
     MapCache.prototype.clear = mapCacheClear;
@@ -8389,24 +8389,24 @@ var require_lodash = __commonJS({
       }
       return -1;
     }
-    function baseIsNative(value) {
-      if (!isObject(value) || isMasked(value)) {
+    function baseIsNative(value2) {
+      if (!isObject(value2) || isMasked(value2)) {
         return false;
       }
-      var pattern = isFunction(value) || isHostObject(value) ? reIsNative : reIsHostCtor;
-      return pattern.test(toSource(value));
+      var pattern = isFunction(value2) || isHostObject(value2) ? reIsNative : reIsHostCtor;
+      return pattern.test(toSource(value2));
     }
     function getMapData(map, key) {
       var data = map.__data__;
       return isKeyable(key) ? data[typeof key == "string" ? "string" : "hash"] : data.map;
     }
     function getNative(object, key) {
-      var value = getValue(object, key);
-      return baseIsNative(value) ? value : void 0;
+      var value2 = getValue(object, key);
+      return baseIsNative(value2) ? value2 : void 0;
     }
-    function isKeyable(value) {
-      var type = typeof value;
-      return type == "string" || type == "number" || type == "symbol" || type == "boolean" ? value !== "__proto__" : value === null;
+    function isKeyable(value2) {
+      var type = typeof value2;
+      return type == "string" || type == "number" || type == "symbol" || type == "boolean" ? value2 !== "__proto__" : value2 === null;
     }
     function isMasked(func) {
       return !!maskSrcKey && maskSrcKey in func;
@@ -8441,16 +8441,16 @@ var require_lodash = __commonJS({
       return memoized2;
     }
     memoize.Cache = MapCache;
-    function eq(value, other) {
-      return value === other || value !== value && other !== other;
+    function eq(value2, other) {
+      return value2 === other || value2 !== value2 && other !== other;
     }
-    function isFunction(value) {
-      var tag = isObject(value) ? objectToString.call(value) : "";
+    function isFunction(value2) {
+      var tag = isObject(value2) ? objectToString.call(value2) : "";
       return tag == funcTag || tag == genTag;
     }
-    function isObject(value) {
-      var type = typeof value;
-      return !!value && (type == "object" || type == "function");
+    function isObject(value2) {
+      var type = typeof value2;
+      return !!value2 && (type == "object" || type == "function");
     }
     module.exports = memoize;
   }
@@ -8526,7 +8526,7 @@ DescriptorsFactory/create*Lib now work as a process-wide singleton in descriptor
 var browser_exports = {};
 __export(browser_exports, {
   compare: () => compare,
-  concat: () => concat,
+  concat: () => concat4,
   fromBase64: () => fromBase64,
   fromHex: () => fromHex,
   fromUtf8: () => fromUtf8,
@@ -8548,7 +8548,7 @@ function toUtf8(bytes2) {
 function fromUtf8(s) {
   return ENCODER.encode(s);
 }
-function concat(arrays) {
+function concat4(arrays) {
   const totalLength = arrays.reduce((a, b) => a + b.length, 0);
   const result = new Uint8Array(totalLength);
   let offset = 0;
@@ -8612,77 +8612,77 @@ function compare(v1, v2) {
   }
   return v1.length === v2.length ? 0 : v1.length > v2.length ? 1 : -1;
 }
-function writeUInt8(buffer, offset, value) {
+function writeUInt8(buffer, offset, value2) {
   if (offset + 1 > buffer.length) {
     throw new Error("Offset is outside the bounds of Uint8Array");
   }
-  if (value > 255) {
-    throw new Error(`The value of "value" is out of range. It must be >= 0 and <= ${255}. Received ${value}`);
+  if (value2 > 255) {
+    throw new Error(`The value of "value" is out of range. It must be >= 0 and <= ${255}. Received ${value2}`);
   }
-  buffer[offset] = value;
+  buffer[offset] = value2;
 }
-function writeUInt16(buffer, offset, value, littleEndian) {
+function writeUInt16(buffer, offset, value2, littleEndian) {
   if (offset + 2 > buffer.length) {
     throw new Error("Offset is outside the bounds of Uint8Array");
   }
   littleEndian = littleEndian.toUpperCase();
-  if (value > 65535) {
-    throw new Error(`The value of "value" is out of range. It must be >= 0 and <= ${65535}. Received ${value}`);
+  if (value2 > 65535) {
+    throw new Error(`The value of "value" is out of range. It must be >= 0 and <= ${65535}. Received ${value2}`);
   }
   if (littleEndian === "LE") {
-    buffer[offset] = value & 255;
-    buffer[offset + 1] = value >> 8 & 255;
+    buffer[offset] = value2 & 255;
+    buffer[offset + 1] = value2 >> 8 & 255;
   } else {
-    buffer[offset] = value >> 8 & 255;
-    buffer[offset + 1] = value & 255;
+    buffer[offset] = value2 >> 8 & 255;
+    buffer[offset + 1] = value2 & 255;
   }
 }
-function writeUInt32(buffer, offset, value, littleEndian) {
+function writeUInt32(buffer, offset, value2, littleEndian) {
   if (offset + 4 > buffer.length) {
     throw new Error("Offset is outside the bounds of Uint8Array");
   }
   littleEndian = littleEndian.toUpperCase();
-  if (value > 4294967295) {
-    throw new Error(`The value of "value" is out of range. It must be >= 0 and <= ${4294967295}. Received ${value}`);
+  if (value2 > 4294967295) {
+    throw new Error(`The value of "value" is out of range. It must be >= 0 and <= ${4294967295}. Received ${value2}`);
   }
   if (littleEndian === "LE") {
-    buffer[offset] = value & 255;
-    buffer[offset + 1] = value >> 8 & 255;
-    buffer[offset + 2] = value >> 16 & 255;
-    buffer[offset + 3] = value >> 24 & 255;
+    buffer[offset] = value2 & 255;
+    buffer[offset + 1] = value2 >> 8 & 255;
+    buffer[offset + 2] = value2 >> 16 & 255;
+    buffer[offset + 3] = value2 >> 24 & 255;
   } else {
-    buffer[offset] = value >> 24 & 255;
-    buffer[offset + 1] = value >> 16 & 255;
-    buffer[offset + 2] = value >> 8 & 255;
-    buffer[offset + 3] = value & 255;
+    buffer[offset] = value2 >> 24 & 255;
+    buffer[offset + 1] = value2 >> 16 & 255;
+    buffer[offset + 2] = value2 >> 8 & 255;
+    buffer[offset + 3] = value2 & 255;
   }
 }
-function writeUInt64(buffer, offset, value, littleEndian) {
+function writeUInt64(buffer, offset, value2, littleEndian) {
   if (offset + 8 > buffer.length) {
     throw new Error("Offset is outside the bounds of Uint8Array");
   }
   littleEndian = littleEndian.toUpperCase();
-  if (value > 0xffffffffffffffffn) {
-    throw new Error(`The value of "value" is out of range. It must be >= 0 and <= ${0xffffffffffffffffn}. Received ${value}`);
+  if (value2 > 0xffffffffffffffffn) {
+    throw new Error(`The value of "value" is out of range. It must be >= 0 and <= ${0xffffffffffffffffn}. Received ${value2}`);
   }
   if (littleEndian === "LE") {
-    buffer[offset] = Number(value & 0xffn);
-    buffer[offset + 1] = Number(value >> 8n & 0xffn);
-    buffer[offset + 2] = Number(value >> 16n & 0xffn);
-    buffer[offset + 3] = Number(value >> 24n & 0xffn);
-    buffer[offset + 4] = Number(value >> 32n & 0xffn);
-    buffer[offset + 5] = Number(value >> 40n & 0xffn);
-    buffer[offset + 6] = Number(value >> 48n & 0xffn);
-    buffer[offset + 7] = Number(value >> 56n & 0xffn);
+    buffer[offset] = Number(value2 & 0xffn);
+    buffer[offset + 1] = Number(value2 >> 8n & 0xffn);
+    buffer[offset + 2] = Number(value2 >> 16n & 0xffn);
+    buffer[offset + 3] = Number(value2 >> 24n & 0xffn);
+    buffer[offset + 4] = Number(value2 >> 32n & 0xffn);
+    buffer[offset + 5] = Number(value2 >> 40n & 0xffn);
+    buffer[offset + 6] = Number(value2 >> 48n & 0xffn);
+    buffer[offset + 7] = Number(value2 >> 56n & 0xffn);
   } else {
-    buffer[offset] = Number(value >> 56n & 0xffn);
-    buffer[offset + 1] = Number(value >> 48n & 0xffn);
-    buffer[offset + 2] = Number(value >> 40n & 0xffn);
-    buffer[offset + 3] = Number(value >> 32n & 0xffn);
-    buffer[offset + 4] = Number(value >> 24n & 0xffn);
-    buffer[offset + 5] = Number(value >> 16n & 0xffn);
-    buffer[offset + 6] = Number(value >> 8n & 0xffn);
-    buffer[offset + 7] = Number(value & 0xffn);
+    buffer[offset] = Number(value2 >> 56n & 0xffn);
+    buffer[offset + 1] = Number(value2 >> 48n & 0xffn);
+    buffer[offset + 2] = Number(value2 >> 40n & 0xffn);
+    buffer[offset + 3] = Number(value2 >> 32n & 0xffn);
+    buffer[offset + 4] = Number(value2 >> 24n & 0xffn);
+    buffer[offset + 5] = Number(value2 >> 16n & 0xffn);
+    buffer[offset + 6] = Number(value2 >> 8n & 0xffn);
+    buffer[offset + 7] = Number(value2 & 0xffn);
   }
 }
 function readUInt8(buffer, offset) {
@@ -8890,7 +8890,7 @@ var require_cjs = __commonJS({
 var browser_exports2 = {};
 __export(browser_exports2, {
   compare: () => compare2,
-  concat: () => concat2,
+  concat: () => concat5,
   fromBase64: () => fromBase642,
   fromHex: () => fromHex2,
   fromUtf8: () => fromUtf82,
@@ -8920,7 +8920,7 @@ function toUtf82(bytes2) {
 function fromUtf82(s) {
   return ENCODER2.encode(s);
 }
-function concat2(arrays) {
+function concat5(arrays) {
   const totalLength = arrays.reduce((a, b) => a + b.length, 0);
   const result = new Uint8Array(totalLength);
   let offset = 0;
@@ -8984,80 +8984,80 @@ function compare2(v1, v2) {
   }
   return v1.length === v2.length ? 0 : v1.length > v2.length ? 1 : -1;
 }
-function writeUInt82(buffer, offset, value) {
+function writeUInt82(buffer, offset, value2) {
   if (offset + 1 > buffer.length) {
     throw new Error("Offset is outside the bounds of Uint8Array");
   }
-  if (value > 255) {
-    throw new Error(`The value of "value" is out of range. It must be >= 0 and <= ${255}. Received ${value}`);
+  if (value2 > 255) {
+    throw new Error(`The value of "value" is out of range. It must be >= 0 and <= ${255}. Received ${value2}`);
   }
-  buffer[offset] = value;
+  buffer[offset] = value2;
   return offset + 1;
 }
-function writeUInt162(buffer, offset, value, littleEndian) {
+function writeUInt162(buffer, offset, value2, littleEndian) {
   if (offset + 2 > buffer.length) {
     throw new Error("Offset is outside the bounds of Uint8Array");
   }
   littleEndian = littleEndian.toUpperCase();
-  if (value > 65535) {
-    throw new Error(`The value of "value" is out of range. It must be >= 0 and <= ${65535}. Received ${value}`);
+  if (value2 > 65535) {
+    throw new Error(`The value of "value" is out of range. It must be >= 0 and <= ${65535}. Received ${value2}`);
   }
   if (littleEndian === "LE") {
-    buffer[offset] = value & 255;
-    buffer[offset + 1] = value >> 8 & 255;
+    buffer[offset] = value2 & 255;
+    buffer[offset + 1] = value2 >> 8 & 255;
   } else {
-    buffer[offset] = value >> 8 & 255;
-    buffer[offset + 1] = value & 255;
+    buffer[offset] = value2 >> 8 & 255;
+    buffer[offset + 1] = value2 & 255;
   }
   return offset + 2;
 }
-function writeUInt322(buffer, offset, value, littleEndian) {
+function writeUInt322(buffer, offset, value2, littleEndian) {
   if (offset + 4 > buffer.length) {
     throw new Error("Offset is outside the bounds of Uint8Array");
   }
   littleEndian = littleEndian.toUpperCase();
-  if (value > 4294967295) {
-    throw new Error(`The value of "value" is out of range. It must be >= 0 and <= ${4294967295}. Received ${value}`);
+  if (value2 > 4294967295) {
+    throw new Error(`The value of "value" is out of range. It must be >= 0 and <= ${4294967295}. Received ${value2}`);
   }
   if (littleEndian === "LE") {
-    buffer[offset] = value & 255;
-    buffer[offset + 1] = value >> 8 & 255;
-    buffer[offset + 2] = value >> 16 & 255;
-    buffer[offset + 3] = value >> 24 & 255;
+    buffer[offset] = value2 & 255;
+    buffer[offset + 1] = value2 >> 8 & 255;
+    buffer[offset + 2] = value2 >> 16 & 255;
+    buffer[offset + 3] = value2 >> 24 & 255;
   } else {
-    buffer[offset] = value >> 24 & 255;
-    buffer[offset + 1] = value >> 16 & 255;
-    buffer[offset + 2] = value >> 8 & 255;
-    buffer[offset + 3] = value & 255;
+    buffer[offset] = value2 >> 24 & 255;
+    buffer[offset + 1] = value2 >> 16 & 255;
+    buffer[offset + 2] = value2 >> 8 & 255;
+    buffer[offset + 3] = value2 & 255;
   }
   return offset + 4;
 }
-function writeUInt642(buffer, offset, value, littleEndian) {
+function writeUInt642(buffer, offset, value2, littleEndian) {
   if (offset + 8 > buffer.length) {
     throw new Error("Offset is outside the bounds of Uint8Array");
   }
   littleEndian = littleEndian.toUpperCase();
-  if (value > 0xffffffffffffffffn) {
-    throw new Error(`The value of "value" is out of range. It must be >= 0 and <= ${0xffffffffffffffffn}. Received ${value}`);
+  if (value2 > 0xffffffffffffffffn) {
+    throw new Error(`The value of "value" is out of range. It must be >= 0 and <= ${0xffffffffffffffffn}. Received ${value2}`);
   }
   if (littleEndian === "LE") {
-    buffer[offset] = Number(value & 0xffn);
-    buffer[offset + 1] = Number(value >> 8n & 0xffn);
-    buffer[offset + 2] = Number(value >> 16n & 0xffn);
-    buffer[offset + 3] = Number(value >> 24n & 0xffn);
-    buffer[offset + 4] = Number(value >> 32n & 0xffn);
-    buffer[offset + 5] = Number(value >> 40n & 0xffn);
-    buffer[offset + 6] = Number(value >> 48n & 0xffn);
-    buffer[offset + 7] = Number(value >> 56n & 0xffn);
+    buffer[offset] = Number(value2 & 0xffn);
+    buffer[offset + 1] = Number(value2 >> 8n & 0xffn);
+    buffer[offset + 2] = Number(value2 >> 16n & 0xffn);
+    buffer[offset + 3] = Number(value2 >> 24n & 0xffn);
+    buffer[offset + 4] = Number(value2 >> 32n & 0xffn);
+    buffer[offset + 5] = Number(value2 >> 40n & 0xffn);
+    buffer[offset + 6] = Number(value2 >> 48n & 0xffn);
+    buffer[offset + 7] = Number(value2 >> 56n & 0xffn);
   } else {
-    buffer[offset] = Number(value >> 56n & 0xffn);
-    buffer[offset + 1] = Number(value >> 48n & 0xffn);
-    buffer[offset + 2] = Number(value >> 40n & 0xffn);
-    buffer[offset + 3] = Number(value >> 32n & 0xffn);
-    buffer[offset + 4] = Number(value >> 24n & 0xffn);
-    buffer[offset + 5] = Number(value >> 16n & 0xffn);
-    buffer[offset + 6] = Number(value >> 8n & 0xffn);
-    buffer[offset + 7] = Number(value & 0xffn);
+    buffer[offset] = Number(value2 >> 56n & 0xffn);
+    buffer[offset + 1] = Number(value2 >> 48n & 0xffn);
+    buffer[offset + 2] = Number(value2 >> 40n & 0xffn);
+    buffer[offset + 3] = Number(value2 >> 32n & 0xffn);
+    buffer[offset + 4] = Number(value2 >> 24n & 0xffn);
+    buffer[offset + 5] = Number(value2 >> 16n & 0xffn);
+    buffer[offset + 6] = Number(value2 >> 8n & 0xffn);
+    buffer[offset + 7] = Number(value2 & 0xffn);
   }
   return offset + 8;
 }
@@ -9134,80 +9134,80 @@ function readUInt642(buffer, offset, littleEndian) {
     return num2;
   }
 }
-function writeInt8(buffer, offset, value) {
+function writeInt8(buffer, offset, value2) {
   if (offset + 1 > buffer.length) {
     throw new Error("Offset is outside the bounds of Uint8Array");
   }
-  if (value > 127 || value < -128) {
-    throw new Error(`The value of "value" is out of range. It must be >= ${-128} and <= ${127}. Received ${value}`);
+  if (value2 > 127 || value2 < -128) {
+    throw new Error(`The value of "value" is out of range. It must be >= ${-128} and <= ${127}. Received ${value2}`);
   }
-  buffer[offset] = value;
+  buffer[offset] = value2;
   return offset + 1;
 }
-function writeInt16(buffer, offset, value, littleEndian) {
+function writeInt16(buffer, offset, value2, littleEndian) {
   if (offset + 2 > buffer.length) {
     throw new Error("Offset is outside the bounds of Uint8Array");
   }
-  if (value > 32767 || value < -32768) {
-    throw new Error(`The value of "value" is out of range. It must be >= ${-32768} and <= ${32767}. Received ${value}`);
+  if (value2 > 32767 || value2 < -32768) {
+    throw new Error(`The value of "value" is out of range. It must be >= ${-32768} and <= ${32767}. Received ${value2}`);
   }
   littleEndian = littleEndian.toUpperCase();
   if (littleEndian === "LE") {
-    buffer[offset] = value & 255;
-    buffer[offset + 1] = value >> 8 & 255;
+    buffer[offset] = value2 & 255;
+    buffer[offset + 1] = value2 >> 8 & 255;
   } else {
-    buffer[offset] = value >> 8 & 255;
-    buffer[offset + 1] = value & 255;
+    buffer[offset] = value2 >> 8 & 255;
+    buffer[offset + 1] = value2 & 255;
   }
   return offset + 2;
 }
-function writeInt32(buffer, offset, value, littleEndian) {
+function writeInt32(buffer, offset, value2, littleEndian) {
   if (offset + 4 > buffer.length) {
     throw new Error("Offset is outside the bounds of Uint8Array");
   }
-  if (value > 2147483647 || value < -2147483648) {
-    throw new Error(`The value of "value" is out of range. It must be >= ${-2147483648} and <= ${2147483647}. Received ${value}`);
+  if (value2 > 2147483647 || value2 < -2147483648) {
+    throw new Error(`The value of "value" is out of range. It must be >= ${-2147483648} and <= ${2147483647}. Received ${value2}`);
   }
   littleEndian = littleEndian.toUpperCase();
   if (littleEndian === "LE") {
-    buffer[offset] = value & 255;
-    buffer[offset + 1] = value >> 8 & 255;
-    buffer[offset + 2] = value >> 16 & 255;
-    buffer[offset + 3] = value >> 24 & 255;
+    buffer[offset] = value2 & 255;
+    buffer[offset + 1] = value2 >> 8 & 255;
+    buffer[offset + 2] = value2 >> 16 & 255;
+    buffer[offset + 3] = value2 >> 24 & 255;
   } else {
-    buffer[offset] = value >> 24 & 255;
-    buffer[offset + 1] = value >> 16 & 255;
-    buffer[offset + 2] = value >> 8 & 255;
-    buffer[offset + 3] = value & 255;
+    buffer[offset] = value2 >> 24 & 255;
+    buffer[offset + 1] = value2 >> 16 & 255;
+    buffer[offset + 2] = value2 >> 8 & 255;
+    buffer[offset + 3] = value2 & 255;
   }
   return offset + 4;
 }
-function writeInt64(buffer, offset, value, littleEndian) {
+function writeInt64(buffer, offset, value2, littleEndian) {
   if (offset + 8 > buffer.length) {
     throw new Error("Offset is outside the bounds of Uint8Array");
   }
-  if (value > 0x7fffffffffffffffn || value < -0x8000000000000000n) {
-    throw new Error(`The value of "value" is out of range. It must be >= ${-0x8000000000000000n} and <= ${0x7fffffffffffffffn}. Received ${value}`);
+  if (value2 > 0x7fffffffffffffffn || value2 < -0x8000000000000000n) {
+    throw new Error(`The value of "value" is out of range. It must be >= ${-0x8000000000000000n} and <= ${0x7fffffffffffffffn}. Received ${value2}`);
   }
   littleEndian = littleEndian.toUpperCase();
   if (littleEndian === "LE") {
-    buffer[offset] = Number(value & 0xffn);
-    buffer[offset + 1] = Number(value >> 8n & 0xffn);
-    buffer[offset + 2] = Number(value >> 16n & 0xffn);
-    buffer[offset + 3] = Number(value >> 24n & 0xffn);
-    buffer[offset + 4] = Number(value >> 32n & 0xffn);
-    buffer[offset + 5] = Number(value >> 40n & 0xffn);
-    buffer[offset + 6] = Number(value >> 48n & 0xffn);
-    buffer[offset + 7] = Number(value >> 56n & 0xffn);
+    buffer[offset] = Number(value2 & 0xffn);
+    buffer[offset + 1] = Number(value2 >> 8n & 0xffn);
+    buffer[offset + 2] = Number(value2 >> 16n & 0xffn);
+    buffer[offset + 3] = Number(value2 >> 24n & 0xffn);
+    buffer[offset + 4] = Number(value2 >> 32n & 0xffn);
+    buffer[offset + 5] = Number(value2 >> 40n & 0xffn);
+    buffer[offset + 6] = Number(value2 >> 48n & 0xffn);
+    buffer[offset + 7] = Number(value2 >> 56n & 0xffn);
   } else {
-    buffer[offset] = Number(value >> 56n & 0xffn);
-    buffer[offset + 1] = Number(value >> 48n & 0xffn);
-    buffer[offset + 2] = Number(value >> 40n & 0xffn);
-    buffer[offset + 3] = Number(value >> 32n & 0xffn);
-    buffer[offset + 4] = Number(value >> 24n & 0xffn);
-    buffer[offset + 5] = Number(value >> 16n & 0xffn);
-    buffer[offset + 6] = Number(value >> 8n & 0xffn);
-    buffer[offset + 7] = Number(value & 0xffn);
+    buffer[offset] = Number(value2 >> 56n & 0xffn);
+    buffer[offset + 1] = Number(value2 >> 48n & 0xffn);
+    buffer[offset + 2] = Number(value2 >> 40n & 0xffn);
+    buffer[offset + 3] = Number(value2 >> 32n & 0xffn);
+    buffer[offset + 4] = Number(value2 >> 24n & 0xffn);
+    buffer[offset + 5] = Number(value2 >> 16n & 0xffn);
+    buffer[offset + 6] = Number(value2 >> 8n & 0xffn);
+    buffer[offset + 7] = Number(value2 & 0xffn);
   }
   return offset + 8;
 }
@@ -9307,14 +9307,14 @@ var require_bitcoinjs_lib_internals = __commonJS({
     var uint8array_tools_1 = (init_browser2(), __toCommonJS(browser_exports2));
     var bitcoinLib_1 = require_bitcoinLib();
     var TAPROOT_LEAF_VERSION_TAPSCRIPT = 192;
-    var OP_12 = 81;
+    var OP_13 = 81;
     var PUSH_DATA_32 = 32;
     function serializeScript(script) {
       const { buffer: encodedLength } = (0, varuint_bitcoin_1.encode)(script.length);
       return (0, uint8array_tools_1.concat)([encodedLength, script]);
     }
     function isP2TRScript(script) {
-      return script instanceof Uint8Array && script.length === 34 && script[0] === OP_12 && script[1] === PUSH_DATA_32;
+      return script instanceof Uint8Array && script.length === 34 && script[0] === OP_13 && script[1] === PUSH_DATA_32;
     }
     function tapleafHash(leaf) {
       const version2 = leaf.version || TAPROOT_LEAF_VERSION_TAPSCRIPT;
@@ -9328,8 +9328,8 @@ var require_bitcoinjs_lib_internals = __commonJS({
       const writeSlice = (slice) => {
         buffer = (0, uint8array_tools_1.concat)([buffer, slice]);
       };
-      const writeVarInt = (value) => {
-        const { buffer: encoded } = (0, varuint_bitcoin_1.encode)(value);
+      const writeVarInt = (value2) => {
+        const { buffer: encoded } = (0, varuint_bitcoin_1.encode)(value2);
         writeSlice(encoded);
       };
       const writeVarSlice = (slice) => {
@@ -9361,25 +9361,25 @@ var require_psbt = __commonJS({
     function reverseBytes(buffer) {
       if (buffer.length < 1)
         return buffer;
-      const copy = Uint8Array.from(buffer);
-      let j = copy.length - 1;
+      const copy2 = Uint8Array.from(buffer);
+      let j = copy2.length - 1;
       let tmp = 0;
-      for (let i = 0; i < copy.length / 2; i++) {
-        tmp = copy[i];
-        copy[i] = copy[j];
-        copy[j] = tmp;
+      for (let i = 0; i < copy2.length / 2; i++) {
+        tmp = copy2[i];
+        copy2[i] = copy2[j];
+        copy2[j] = tmp;
         j--;
       }
-      return copy;
+      return copy2;
     }
-    function finalScriptsFuncFactory(scriptSatisfaction, network, payments) {
+    function finalScriptsFuncFactory(scriptSatisfaction, network2, payments) {
       const finalScriptsFunc = (_index, _input, lockingScript, isSegwit, isP2SH, _isP2WSH) => {
         let finalScriptWitness;
         let finalScriptSig;
         if (isSegwit && !isP2SH) {
           const payment = payments.p2wsh({
             redeem: { input: scriptSatisfaction, output: lockingScript },
-            network
+            network: network2
           });
           if (!payment.witness)
             throw new Error(`Error: p2wsh failed producing a witness`);
@@ -9388,9 +9388,9 @@ var require_psbt = __commonJS({
           const payment = payments.p2sh({
             redeem: payments.p2wsh({
               redeem: { input: scriptSatisfaction, output: lockingScript },
-              network
+              network: network2
             }),
-            network
+            network: network2
           });
           if (!payment.witness)
             throw new Error(`Error: p2sh-p2wsh failed producing a witness`);
@@ -9399,7 +9399,7 @@ var require_psbt = __commonJS({
         } else {
           finalScriptSig = payments.p2sh({
             redeem: { input: scriptSatisfaction, output: lockingScript },
-            network
+            network: network2
           }).input;
         }
         return {
@@ -9409,17 +9409,17 @@ var require_psbt = __commonJS({
       };
       return finalScriptsFunc;
     }
-    function addPsbtInput({ psbt, vout, txHex, txId, value, sequence, locktime, keysInfo, scriptPubKey, isSegwit, tapInternalKey, tapLeafScript, tapBip32Derivation, witnessScript, redeemScript, rbf, Transaction: Transaction3 }) {
-      if (value !== void 0 && typeof value !== "bigint")
+    function addPsbtInput({ psbt, vout, txHex, txId, value: value2, sequence, locktime, keysInfo, scriptPubKey, isSegwit, tapInternalKey, tapLeafScript, tapBip32Derivation, witnessScript, redeemScript, rbf, Transaction: Transaction3 }) {
+      if (value2 !== void 0 && typeof value2 !== "bigint")
         throw new Error(`Error: value must be a bigint`);
-      if (value !== void 0 && value < 0n)
+      if (value2 !== void 0 && value2 < 0n)
         throw new Error(`Error: value must be >= 0n`);
-      let normalizedValue = value;
+      let normalizedValue = value2;
       if (sequence !== void 0 && rbf && sequence > 4294967293)
         throw new Error(`Error: incompatible sequence and rbf settings`);
       if (!isSegwit && txHex === void 0)
         throw new Error(`Error: txHex is mandatory for Non-Segwit inputs`);
-      if (isSegwit && txHex === void 0 && (txId === void 0 || value === void 0))
+      if (isSegwit && txHex === void 0 && (txId === void 0 || value2 === void 0))
         throw new Error(`Error: pass txHex or txId+value for Segwit inputs`);
       if (txHex !== void 0) {
         const tx = Transaction3.fromHex(txHex);
@@ -9439,7 +9439,7 @@ var require_psbt = __commonJS({
         }
         if (normalizedValue !== void 0) {
           if (out.value !== normalizedValue)
-            throw new Error(`Error: value for ${txHex} and vout ${vout} does not correspond to ${value}`);
+            throw new Error(`Error: value for ${txHex} and vout ${vout} does not correspond to ${value2}`);
         } else {
           normalizedValue = out.value;
         }
@@ -9714,7 +9714,7 @@ var require_keyExpressions = __commonJS({
       }
       return node.derivePath(parsedPath);
     };
-    function parseKeyExpression({ keyExpression, isSegwit, isTaproot, ECPair, BIP32, network = networks_1.networks.bitcoin }) {
+    function parseKeyExpression({ keyExpression, isSegwit, isTaproot, ECPair, BIP32, network: network2 = networks_1.networks.bitcoin }) {
       if (isTaproot && isSegwit !== true)
         throw new Error(`Error: taproot key expressions require isSegwit`);
       let pubkey;
@@ -9754,7 +9754,7 @@ var require_keyExpressions = __commonJS({
         pubkey = (0, uint8array_tools_1.fromHex)(mPubKey[0]);
         if (isTaproot && pubkey.length === 32)
           pubkey = (0, uint8array_tools_1.concat)([Uint8Array.from([2]), pubkey]);
-        ecpair = ECPair.fromPublicKey(pubkey, { network });
+        ecpair = ECPair.fromPublicKey(pubkey, { network: network2 });
         if (!ECPair.isPoint(pubkey) || !(pubkey.length === 33 || pubkey.length === 65)) {
           throw new Error(`Error: invalid pubkey`);
         }
@@ -9762,7 +9762,7 @@ var require_keyExpressions = __commonJS({
           throw new Error(`Error: invalid pubkey`);
         }
       } else if ((mWIF = actualKey.match(RE.anchorStartAndEnd(RE.reWIF))) !== null) {
-        ecpair = ECPair.fromWIF(mWIF[0], network);
+        ecpair = ECPair.fromWIF(mWIF[0], network2);
         pubkey = ecpair.publicKey;
         privkey = ecpair.privateKey;
       } else if ((mXpubKey = actualKey.match(RE.anchorStartAndEnd(RE.reXpubKey))) !== null) {
@@ -9770,7 +9770,7 @@ var require_keyExpressions = __commonJS({
         xPub = xPubKey.match(RE.reXpub)?.[0];
         if (!xPub)
           throw new Error(`Error: xpub could not be matched`);
-        bip32 = BIP32.fromBase58(xPub, network);
+        bip32 = BIP32.fromBase58(xPub, network2);
         const mPath = xPubKey.match(RE.rePath);
         if (mPath !== null) {
           keyPath = xPubKey.match(RE.rePath)?.[0];
@@ -9786,7 +9786,7 @@ var require_keyExpressions = __commonJS({
         xPrv = xPrvKey.match(RE.reXprv)?.[0];
         if (!xPrv)
           throw new Error(`Error: xprv could not be matched`);
-        bip32 = BIP32.fromBase58(xPrv, network);
+        bip32 = BIP32.fromBase58(xPrv, network2);
         xPub = bip32.neutered().toBase58();
         const mPath = xPrvKey.match(RE.rePath);
         if (mPath !== null) {
@@ -9868,9 +9868,9 @@ var require_maxLock = __commonJS({
         throw new Error("lockType must be specified");
       if (lockType !== "ABSOLUTE" && lockType !== "RELATIVE")
         throw new Error('lockType must be either "ABSOLUTE" or "RELATIVE"');
-      const isInteger = (value) => {
-        const isNumeric = !isNaN(value) && !isNaN(parseFloat(String(value)));
-        if (isNumeric && Number.isInteger(Number(value)))
+      const isInteger = (value2) => {
+        const isNumeric = !isNaN(value2) && !isNaN(parseFloat(String(value2)));
+        if (isNumeric && Number.isInteger(Number(value2)))
           return true;
         return false;
       };
@@ -9944,17 +9944,17 @@ var require_satisfactions = __commonJS({
       incrementSolutionCounter(solutionCounter);
       solutions.push(solution);
     }
-    function forEachKeyCombination(keys, k, start, currentKeyCombination, onKeyCombination) {
+    function forEachKeyCombination(keys2, k, start, currentKeyCombination, onKeyCombination) {
       if (k === 0) {
         onKeyCombination([...currentKeyCombination]);
         return;
       }
-      for (let i = start; i <= keys.length - k; i++) {
-        const key = keys[i];
+      for (let i = start; i <= keys2.length - k; i++) {
+        const key = keys2[i];
         if (!key)
           throw new Error("Missing key");
         currentKeyCombination.push(key);
-        forEachKeyCombination(keys, k - 1, i + 1, currentKeyCombination, onKeyCombination);
+        forEachKeyCombination(keys2, k - 1, i + 1, currentKeyCombination, onKeyCombination);
         currentKeyCombination.pop();
       }
     }
@@ -10067,57 +10067,57 @@ var require_satisfactions = __commonJS({
           sats: filterSolutions([{ asm: `<hash160_preimage(${h})>` }]),
           dsats: filterSolutions([{ asm: `<random_preimage()>` }])
         }),
-        andor: (X2, Y, Z) => ({
+        andor: (X3, Y, Z) => ({
           dsats: [
-            ...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X2, Y, Z }),
-            ...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X2, Y, Z })
+            ...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X3, Y, Z }),
+            ...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X3, Y, Z })
           ],
           sats: [
-            ...combineFilteredSolutions("sat(Y) sat(X)", { X: X2, Y, Z }),
-            ...combineFilteredSolutions("sat(Z) dsat(X)", { X: X2, Y, Z })
+            ...combineFilteredSolutions("sat(Y) sat(X)", { X: X3, Y, Z }),
+            ...combineFilteredSolutions("sat(Z) dsat(X)", { X: X3, Y, Z })
           ]
         }),
-        and_v: (X2, Y) => ({
-          dsats: [...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X2, Y })],
-          sats: [...combineFilteredSolutions(`sat(Y) sat(X)`, { X: X2, Y })]
+        and_v: (X3, Y) => ({
+          dsats: [...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X3, Y })],
+          sats: [...combineFilteredSolutions(`sat(Y) sat(X)`, { X: X3, Y })]
         }),
-        and_b: (X2, Y) => ({
+        and_b: (X3, Y) => ({
           dsats: [
-            ...combineFilteredSolutions(`dsat(Y) dsat(X)`, { X: X2, Y }),
-            ...combineFilteredSolutions(`sat(Y) dsat(X)`, { X: X2, Y }),
-            ...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X2, Y })
+            ...combineFilteredSolutions(`dsat(Y) dsat(X)`, { X: X3, Y }),
+            ...combineFilteredSolutions(`sat(Y) dsat(X)`, { X: X3, Y }),
+            ...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X3, Y })
           ],
-          sats: [...combineFilteredSolutions(`sat(Y) sat(X)`, { Y, X: X2 })]
+          sats: [...combineFilteredSolutions(`sat(Y) sat(X)`, { Y, X: X3 })]
         }),
-        or_b: (X2, Z) => ({
-          dsats: [...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X2, Z })],
+        or_b: (X3, Z) => ({
+          dsats: [...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X3, Z })],
           sats: [
-            ...combineFilteredSolutions(`dsat(Z) sat(X)`, { X: X2, Z }),
-            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X2, Z }),
-            ...combineFilteredSolutions(`sat(Z) sat(X)`, { X: X2, Z })
+            ...combineFilteredSolutions(`dsat(Z) sat(X)`, { X: X3, Z }),
+            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X3, Z }),
+            ...combineFilteredSolutions(`sat(Z) sat(X)`, { X: X3, Z })
           ]
         }),
-        or_c: (X2, Z) => ({
+        or_c: (X3, Z) => ({
           sats: [
-            ...combineFilteredSolutions(`sat(X)`, { X: X2, Z }),
-            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X2, Z })
+            ...combineFilteredSolutions(`sat(X)`, { X: X3, Z }),
+            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X3, Z })
           ]
         }),
-        or_d: (X2, Z) => ({
-          dsats: [...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X2, Z })],
+        or_d: (X3, Z) => ({
+          dsats: [...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X3, Z })],
           sats: [
-            ...combineFilteredSolutions(`sat(X)`, { X: X2, Z }),
-            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X2, Z })
+            ...combineFilteredSolutions(`sat(X)`, { X: X3, Z }),
+            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X3, Z })
           ]
         }),
-        or_i: (X2, Z) => ({
+        or_i: (X3, Z) => ({
           dsats: [
-            ...combineFilteredSolutions(`dsat(X) 1`, { X: X2, Z }),
-            ...combineFilteredSolutions(`dsat(Z) 0`, { X: X2, Z })
+            ...combineFilteredSolutions(`dsat(X) 1`, { X: X3, Z }),
+            ...combineFilteredSolutions(`dsat(Z) 0`, { X: X3, Z })
           ],
           sats: [
-            ...combineFilteredSolutions(`sat(X) 1`, { X: X2, Z }),
-            ...combineFilteredSolutions(`sat(Z) 0`, { X: X2, Z })
+            ...combineFilteredSolutions(`sat(X) 1`, { X: X3, Z }),
+            ...combineFilteredSolutions(`sat(Z) 0`, { X: X3, Z })
           ]
         }),
         /*
@@ -10166,7 +10166,7 @@ var require_satisfactions = __commonJS({
           }
           return { dsats, sats };
         },
-        multi: (k, ...keys) => {
+        multi: (k, ...keys2) => {
           if (Number.isInteger(Number(k)) && Number(k) > 0)
             k = Number(k);
           else
@@ -10176,7 +10176,7 @@ var require_satisfactions = __commonJS({
           if (k === 0)
             throw new Error("k cannot be 0");
           const dsats = filterSolutions([{ asm: "0 ".repeat(k + 1).trim() }]);
-          const candidateKeys = keys.filter(isSignatureKnown || (() => true));
+          const candidateKeys = keys2.filter(isSignatureKnown || (() => true));
           const sats = [];
           forEachKeyCombination(candidateKeys, k, 0, [], (keyCombination) => {
             let asm = "0";
@@ -10187,7 +10187,7 @@ var require_satisfactions = __commonJS({
           });
           return { sats, dsats };
         },
-        multi_a: (k, ...keys) => {
+        multi_a: (k, ...keys2) => {
           if (Number.isInteger(Number(k)) && Number(k) > 0)
             k = Number(k);
           else
@@ -10196,34 +10196,34 @@ var require_satisfactions = __commonJS({
             throw new Error("k must be a number:" + k);
           if (k === 0)
             throw new Error("k cannot be 0");
-          const dsats = filterSolutions([{ asm: "0 ".repeat(keys.length).trim() }]);
-          const candidateKeys = keys.filter(isSignatureKnown || (() => true));
+          const dsats = filterSolutions([{ asm: "0 ".repeat(keys2.length).trim() }]);
+          const candidateKeys = keys2.filter(isSignatureKnown || (() => true));
           const sats = [];
           forEachKeyCombination(candidateKeys, k, 0, [], (keyCombination) => {
             const selectedKeys = new Set(keyCombination);
-            const parts = keys.map((key) => selectedKeys.has(key) ? `<sig(${key})>` : "0");
+            const parts = keys2.map((key) => selectedKeys.has(key) ? `<sig(${key})>` : "0");
             pushAllowedSolution(sats, { asm: parts.reverse().join(" ") }, isSolutionAllowed, solutionCounter);
           });
           return { sats, dsats };
         },
-        a: (X2) => ({
-          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X2 })],
-          sats: [...combineFilteredSolutions(`sat(X)`, { X: X2 })]
+        a: (X3) => ({
+          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X3 })],
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X3 })]
         }),
-        s: (X2) => ({
-          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X2 })],
-          sats: [...combineFilteredSolutions(`sat(X)`, { X: X2 })]
+        s: (X3) => ({
+          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X3 })],
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X3 })]
         }),
-        c: (X2) => ({
-          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X2 })],
-          sats: [...combineFilteredSolutions(`sat(X)`, { X: X2 })]
+        c: (X3) => ({
+          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X3 })],
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X3 })]
         }),
-        d: (X2) => ({
+        d: (X3) => ({
           dsats: filterSolutions([{ asm: `0` }]),
-          sats: [...combineFilteredSolutions(`sat(X) 1`, { X: X2 })]
+          sats: [...combineFilteredSolutions(`sat(X) 1`, { X: X3 })]
         }),
-        v: (X2) => ({
-          sats: [...combineFilteredSolutions(`sat(X)`, { X: X2 })]
+        v: (X3) => ({
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X3 })]
         }),
         /**
            * j:X corresponds to SIZE 0NOTEQUAL IF [X] ENDIF
@@ -10258,10 +10258,10 @@ var require_satisfactions = __commonJS({
         
            * DSAT(X) X is a good dsat
            */
-        j: (X2) => {
+        j: (X3) => {
           const dsats = [];
           pushAllowedSolution(dsats, { asm: `0` }, isSolutionAllowed, solutionCounter);
-          const dsats_nzts = (X2.dsats || []).filter(
+          const dsats_nzts = (X3.dsats || []).filter(
             //The top stack corresponds to the last element pushed to the stack,
             //that is, the last element in the produced witness
             (solution) => solution.asm.trim().split(" ").pop() !== "0"
@@ -10269,11 +10269,11 @@ var require_satisfactions = __commonJS({
           for (const solution of dsats_nzts) {
             pushAllowedSolution(dsats, solution, isSolutionAllowed, solutionCounter);
           }
-          return { dsats, sats: [...combineFilteredSolutions(`sat(X)`, { X: X2 })] };
+          return { dsats, sats: [...combineFilteredSolutions(`sat(X)`, { X: X3 })] };
         },
-        n: (X2) => ({
-          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X2 })],
-          sats: [...combineFilteredSolutions(`sat(X)`, { X: X2 })]
+        n: (X3) => ({
+          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X3 })],
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X3 })]
         })
       };
       return satisfactionsMaker;
@@ -10398,8 +10398,8 @@ var require_parse = __commonJS({
         case "hash160": {
           if (args.length !== 1)
             throw new Error(`Invalid ${name}() args: ${expression}`);
-          const value = getArg(args, 0);
-          return { type: name, value };
+          const value2 = getArg(args, 0);
+          return { type: name, value: value2 };
         }
         case "multi":
         case "multi_a": {
@@ -10494,15 +10494,15 @@ var require_compile = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.compileNode = void 0;
     var toHex3 = (bytes2) => bytes2.map((byte) => byte.toString(16).padStart(2, "0")).join("");
-    var encodeScriptNum = (value) => {
-      let num2 = Number(value);
+    var encodeScriptNum = (value2) => {
+      let num2 = Number(value2);
       if (!Number.isInteger(num2)) {
-        throw new Error(`Invalid script number: ${value}`);
+        throw new Error(`Invalid script number: ${value2}`);
       }
       if (num2 === 0)
         return [];
       if (num2 < 0) {
-        throw new Error(`Negative numbers not supported: ${value}`);
+        throw new Error(`Negative numbers not supported: ${value2}`);
       }
       const result = [];
       while (num2 > 0) {
@@ -10518,10 +10518,10 @@ var require_compile = __commonJS({
       }
       return result;
     };
-    var formatNumber = (value) => {
-      const num2 = Number(value);
+    var formatNumber = (value2) => {
+      const num2 = Number(value2);
       if (!Number.isInteger(num2)) {
-        throw new Error(`Invalid script number: ${value}`);
+        throw new Error(`Invalid script number: ${value2}`);
       }
       if (num2 >= 0 && num2 <= 16)
         return String(num2);
@@ -11374,24 +11374,24 @@ var require_analyze = __commonJS({
     };
     var combineAndTimelocks = (left, right) => combineThresholdTimelocks(2, [left, right]);
     var combineOrTimelocks = (left, right) => combineThresholdTimelocks(1, [left, right]);
-    var parseInteger = (value, label) => {
-      const num2 = Number(value);
+    var parseInteger = (value2, label) => {
+      const num2 = Number(value2);
       if (!Number.isInteger(num2)) {
-        return { ok: false, error: `${label} must be an integer: ${value}` };
+        return { ok: false, error: `${label} must be an integer: ${value2}` };
       }
       return { ok: true, value: num2 };
     };
-    var makeValidResult = ({ correctness, malleability, timelockInfo, keys, hasDuplicateKeys }) => ({
+    var makeValidResult = ({ correctness, malleability, timelockInfo, keys: keys2, hasDuplicateKeys }) => ({
       valid: true,
       correctness,
       malleability,
       timelockInfo,
-      keys,
+      keys: keys2,
       hasDuplicateKeys
     });
-    var makeInvalidResult = (error) => ({
+    var makeInvalidResult = (error2) => ({
       valid: false,
-      error,
+      error: error2,
       correctness: null,
       malleability: null,
       timelockInfo: newTimelockInfo(),
@@ -11399,14 +11399,14 @@ var require_analyze = __commonJS({
       hasDuplicateKeys: false
     });
     var mergeKeySets = (left, right) => {
-      const keys = new Set(left.keys);
+      const keys2 = new Set(left.keys);
       let hasDuplicateKeys = left.hasDuplicateKeys || right.hasDuplicateKeys;
       for (const key of right.keys) {
-        if (keys.has(key))
+        if (keys2.has(key))
           hasDuplicateKeys = true;
-        keys.add(key);
+        keys2.add(key);
       }
-      return { keys, hasDuplicateKeys };
+      return { keys: keys2, hasDuplicateKeys };
     };
     var analyzeNode = (node, context) => {
       const tapscript = Boolean(context.tapscript);
@@ -11533,12 +11533,12 @@ var require_analyze = __commonJS({
           if (parsed.value < 1 || parsed.value > node.keys.length) {
             return makeInvalidResult(`multi() k out of range: ${node.k}`);
           }
-          const keys = /* @__PURE__ */ new Set();
+          const keys2 = /* @__PURE__ */ new Set();
           let hasDuplicateKeys = false;
           node.keys.forEach((key) => {
-            if (keys.has(key))
+            if (keys2.has(key))
               hasDuplicateKeys = true;
-            keys.add(key);
+            keys2.add(key);
           });
           const correctnessResult = (0, correctness_1.multiCorrectness)();
           if (!correctnessResult.ok)
@@ -11547,7 +11547,7 @@ var require_analyze = __commonJS({
             correctness: correctnessResult.correctness,
             malleability: (0, malleability_1.multiMalleability)(),
             timelockInfo: newTimelockInfo(),
-            keys,
+            keys: keys2,
             hasDuplicateKeys
           });
         }
@@ -11560,12 +11560,12 @@ var require_analyze = __commonJS({
           if (parsed.value < 1 || parsed.value > node.keys.length) {
             return makeInvalidResult(`multi_a() k out of range: ${node.k}`);
           }
-          const keys = /* @__PURE__ */ new Set();
+          const keys2 = /* @__PURE__ */ new Set();
           let hasDuplicateKeys = false;
           node.keys.forEach((key) => {
-            if (keys.has(key))
+            if (keys2.has(key))
               hasDuplicateKeys = true;
-            keys.add(key);
+            keys2.add(key);
           });
           const correctnessResult = (0, correctness_1.multiACorrectness)();
           if (!correctnessResult.ok)
@@ -11574,7 +11574,7 @@ var require_analyze = __commonJS({
             correctness: correctnessResult.correctness,
             malleability: (0, malleability_1.multiMalleability)(),
             timelockInfo: newTimelockInfo(),
-            keys,
+            keys: keys2,
             hasDuplicateKeys
           });
         }
@@ -11873,22 +11873,22 @@ var require_analyze = __commonJS({
       const hasDuplicateKeys = analysis.hasDuplicateKeys;
       const issanesublevel = needsSignature && nonMalleable && !timelockMix && !hasDuplicateKeys;
       const issane = issanesublevel && analysis.correctness.basicType === "B";
-      let error = null;
+      let error2 = null;
       if (!needsSignature)
-        error = "sane: signature required in every branch.";
+        error2 = "sane: signature required in every branch.";
       else if (!nonMalleable)
-        error = "sane: malleable satisfactions possible.";
+        error2 = "sane: malleable satisfactions possible.";
       else if (hasDuplicateKeys)
-        error = "sane: repeated public keys.";
+        error2 = "sane: repeated public keys.";
       else if (timelockMix)
-        error = "sane: mixed height and time locks.";
+        error2 = "sane: mixed height and time locks.";
       else if (analysis.correctness.basicType !== "B")
-        error = "sane: top-level must be type B.";
+        error2 = "sane: top-level must be type B.";
       return {
         issane,
         issanesublevel,
         valid: true,
-        error,
+        error: error2,
         needsSignature,
         nonMalleable,
         timelockMix,
@@ -12075,18 +12075,18 @@ var require_satisfier = __commonJS({
       }
       return satisfier2(...satisfactionMakerArgs);
     };
-    var satisfier = (miniscript, options = {}) => {
-      let { unknowns } = options;
-      const { knowns } = options;
-      const { maxSolutions: rawMaxSolutions } = options;
-      const tapscript = Boolean(options.tapscript);
-      const computeUnknowns = options.computeUnknowns === true;
+    var satisfier = (miniscript, options2 = {}) => {
+      let { unknowns } = options2;
+      const { knowns } = options2;
+      const { maxSolutions: rawMaxSolutions } = options2;
+      const tapscript = Boolean(options2.tapscript);
+      const computeUnknowns = options2.computeUnknowns === true;
       let analysis;
       try {
         analysis = (0, compiler_1.analyzeMiniscript)(miniscript, { tapscript });
-      } catch (error) {
+      } catch (error2) {
         const err2 = new Error(`Miniscript ${miniscript} is not sane.`);
-        err2.cause = error;
+        err2.cause = error2;
         throw err2;
       }
       if (!analysis.valid || !analysis.issane) {
@@ -12238,7 +12238,7 @@ var require_miniscript = __commonJS({
     var miniscript_1 = require_dist();
     var uint8array_tools_1 = (init_browser2(), __toCommonJS(browser_exports2));
     var bitcoinLib_1 = require_bitcoinLib();
-    function expandMiniscript({ miniscript, isSegwit, isTaproot, network = networks_1.networks.bitcoin, ECPair, BIP32 }) {
+    function expandMiniscript({ miniscript, isSegwit, isTaproot, network: network2 = networks_1.networks.bitcoin, ECPair, BIP32 }) {
       const reKeyExp = isTaproot ? RE.reTaprootKeyExp : isSegwit ? RE.reSegwitKeyExp : RE.reNonSegwitKeyExp;
       const expansionMap = {};
       let keyIndex = 0;
@@ -12255,7 +12255,7 @@ var require_miniscript = __commonJS({
           keyExpression: trimmed,
           isSegwit,
           isTaproot,
-          network,
+          network: network2,
           ECPair,
           BIP32
         });
@@ -12575,10 +12575,10 @@ var require_resourceLimits = __commonJS({
           throw new Error(`Error: taproot script-path stack item exceeds standard policy, ${stackItem.length} bytes is larger than ${MAX_STANDARD_TAPSCRIPT_STACK_ITEM_SIZE} bytes`);
       }
     }
-    function assertP2shScriptSigStandardSize({ scriptSatisfaction, redeemScript, network, payments }) {
+    function assertP2shScriptSigStandardSize({ scriptSatisfaction, redeemScript, network: network2, payments }) {
       const scriptSig = payments.p2sh({
         redeem: { input: scriptSatisfaction, output: redeemScript },
-        network
+        network: network2
       }).input;
       if (!scriptSig)
         throw new Error(`Error: could not build scriptSig from satisfaction`);
@@ -12613,17 +12613,17 @@ var require_tapMiniscript = __commonJS({
     var tapTree_1 = require_tapTree();
     var resourceLimits_1 = require_resourceLimits();
     var TAPROOT_LEAF_VERSION_TAPSCRIPT = 192;
-    function expandTaprootMiniscript({ miniscript, network = networks_1.networks.bitcoin, BIP32, ECPair }) {
+    function expandTaprootMiniscript({ miniscript, network: network2 = networks_1.networks.bitcoin, BIP32, ECPair }) {
       return (0, miniscript_1.expandMiniscript)({
         miniscript,
         isSegwit: true,
         isTaproot: true,
-        network,
+        network: network2,
         BIP32,
         ECPair
       });
     }
-    function buildTapTreeInfo({ tapTree: tapTree2, network = networks_1.networks.bitcoin, BIP32, ECPair, leafExpansionOverride }) {
+    function buildTapTreeInfo({ tapTree: tapTree2, network: network2 = networks_1.networks.bitcoin, BIP32, ECPair, leafExpansionOverride }) {
       (0, tapTree_1.assertTapTreeDepth)(tapTree2);
       if ("expression" in tapTree2) {
         const expression = tapTree2.expression;
@@ -12639,7 +12639,7 @@ var require_tapMiniscript = __commonJS({
         } else {
           const expanded = expandTaprootMiniscript({
             miniscript: expression,
-            network,
+            network: network2,
             BIP32,
             ECPair
           });
@@ -12664,14 +12664,14 @@ var require_tapMiniscript = __commonJS({
       return {
         left: buildTapTreeInfo({
           tapTree: tapTree2.left,
-          network,
+          network: network2,
           BIP32,
           ECPair,
           leafExpansionOverride
         }),
         right: buildTapTreeInfo({
           tapTree: tapTree2.right,
-          network,
+          network: network2,
           BIP32,
           ECPair,
           leafExpansionOverride
@@ -12879,9 +12879,9 @@ var require_tapMiniscript = __commonJS({
             nSequence,
             totalWitnessSize
           });
-        } catch (error) {
+        } catch (error2) {
           if (tapLeaf !== void 0)
-            throw error;
+            throw error2;
         }
       }
       if (satisfactions.length === 0)
@@ -12945,10 +12945,10 @@ var require_multipath = __commonJS({
       const values = parts.map((part) => {
         if (!/^(0|[1-9]\d*)$/.test(part))
           throw new Error(`Error: multipath tuple values must be decimal numbers, got <${tupleBody}>`);
-        const value = Number(part);
-        if (!Number.isSafeInteger(value))
+        const value2 = Number(part);
+        if (!Number.isSafeInteger(value2))
           throw new Error(`Error: multipath tuple value overflow, got <${tupleBody}>`);
-        return value;
+        return value2;
       });
       for (let i = 1; i < values.length; i++) {
         const prev = values[i - 1];
@@ -13033,11 +13033,11 @@ var require_descriptors = __commonJS({
         return result;
       };
     })();
-    var __classPrivateFieldSet = exports && exports.__classPrivateFieldSet || function(receiver, state, value, kind, f) {
+    var __classPrivateFieldSet = exports && exports.__classPrivateFieldSet || function(receiver, state, value2, kind, f) {
       if (kind === "m") throw new TypeError("Private method is not writable");
       if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
       if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-      return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+      return kind === "a" ? f.call(receiver, value2) : f ? f.value = value2 : state.set(receiver, value2), value2;
     };
     var __classPrivateFieldGet = exports && exports.__classPrivateFieldGet || function(receiver, state, kind, f) {
       if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
@@ -13223,17 +13223,17 @@ var require_descriptors = __commonJS({
           return ECPair.fromPublicKey(pubkey).verify(msghash, signature);
         }
       };
-      const parseKeyExpression = ({ keyExpression, isSegwit, isTaproot, network = networks_1.networks.bitcoin }) => {
+      const parseKeyExpression = ({ keyExpression, isSegwit, isTaproot, network: network2 = networks_1.networks.bitcoin }) => {
         return (0, keyExpressions_1.parseKeyExpression)({
           keyExpression,
-          network,
+          network: network2,
           ...typeof isSegwit === "boolean" ? { isSegwit } : {},
           ...typeof isTaproot === "boolean" ? { isTaproot } : {},
           ECPair,
           BIP32
         });
       };
-      function buildTapLeafSortedMultiAOverride({ expression, network = networks_1.networks.bitcoin }) {
+      function buildTapLeafSortedMultiAOverride({ expression, network: network2 = networks_1.networks.bitcoin }) {
         if (!/\bsortedmulti_a\(/.test(expression))
           return void 0;
         const trimmed = expression.trim();
@@ -13249,7 +13249,7 @@ var require_descriptors = __commonJS({
             keyExpression,
             isSegwit: true,
             isTaproot: true,
-            network
+            network: network2
           });
           if (!keyInfo.pubkey)
             throw new Error(`Error: sortedmulti_a() key must resolve to a concrete pubkey: ${keyExpression}`);
@@ -13274,7 +13274,7 @@ var require_descriptors = __commonJS({
         });
         return { expandedExpression, expansionMap, tapScript };
       }
-      function expand3({ descriptor, index, change, checksumRequired = false, network = networks_1.networks.bitcoin, allowMiniscriptInP2SH = false }) {
+      function expand3({ descriptor, index, change, checksumRequired = false, network: network2 = networks_1.networks.bitcoin, allowMiniscriptInP2SH = false }) {
         if (!descriptor)
           throw new Error(`descriptor not provided`);
         let expandedExpression;
@@ -13309,41 +13309,41 @@ var require_descriptors = __commonJS({
             throw new Error(`Error: could not get an address in ${descriptor}`);
           let output;
           try {
-            output = address.toOutputScript(matchedAddress, network);
+            output = address.toOutputScript(matchedAddress, network2);
           } catch (e) {
             void e;
             throw new Error(`Error: invalid address ${matchedAddress}`);
           }
           try {
-            payment = p2pkh2({ output, network });
+            payment = p2pkh2({ output, network: network2 });
             isSegwit = false;
             isTaproot = false;
           } catch (e) {
             void e;
           }
           try {
-            payment = p2sh2({ output, network });
+            payment = p2sh2({ output, network: network2 });
             isSegwit = true;
             isTaproot = false;
           } catch (e) {
             void e;
           }
           try {
-            payment = p2wpkh2({ output, network });
+            payment = p2wpkh2({ output, network: network2 });
             isSegwit = true;
             isTaproot = false;
           } catch (e) {
             void e;
           }
           try {
-            payment = p2wsh2({ output, network });
+            payment = p2wsh2({ output, network: network2 });
             isSegwit = true;
             isTaproot = false;
           } catch (e) {
             void e;
           }
           try {
-            payment = p2tr2({ output, network });
+            payment = p2tr2({ output, network: network2 });
             isSegwit = true;
             isTaproot = true;
           } catch (e) {
@@ -13361,13 +13361,13 @@ var require_descriptors = __commonJS({
           if (canonicalExpression !== `pk(${keyExpression})`)
             throw new Error(`Error: invalid expression ${descriptor}`);
           expandedExpression = "pk(@0)";
-          const pKE = parseKeyExpression({ keyExpression, network, isSegwit });
+          const pKE = parseKeyExpression({ keyExpression, network: network2, isSegwit });
           expansionMap = { "@0": pKE };
           if (!isCanonicalRanged) {
             const pubkey = pKE.pubkey;
             if (!pubkey)
               throw new Error(`Error: could not extract a pubkey from ${descriptor}`);
-            payment = p2pk2({ pubkey, network });
+            payment = p2pk2({ pubkey, network: network2 });
           }
         } else if (canonicalExpression.match(RE.rePkhAnchored)) {
           isSegwit = false;
@@ -13378,13 +13378,13 @@ var require_descriptors = __commonJS({
           if (canonicalExpression !== `pkh(${keyExpression})`)
             throw new Error(`Error: invalid expression ${descriptor}`);
           expandedExpression = "pkh(@0)";
-          const pKE = parseKeyExpression({ keyExpression, network, isSegwit });
+          const pKE = parseKeyExpression({ keyExpression, network: network2, isSegwit });
           expansionMap = { "@0": pKE };
           if (!isCanonicalRanged) {
             const pubkey = pKE.pubkey;
             if (!pubkey)
               throw new Error(`Error: could not extract a pubkey from ${descriptor}`);
-            payment = p2pkh2({ pubkey, network });
+            payment = p2pkh2({ pubkey, network: network2 });
           }
         } else if (canonicalExpression.match(RE.reShWpkhAnchored)) {
           isSegwit = true;
@@ -13395,13 +13395,13 @@ var require_descriptors = __commonJS({
           if (canonicalExpression !== `sh(wpkh(${keyExpression}))`)
             throw new Error(`Error: invalid expression ${descriptor}`);
           expandedExpression = "sh(wpkh(@0))";
-          const pKE = parseKeyExpression({ keyExpression, network, isSegwit });
+          const pKE = parseKeyExpression({ keyExpression, network: network2, isSegwit });
           expansionMap = { "@0": pKE };
           if (!isCanonicalRanged) {
             const pubkey = pKE.pubkey;
             if (!pubkey)
               throw new Error(`Error: could not extract a pubkey from ${descriptor}`);
-            payment = p2sh2({ redeem: p2wpkh2({ pubkey, network }), network });
+            payment = p2sh2({ redeem: p2wpkh2({ pubkey, network: network2 }), network: network2 });
             redeemScript = payment.redeem?.output;
             if (!redeemScript)
               throw new Error(`Error: could not calculate redeemScript for ${descriptor}`);
@@ -13415,13 +13415,13 @@ var require_descriptors = __commonJS({
           if (canonicalExpression !== `wpkh(${keyExpression})`)
             throw new Error(`Error: invalid expression ${descriptor}`);
           expandedExpression = "wpkh(@0)";
-          const pKE = parseKeyExpression({ keyExpression, network, isSegwit });
+          const pKE = parseKeyExpression({ keyExpression, network: network2, isSegwit });
           expansionMap = { "@0": pKE };
           if (!isCanonicalRanged) {
             const pubkey = pKE.pubkey;
             if (!pubkey)
               throw new Error(`Error: could not extract a pubkey from ${descriptor}`);
-            payment = p2wpkh2({ pubkey, network });
+            payment = p2wpkh2({ pubkey, network: network2 });
           }
         } else if (canonicalExpression.match(RE.reShSortedMultiAnchored)) {
           isSegwit = false;
@@ -13430,7 +13430,7 @@ var require_descriptors = __commonJS({
           if (!inner)
             throw new Error(`Error extracting sortedmulti() in ${descriptor}`);
           const { m, keyExpressions } = parseSortedMulti(inner);
-          const pKEs = keyExpressions.map((k) => parseKeyExpression({ keyExpression: k, network, isSegwit: false }));
+          const pKEs = keyExpressions.map((k) => parseKeyExpression({ keyExpression: k, network: network2, isSegwit: false }));
           const map = {};
           pKEs.forEach((pke, i) => map["@" + i] = pke);
           expansionMap = map;
@@ -13442,11 +13442,11 @@ var require_descriptors = __commonJS({
               return p.pubkey;
             });
             pubkeys.sort((a, b) => (0, uint8array_tools_1.compare)(a, b));
-            const redeem = payments.p2ms({ m, pubkeys, network });
+            const redeem = payments.p2ms({ m, pubkeys, network: network2 });
             redeemScript = redeem.output;
             if (!redeemScript)
               throw new Error(`Error creating redeemScript`);
-            payment = payments.p2sh({ redeem, network });
+            payment = payments.p2sh({ redeem, network: network2 });
           }
         } else if (canonicalExpression.match(RE.reWshSortedMultiAnchored)) {
           isSegwit = true;
@@ -13455,7 +13455,7 @@ var require_descriptors = __commonJS({
           if (!inner)
             throw new Error(`Error extracting sortedmulti() in ${descriptor}`);
           const { m, keyExpressions } = parseSortedMulti(inner);
-          const pKEs = keyExpressions.map((k) => parseKeyExpression({ keyExpression: k, network, isSegwit: true }));
+          const pKEs = keyExpressions.map((k) => parseKeyExpression({ keyExpression: k, network: network2, isSegwit: true }));
           const map = {};
           pKEs.forEach((pke, i) => map["@" + i] = pke);
           expansionMap = map;
@@ -13467,11 +13467,11 @@ var require_descriptors = __commonJS({
               return p.pubkey;
             });
             pubkeys.sort((a, b) => (0, uint8array_tools_1.compare)(a, b));
-            const redeem = payments.p2ms({ m, pubkeys, network });
+            const redeem = payments.p2ms({ m, pubkeys, network: network2 });
             witnessScript = redeem.output;
             if (!witnessScript)
               throw new Error(`Error computing witnessScript`);
-            payment = payments.p2wsh({ redeem, network });
+            payment = payments.p2wsh({ redeem, network: network2 });
           }
         } else if (canonicalExpression.match(RE.reShWshSortedMultiAnchored)) {
           isSegwit = true;
@@ -13480,7 +13480,7 @@ var require_descriptors = __commonJS({
           if (!inner)
             throw new Error(`Error extracting sortedmulti() in ${descriptor}`);
           const { m, keyExpressions } = parseSortedMulti(inner);
-          const pKEs = keyExpressions.map((k) => parseKeyExpression({ keyExpression: k, network, isSegwit: true }));
+          const pKEs = keyExpressions.map((k) => parseKeyExpression({ keyExpression: k, network: network2, isSegwit: true }));
           const map = {};
           pKEs.forEach((pke, i) => map["@" + i] = pke);
           expansionMap = map;
@@ -13492,11 +13492,11 @@ var require_descriptors = __commonJS({
               return p.pubkey;
             });
             pubkeys.sort((a, b) => (0, uint8array_tools_1.compare)(a, b));
-            const redeem = payments.p2ms({ m, pubkeys, network });
-            const wsh = payments.p2wsh({ redeem, network });
+            const redeem = payments.p2ms({ m, pubkeys, network: network2 });
+            const wsh = payments.p2wsh({ redeem, network: network2 });
             witnessScript = redeem.output;
             redeemScript = wsh.output;
-            payment = payments.p2sh({ redeem: wsh, network });
+            payment = payments.p2sh({ redeem: wsh, network: network2 });
           }
         } else if (canonicalExpression.match(RE.reShWshMiniscriptAnchored)) {
           isSegwit = true;
@@ -13507,7 +13507,7 @@ var require_descriptors = __commonJS({
           ({ expandedMiniscript, expansionMap } = expandMiniscript({
             miniscript,
             isSegwit,
-            network
+            network: network2
           }));
           expandedExpression = `sh(wsh(${expandedMiniscript}))`;
           if (!isCanonicalRanged) {
@@ -13521,8 +13521,8 @@ var require_descriptors = __commonJS({
             }
             (0, resourceLimits_1.assertScriptNonPushOnlyOpsLimit)({ script });
             payment = p2sh2({
-              redeem: p2wsh2({ redeem: { output: script, network }, network }),
-              network
+              redeem: p2wsh2({ redeem: { output: script, network: network2 }, network: network2 }),
+              network: network2
             });
             redeemScript = payment.redeem?.output;
             if (!redeemScript)
@@ -13546,7 +13546,7 @@ var require_descriptors = __commonJS({
           ({ expandedMiniscript, expansionMap } = expandMiniscript({
             miniscript,
             isSegwit,
-            network
+            network: network2
           }));
           expandedExpression = `sh(${expandedMiniscript})`;
           if (!isCanonicalRanged) {
@@ -13559,7 +13559,7 @@ var require_descriptors = __commonJS({
               throw new Error(`Error: P2SH script is too large, ${script.byteLength} bytes is larger than ${resourceLimits_1.MAX_SCRIPT_ELEMENT_SIZE} bytes`);
             }
             (0, resourceLimits_1.assertScriptNonPushOnlyOpsLimit)({ script });
-            payment = p2sh2({ redeem: { output: script, network }, network });
+            payment = p2sh2({ redeem: { output: script, network: network2 }, network: network2 });
           }
         } else if (canonicalExpression.match(RE.reWshMiniscriptAnchored)) {
           isSegwit = true;
@@ -13570,7 +13570,7 @@ var require_descriptors = __commonJS({
           ({ expandedMiniscript, expansionMap } = expandMiniscript({
             miniscript,
             isSegwit,
-            network
+            network: network2
           }));
           expandedExpression = `wsh(${expandedMiniscript})`;
           if (!isCanonicalRanged) {
@@ -13583,7 +13583,7 @@ var require_descriptors = __commonJS({
               throw new Error(`Error: script is too large, ${script.byteLength} bytes is larger than ${resourceLimits_1.MAX_STANDARD_P2WSH_SCRIPT_SIZE} bytes`);
             }
             (0, resourceLimits_1.assertScriptNonPushOnlyOpsLimit)({ script });
-            payment = p2wsh2({ redeem: { output: script, network }, network });
+            payment = p2wsh2({ redeem: { output: script, network: network2 }, network: network2 });
           }
         } else if (canonicalExpression.startsWith("tr(")) {
           isSegwit = true;
@@ -13592,7 +13592,7 @@ var require_descriptors = __commonJS({
           expandedExpression = treeExpression ? `tr(@0,${treeExpression})` : "tr(@0)";
           const pKE = parseKeyExpression({
             keyExpression,
-            network,
+            network: network2,
             isSegwit,
             isTaproot
           });
@@ -13603,7 +13603,7 @@ var require_descriptors = __commonJS({
             if (!isCanonicalRanged) {
               tapTreeInfo = (0, tapMiniscript_1.buildTapTreeInfo)({
                 tapTree: tapTree2,
-                network,
+                network: network2,
                 BIP32,
                 ECPair,
                 // `leafExpansionOverride` runs per leaf expression.
@@ -13611,7 +13611,7 @@ var require_descriptors = __commonJS({
                 // normal miniscript expansion is used;
                 // for sortedmulti_a leaves it returns descriptor-level
                 // metadata plus precompiled tapscript bytes.
-                leafExpansionOverride: (expression) => buildTapLeafSortedMultiAOverride({ expression, network })
+                leafExpansionOverride: (expression) => buildTapLeafSortedMultiAOverride({ expression, network: network2 })
               });
             }
           }
@@ -13626,10 +13626,10 @@ var require_descriptors = __commonJS({
               payment = p2tr2({
                 internalPubkey,
                 scriptTree: (0, tapMiniscript_1.tapTreeInfoToScriptTree)(tapTreeInfo),
-                network
+                network: network2
               });
             } else {
-              payment = p2tr2({ internalPubkey, network });
+              payment = p2tr2({ internalPubkey, network: network2 });
             }
           }
         } else {
@@ -13652,13 +13652,13 @@ var require_descriptors = __commonJS({
           canonicalExpression
         };
       }
-      function expandMiniscript({ miniscript, isSegwit, network = networks_1.networks.bitcoin }) {
+      function expandMiniscript({ miniscript, isSegwit, network: network2 = networks_1.networks.bitcoin }) {
         return (0, miniscript_1.expandMiniscript)({
           miniscript,
           isSegwit,
           isTaproot: false,
           //TODO:
-          network,
+          network: network2,
           BIP32,
           ECPair
         });
@@ -13668,7 +13668,7 @@ var require_descriptors = __commonJS({
          * @param options
          * @throws {Error} - when descriptor is invalid
          */
-        constructor({ descriptor, index, change, checksumRequired = false, allowMiniscriptInP2SH = false, network = networks_1.networks.bitcoin, preimages = [], signersPubKeys, taprootSpendPath, tapLeaf }) {
+        constructor({ descriptor, index, change, checksumRequired = false, allowMiniscriptInP2SH = false, network: network2 = networks_1.networks.bitcoin, preimages = [], signersPubKeys, taprootSpendPath, tapLeaf }) {
           _Output_instances.add(this);
           _Output_payment.set(this, void 0);
           _Output_preimages.set(this, []);
@@ -13687,7 +13687,7 @@ var require_descriptors = __commonJS({
           _Output_tapLeaf.set(this, void 0);
           _Output_expansionMap.set(this, void 0);
           _Output_network.set(this, void 0);
-          __classPrivateFieldSet(this, _Output_network, network, "f");
+          __classPrivateFieldSet(this, _Output_network, network2, "f");
           __classPrivateFieldSet(this, _Output_preimages, preimages, "f");
           if (typeof descriptor !== "string")
             throw new Error(`Error: invalid descriptor type`);
@@ -13696,7 +13696,7 @@ var require_descriptors = __commonJS({
             ...index !== void 0 ? { index } : {},
             ...change !== void 0 ? { change } : {},
             checksumRequired,
-            network,
+            network: network2,
             allowMiniscriptInP2SH
           });
           const isTaprootDescriptor = expandedResult.isTaproot === true;
@@ -13752,10 +13752,10 @@ var require_descriptors = __commonJS({
           this.inputWeight = (0, lodash_memoize_1.default)(
             this.inputWeight,
             // resolver function:
-            (isSegwitTx, signatures, options) => {
+            (isSegwitTx, signatures, options2) => {
               const segwitKey = isSegwitTx ? "segwit" : "non-segwit";
               const signaturesKey = getSignaturesKey(signatures);
-              const taprootSighashKey = options?.taprootSighash ?? "SIGHASH_DEFAULT";
+              const taprootSighashKey = options2?.taprootSighash ?? "SIGHASH_DEFAULT";
               return `${segwitKey}-${signaturesKey}-taprootSighash:${taprootSighashKey}`;
             }
           );
@@ -14010,10 +14010,10 @@ var require_descriptors = __commonJS({
         // - After PSBT taproot script-path fields are fully populated, add regtest
         //   integration fixtures comparing real tx vsize with inputWeight/outputWeight
         //   estimates for taproot key-path and script-path spends.
-        inputWeight(isSegwitTx, signatures, options = {
+        inputWeight(isSegwitTx, signatures, options2 = {
           taprootSighash: "SIGHASH_DEFAULT"
         }) {
-          const taprootSighash = options.taprootSighash ?? "SIGHASH_DEFAULT";
+          const taprootSighash = options2.taprootSighash ?? "SIGHASH_DEFAULT";
           if (this.isSegwit() && !isSegwitTx)
             throw new Error(`a tx is segwit if at least one input is segwit`);
           const expansion = this.expand().expandedExpression;
@@ -14274,15 +14274,15 @@ var require_descriptors = __commonJS({
           psbt,
           txHex,
           txId,
-          value,
+          value: value2,
           vout,
           //vector output index
           rbf = true
         }) {
           psbt = (0, psbt_1.toPsbt)(psbt);
-          if (value !== void 0 && typeof value !== "bigint")
+          if (value2 !== void 0 && typeof value2 !== "bigint")
             throw new Error(`Error: value must be a bigint`);
-          if (value !== void 0 && value < 0n)
+          if (value2 !== void 0 && value2 < 0n)
             throw new Error(`Error: value must be >= 0n`);
           if (txHex === void 0) {
             console.warn(`Warning: missing txHex may allow fee attacks`);
@@ -14327,7 +14327,7 @@ var require_descriptors = __commonJS({
             vout,
             ...txHex !== void 0 ? { txHex } : {},
             ...txId !== void 0 ? { txId } : {},
-            ...value !== void 0 ? { value } : {},
+            ...value2 !== void 0 ? { value: value2 } : {},
             tapInternalKey,
             tapLeafScript,
             tapBip32Derivation,
@@ -14396,13 +14396,13 @@ var require_descriptors = __commonJS({
          * or a {@link https://github.com/paulmillr/scure-btc-signer | `@scure/btc-signer` `Transaction`}.
          * @param params.value - The value for the output in satoshis.
          */
-        updatePsbtAsOutput({ psbt, value }) {
-          if (typeof value !== "bigint")
+        updatePsbtAsOutput({ psbt, value: value2 }) {
+          if (typeof value2 !== "bigint")
             throw new Error(`Error: value must be a bigint`);
-          if (value < 0n)
+          if (value2 < 0n)
             throw new Error(`Error: value must be >= 0n`);
           psbt = (0, psbt_1.toPsbt)(psbt);
-          psbt.addOutput({ script: this.getScriptPubKey(), value });
+          psbt.addOutput({ script: this.getScriptPubKey(), value: value2 });
         }
         /**
          * Decomposes the descriptor used to form this `Output` into its elemental
@@ -14806,11 +14806,11 @@ var require_networkUtils = __commonJS({
     exports.isBitcoinMainnet = isBitcoinMainnet;
     exports.coinTypeFromNetwork = coinTypeFromNetwork;
     var networks_1 = require_networks();
-    function isBitcoinMainnet(network) {
-      return network.bech32 === networks_1.networks.bitcoin.bech32 && network.bip32.public === networks_1.networks.bitcoin.bip32.public && network.bip32.private === networks_1.networks.bitcoin.bip32.private && network.pubKeyHash === networks_1.networks.bitcoin.pubKeyHash && network.scriptHash === networks_1.networks.bitcoin.scriptHash && network.wif === networks_1.networks.bitcoin.wif;
+    function isBitcoinMainnet(network2) {
+      return network2.bech32 === networks_1.networks.bitcoin.bech32 && network2.bip32.public === networks_1.networks.bitcoin.bip32.public && network2.bip32.private === networks_1.networks.bitcoin.bip32.private && network2.pubKeyHash === networks_1.networks.bitcoin.pubKeyHash && network2.scriptHash === networks_1.networks.bitcoin.scriptHash && network2.wif === networks_1.networks.bitcoin.wif;
     }
-    function coinTypeFromNetwork(network) {
-      return isBitcoinMainnet(network) ? 0 : 1;
+    function coinTypeFromNetwork(network2) {
+      return isBitcoinMainnet(network2) ? 0 : 1;
     }
   }
 });
@@ -14833,8 +14833,8 @@ var require_scriptExpressions = __commonJS({
       }
     }
     function standardExpressionsBIP32Maker(purpose, scriptTemplate) {
-      function standardScriptExpressionBIP32({ masterNode, network = networks_1.networks.bitcoin, keyPath, account, change, index, isPublic = true }) {
-        const originPath = `/${purpose}'/${(0, networkUtils_1.coinTypeFromNetwork)(network)}'/${account}'`;
+      function standardScriptExpressionBIP32({ masterNode, network: network2 = networks_1.networks.bitcoin, keyPath, account, change, index, isPublic = true }) {
+        const originPath = `/${purpose}'/${(0, networkUtils_1.coinTypeFromNetwork)(network2)}'/${account}'`;
         if (keyPath !== void 0)
           assertStandardKeyPath(keyPath);
         const keyExpression = (0, keyExpressions_1.keyExpressionBIP32)({
@@ -14944,24 +14944,24 @@ var require_common = __commonJS({
     exports.uint32FromBytesBE = uint32FromBytesBE;
     var networks_1 = require_networks();
     var uint8array_tools_1 = (init_browser2(), __toCommonJS(browser_exports2));
-    function toBtcSignerNetwork(network) {
+    function toBtcSignerNetwork(network2) {
       return {
-        bech32: network.bech32,
-        pubKeyHash: network.pubKeyHash,
-        scriptHash: network.scriptHash,
-        wif: network.wif
+        bech32: network2.bech32,
+        pubKeyHash: network2.pubKeyHash,
+        scriptHash: network2.scriptHash,
+        wif: network2.wif
       };
     }
-    function scureVersions(network) {
-      const net = network ?? networks_1.networks.bitcoin;
+    function scureVersions(network2) {
+      const net = network2 ?? networks_1.networks.bitcoin;
       return {
         public: net.bip32.public,
         private: net.bip32.private
       };
     }
-    function uint32ToBytesBE(value) {
+    function uint32ToBytesBE(value2) {
       const bytes2 = new Uint8Array(4);
-      (0, uint8array_tools_1.writeUInt32)(bytes2, 0, value, "BE");
+      (0, uint8array_tools_1.writeUInt32)(bytes2, 0, value2, "BE");
       return bytes2;
     }
     function uint32FromBytesBE(bytes2) {
@@ -15439,8 +15439,8 @@ var require_address = __commonJS({
     var common_1 = require_common();
     function createScureAddressAdapter() {
       return {
-        toOutputScript(addr, network) {
-          const net = (0, common_1.toBtcSignerNetwork)(network ?? networks_1.networks.bitcoin);
+        toOutputScript(addr, network2) {
+          const net = (0, common_1.toBtcSignerNetwork)(network2 ?? networks_1.networks.bitcoin);
           const decoded = btc.Address(net).decode(addr);
           return btc.OutScript.encode(decoded);
         }
@@ -15514,7 +15514,7 @@ var init_bip32 = __esm({
         return base58check3.encode(this.serialize(this.versions.public, this._publicKey));
       }
       static fromMasterSeed(seed, versions = BITCOIN_VERSIONS) {
-        abytes(seed);
+        abytes2(seed);
         if (8 * seed.length < 128 || 8 * seed.length > 512) {
           throw new Error("HDKey: seed length must be between 128 and 512 bits; 256 bits is advised, got " + seed.length);
         }
@@ -15664,12 +15664,12 @@ var init_bip32 = __esm({
         if (!this._privateKey) {
           throw new Error("No privateKey set!");
         }
-        abytes(hash, 32);
+        abytes2(hash, 32);
         return secp256k1.sign(hash, this._privateKey, { prehash: false });
       }
       verify(hash, signature) {
-        abytes(hash, 32);
-        abytes(signature, 64);
+        abytes2(hash, 32);
+        abytes2(signature, 64);
         if (!this._publicKey) {
           throw new Error("No publicKey set!");
         }
@@ -15692,7 +15692,7 @@ var init_bip32 = __esm({
         if (!this.chainCode) {
           throw new Error("No chainCode set");
         }
-        abytes(key, 33);
+        abytes2(key, 33);
         return concatBytes(toU32(version2), new Uint8Array([this.depth]), toU32(this.parentFingerprint), toU32(this.index), this.chainCode, key);
       }
     };
@@ -15718,14 +15718,14 @@ var require_scureKeys = __commonJS({
       const result = a % n;
       return result >= 0n ? result : result + n;
     }
-    function tweakPrivateKey(privateKey, tweak, publicKey) {
+    function tweakPrivateKey(privateKey, tweak, publicKey2) {
       if (tweak.length !== 32)
         throw new Error("Error: invalid tweak value");
       const tweakNum = (0, utils_js_1.bytesToNumberBE)(tweak);
       if (tweakNum <= 0n || tweakNum >= CURVE_N)
         throw new Error("Error: invalid tweak value");
       let d = (0, utils_js_1.bytesToNumberBE)(privateKey);
-      if (publicKey[0] === 3)
+      if (publicKey2[0] === 3)
         d = mod2(-d, CURVE_N);
       const tweaked = mod2(d + tweakNum, CURVE_N);
       if (tweaked === 0n)
@@ -15736,10 +15736,10 @@ var require_scureKeys = __commonJS({
       if (!secp256k1_js_1.secp256k1.utils.isValidSecretKey(privateKey))
         throw new Error("Error: invalid private key");
       const compressedPublicKey = secp256k1_js_1.secp256k1.getPublicKey(privateKey, true);
-      const publicKey = compressed2 ? compressedPublicKey : secp256k1_js_1.secp256k1.getPublicKey(privateKey, false);
+      const publicKey2 = compressed2 ? compressedPublicKey : secp256k1_js_1.secp256k1.getPublicKey(privateKey, false);
       const xOnlyPubkey = compressedPublicKey.slice(1, 33);
       return {
-        publicKey,
+        publicKey: publicKey2,
         privateKey,
         sign(hash) {
           return secp256k1_js_1.secp256k1.sign(hash, privateKey, {
@@ -15749,7 +15749,7 @@ var require_scureKeys = __commonJS({
           });
         },
         verify(hash, signature) {
-          return secp256k1_js_1.secp256k1.verify(signature, hash, publicKey, {
+          return secp256k1_js_1.secp256k1.verify(signature, hash, publicKey2, {
             prehash: false,
             lowS: true,
             format: "compact"
@@ -15766,18 +15766,18 @@ var require_scureKeys = __commonJS({
         }
       };
     }
-    function wrapScurePublicKey(publicKey) {
-      if (!secp256k1_js_1.secp256k1.utils.isValidPublicKey(publicKey))
+    function wrapScurePublicKey(publicKey2) {
+      if (!secp256k1_js_1.secp256k1.utils.isValidPublicKey(publicKey2))
         throw new Error("Error: invalid public key point");
-      const compressedPubkey = publicKey.length === 33 ? publicKey : secp256k1_js_1.secp256k1.Point.fromHex(base_1.hex.encode(publicKey)).toBytes(true);
+      const compressedPubkey = publicKey2.length === 33 ? publicKey2 : secp256k1_js_1.secp256k1.Point.fromHex(base_1.hex.encode(publicKey2)).toBytes(true);
       const xOnlyPubkey = compressedPubkey.slice(1, 33);
       return {
-        publicKey,
+        publicKey: publicKey2,
         sign() {
           throw new Error("Error: private key is required for signing");
         },
         verify(hash, signature) {
-          return secp256k1_js_1.secp256k1.verify(signature, hash, publicKey, {
+          return secp256k1_js_1.secp256k1.verify(signature, hash, publicKey2, {
             prehash: false,
             lowS: true,
             format: "compact"
@@ -15847,7 +15847,7 @@ var require_ecpair = __commonJS({
     var uint8array_tools_1 = (init_browser2(), __toCommonJS(browser_exports2));
     var sha2_js_1 = (init_sha2(), __toCommonJS(sha2_exports));
     var scureKeys_1 = require_scureKeys();
-    function decodeWIF(wifString, network) {
+    function decodeWIF(wifString, network2) {
       const raw2 = base_1.base58.decode(wifString);
       if (!(raw2.length === 37 || raw2.length === 38)) {
         throw new Error("Wrong WIF length");
@@ -15861,11 +15861,11 @@ var require_ecpair = __commonJS({
       const version2 = payload[0];
       if (version2 === void 0)
         throw new Error("Invalid WIF payload");
-      if (Array.isArray(network)) {
-        if (!network.some((net) => net.wif === version2)) {
+      if (Array.isArray(network2)) {
+        if (!network2.some((net) => net.wif === version2)) {
           throw new Error("Invalid network version");
         }
-      } else if (network && network.wif !== version2) {
+      } else if (network2 && network2.wif !== version2) {
         throw new Error("Invalid network version");
       }
       if (!(payload.length === 33 || payload.length === 34)) {
@@ -15887,8 +15887,8 @@ var require_ecpair = __commonJS({
         fromPublicKey(buffer, _options) {
           return (0, scureKeys_1.wrapScurePublicKey)(buffer);
         },
-        fromWIF(wifString, network) {
-          const { privateKey, compressed: compressed2 } = decodeWIF(wifString, network);
+        fromWIF(wifString, network2) {
+          const { privateKey, compressed: compressed2 } = decodeWIF(wifString, network2);
           return (0, scureKeys_1.wrapScurePrivateKey)(privateKey, compressed2);
         }
       };
@@ -15908,8 +15908,8 @@ var require_bip32 = __commonJS({
     var common_1 = require_common();
     function createScureBIP32Adapter() {
       return {
-        fromBase58(inString, network) {
-          const hd = bip32_1.HDKey.fromExtendedKey(inString, (0, common_1.scureVersions)(network));
+        fromBase58(inString, network2) {
+          const hd = bip32_1.HDKey.fromExtendedKey(inString, (0, common_1.scureVersions)(network2));
           return (0, scureKeys_1.wrapScureHDKey)(hd);
         }
       };
@@ -16584,11 +16584,11 @@ var require_psbt2 = __commonJS({
         return result;
       };
     })();
-    var __classPrivateFieldSet = exports && exports.__classPrivateFieldSet || function(receiver, state, value, kind, f) {
+    var __classPrivateFieldSet = exports && exports.__classPrivateFieldSet || function(receiver, state, value2, kind, f) {
       if (kind === "m") throw new TypeError("Private method is not writable");
       if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
       if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-      return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+      return kind === "a" ? f.call(receiver, value2) : f ? f.value = value2 : state.set(receiver, value2), value2;
     };
     var __classPrivateFieldGet = exports && exports.__classPrivateFieldGet || function(receiver, state, kind, f) {
       if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
@@ -16604,11 +16604,11 @@ var require_psbt2 = __commonJS({
     var uint8array_tools_1 = (init_browser2(), __toCommonJS(browser_exports2));
     var common_1 = require_common();
     var warnedAboutScureSignatureValidation = false;
-    function copyDefinedFields(source, target, keys) {
-      for (const key of keys) {
-        const value = source[key];
-        if (value !== void 0)
-          target[key] = source[key];
+    function copyDefinedFields(source2, target, keys2) {
+      for (const key of keys2) {
+        const value2 = source2[key];
+        if (value2 !== void 0)
+          target[key] = source2[key];
       }
     }
     function pathArrayToString(path) {
@@ -16702,9 +16702,9 @@ var require_psbt2 = __commonJS({
           value: raw2.witnessUtxo.amount
         };
       if (raw2.bip32Derivation)
-        input.bip32Derivation = raw2.bip32Derivation.map(([pubkey, { fingerprint: fingerprint2, path }]) => ({
+        input.bip32Derivation = raw2.bip32Derivation.map(([pubkey, { fingerprint: fingerprint3, path }]) => ({
           pubkey,
-          masterFingerprint: (0, common_1.uint32ToBytesBE)(fingerprint2),
+          masterFingerprint: (0, common_1.uint32ToBytesBE)(fingerprint3),
           path: pathArrayToString(path)
         }));
       if (raw2.tapBip32Derivation)
@@ -17073,7 +17073,7 @@ var require_lib = __commonJS({
         throw new Error(`Wrong integer: ${n}`);
     }
     exports.assertNumber = assertNumber;
-    function chain2(...args) {
+    function chain3(...args) {
       const wrap3 = (a, b) => (c) => a(b(c));
       const encode3 = Array.from(args).reverse().reduce((acc, i) => acc ? wrap3(acc, i.encode) : i.encode, void 0);
       const decode3 = args.reduce((acc, i) => acc ? wrap3(acc, i.decode) : i.decode, void 0);
@@ -17314,14 +17314,14 @@ var require_lib = __commonJS({
         }
       };
     }
-    exports.utils = { alphabet: alphabet2, chain: chain2, checksum: checksum2, radix: radix3, radix2: radix22, join: join2, padding: padding2 };
-    exports.base16 = chain2(radix22(4), alphabet2("0123456789ABCDEF"), join2(""));
-    exports.base32 = chain2(radix22(5), alphabet2("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"), padding2(5), join2(""));
-    exports.base32hex = chain2(radix22(5), alphabet2("0123456789ABCDEFGHIJKLMNOPQRSTUV"), padding2(5), join2(""));
-    exports.base32crockford = chain2(radix22(5), alphabet2("0123456789ABCDEFGHJKMNPQRSTVWXYZ"), join2(""), normalize2((s) => s.toUpperCase().replace(/O/g, "0").replace(/[IL]/g, "1")));
-    exports.base64 = chain2(radix22(6), alphabet2("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"), padding2(6), join2(""));
-    exports.base64url = chain2(radix22(6), alphabet2("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"), padding2(6), join2(""));
-    var genBase582 = (abc) => chain2(radix3(58), alphabet2(abc), join2(""));
+    exports.utils = { alphabet: alphabet2, chain: chain3, checksum: checksum2, radix: radix3, radix2: radix22, join: join2, padding: padding2 };
+    exports.base16 = chain3(radix22(4), alphabet2("0123456789ABCDEF"), join2(""));
+    exports.base32 = chain3(radix22(5), alphabet2("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"), padding2(5), join2(""));
+    exports.base32hex = chain3(radix22(5), alphabet2("0123456789ABCDEFGHIJKLMNOPQRSTUV"), padding2(5), join2(""));
+    exports.base32crockford = chain3(radix22(5), alphabet2("0123456789ABCDEFGHJKMNPQRSTVWXYZ"), join2(""), normalize2((s) => s.toUpperCase().replace(/O/g, "0").replace(/[IL]/g, "1")));
+    exports.base64 = chain3(radix22(6), alphabet2("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"), padding2(6), join2(""));
+    exports.base64url = chain3(radix22(6), alphabet2("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"), padding2(6), join2(""));
+    var genBase582 = (abc) => chain3(radix3(58), alphabet2(abc), join2(""));
     exports.base58 = genBase582("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz");
     exports.base58flickr = genBase582("123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ");
     exports.base58xrp = genBase582("rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz");
@@ -17350,9 +17350,9 @@ var require_lib = __commonJS({
         return Uint8Array.from(res);
       }
     };
-    var base58check4 = (sha2562) => chain2(checksum2(4, (data) => sha2562(sha2562(data))), exports.base58);
+    var base58check4 = (sha2562) => chain3(checksum2(4, (data) => sha2562(sha2562(data))), exports.base58);
     exports.base58check = base58check4;
-    var BECH_ALPHABET2 = chain2(alphabet2("qpzry9x8gf2tvdw0s3jn54khce6mua7l"), join2(""));
+    var BECH_ALPHABET2 = chain3(alphabet2("qpzry9x8gf2tvdw0s3jn54khce6mua7l"), join2(""));
     var POLYMOD_GENERATORS2 = [996825010, 642813549, 513874426, 1027748829, 705979059];
     function bech32Polymod2(pre) {
       const b = pre >> 25;
@@ -17434,7 +17434,7 @@ var require_lib = __commonJS({
       encode: (data) => new TextDecoder().decode(data),
       decode: (str2) => new TextEncoder().encode(str2)
     };
-    exports.hex = chain2(radix22(4), alphabet2("0123456789abcdef"), join2(""), normalize2((s) => {
+    exports.hex = chain3(radix22(4), alphabet2("0123456789abcdef"), join2(""), normalize2((s) => {
       if (typeof s !== "string" || s.length % 2)
         throw new TypeError(`hex.decode: expected string, got ${typeof s} with length ${s.length}`);
       return s.toLowerCase();
@@ -17545,9 +17545,9 @@ var require_bolt11 = __commonJS({
       metadata: 27
     };
     var TAGNAMES = {};
-    for (let i = 0, keys = Object.keys(TAGCODES); i < keys.length; i++) {
-      const currentName = keys[i];
-      const currentCode = TAGCODES[keys[i]].toString();
+    for (let i = 0, keys2 = Object.keys(TAGCODES); i < keys2.length; i++) {
+      const currentName = keys2[i];
+      const currentCode = TAGCODES[keys2[i]].toString();
       TAGNAMES[currentCode] = currentName;
     }
     var TAGPARSERS = {
@@ -17620,15 +17620,15 @@ var require_bolt11 = __commonJS({
       }
       const featureBits = {};
       FEATUREBIT_ORDER.forEach((featureName, index) => {
-        let status;
+        let status2;
         if (bools[index * 2]) {
-          status = "required";
+          status2 = "required";
         } else if (bools[index * 2 + 1]) {
-          status = "supported";
+          status2 = "supported";
         } else {
-          status = "unsupported";
+          status2 = "unsupported";
         }
-        featureBits[featureName] = status;
+        featureBits[featureName] = status2;
       });
       const extraBits = bools.slice(FEATUREBIT_ORDER.length * 2);
       featureBits.extra_bits = {
@@ -17642,25 +17642,25 @@ var require_bolt11 = __commonJS({
       return featureBits;
     }
     function hrpToMillisat(hrpString, outputString) {
-      let divisor, value;
+      let divisor, value2;
       if (hrpString.slice(-1).match(/^[munp]$/)) {
         divisor = hrpString.slice(-1);
-        value = hrpString.slice(0, -1);
+        value2 = hrpString.slice(0, -1);
       } else if (hrpString.slice(-1).match(/^[^munp0-9]$/)) {
         throw new Error("Not a valid multiplier for the amount");
       } else {
-        value = hrpString;
+        value2 = hrpString;
       }
-      if (!value.match(/^\d+$/))
+      if (!value2.match(/^\d+$/))
         throw new Error("Not a valid human readable amount");
-      const valueBN = BigInt(value);
+      const valueBN = BigInt(value2);
       const millisatoshisBN = divisor ? valueBN * MILLISATS_PER_BTC / DIVISORS[divisor] : valueBN * MILLISATS_PER_BTC;
       if (divisor === "p" && !(valueBN % BigInt(10) === BigInt(0)) || millisatoshisBN > MAX_MILLISATS) {
         throw new Error("Amount is outside of valid range");
       }
       return outputString ? millisatoshisBN.toString() : millisatoshisBN;
     }
-    function decode3(paymentRequest, network) {
+    function decode3(paymentRequest, network2) {
       if (typeof paymentRequest !== "string")
         throw new Error("Lightning Payment Request must be string");
       if (paymentRequest.slice(0, 2).toLowerCase() !== "ln")
@@ -17685,7 +17685,7 @@ var require_bolt11 = __commonJS({
       });
       const bech32Prefix = prefixMatches[1];
       let coinNetwork;
-      if (!network) {
+      if (!network2) {
         switch (bech32Prefix) {
           case DEFAULTNETWORK.bech32:
             coinNetwork = DEFAULTNETWORK;
@@ -17704,9 +17704,9 @@ var require_bolt11 = __commonJS({
             break;
         }
       } else {
-        if (network.bech32 === void 0 || network.pubKeyHash === void 0 || network.scriptHash === void 0 || !Array.isArray(network.validWitnessVersions))
+        if (network2.bech32 === void 0 || network2.pubKeyHash === void 0 || network2.scriptHash === void 0 || !Array.isArray(network2.validWitnessVersions))
           throw new Error("Invalid network");
-        coinNetwork = network;
+        coinNetwork = network2;
       }
       if (!coinNetwork || coinNetwork.bech32 !== bech32Prefix) {
         throw new Error("Unknown coin bech32 prefix");
@@ -17716,11 +17716,11 @@ var require_bolt11 = __commonJS({
         letters: bech32Prefix,
         value: coinNetwork
       });
-      const value = prefixMatches[2];
+      const value2 = prefixMatches[2];
       let millisatoshis;
-      if (value) {
+      if (value2) {
         const divisor = prefixMatches[3];
-        millisatoshis = hrpToMillisat(value + divisor, true);
+        millisatoshis = hrpToMillisat(value2 + divisor, true);
         sections.push({
           name: "amount",
           letters: prefixMatches[2] + prefixMatches[3],
@@ -17804,8 +17804,1812 @@ var require_bolt11 = __commonJS({
   }
 });
 
-// tools/light-emergency/recover.ts
+// tools/program-emergency/recover.ts
 init_define_import_meta_env();
+
+// tools/offline-recovery/src/lib/vault/program/kitBundle.ts
+init_define_import_meta_env();
+
+// tools/offline-recovery/src/lib/vault/program/kit.ts
+init_define_import_meta_env();
+
+// tools/offline-recovery/src/lib/vault/program/connector.ts
+init_define_import_meta_env();
+init_base();
+init_btc_signer();
+init_secp256k1();
+init_sha2();
+
+// tools/offline-recovery/src/lib/vault/spendingPolicy.ts
+init_define_import_meta_env();
+init_sha2();
+
+// tools/offline-recovery/src/lib/vault/hex.ts
+init_define_import_meta_env();
+function requireLowerHex(value2, name, exactBytes) {
+  if (!value2 || value2 !== value2.toLowerCase() || value2.length % 2 !== 0 || !/^[0-9a-f]+$/.test(value2)) {
+    throw new Error(`${name} must be canonical lowercase hex`);
+  }
+  if (exactBytes !== void 0 && value2.length !== exactBytes * 2) {
+    throw new Error(`${name} must be ${exactBytes} bytes`);
+  }
+  return value2;
+}
+function hexToBytes2(value2) {
+  const hex2 = requireLowerHex(value2, "hex");
+  const out = new Uint8Array(hex2.length / 2);
+  for (let i = 0; i < out.length; i++) {
+    out[i] = parseInt(hex2.slice(i * 2, i * 2 + 2), 16);
+  }
+  return out;
+}
+function bytesToHex2(bytes2) {
+  return Array.from(bytes2, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+function encodeUtf8(value2) {
+  return new TextEncoder().encode(value2);
+}
+
+// tools/offline-recovery/src/lib/vault/constants.ts
+init_define_import_meta_env();
+var POLICY_VERSION = "vault-spending-policy-v1";
+var TX_RECIPIENT_CAP_SATS = 5e4;
+var PERIOD_ALLOWANCE_SATS = 1e5;
+var MUTINYNET_ABSOLUTE_FEE_CEILING_SATS = 5e3;
+var MUTINYNET_FEERATE_CEILING_SAT_PER_V = 10;
+var MAINNET_ABSOLUTE_FEE_CEILING_SATS = 2e4;
+var MAINNET_FEERATE_CEILING_SAT_PER_V = 25;
+var bakedReleaseNetwork = String(
+  define_import_meta_env_default?.VITE_VAULT_RELEASE_NETWORK || ""
+).trim();
+var ABSOLUTE_FEE_CEILING_SATS = bakedReleaseNetwork === "mainnet" ? MAINNET_ABSOLUTE_FEE_CEILING_SATS : MUTINYNET_ABSOLUTE_FEE_CEILING_SATS;
+var FEERATE_CEILING_SAT_PER_V = bakedReleaseNetwork === "mainnet" ? MAINNET_FEERATE_CEILING_SAT_PER_V : MUTINYNET_FEERATE_CEILING_SAT_PER_V;
+var DUST_SATS = 330;
+var SUPPORTED_NETWORKS = ["mutinynet", "mainnet"];
+function isSupportedVaultNetwork(value2) {
+  return typeof value2 === "string" && SUPPORTED_NETWORKS.includes(value2);
+}
+function requireSupportedVaultNetwork(value2) {
+  if (!isSupportedVaultNetwork(value2)) throw new Error(`unsupported Vault network ${String(value2 || "")}`);
+  return value2;
+}
+
+// tools/offline-recovery/src/lib/vault/spendingPolicy.ts
+var SPENDING_POLICY_PROGRAM = "vault-policy-v1";
+var SPENDING_POLICY_PERIOD = "rolling-24h";
+var SPENDING_POLICY_BOUNDS = {
+  periodAllowanceSats: { min: 330, max: 1e9 },
+  txRecipientCapSats: { min: 330, max: 1e8 },
+  absoluteFeeCapSats: { min: ABSOLUTE_FEE_CEILING_SATS, max: ABSOLUTE_FEE_CEILING_SATS },
+  feerateCapSatPerV: { min: FEERATE_CEILING_SAT_PER_V, max: FEERATE_CEILING_SAT_PER_V }
+};
+function policyBounds(network2) {
+  if (network2 === void 0) return SPENDING_POLICY_BOUNDS;
+  requireSupportedVaultNetwork(network2);
+  const fee = network2 === "mainnet" ? MAINNET_ABSOLUTE_FEE_CEILING_SATS : MUTINYNET_ABSOLUTE_FEE_CEILING_SATS;
+  const rate = network2 === "mainnet" ? MAINNET_FEERATE_CEILING_SAT_PER_V : MUTINYNET_FEERATE_CEILING_SAT_PER_V;
+  return {
+    ...SPENDING_POLICY_BOUNDS,
+    absoluteFeeCapSats: { min: fee, max: fee },
+    feerateCapSatPerV: { min: rate, max: rate }
+  };
+}
+function defaultSpendingPolicy(network2) {
+  const bounds = policyBounds(network2);
+  return {
+    program: SPENDING_POLICY_PROGRAM,
+    schema: POLICY_VERSION,
+    period: SPENDING_POLICY_PERIOD,
+    periodAllowanceSats: PERIOD_ALLOWANCE_SATS,
+    txRecipientCapSats: TX_RECIPIENT_CAP_SATS,
+    absoluteFeeCapSats: bounds.absoluteFeeCapSats.min,
+    feerateCapSatPerV: bounds.feerateCapSatPerV.min
+  };
+}
+var CURRENT_SPENDING_POLICY_CAPABILITIES = {
+  program: SPENDING_POLICY_PROGRAM,
+  schema: POLICY_VERSION,
+  period: SPENDING_POLICY_PERIOD,
+  bounds: SPENDING_POLICY_BOUNDS,
+  presets: [
+    {
+      id: "lower-exposure",
+      label: "Lower exposure",
+      policy: {
+        ...defaultSpendingPolicy(),
+        txRecipientCapSats: 25e3,
+        periodAllowanceSats: 5e4
+      }
+    },
+    { id: "everyday", label: "Everyday", policy: defaultSpendingPolicy() }
+  ]
+};
+function requireBound(value2, bound, name) {
+  if (!Number.isSafeInteger(value2) || Number(value2) < bound.min || Number(value2) > bound.max) {
+    throw new Error(`${name} must be between ${bound.min} and ${bound.max}`);
+  }
+  return Number(value2);
+}
+function validateSpendingPolicy(value2, network2) {
+  const bounds = policyBounds(network2);
+  if (!value2 || typeof value2 !== "object" || Array.isArray(value2)) throw new Error("spending policy required");
+  const p = value2;
+  const expected = [
+    "program",
+    "schema",
+    "period",
+    "periodAllowanceSats",
+    "txRecipientCapSats",
+    "absoluteFeeCapSats",
+    "feerateCapSatPerV"
+  ];
+  const fields = Object.keys(p);
+  if (fields.length !== expected.length || expected.some((name) => !Object.prototype.hasOwnProperty.call(p, name))) {
+    throw new Error("spending policy fields");
+  }
+  if (p.program !== SPENDING_POLICY_PROGRAM) throw new Error("unsupported spending policy program");
+  if (p.schema !== POLICY_VERSION) throw new Error("unsupported spending policy schema");
+  if (p.period !== SPENDING_POLICY_PERIOD) throw new Error("unsupported spending policy period");
+  const policy = {
+    program: SPENDING_POLICY_PROGRAM,
+    schema: POLICY_VERSION,
+    period: SPENDING_POLICY_PERIOD,
+    periodAllowanceSats: requireBound(p.periodAllowanceSats, bounds.periodAllowanceSats, "period allowance"),
+    txRecipientCapSats: requireBound(p.txRecipientCapSats, bounds.txRecipientCapSats, "transaction recipient cap"),
+    absoluteFeeCapSats: requireBound(p.absoluteFeeCapSats, bounds.absoluteFeeCapSats, "absolute fee cap"),
+    feerateCapSatPerV: requireBound(p.feerateCapSatPerV, bounds.feerateCapSatPerV, "feerate cap")
+  };
+  if (policy.periodAllowanceSats < policy.txRecipientCapSats) {
+    throw new Error("period allowance must be at least the transaction recipient cap");
+  }
+  return policy;
+}
+function canonicalSpendingPolicy(policy, network2) {
+  return JSON.stringify(validateSpendingPolicy(policy, network2));
+}
+function spendingPolicyDigest(policy, network2) {
+  return bytesToHex2(sha256(encodeUtf8(canonicalSpendingPolicy(policy, network2))));
+}
+
+// tools/offline-recovery/src/lib/vault/protectionTier.ts
+init_define_import_meta_env();
+function requireProtectionTier(value2) {
+  if (value2 !== "standard" && value2 !== "advanced") throw new Error("unsupported protection tier");
+  return value2;
+}
+function requireProtectionTierMatchesRecovery(tier, recoveryPub) {
+  const selected = requireProtectionTier(tier);
+  const hasRecovery = typeof recoveryPub === "string" && recoveryPub.trim().length > 0;
+  if (selected === "standard" && hasRecovery) throw new Error("Standard protection must not include a recovery key");
+  if (selected === "advanced" && !hasRecovery) throw new Error("Advanced protection requires a recovery key");
+  return selected;
+}
+
+// tools/offline-recovery/src/lib/vault/addressNetwork.ts
+init_define_import_meta_env();
+init_btc_signer();
+function vaultAddressNetwork(network2) {
+  if (network2 === "mutinynet") return TEST_NETWORK;
+  if (network2 === "bitcoin" || network2 === "mainnet") return NETWORK;
+  throw new Error("unsupported network");
+}
+
+// tools/offline-recovery/src/lib/vault/savingsTree.ts
+init_define_import_meta_env();
+var TAPROOT_NUMS_XONLY = "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0";
+var OP_CHECKSIG = 172;
+var OP_CHECKSIGVERIFY = 173;
+var OP_CSV = 178;
+var OP_DROP = 117;
+var OP_0 = 0;
+var OP_1 = 81;
+function xOnlyFromCompressed(pub) {
+  const raw2 = hexToBytes2(pub);
+  if (raw2.length === 32) return raw2;
+  if (raw2.length === 33 && (raw2[0] === 2 || raw2[0] === 3)) return raw2.slice(1);
+  throw new Error("expected a compressed or x-only secp256k1 key");
+}
+function encodeScriptInt(value2) {
+  if (!Number.isInteger(value2) || value2 < 0 || value2 > 2147483647) {
+    throw new Error("script integer out of range");
+  }
+  if (value2 === 0) return new Uint8Array([OP_0]);
+  if (value2 <= 16) return new Uint8Array([OP_1 + value2 - 1]);
+  const bytes2 = [];
+  let n = value2;
+  while (n > 0) {
+    bytes2.push(n & 255);
+    n >>= 8;
+  }
+  if (bytes2[bytes2.length - 1] & 128) bytes2.push(0);
+  return new Uint8Array([bytes2.length, ...bytes2]);
+}
+function checksigScript(pubs) {
+  if (pubs.length === 0) throw new Error("at least one key");
+  const parts = [];
+  pubs.forEach((pub, i) => {
+    if (pub.length !== 32) throw new Error("x-only key required");
+    parts.push(32, ...pub);
+    parts.push(i === pubs.length - 1 ? OP_CHECKSIG : OP_CHECKSIGVERIFY);
+  });
+  return new Uint8Array(parts);
+}
+function csvChecksigScript(blocks, pub) {
+  const lock = encodeScriptInt(blocks);
+  const key = checksigScript([pub]);
+  return new Uint8Array([...lock, OP_CSV, OP_DROP, ...key]);
+}
+
+// tools/offline-recovery/src/lib/vault/program/context.ts
+init_define_import_meta_env();
+init_sha2();
+init_base();
+init_btc_signer();
+
+// tools/offline-recovery/src/lib/vault/program/constants.ts
+init_define_import_meta_env();
+var PROGRAM_SCHEMA = "arkade-vault/savings-v1";
+var SAVINGS_TEMPLATE = "phone-hww-recovery-savings-v1";
+function isSavingsTemplate(value2) {
+  return value2 === SAVINGS_TEMPLATE;
+}
+var PROGRAM_INTERNAL_TAG = "arkade-vault/savings-v1/internal";
+var PROGRAM_CSV = {
+  hardware: 6,
+  phone: 144,
+  recovery: 288
+};
+var P2A_SCRIPT_HEX = "51024e73";
+var P2A_VALUE_SATS = 240;
+var P2A_OUTPUT_INDEX = 1;
+var PACKET_OUTPUT_INDEX = 2;
+var TRANSITION_OUTPUT_COUNT = 3;
+var TRANSITION_SEQUENCE = 4294967293;
+var WITNESS_BYTES_367 = 367;
+var WITNESS_BYTES_399 = 399;
+var WITNESS_BYTES_431 = 431;
+var CLAIMANTS = ["phone", "hardware", "recovery"];
+var TEMPLATE_REGISTRY = {
+  [SAVINGS_TEMPLATE]: { schema: PROGRAM_SCHEMA, recovery: true, serverFreeClawback: true }
+};
+function familyClaimants(hasRecovery) {
+  return hasRecovery ? ["phone", "hardware", "recovery"] : ["phone", "hardware"];
+}
+function familyKeysFor(hasRecovery) {
+  return familyClaimants(hasRecovery).map((claimant) => `savings-${claimant}`);
+}
+
+// tools/offline-recovery/src/lib/vault/program/context.ts
+function taggedHash2(tag, ...messages) {
+  const tagH = sha256(encodeUtf8(tag));
+  const prefix2 = new Uint8Array(64);
+  prefix2.set(tagH, 0);
+  prefix2.set(tagH, 32);
+  const total = messages.reduce((n, m) => n + m.length, 64);
+  const out = new Uint8Array(total);
+  out.set(prefix2);
+  let offset = 64;
+  for (const msg of messages) {
+    out.set(msg, offset);
+    offset += msg.length;
+  }
+  return sha256(out);
+}
+function appendText(parts, value2, name) {
+  if (!value2 || value2 !== value2.trim() || value2 !== value2.toLowerCase()) {
+    throw new Error(`${name} must be non-empty canonical lowercase`);
+  }
+  const bytes2 = encodeUtf8(value2);
+  const len = new Uint8Array(4);
+  new DataView(len.buffer).setUint32(0, bytes2.length, false);
+  parts.push(len, bytes2);
+}
+function encodeTreeContext(input) {
+  const claimant = input.claimant || "";
+  if (claimant && !CLAIMANTS.includes(claimant)) throw new Error("unknown claimant");
+  const parts = [];
+  appendText(parts, input.vaultId, "vaultId");
+  appendText(parts, "savings", "kind");
+  appendText(parts, claimant === "" ? "-" : claimant, "claimant");
+  appendText(parts, input.templateVersion || SAVINGS_TEMPLATE, "templateVersion");
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+function contextInternalKey(input) {
+  const context = taggedHash2(PROGRAM_INTERNAL_TAG, encodeTreeContext(input));
+  const [tweaked] = utils3.taprootTweakPubkey(hex.decode(TAPROOT_NUMS_XONLY), context);
+  return tweaked;
+}
+
+// tools/offline-recovery/src/lib/vault/program/packet.ts
+init_define_import_meta_env();
+var ARK_MAGIC = Uint8Array.of(65, 82, 75);
+var EMULATOR_PACKET_TYPE = 1;
+function concat(parts) {
+  const out = new Uint8Array(parts.reduce((sum, part) => sum + part.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+function writeCompactSize(value2) {
+  if (!Number.isSafeInteger(value2) || value2 < 0) throw new Error("compact size");
+  if (value2 < 253) return Uint8Array.of(value2);
+  if (value2 <= 65535) return Uint8Array.of(253, value2 & 255, value2 >> 8 & 255);
+  if (value2 <= 4294967295) {
+    return Uint8Array.of(254, value2 & 255, value2 >> 8 & 255, value2 >> 16 & 255, value2 >> 24 & 255);
+  }
+  throw new Error("compact size too large");
+}
+function writeWitness(items) {
+  return concat([writeCompactSize(items.length), ...items.flatMap((item) => [writeCompactSize(item.length), item])]);
+}
+function writeUvarint(value2) {
+  if (!Number.isSafeInteger(value2) || value2 < 0) throw new Error("uvarint");
+  const out = [];
+  let remaining = BigInt(value2);
+  while (remaining >= 0x80n) {
+    out.push(Number(remaining & 0x7fn | 0x80n));
+    remaining >>= 7n;
+  }
+  out.push(Number(remaining));
+  return Uint8Array.from(out);
+}
+function pushBytes(bytes2) {
+  if (bytes2.length < 76) return concat([Uint8Array.of(bytes2.length), bytes2]);
+  if (bytes2.length <= 255) return concat([Uint8Array.of(76, bytes2.length), bytes2]);
+  if (bytes2.length <= 65535) {
+    return concat([Uint8Array.of(77, bytes2.length & 255, bytes2.length >> 8 & 255), bytes2]);
+  }
+  throw new Error("push too large");
+}
+function encodeExtensionScript(packets) {
+  if (packets.length === 0) throw new Error("missing packets");
+  const seen = /* @__PURE__ */ new Set();
+  const body = [ARK_MAGIC];
+  for (const packet of packets) {
+    if (!Number.isSafeInteger(packet.type) || packet.type < 0 || packet.type > 255) throw new Error("packet type");
+    if (seen.has(packet.type)) throw new Error("duplicate packet type");
+    seen.add(packet.type);
+    body.push(Uint8Array.of(packet.type), writeUvarint(packet.data.length), packet.data);
+  }
+  return concat([Uint8Array.of(106), pushBytes(concat(body))]);
+}
+function encodeEmulatorPacket(entry) {
+  if (!Number.isSafeInteger(entry.vin) || entry.vin < 0 || entry.vin > 65535) throw new Error("emulator vin");
+  const witness = writeWitness(entry.witness);
+  return concat([
+    writeCompactSize(1),
+    Uint8Array.of(entry.vin & 255, entry.vin >> 8 & 255),
+    writeCompactSize(entry.script.length),
+    entry.script,
+    writeCompactSize(witness.length),
+    witness
+  ]);
+}
+function exactPacketOutputPrefix(scriptLen, witnessItemLens) {
+  if (scriptLen <= 0) throw new Error("authorization script length required");
+  const content = encodeEmulatorPacket({
+    vin: 0,
+    script: new Uint8Array(scriptLen),
+    witness: witnessItemLens.map((len) => new Uint8Array(len))
+  });
+  const outputScript = encodeExtensionScript([{ type: EMULATOR_PACKET_TYPE, data: content }]);
+  if (outputScript.length <= content.length) throw new Error("canonical packet output envelope");
+  const prefix2 = outputScript.slice(0, outputScript.length - content.length);
+  for (let i = 0; i < content.length; i++) {
+    if (outputScript[prefix2.length + i] !== content[i]) throw new Error("canonical packet output envelope");
+  }
+  return prefix2;
+}
+function packetWitnessShape(phoneBound) {
+  return phoneBound ? [64] : [];
+}
+
+// tools/offline-recovery/src/lib/vault/program/script.ts
+init_define_import_meta_env();
+
+// node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/nist.js
+init_define_import_meta_env();
+init_sha2();
+init_weierstrass();
+var p256_CURVE = /* @__PURE__ */ (() => ({
+  p: BigInt("0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff"),
+  n: BigInt("0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551"),
+  h: BigInt(1),
+  a: BigInt("0xffffffff00000001000000000000000000000000fffffffffffffffffffffffc"),
+  b: BigInt("0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b"),
+  Gx: BigInt("0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296"),
+  Gy: BigInt("0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5")
+}))();
+var p256_Point = /* @__PURE__ */ weierstrass(p256_CURVE);
+var p256 = /* @__PURE__ */ ecdsa(p256_Point, sha256);
+
+// tools/offline-recovery/src/lib/vault/program/script.ts
+init_base();
+var OP2 = {
+  VERIFY: 105,
+  EQUAL: 135,
+  EQUALVERIFY: 136,
+  ADD: 147,
+  SUB: 148,
+  MUL: 149,
+  DIV: 150,
+  GREATERTHANOREQUAL: 162,
+  LESSTHANOREQUAL: 161,
+  DUP: 118,
+  DROP: 117,
+  SWAP: 124,
+  SHA256: 168,
+  CAT: 126,
+  INSPECTINPUTVALUE: 201,
+  INSPECTINPUTSEQUENCE: 203,
+  CHECKSIGFROMSTACK: 204,
+  INSPECTOUTPUTVALUE: 207,
+  INSPECTOUTPUTSCRIPTPUBKEY: 209,
+  INSPECTVERSION: 210,
+  INSPECTLOCKTIME: 211,
+  INSPECTNUMINPUTS: 212,
+  INSPECTNUMOUTPUTS: 213,
+  TXWEIGHT: 214,
+  INSPECTPACKET: 244,
+  SIGHASH: 246
+};
+var DIRECT_P256_CSFS_PREFIX = 17;
+var TRANSITION_WITNESS_BYTES = WITNESS_BYTES_399;
+function initiateWitnessBytes(claimant, hasRecovery = true) {
+  if (hasRecovery) {
+    return WITNESS_BYTES_399;
+  }
+  if (claimant === "hardware") return WITNESS_BYTES_367;
+  return WITNESS_BYTES_399;
+}
+function clawbackWitnessBytes(serverFree = false, hasRecovery = true) {
+  if (serverFree && hasRecovery) return WITNESS_BYTES_431;
+  return WITNESS_BYTES_399;
+}
+function collaborativeWitnessBytes(script, controlBlock) {
+  return 2 + 1 + 3 * (1 + 64) + compactSizeLen(script.length) + script.length + compactSizeLen(controlBlock.length) + controlBlock.length;
+}
+function compactSizeLen(n) {
+  if (n < 253) return 1;
+  if (n <= 65535) return 3;
+  if (n <= 4294967295) return 5;
+  return 9;
+}
+function scriptNum(value2) {
+  if (value2 === 0n) return new Uint8Array();
+  const neg = value2 < 0n;
+  let abs = neg ? -value2 : value2;
+  const bytes2 = [];
+  while (abs > 0n) {
+    bytes2.push(Number(abs & 0xffn));
+    abs >>= 8n;
+  }
+  if (bytes2[bytes2.length - 1] & 128) bytes2.push(neg ? 128 : 0);
+  else if (neg) bytes2[bytes2.length - 1] |= 128;
+  return new Uint8Array(bytes2);
+}
+function pushInt(value2) {
+  const n = BigInt(value2);
+  if (n === 0n) return new Uint8Array([0]);
+  if (n >= 1n && n <= 16n) return new Uint8Array([80 + Number(n)]);
+  if (n === -1n) return new Uint8Array([79]);
+  const raw2 = scriptNum(n);
+  return new Uint8Array([raw2.length, ...raw2]);
+}
+function pushData(data) {
+  if (data.length <= 75) return new Uint8Array([data.length, ...data]);
+  if (data.length <= 255) return new Uint8Array([76, data.length, ...data]);
+  throw new Error("push too large");
+}
+function concat2(...parts) {
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+function p2trProgram(scriptHex) {
+  const raw2 = hex.decode(scriptHex);
+  if (raw2.length !== 34 || raw2[0] !== 81 || raw2[1] !== 32) {
+    throw new Error("dest must be a 34-byte p2tr script");
+  }
+  return raw2.slice(2);
+}
+function p2aProgram() {
+  const raw2 = hex.decode(P2A_SCRIPT_HEX);
+  if (raw2[0] !== 81 || raw2[1] !== 2) throw new Error("P2A script");
+  return raw2.slice(2);
+}
+function requirePhoneDirect(pub) {
+  if (pub.length !== 33) throw new Error("PhoneDirectP256 must be 33 bytes");
+  if (pub[0] !== 2 && pub[0] !== 3) throw new Error("PhoneDirectP256 must be compressed");
+  if (!p256.utils.isValidPublicKey(pub, true)) throw new Error("PhoneDirectP256 is off-curve");
+  return pub;
+}
+function buildTransitionScript(input) {
+  const dest = p2trProgram(input.destScriptHex);
+  const feeCap = input.feeCap ?? ABSOLUTE_FEE_CEILING_SATS;
+  const feerateCap = input.feerateCap ?? FEERATE_CEILING_SAT_PER_V;
+  const witnessBytes = input.witnessBytes ?? TRANSITION_WITNESS_BYTES;
+  const phone2 = input.bindPhoneDirect ? requirePhoneDirect(input.bindPhoneDirect) : void 0;
+  const witnessShape = packetWitnessShape(!!phone2);
+  let prefix2 = new Uint8Array();
+  for (let i = 0; i < 8; i++) {
+    const script = assembleTransitionScript({
+      dest,
+      prefix: prefix2,
+      phone: phone2,
+      witnessBytes,
+      feeCap,
+      feerateCap
+    });
+    const next = exactPacketOutputPrefix(script.length, witnessShape);
+    if (next.length === prefix2.length && next.every((b, j) => b === prefix2[j])) return script;
+    prefix2 = next;
+  }
+  throw new Error("authorization script packet envelope did not converge");
+}
+function assembleTransitionScript(input) {
+  const parts = [
+    new Uint8Array([OP2.INSPECTVERSION]),
+    pushInt(2),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    new Uint8Array([OP2.INSPECTLOCKTIME]),
+    pushInt(0),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    new Uint8Array([OP2.INSPECTNUMINPUTS]),
+    pushInt(1),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    pushInt(0),
+    new Uint8Array([OP2.INSPECTINPUTSEQUENCE]),
+    pushInt(TRANSITION_SEQUENCE),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    new Uint8Array([OP2.INSPECTNUMOUTPUTS]),
+    pushInt(TRANSITION_OUTPUT_COUNT),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    pushInt(0),
+    new Uint8Array([OP2.INSPECTOUTPUTSCRIPTPUBKEY]),
+    pushInt(1),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    pushData(input.dest),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    pushInt(0),
+    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
+    pushInt(DUST_SATS),
+    new Uint8Array([OP2.GREATERTHANOREQUAL, OP2.VERIFY]),
+    pushInt(P2A_OUTPUT_INDEX),
+    new Uint8Array([OP2.INSPECTOUTPUTSCRIPTPUBKEY]),
+    pushInt(1),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    pushData(p2aProgram()),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    pushInt(P2A_OUTPUT_INDEX),
+    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
+    pushInt(P2A_VALUE_SATS),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    pushInt(PACKET_OUTPUT_INDEX),
+    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
+    pushInt(0),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    pushInt(EMULATOR_PACKET_TYPE),
+    new Uint8Array([OP2.INSPECTPACKET, OP2.VERIFY]),
+    pushData(input.prefix),
+    new Uint8Array([OP2.SWAP, OP2.CAT, OP2.SHA256]),
+    pushInt(PACKET_OUTPUT_INDEX),
+    new Uint8Array([OP2.INSPECTOUTPUTSCRIPTPUBKEY]),
+    pushInt(-1),
+    new Uint8Array([OP2.EQUALVERIFY, OP2.EQUALVERIFY]),
+    pushInt(0),
+    new Uint8Array([OP2.INSPECTINPUTVALUE]),
+    pushInt(0),
+    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
+    new Uint8Array([OP2.SUB]),
+    pushInt(P2A_OUTPUT_INDEX),
+    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
+    new Uint8Array([OP2.SUB]),
+    new Uint8Array([OP2.DUP]),
+    pushInt(0),
+    new Uint8Array([OP2.GREATERTHANOREQUAL, OP2.VERIFY]),
+    new Uint8Array([OP2.DUP]),
+    pushInt(input.feeCap),
+    new Uint8Array([OP2.LESSTHANOREQUAL, OP2.VERIFY]),
+    new Uint8Array([OP2.DUP]),
+    new Uint8Array([OP2.TXWEIGHT]),
+    pushInt(input.witnessBytes),
+    new Uint8Array([OP2.ADD]),
+    pushInt(3),
+    new Uint8Array([OP2.ADD]),
+    pushInt(4),
+    new Uint8Array([OP2.DIV]),
+    pushInt(input.feerateCap),
+    new Uint8Array([OP2.MUL]),
+    new Uint8Array([OP2.LESSTHANOREQUAL, OP2.VERIFY]),
+    new Uint8Array([OP2.DROP])
+  ];
+  if (input.phone) {
+    parts.push(
+      pushInt(0),
+      new Uint8Array([OP2.SIGHASH]),
+      pushData(new Uint8Array([DIRECT_P256_CSFS_PREFIX, ...input.phone])),
+      new Uint8Array([OP2.CHECKSIGFROMSTACK])
+    );
+  } else {
+    parts.push(pushInt(1));
+  }
+  return concat2(...parts);
+}
+
+// tools/offline-recovery/src/lib/vault/program/trees.ts
+init_define_import_meta_env();
+init_base();
+init_btc_signer();
+
+// tools/offline-recovery/src/lib/vault/setupPlan.ts
+init_define_import_meta_env();
+var FORBIDDEN_PUBLIC_KEY_G = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
+var FORBIDDEN_PUBLIC_KEY_2G = "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5";
+
+// tools/offline-recovery/src/lib/vault/program/tweak.ts
+init_define_import_meta_env();
+init_secp256k1();
+init_base();
+var ARK_SCRIPT_HASH_TAG = "ArkScriptHash";
+function arkadeScriptHash(script) {
+  return schnorr.utils.taggedHash(ARK_SCRIPT_HASH_TAG, script);
+}
+function tweakByArkScript(basePub, script) {
+  const xonly = xOnlyFromCompressed(basePub);
+  const hash = arkadeScriptHash(script);
+  const evenY = secp256k1.Point.fromBytes(new Uint8Array([2, ...xonly]));
+  const scalar2 = BigInt(`0x${hex.encode(hash)}`);
+  if (scalar2 === 0n) throw new Error("ArkScriptHash is zero");
+  const tweaked = evenY.add(secp256k1.Point.BASE.multiply(scalar2));
+  if (tweaked.equals(secp256k1.Point.ZERO)) throw new Error("Arkade tweak is degenerate");
+  return hex.encode(tweaked.toBytes(true));
+}
+function tweakPair(vaultBase, arkadeBase, script) {
+  return {
+    vault: tweakByArkScript(vaultBase, script),
+    arkade: tweakByArkScript(arkadeBase, script)
+  };
+}
+
+// tools/offline-recovery/src/lib/vault/program/trees.ts
+var UNSPENDABLE_PADDING = new Uint8Array([106]);
+function quarantineGuardians(claimant, hasRecovery = true) {
+  if (claimant === "phone") return hasRecovery ? ["hardware", "recovery"] : ["hardware"];
+  if (claimant === "hardware") return hasRecovery ? ["phone", "recovery"] : ["phone"];
+  return ["phone", "hardware"];
+}
+function pendingGuardians(claimant, hasRecovery = true) {
+  const roles = hasRecovery ? ["phone", "hardware", "recovery"] : ["phone", "hardware"];
+  return roles.filter((role) => role !== claimant);
+}
+function pendingDelay(claimant) {
+  if (claimant === "hardware") return PROGRAM_CSV.hardware;
+  if (claimant === "phone") return PROGRAM_CSV.phone;
+  return PROGRAM_CSV.recovery;
+}
+function tapTreeFromScripts(scripts) {
+  if (scripts.length === 0) throw new Error("no leaves");
+  if (scripts.length === 1) return { script: scripts[0] };
+  const leaves = scripts.map((script) => ({ script }));
+  const branches = [];
+  for (let i = 0; i < leaves.length; i += 2) {
+    if (i === leaves.length - 1) {
+      branches[branches.length - 1] = [branches[branches.length - 1], leaves[i]];
+      continue;
+    }
+    branches.push([leaves[i], leaves[i + 1]]);
+  }
+  while (branches.length > 1) {
+    const left = branches.shift();
+    const right = branches.shift();
+    branches.push([left, right]);
+  }
+  return branches[0];
+}
+function requireDistinct(keys2, name) {
+  const seen = /* @__PURE__ */ new Set();
+  for (const key of keys2) {
+    const hexKey = hex.encode(key);
+    if (seen.has(hexKey)) throw new Error(`${name} keys must be x-only distinct`);
+    seen.add(hexKey);
+  }
+}
+var FORBIDDEN_XONLY = /* @__PURE__ */ new Set([
+  TAPROOT_NUMS_XONLY,
+  hex.encode(xOnlyFromCompressed(FORBIDDEN_PUBLIC_KEY_G)),
+  hex.encode(xOnlyFromCompressed(FORBIDDEN_PUBLIC_KEY_2G))
+]);
+function assertRoleSet(pubs, name) {
+  const xonlys = pubs.map(xOnlyFromCompressed);
+  requireDistinct(xonlys, name);
+  for (const pub of xonlys) {
+    if (FORBIDDEN_XONLY.has(hex.encode(pub))) throw new Error("family key is a forbidden point");
+  }
+}
+function controlOf(payment, script) {
+  const leaf = payment.leaves?.find((item) => hex.encode(item.script) === hex.encode(script));
+  if (!leaf?.controlBlock) throw new Error("leaf control block required");
+  return leaf.controlBlock;
+}
+function buildQuarantine(input) {
+  const pubs = {
+    phone: xOnlyFromCompressed(input.phonePub),
+    hardware: xOnlyFromCompressed(input.hardwarePub)
+  };
+  if (input.recoveryPub) pubs.recovery = xOnlyFromCompressed(input.recoveryPub);
+  requireDistinct(Object.values(pubs), "user");
+  const names = quarantineGuardians(input.claimant, Boolean(input.recoveryPub));
+  const script = checksigScript(names.map((name) => pubs[name]));
+  const internal = contextInternalKey({
+    vaultId: input.vaultId,
+    claimant: input.claimant,
+    templateVersion: input.templateVersion
+  });
+  const payment = p2tr(internal, { script }, vaultAddressNetwork(input.network), true);
+  if (!payment.address) throw new Error("quarantine address required");
+  return {
+    role: "quarantine",
+    address: payment.address,
+    script: payment.script,
+    tapInternalKey: payment.tapInternalKey,
+    tapLeafScript: payment.tapLeafScript,
+    admin: script,
+    guardians: names
+  };
+}
+function buildPending(input) {
+  const pubs = {
+    phone: xOnlyFromCompressed(input.phonePub),
+    hardware: xOnlyFromCompressed(input.hardwarePub)
+  };
+  if (input.recoveryPub) pubs.recovery = xOnlyFromCompressed(input.recoveryPub);
+  const vault = xOnlyFromCompressed(input.vaultTweak);
+  const arkade = xOnlyFromCompressed(input.arkadeTweak);
+  requireDistinct([...Object.values(pubs), vault, arkade], "pending");
+  const claim = csvChecksigScript(pendingDelay(input.claimant), pubs[input.claimant]);
+  const clawbacks = pendingGuardians(input.claimant, Boolean(input.recoveryPub)).map(
+    (guardian) => checksigScript([pubs[guardian], vault, arkade])
+  );
+  const scripts = [claim, ...clawbacks];
+  if (input.serverFreeClawback) {
+    const guardians = pendingGuardians(input.claimant, Boolean(input.recoveryPub)).map((name) => pubs[name]);
+    scripts.push(checksigScript(guardians));
+  }
+  scripts.push(UNSPENDABLE_PADDING);
+  const internal = contextInternalKey({
+    vaultId: input.vaultId,
+    claimant: input.claimant,
+    templateVersion: input.templateVersion
+  });
+  const payment = p2tr(internal, tapTreeFromScripts(scripts), vaultAddressNetwork(input.network), true);
+  if (!payment.address) throw new Error("pending address required");
+  return {
+    role: "pending",
+    address: payment.address,
+    script: payment.script,
+    tapInternalKey: payment.tapInternalKey,
+    tapLeafScript: payment.tapLeafScript,
+    leaves: payment.leaves,
+    claim,
+    clawbacks,
+    guardianExit: input.serverFreeClawback ? checksigScript(pendingGuardians(input.claimant, Boolean(input.recoveryPub)).map((name) => pubs[name])) : void 0,
+    delay: pendingDelay(input.claimant)
+  };
+}
+function buildNormal(input) {
+  const phone2 = xOnlyFromCompressed(input.phonePub);
+  const hardware = xOnlyFromCompressed(input.hardwarePub);
+  const recovery = input.recoveryPub ? xOnlyFromCompressed(input.recoveryPub) : void 0;
+  const claimants = recovery ? ["phone", "hardware", "recovery"] : ["phone", "hardware"];
+  const tweaks = [];
+  for (const claimant of claimants) {
+    const pair = input.initiate[claimant];
+    if (!pair) throw new Error(`missing ${claimant} initiate tweaks`);
+    tweaks.push(xOnlyFromCompressed(pair.vault), xOnlyFromCompressed(pair.arkade));
+  }
+  requireDistinct([phone2, hardware, ...recovery ? [recovery] : [], ...tweaks], "normal");
+  const admin = checksigScript([phone2, hardware]);
+  const role = { phone: phone2, hardware, recovery };
+  const initiate = claimants.map((claimant) => {
+    const pair = input.initiate[claimant];
+    const pub = role[claimant];
+    if (!pub) throw new Error(`missing ${claimant}`);
+    return checksigScript([pub, xOnlyFromCompressed(pair.vault), xOnlyFromCompressed(pair.arkade)]);
+  });
+  const scripts = [admin, ...initiate];
+  const internal = contextInternalKey({
+    vaultId: input.vaultId,
+    claimant: "",
+    templateVersion: input.templateVersion
+  });
+  const payment = p2tr(internal, tapTreeFromScripts(scripts), vaultAddressNetwork(input.network), true);
+  if (!payment.address) throw new Error("normal address required");
+  return {
+    role: "normal",
+    address: payment.address,
+    script: payment.script,
+    tapInternalKey: payment.tapInternalKey,
+    tapLeafScript: payment.tapLeafScript,
+    leaves: payment.leaves,
+    admin,
+    initiate
+  };
+}
+function buildVaultProgramFamily(input) {
+  const phoneDirect = hexToBytes2(input.phoneDirectP256);
+  const bases = [input.phonePub, input.hardwarePub, input.vaultCosignerBase, input.arkadeCosignerBase];
+  if (input.recoveryPub) bases.splice(2, 0, input.recoveryPub);
+  assertRoleSet(bases, "family bases");
+  const claimants = input.recoveryPub ? ["phone", "hardware", "recovery"] : ["phone", "hardware"];
+  const hasRecovery = Boolean(input.recoveryPub);
+  const quarantine = {};
+  const pending = {};
+  const initiateAuth = {};
+  const clawbackAuth = {};
+  const pendingTweaks = {};
+  const templateVersion = input.templateVersion;
+  const serverFreeClawback = input.serverFreeClawback ?? templateVersion === SAVINGS_TEMPLATE;
+  const expectedClawbackWitness = clawbackWitnessBytes(serverFreeClawback, hasRecovery);
+  for (const claimant of claimants) {
+    const key = `savings-${claimant}`;
+    quarantine[key] = buildQuarantine({ ...input, claimant, templateVersion });
+    clawbackAuth[key] = buildTransitionScript({
+      destScriptHex: hex.encode(quarantine[key].script),
+      witnessBytes: expectedClawbackWitness,
+      feeCap: input.absoluteFeeCapSats,
+      feerateCap: input.feerateCapSatPerV
+    });
+    pendingTweaks[key] = tweakPair(input.vaultCosignerBase, input.arkadeCosignerBase, clawbackAuth[key]);
+    pending[key] = buildPending({
+      ...input,
+      templateVersion,
+      serverFreeClawback,
+      claimant,
+      vaultTweak: pendingTweaks[key].vault,
+      arkadeTweak: pendingTweaks[key].arkade
+    });
+    initiateAuth[key] = buildTransitionScript({
+      destScriptHex: hex.encode(pending[key].script),
+      bindPhoneDirect: claimant === "phone" ? phoneDirect : void 0,
+      witnessBytes: initiateWitnessBytes(claimant, hasRecovery),
+      feeCap: input.absoluteFeeCapSats,
+      feerateCap: input.feerateCapSatPerV
+    });
+  }
+  const savingsInitiate = {
+    phone: tweakPair(input.vaultCosignerBase, input.arkadeCosignerBase, initiateAuth["savings-phone"]),
+    hardware: tweakPair(input.vaultCosignerBase, input.arkadeCosignerBase, initiateAuth["savings-hardware"]),
+    ...hasRecovery ? { recovery: tweakPair(input.vaultCosignerBase, input.arkadeCosignerBase, initiateAuth["savings-recovery"]) } : {}
+  };
+  const savings = buildNormal({
+    ...input,
+    initiate: savingsInitiate
+  });
+  savings.initiate.forEach((script, i) => {
+    const claimant = claimants[i];
+    const got = collaborativeWitnessBytes(script, controlOf(savings, script));
+    const want = initiateWitnessBytes(claimant, hasRecovery);
+    if (got !== want) throw new Error(`savings ${claimant} initiate witness ${got} != ${want}`);
+  });
+  assertRoleSet(
+    [
+      input.phonePub,
+      input.hardwarePub,
+      ...input.recoveryPub ? [input.recoveryPub] : [],
+      input.vaultCosignerBase,
+      input.arkadeCosignerBase,
+      ...claimants.flatMap((claimant) => [savingsInitiate[claimant].vault, savingsInitiate[claimant].arkade]),
+      ...Object.values(pendingTweaks).flatMap((pair) => [pair.vault, pair.arkade])
+    ],
+    "family"
+  );
+  return {
+    savings,
+    quarantine,
+    pending,
+    initiateAuth,
+    clawbackAuth,
+    initiateTweaks: savingsInitiate,
+    pendingTweaks
+  };
+}
+
+// tools/offline-recovery/src/lib/vault/program/connector.ts
+var CONNECTOR_PROGRAM = "savings-connector-v1";
+var CONNECTOR_TEMPLATE = "phone-connector-recovery-savings-v1";
+var X = { inputScript: 202, toAlt: 107, fromAlt: 108, if: 99, endif: 104, boolOr: 155 };
+function buildConnectorProgram(r) {
+  if (!(r.connectorScript.length === 22 && r.connectorScript[0] === 0 && r.connectorScript[1] === 20) && (r.connectorScript.length !== 34 || r.connectorScript[0] !== 81 || r.connectorScript[1] !== 32 || !secp256k1.utils.isValidPublicKey(new Uint8Array([2, ...r.connectorScript.slice(2)]), true)))
+    throw new Error("connector native SegWit or Taproot script required");
+  if (!Number.isSafeInteger(r.witnessBytes) || r.witnessBytes < 1 || r.witnessBytes > 1e4 || !Number.isSafeInteger(r.absoluteFeeCapSats) || r.absoluteFeeCapSats < 0 || r.absoluteFeeCapSats > 1e5 || !Number.isSafeInteger(r.feerateCapSatPerV) || r.feerateCapSatPerV < 1 || r.feerateCapSatPerV > 100)
+    throw new Error("invalid connector fee policy");
+  let prefix2 = new Uint8Array();
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const chunks = [];
+    const op = (...values) => chunks.push(Uint8Array.from(values));
+    const num2 = (n) => chunks.push(pushInt(n));
+    const data = (b) => chunks.push(pushData(b));
+    const equal = (opcode, n) => {
+      op(opcode);
+      num2(n);
+      op(OP2.EQUALVERIFY);
+    };
+    const script = (opcode, index, b) => {
+      num2(index);
+      op(opcode);
+      num2(b[0] === 81 ? 1 : 0);
+      op(OP2.EQUALVERIFY);
+      data(b.slice(2));
+      op(OP2.EQUALVERIFY);
+    };
+    const withChange = () => {
+      op(OP2.INSPECTNUMOUTPUTS);
+      num2(5);
+      op(OP2.EQUAL, X.if);
+    };
+    data(new TextEncoder().encode(CONNECTOR_PROGRAM));
+    op(OP2.DROP);
+    equal(OP2.INSPECTVERSION, 2);
+    equal(OP2.INSPECTLOCKTIME, 0);
+    equal(OP2.INSPECTNUMINPUTS, 2);
+    op(OP2.INSPECTNUMOUTPUTS, OP2.DUP);
+    num2(4);
+    op(OP2.EQUAL, OP2.SWAP);
+    num2(5);
+    op(OP2.EQUAL, X.boolOr, OP2.VERIFY);
+    for (const i of [0, 1]) {
+      num2(i);
+      equal(OP2.INSPECTINPUTSEQUENCE, 4294967293);
+    }
+    script(X.inputScript, 1, r.connectorScript);
+    script(OP2.INSPECTOUTPUTSCRIPTPUBKEY, 1, r.connectorScript);
+    script(OP2.INSPECTOUTPUTSCRIPTPUBKEY, 2, hex.decode("51024e73"));
+    withChange();
+    num2(0);
+    op(X.inputScript, X.toAlt);
+    num2(4);
+    op(OP2.INSPECTOUTPUTSCRIPTPUBKEY, X.fromAlt, OP2.EQUALVERIFY, OP2.EQUALVERIFY);
+    num2(4);
+    op(OP2.INSPECTOUTPUTVALUE);
+    num2(330);
+    op(OP2.GREATERTHANOREQUAL, OP2.VERIFY, X.endif);
+    num2(1);
+    equal(OP2.INSPECTINPUTVALUE, 1e3);
+    num2(1);
+    equal(OP2.INSPECTOUTPUTVALUE, 1e3);
+    num2(2);
+    equal(OP2.INSPECTOUTPUTVALUE, 240);
+    num2(3);
+    equal(OP2.INSPECTOUTPUTVALUE, 0);
+    num2(0);
+    op(OP2.INSPECTOUTPUTVALUE);
+    num2(294);
+    op(OP2.GREATERTHANOREQUAL, OP2.VERIFY);
+    num2(1);
+    op(OP2.INSPECTPACKET, OP2.VERIFY);
+    data(prefix2);
+    op(OP2.SWAP, OP2.CAT, OP2.SHA256);
+    num2(3);
+    op(OP2.INSPECTOUTPUTSCRIPTPUBKEY);
+    num2(-1);
+    op(OP2.EQUALVERIFY, OP2.EQUALVERIFY);
+    num2(0);
+    op(OP2.INSPECTINPUTVALUE);
+    for (const i of [0, 2]) {
+      num2(i);
+      op(OP2.INSPECTOUTPUTVALUE, OP2.SUB);
+    }
+    withChange();
+    num2(4);
+    op(OP2.INSPECTOUTPUTVALUE, OP2.SUB, X.endif);
+    op(OP2.DUP);
+    num2(0);
+    op(OP2.GREATERTHANOREQUAL, OP2.VERIFY, OP2.DUP);
+    num2(r.absoluteFeeCapSats);
+    op(OP2.LESSTHANOREQUAL, OP2.VERIFY, OP2.TXWEIGHT);
+    num2(r.witnessBytes);
+    op(OP2.ADD);
+    num2(3);
+    op(OP2.ADD);
+    num2(4);
+    op(OP2.DIV);
+    num2(r.feerateCapSatPerV);
+    op(OP2.MUL, OP2.LESSTHANOREQUAL);
+    const result = concat2(...chunks);
+    const next = exactPacketOutputPrefix(result.length, []);
+    if (hex.encode(next) === hex.encode(prefix2)) return result;
+    prefix2 = next;
+  }
+  throw new Error("connector packet envelope did not converge");
+}
+function buildConnectorFamily(input) {
+  if (input.templateVersion && input.templateVersion !== CONNECTOR_TEMPLATE)
+    throw new Error("connector template mismatch");
+  if (input.network !== "mainnet" && input.network !== "mutinynet") throw new Error("unsupported connector network");
+  const selected = { ...input, templateVersion: CONNECTOR_TEMPLATE, serverFreeClawback: true };
+  const base = buildVaultProgramFamily(selected);
+  if (input.connectorType !== "p2tr" && input.connectorType !== "p2wpkh") throw new Error("unsupported connector type");
+  const connector = input.connectorType === "p2tr" ? p2tr(xOnlyFromCompressed(input.hardwarePub), void 0, vaultAddressNetwork(input.network)) : p2wpkh(hex.decode(input.hardwarePub), vaultAddressNetwork(input.network));
+  const connectorWitnessBytes = input.connectorType === "p2tr" ? 66 : 45;
+  const internal = contextInternalKey({ vaultId: input.vaultId, claimant: "", templateVersion: CONNECTOR_TEMPLATE });
+  const makeNormal = (normal) => {
+    const tree = p2tr(
+      internal,
+      tapTreeFromScripts([normal, ...base.savings.initiate]),
+      vaultAddressNetwork(input.network),
+      true
+    );
+    const leaves = tree.leaves;
+    const control = leaves?.find((leaf) => hex.encode(leaf.script) === hex.encode(normal))?.controlBlock;
+    if (!control) throw new Error("connector normal proof missing");
+    return { ...tree, normal, control };
+  };
+  const preliminary = makeNormal(
+    checksigScript([input.phonePub, input.vaultCosignerBase, input.arkadeCosignerBase].map(xOnlyFromCompressed))
+  );
+  const rules = {
+    connectorScript: connector.script,
+    witnessBytes: collaborativeWitnessBytes(preliminary.normal, preliminary.control) + connectorWitnessBytes,
+    absoluteFeeCapSats: input.absoluteFeeCapSats,
+    feerateCapSatPerV: input.feerateCapSatPerV
+  };
+  const program = buildConnectorProgram(rules);
+  const pair = tweakPair(input.vaultCosignerBase, input.arkadeCosignerBase, program);
+  const roles = [
+    input.phonePub,
+    input.hardwarePub,
+    input.vaultCosignerBase,
+    input.arkadeCosignerBase,
+    ...input.recoveryPub ? [input.recoveryPub] : [],
+    pair.vault,
+    pair.arkade,
+    ...Object.values(base.initiateTweaks).flatMap((p) => [p.vault, p.arkade]),
+    ...Object.values(base.pendingTweaks).flatMap((p) => [p.vault, p.arkade])
+  ].map((p) => hex.encode(xOnlyFromCompressed(p)));
+  if (new Set(roles).size !== roles.length) throw new Error("connector family roles must be distinct");
+  const savings = makeNormal(checksigScript([input.phonePub, pair.vault, pair.arkade].map(xOnlyFromCompressed)));
+  if (collaborativeWitnessBytes(savings.normal, savings.control) + connectorWitnessBytes !== rules.witnessBytes)
+    throw new Error("connector witness shape changed");
+  return {
+    ...base,
+    savings: { ...base.savings, ...savings, admin: savings.normal },
+    connector,
+    rules,
+    program,
+    normalTweaks: pair
+  };
+}
+function connectorEnrollmentDigest(input, origin) {
+  if (input.network !== "mainnet" && input.network !== "mutinynet") throw new Error("unsupported connector network");
+  requireProtectionTierMatchesRecovery(input.protectionTier, input.recoveryPub);
+  const policy = validateSpendingPolicy(input.spendingPolicy, input.network);
+  if (policy.absoluteFeeCapSats !== input.absoluteFeeCapSats || policy.feerateCapSatPerV !== input.feerateCapSatPerV)
+    throw new Error("connector fee policy mismatch");
+  const f = buildConnectorFamily(input);
+  if (hex.encode(origin.publicKey) !== hex.encode(hex.decode(input.hardwarePub)))
+    throw new Error("hardware origin mismatch");
+  const path = origin.path;
+  const coin = input.network === "mainnet" ? 2147483648 : 2147483649;
+  const standardPurpose = path[0] === 2147483732 || path[0] === 2147483734;
+  const standardPath = path.length === 5 && path[0] === (input.connectorType === "p2wpkh" ? 2147483732 : 2147483734) && path[1] === coin && path[2] >= 2147483648 && path[3] <= 1 && path[4] < 2147483648;
+  if (!Number.isInteger(origin.fingerprint) || origin.fingerprint < 0 || origin.fingerprint > 4294967295 || path.length < 1 || path.length > 255 || path.some((n) => !Number.isInteger(n) || n < 0 || n > 4294967295) || standardPurpose && !standardPath)
+    throw new Error("hardware origin network or path mismatch");
+  const canonical2 = (s) => hex.encode(hex.decode(s));
+  const fields = [
+    "arkade-vault/connector-enrollment-v1",
+    CONNECTOR_TEMPLATE,
+    input.vaultId,
+    input.network,
+    input.protectionTier,
+    canonical2(input.phonePub),
+    canonical2(input.hardwarePub),
+    input.recoveryPub ? canonical2(input.recoveryPub) : "",
+    canonical2(input.phoneDirectP256),
+    canonical2(input.vaultCosignerBase),
+    canonical2(input.arkadeCosignerBase),
+    spendingPolicyDigest(policy, input.network),
+    hex.encode(f.program),
+    hex.encode(f.savings.script),
+    hex.encode(f.connector.script),
+    origin.fingerprint.toString(16).padStart(8, "0"),
+    path.join("/")
+  ];
+  for (const role of input.recoveryPub ? ["phone", "hardware", "recovery"] : ["phone", "hardware"]) {
+    const key = `savings-${role}`;
+    fields.push(
+      role,
+      hex.encode(f.pending[key].script),
+      hex.encode(f.quarantine[key].script),
+      hex.encode(f.initiateAuth[key]),
+      hex.encode(f.clawbackAuth[key])
+    );
+  }
+  const chunks = fields.flatMap((field2) => {
+    const data = new TextEncoder().encode(field2);
+    const size = new Uint8Array(4);
+    new DataView(size.buffer).setUint32(0, data.length, false);
+    return [size, data];
+  });
+  return hex.encode(sha256(concat2(...chunks)));
+}
+
+// tools/offline-recovery/src/lib/vault/program/connectorEnrollmentCore.ts
+init_define_import_meta_env();
+init_base();
+init_sha2();
+
+// tools/offline-recovery/src/lib/vault/program/descriptor.ts
+init_define_import_meta_env();
+init_secp256k1();
+init_sha2();
+init_base();
+var COMPRESSED = 33;
+function appendU32(parts, value2, name) {
+  if (!Number.isInteger(value2) || value2 < 0 || value2 > 4294967295) {
+    throw new Error(`${name} is not a uint32`);
+  }
+  const buf = new Uint8Array(4);
+  new DataView(buf.buffer).setUint32(0, value2, false);
+  parts.push(buf);
+}
+function appendI64(parts, value2, name) {
+  if (!Number.isInteger(value2) || value2 < 0 || value2 > Number.MAX_SAFE_INTEGER) {
+    throw new Error(`${name} is not a safe non-negative integer`);
+  }
+  const buf = new Uint8Array(8);
+  new DataView(buf.buffer).setBigUint64(0, BigInt(value2), false);
+  parts.push(buf);
+}
+function appendBytes(parts, bytes2) {
+  appendU32(parts, bytes2.length, "length");
+  parts.push(bytes2);
+}
+function appendHex(parts, value2, name, exactBytes) {
+  appendBytes(parts, hexToBytes2(requireLowerHex(value2, name, exactBytes)));
+}
+function appendText2(parts, value2, name) {
+  if (!value2 || value2 !== value2.trim() || value2 !== value2.toLowerCase()) {
+    throw new Error(`${name} must be non-empty canonical lowercase`);
+  }
+  appendBytes(parts, encodeUtf8(value2));
+}
+function appendRawText(parts, value2, name) {
+  if (!value2 || value2 !== value2.trim()) throw new Error(`${name} required`);
+  appendBytes(parts, encodeUtf8(value2));
+}
+function concat3(parts) {
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+function requireSecp(pub, name) {
+  const hexKey = requireLowerHex(pub, name, COMPRESSED);
+  if (hexKey[1] !== "2" && hexKey[1] !== "3") throw new Error(`${name} must be compressed`);
+  if (!secp256k1.utils.isValidPublicKey(hexToBytes2(hexKey), true)) {
+    throw new Error(`${name} is not a valid secp256k1 public key`);
+  }
+  return hexKey;
+}
+function requireP256(pub, name) {
+  const hexKey = requireLowerHex(pub, name, COMPRESSED);
+  if (hexKey[0] !== "0" || hexKey[1] !== "2" && hexKey[1] !== "3") {
+    throw new Error(`${name} must be compressed`);
+  }
+  if (!p256.utils.isValidPublicKey(hexToBytes2(hexKey), true)) {
+    throw new Error(`${name} is not a valid P-256 public key`);
+  }
+  return hexKey;
+}
+function requirePair(pair, name) {
+  return {
+    vault: requireSecp(pair.vault, `${name}.vault`),
+    arkade: requireSecp(pair.arkade, `${name}.arkade`)
+  };
+}
+function validateVaultProgramDescriptor(d) {
+  if (d.schema !== PROGRAM_SCHEMA) throw new Error("unsupported vault schema");
+  if (!SUPPORTED_NETWORKS.includes(d.network)) throw new Error(`unsupported network ${d.network}`);
+  if (!d.vaultId || String(d.vaultId).trim() === "") throw new Error("vault id required");
+  if (!isSavingsTemplate(d.templateVersion) && d.templateVersion !== CONNECTOR_TEMPLATE)
+    throw new Error("template version is not this release");
+  if (d.policyVersion !== POLICY_VERSION) throw new Error("policy version is not this release");
+  requireProtectionTierMatchesRecovery(d.protectionTier, d.keys.recovery);
+  if (d.csv.hardware !== PROGRAM_CSV.hardware || d.csv.phone !== PROGRAM_CSV.phone || d.csv.recovery !== PROGRAM_CSV.recovery) {
+    throw new Error("csv delays do not match this release");
+  }
+  if (d.p2a.script !== P2A_SCRIPT_HEX || d.p2a.valueSats !== P2A_VALUE_SATS || d.p2a.outputIndex !== P2A_OUTPUT_INDEX) {
+    throw new Error("P2A lock does not match this release");
+  }
+  if (d.transitionSequence !== TRANSITION_SEQUENCE) throw new Error("transition sequence does not match this release");
+  if (d.policy.recipientDustSats !== DUST_SATS) throw new Error("dust does not match this release");
+  const selectedPolicy = validateSpendingPolicy(
+    {
+      program: d.policy.program,
+      schema: d.policy.schema,
+      period: d.policy.period,
+      periodAllowanceSats: d.policy.periodAllowanceSats,
+      txRecipientCapSats: d.policy.recipientCapSats,
+      absoluteFeeCapSats: d.policy.absoluteFeeCapSats,
+      feerateCapSatPerV: d.policy.feerateCapSatVb
+    },
+    d.network
+  );
+  if (spendingPolicyDigest(selectedPolicy, d.network) !== d.policy.digest)
+    throw new Error("spending policy digest does not match");
+  requireSecp(d.keys.phoneBip340, "phone");
+  requireP256(d.keys.phoneDirectP256, "phoneDirectP256");
+  requireSecp(d.keys.hardware, "hardware");
+  if (d.keys.recovery) requireSecp(d.keys.recovery, "recovery");
+  requireSecp(d.keys.vaultCosignerBase, "vaultCosignerBase");
+  requireSecp(d.keys.arkadeCosignerBase, "arkadeCosignerBase");
+  const hasRecovery = Boolean(d.keys.recovery);
+  const claimants = familyClaimants(hasRecovery);
+  const keys2 = familyKeysFor(hasRecovery);
+  for (const claimant of claimants) {
+    requirePair(d.tweaks.initiate[claimant], `initiate.${claimant}`);
+  }
+  for (const key of keys2) {
+    requirePair(d.tweaks.pending[key], `pending.${key}`);
+  }
+  const rebuilt = buildDescriptorFamily({
+    vaultId: d.vaultId,
+    phonePub: d.keys.phoneBip340,
+    hardwarePub: d.keys.hardware,
+    recoveryPub: d.keys.recovery,
+    phoneDirectP256: d.keys.phoneDirectP256,
+    vaultCosignerBase: d.keys.vaultCosignerBase,
+    arkadeCosignerBase: d.keys.arkadeCosignerBase,
+    network: d.network,
+    templateVersion: d.templateVersion,
+    connectorType: d.connectorType,
+    absoluteFeeCapSats: selectedPolicy.absoluteFeeCapSats,
+    feerateCapSatPerV: selectedPolicy.feerateCapSatPerV
+  });
+  for (const claimant of claimants) {
+    if (d.tweaks.initiate[claimant].vault !== rebuilt.initiateTweaks[claimant].vault || d.tweaks.initiate[claimant].arkade !== rebuilt.initiateTweaks[claimant].arkade) {
+      throw new Error("initiate tweaks do not match derived authorization scripts");
+    }
+  }
+  for (const key of keys2) {
+    if (d.tweaks.pending[key].vault !== rebuilt.pendingTweaks[key].vault || d.tweaks.pending[key].arkade !== rebuilt.pendingTweaks[key].arkade) {
+      throw new Error("pending tweaks do not match derived authorization scripts");
+    }
+  }
+  if (d.savings.address !== rebuilt.savings.address || d.savings.script !== hex.encode(rebuilt.savings.script)) {
+    throw new Error("savings tree does not match rebuilt descriptor");
+  }
+  for (const key of keys2) {
+    if (!d.pending[key] || !d.quarantine[key]) throw new Error(`missing ${key} trees`);
+    if (d.pending[key].address !== rebuilt.pending[key].address)
+      throw new Error(`${key} pending does not match rebuilt descriptor`);
+    if (d.pending[key].script !== hex.encode(rebuilt.pending[key].script)) {
+      throw new Error(`${key} pending does not match rebuilt descriptor`);
+    }
+    if (d.pending[key].delay !== rebuilt.pending[key].delay) throw new Error(`${key} pending delay does not match`);
+    if (d.quarantine[key].address !== rebuilt.quarantine[key].address) {
+      throw new Error(`${key} quarantine does not match rebuilt descriptor`);
+    }
+    if (d.quarantine[key].script !== hex.encode(rebuilt.quarantine[key].script)) {
+      throw new Error(`${key} quarantine does not match rebuilt descriptor`);
+    }
+    const want = rebuilt.quarantine[key].guardians;
+    if (d.quarantine[key].guardians.length !== want.length || d.quarantine[key].guardians.some((g, i) => g !== want[i])) {
+      throw new Error(`${key} quarantine guardians do not match`);
+    }
+  }
+  return d;
+}
+function encodeVaultProgramDescriptor(input) {
+  return encodeRawVaultProgramDescriptor(validateVaultProgramDescriptor(input));
+}
+function encodeRawVaultProgramDescriptor(d) {
+  const parts = [];
+  appendText2(parts, d.schema, "schema");
+  appendText2(parts, d.network, "network");
+  appendText2(parts, d.vaultId, "vaultId");
+  appendBytes(parts, encodeUtf8(d.templateVersion));
+  appendBytes(parts, encodeUtf8(d.policyVersion));
+  appendText2(parts, requireProtectionTier(d.protectionTier), "protectionTier");
+  appendHex(parts, d.keys.phoneBip340, "phone", COMPRESSED);
+  appendHex(parts, d.keys.phoneDirectP256, "phoneDirectP256", COMPRESSED);
+  appendHex(parts, d.keys.hardware, "hardware", COMPRESSED);
+  if (d.keys.recovery) appendHex(parts, d.keys.recovery, "recovery", COMPRESSED);
+  appendHex(parts, d.keys.vaultCosignerBase, "vaultCosignerBase", COMPRESSED);
+  appendHex(parts, d.keys.arkadeCosignerBase, "arkadeCosignerBase", COMPRESSED);
+  const hasRecovery = Boolean(d.keys.recovery);
+  for (const claimant of familyClaimants(hasRecovery)) {
+    appendHex(parts, d.tweaks.initiate[claimant].vault, `initiate.${claimant}.vault`, COMPRESSED);
+    appendHex(parts, d.tweaks.initiate[claimant].arkade, `initiate.${claimant}.arkade`, COMPRESSED);
+  }
+  for (const key of familyKeysFor(hasRecovery)) {
+    appendHex(parts, d.tweaks.pending[key].vault, `pending.${key}.vault`, COMPRESSED);
+    appendHex(parts, d.tweaks.pending[key].arkade, `pending.${key}.arkade`, COMPRESSED);
+  }
+  appendRawText(parts, d.arkadeCosigner.origin, "arkade origin");
+  appendRawText(parts, d.arkadeCosigner.version, "arkade version");
+  appendU32(parts, d.csv.hardware, "csv.hardware");
+  appendU32(parts, d.csv.phone, "csv.phone");
+  appendU32(parts, d.csv.recovery, "csv.recovery");
+  appendBytes(parts, encodeUtf8(d.policy.program));
+  appendBytes(parts, encodeUtf8(d.policy.schema));
+  appendBytes(parts, encodeUtf8(d.policy.period));
+  appendHex(parts, d.policy.digest, "policy.digest", 32);
+  appendI64(parts, d.policy.recipientDustSats, "dust");
+  appendI64(parts, d.policy.recipientCapSats, "tx cap");
+  appendI64(parts, d.policy.periodAllowanceSats, "period");
+  appendI64(parts, d.policy.absoluteFeeCapSats, "fee cap");
+  appendI64(parts, d.policy.feerateCapSatVb, "feerate");
+  appendHex(parts, d.p2a.script, "p2a.script", d.p2a.script.length / 2);
+  appendI64(parts, d.p2a.valueSats, "p2a.value");
+  appendU32(parts, d.p2a.outputIndex, "p2a.index");
+  appendU32(parts, d.transitionSequence, "sequence");
+  appendHex(parts, d.savings.script, "savings.script", d.savings.script.length / 2);
+  appendText2(parts, d.savings.address, "savings.address");
+  for (const key of familyKeysFor(hasRecovery)) {
+    appendHex(parts, d.pending[key].script, `${key}.pending.script`, d.pending[key].script.length / 2);
+    appendText2(parts, d.pending[key].address, `${key}.pending.address`);
+    appendU32(parts, d.pending[key].delay, `${key}.pending.delay`);
+  }
+  for (const key of familyKeysFor(hasRecovery)) {
+    appendHex(parts, d.quarantine[key].script, `${key}.quarantine.script`, d.quarantine[key].script.length / 2);
+    appendText2(parts, d.quarantine[key].address, `${key}.quarantine.address`);
+    appendText2(parts, d.quarantine[key].guardians[0], `${key}.guardian0`);
+    if (d.quarantine[key].guardians[1]) {
+      appendText2(parts, d.quarantine[key].guardians[1], `${key}.guardian1`);
+    }
+  }
+  return concat3(parts);
+}
+function hashVaultProgramDescriptor(d) {
+  return bytesToHex2(sha256(encodeVaultProgramDescriptor(d)));
+}
+function buildDescriptorFamily(input) {
+  if (input.templateVersion !== CONNECTOR_TEMPLATE) {
+    if (input.connectorType !== void 0) throw new Error("connector type on a legacy descriptor");
+    return buildVaultProgramFamily(input);
+  }
+  if (input.connectorType !== "p2tr" && input.connectorType !== "p2wpkh") throw new Error("connector type required");
+  return buildConnectorFamily({ ...input, connectorType: input.connectorType });
+}
+
+// tools/offline-recovery/src/lib/vault/program/connectorEnrollmentCore.ts
+var BOARDING_ENROLLMENT_SCHEMA = "arkade-vault/enrollment-with-board-v1";
+function fail(message) {
+  throw new Error(message);
+}
+function requireCompressedHex(value2, name) {
+  const key = typeof value2 === "string" ? value2.toLowerCase() : "";
+  if (!/^(02|03)[0-9a-f]{64}$/.test(key)) fail(`${name} must be a compressed public key`);
+  return key;
+}
+function requireUint32(value2, name) {
+  if (!Number.isInteger(value2) || value2 < 0 || value2 > 4294967295)
+    fail(`${name} must be a uint32`);
+  return value2;
+}
+function appendLE32(parts, value2) {
+  const bytes2 = new Uint8Array(4);
+  new DataView(bytes2.buffer).setUint32(0, value2, true);
+  parts.push(bytes2);
+}
+function appendField(parts, value2) {
+  const bytes2 = new TextEncoder().encode(value2);
+  appendLE32(parts, bytes2.length);
+  parts.push(bytes2);
+}
+function concatParts(parts) {
+  const out = new Uint8Array(parts.reduce((size, part) => size + part.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+function hashConnectorBoarding(vaultId, savingsHash, boarding) {
+  if (!/^[0-9a-f]{64}$/.test(savingsHash)) fail("connector savings hash required");
+  const fields = [
+    BOARDING_ENROLLMENT_SCHEMA,
+    vaultId,
+    savingsHash,
+    boarding.schema,
+    boarding.program,
+    boarding.template,
+    boarding.network,
+    boarding.boardingPub,
+    boarding.recoveryPhonePub,
+    boarding.vaultBoardCosignerPub,
+    boarding.operatorPub,
+    boarding.exitDelayUnit,
+    boarding.script,
+    boarding.address
+  ];
+  const parts = [];
+  for (const field2 of fields) appendField(parts, field2);
+  appendLE32(parts, boarding.exitDelay);
+  return hex.encode(sha256(concatParts(parts)));
+}
+function hashConnectorBoardComposite(digestHex, boardingHashHex) {
+  if (!/^[0-9a-f]{64}$/.test(digestHex)) fail("connector enrollment digest required");
+  if (!/^[0-9a-f]{64}$/.test(boardingHashHex)) fail("connector boarding hash required");
+  const payload = new Uint8Array(65);
+  payload[0] = 1;
+  payload.set(hex.decode(digestHex), 1);
+  payload.set(hex.decode(boardingHashHex), 33);
+  const out = hex.encode(sha256(payload));
+  payload.fill(0);
+  return out;
+}
+function toOrigin(origin) {
+  return {
+    publicKey: hex.decode(requireCompressedHex(origin.connectorPub, "connectorPub")),
+    fingerprint: requireUint32(origin.connectorFingerprint, "connectorFingerprint"),
+    path: [...origin.connectorPath]
+  };
+}
+function buildConnectorEnrollmentPreview(input) {
+  const network2 = input.network === "mainnet" || input.network === "mutinynet" ? input.network : fail("unsupported network");
+  const protectionTier = requireProtectionTierMatchesRecovery(input.protectionTier, input.recoveryPub || "");
+  const policy = validateSpendingPolicy(input.spendingPolicy, network2);
+  const origin = toOrigin(input.origin);
+  if (input.origin.connectorType !== "p2wpkh" && input.origin.connectorType !== "p2tr")
+    fail("connector type must be p2tr or p2wpkh");
+  const familyInput = {
+    connectorType: input.origin.connectorType,
+    vaultId: input.vaultId,
+    network: network2,
+    phonePub: requireCompressedHex(input.phonePub, "phonePub"),
+    hardwarePub: requireCompressedHex(input.origin.connectorPub, "connectorPub"),
+    ...input.recoveryPub ? { recoveryPub: requireCompressedHex(input.recoveryPub, "recoveryPub") } : {},
+    phoneDirectP256: requireCompressedHex(input.phoneDirectP256, "phoneDirectP256"),
+    vaultCosignerBase: requireCompressedHex(input.vaultCosignerBase, "vaultCosignerBase"),
+    arkadeCosignerBase: requireCompressedHex(input.arkadeCosignerBase, "arkadeCosignerBase"),
+    absoluteFeeCapSats: policy.absoluteFeeCapSats,
+    feerateCapSatPerV: policy.feerateCapSatPerV
+  };
+  const family = buildConnectorFamily(familyInput);
+  const digest = connectorEnrollmentDigest({ ...familyInput, protectionTier, spendingPolicy: policy }, origin);
+  const hasRecovery = Boolean(input.recoveryPub);
+  const pending = {};
+  const quarantine = {};
+  for (const key of familyKeysFor(hasRecovery)) {
+    pending[key] = {
+      script: hex.encode(family.pending[key].script),
+      address: family.pending[key].address,
+      delay: family.pending[key].delay
+    };
+    quarantine[key] = {
+      script: hex.encode(family.quarantine[key].script),
+      address: family.quarantine[key].address,
+      guardians: [...family.quarantine[key].guardians]
+    };
+  }
+  const descriptor = {
+    connectorType: input.origin.connectorType,
+    schema: PROGRAM_SCHEMA,
+    network: network2,
+    vaultId: input.vaultId,
+    templateVersion: CONNECTOR_TEMPLATE,
+    policyVersion: POLICY_VERSION,
+    protectionTier,
+    keys: {
+      phoneBip340: familyInput.phonePub,
+      phoneDirectP256: familyInput.phoneDirectP256,
+      hardware: familyInput.hardwarePub,
+      ...familyInput.recoveryPub ? { recovery: familyInput.recoveryPub } : {},
+      vaultCosignerBase: familyInput.vaultCosignerBase,
+      arkadeCosignerBase: familyInput.arkadeCosignerBase
+    },
+    tweaks: { initiate: family.initiateTweaks, pending: family.pendingTweaks },
+    arkadeCosigner: { origin: input.arkadeOrigin.trim(), version: input.arkadeVersion.trim() },
+    csv: { ...PROGRAM_CSV },
+    policy: {
+      program: policy.program,
+      schema: policy.schema,
+      period: policy.period,
+      digest: spendingPolicyDigest(policy, network2),
+      recipientDustSats: DUST_SATS,
+      recipientCapSats: policy.txRecipientCapSats,
+      periodAllowanceSats: policy.periodAllowanceSats,
+      absoluteFeeCapSats: policy.absoluteFeeCapSats,
+      feerateCapSatVb: policy.feerateCapSatPerV
+    },
+    p2a: { script: P2A_SCRIPT_HEX, valueSats: P2A_VALUE_SATS, outputIndex: P2A_OUTPUT_INDEX },
+    transitionSequence: TRANSITION_SEQUENCE,
+    savings: { script: hex.encode(family.savings.script), address: family.savings.address },
+    pending,
+    quarantine
+  };
+  const savingsHash = hex.encode(sha256(encodeRawVaultProgramDescriptor(descriptor)));
+  const boardingHash = input.boarding ? hashConnectorBoarding(input.vaultId, savingsHash, input.boarding) : "";
+  const compositeHash = input.boarding ? hashConnectorBoardComposite(digest, boardingHash) : "";
+  return {
+    family,
+    origin,
+    digest,
+    savingsHash,
+    boardingHash,
+    compositeHash,
+    descriptor,
+    policy,
+    protectionTier
+  };
+}
+var CONNECTOR_KIT_NAME = "arkade-connector-enrollment";
+var CONNECTOR_KIT_VERSION = 1;
+function parseConnectorRecoveryKit(raw2) {
+  const kit2 = raw2;
+  if (!kit2 || kit2.name !== CONNECTOR_KIT_NAME) fail("not a connector enrollment kit");
+  if (kit2.version !== CONNECTOR_KIT_VERSION) fail("unsupported connector kit version");
+  const rebuilt = buildConnectorEnrollmentPreview({
+    vaultId: kit2.vaultId,
+    network: kit2.network,
+    protectionTier: kit2.protectionTier,
+    phonePub: kit2.phonePub,
+    phoneDirectP256: kit2.phoneDirectP256,
+    ...kit2.recoveryPub ? { recoveryPub: kit2.recoveryPub } : {},
+    vaultCosignerBase: kit2.vaultCosignerBase,
+    arkadeCosignerBase: kit2.arkadeCosignerBase,
+    arkadeOrigin: kit2.arkadeOrigin,
+    arkadeVersion: kit2.arkadeVersion,
+    spendingPolicy: kit2.spendingPolicy,
+    origin: kit2.origin,
+    boarding: kit2.boarding
+  });
+  if (rebuilt.digest !== kit2.enrollmentDigest) fail("connector kit digest does not match rebuild");
+  if (rebuilt.savingsHash !== kit2.savingsHash) fail("connector kit savings hash does not match rebuild");
+  if (rebuilt.boardingHash !== kit2.boardingHash) fail("connector kit boarding hash does not match rebuild");
+  if (rebuilt.compositeHash !== kit2.descriptorHash) fail("connector kit hash does not match rebuild");
+  if (rebuilt.descriptor.savings.script !== kit2.savingsScript)
+    fail("connector kit Savings script does not match rebuild");
+  if (rebuilt.descriptor.savings.address !== kit2.savingsAddress)
+    fail("connector kit Savings address does not match rebuild");
+  if (hex.encode(rebuilt.family.connector.script) !== kit2.connectorScript)
+    fail("connector kit script does not match rebuild");
+  return kit2;
+}
+function connectorRecoveryDescriptor(raw2) {
+  const kit2 = parseConnectorRecoveryKit(raw2);
+  return buildConnectorEnrollmentPreview({
+    vaultId: kit2.vaultId,
+    network: kit2.network,
+    protectionTier: kit2.protectionTier,
+    origin: kit2.origin,
+    phonePub: kit2.phonePub,
+    phoneDirectP256: kit2.phoneDirectP256,
+    vaultCosignerBase: kit2.vaultCosignerBase,
+    arkadeCosignerBase: kit2.arkadeCosignerBase,
+    arkadeOrigin: kit2.arkadeOrigin,
+    arkadeVersion: kit2.arkadeVersion,
+    recoveryPub: kit2.recoveryPub,
+    spendingPolicy: kit2.spendingPolicy,
+    boarding: kit2.boarding
+  }).descriptor;
+}
+
+// tools/offline-recovery/src/lib/vault/prfEnvelope.ts
+init_define_import_meta_env();
+
+// tools/offline-recovery/src/lib/vault/ceremony/directauth.ts
+init_define_import_meta_env();
+var DIRECT_P256_HKDF_PREFIX = new TextEncoder().encode("arkade-2fa-vault/direct-p256/v1");
+
+// tools/offline-recovery/src/lib/vault/prfEnvelope.ts
+var PRF_SALT_UTF8 = "arkade-2fa-vault/prf/v1";
+var KEK_HKDF_INFO_UTF8 = "arkade-2fa-vault/kek/v1";
+var PRF_SALT = new TextEncoder().encode(PRF_SALT_UTF8);
+var KEK_HKDF_INFO = new TextEncoder().encode(KEK_HKDF_INFO_UTF8);
+
+// tools/offline-recovery/src/lib/vault/program/kit.ts
+var RECOVERY_KIT_NAME = "arkade-recovery-kit";
+var RECOVERY_KIT_VERSION_V3 = 3;
+var RECOVERY_KIT_VERSION = 4;
+var UNLOCK_KEYS = ["prfSalt", "kekInfo", "credId", "webauthnP256", "nonce", "ciphertext"];
+var BOARDING_KEYS = [
+  "schema",
+  "program",
+  "template",
+  "network",
+  "boardingPub",
+  "recoveryPhonePub",
+  "vaultBoardCosignerPub",
+  "operatorPub",
+  "exitDelay",
+  "exitDelayUnit",
+  "script",
+  "address"
+];
+function requireExactKeys(value2, allowed, label) {
+  for (const key of Object.keys(value2)) {
+    if (!allowed.includes(key)) throw new Error(`Recovery Kit ${label} has an unknown field`);
+  }
+}
+function parseHostname(value2, label) {
+  const host = String(value2 || "").trim().toLowerCase();
+  if (!host || host.includes("/") || host.includes(":") || host.includes(" ")) {
+    throw new Error(`Recovery Kit ${label} is not a hostname`);
+  }
+  return host;
+}
+function parseOrigin(value2) {
+  const raw2 = String(value2 || "").trim();
+  let parsed;
+  try {
+    parsed = new URL(raw2);
+  } catch {
+    throw new Error("Recovery Kit origin is not a valid URL");
+  }
+  if (parsed.protocol !== "https:" && parsed.hostname !== "localhost") {
+    throw new Error("Recovery Kit origin must be https");
+  }
+  if (parsed.username || parsed.password || parsed.search || parsed.hash || parsed.pathname !== "/") {
+    throw new Error("Recovery Kit origin must contain only scheme and host");
+  }
+  return `${parsed.protocol}//${parsed.host.toLowerCase()}`;
+}
+function parseKitUnlock(raw2) {
+  if (!raw2 || typeof raw2 !== "object") throw new Error("Recovery Kit is missing the unlock envelope");
+  requireExactKeys(raw2, UNLOCK_KEYS, "unlock");
+  const rec = raw2;
+  if (rec.prfSalt !== PRF_SALT_UTF8 || rec.kekInfo !== KEK_HKDF_INFO_UTF8) {
+    throw new Error("Recovery Kit unlock constants do not match this wallet");
+  }
+  const credId = requireLowerHex(String(rec.credId || ""), "credential id");
+  if (credId.length < 2 || credId.length > 256) throw new Error("credential id must be 1..128 bytes");
+  return {
+    prfSalt: PRF_SALT_UTF8,
+    kekInfo: KEK_HKDF_INFO_UTF8,
+    credId,
+    webauthnP256: requireLowerHex(String(rec.webauthnP256 || ""), "webauthn P-256", 33),
+    nonce: requireLowerHex(String(rec.nonce || ""), "envelope nonce", 12),
+    ciphertext: requireLowerHex(String(rec.ciphertext || ""), "envelope ciphertext", 48)
+  };
+}
+function parseKitBoardingPins(raw2) {
+  if (!raw2 || typeof raw2 !== "object") throw new Error("Recovery Kit boarding pins are missing");
+  requireExactKeys(raw2, BOARDING_KEYS, "boarding");
+  const rec = raw2;
+  if (rec.schema !== "arkade-vault/board-v1" || rec.program !== "vault-board-v1") {
+    throw new Error("Recovery Kit boarding program does not match this wallet");
+  }
+  if (rec.template !== "vault-board-v1-boarding-vault-and-operator" || rec.exitDelayUnit !== "seconds") {
+    throw new Error("Recovery Kit boarding template does not match this wallet");
+  }
+  if (!isSupportedVaultNetwork(rec.network)) throw new Error("Recovery Kit boarding network is unsupported");
+  const exitDelay = Number(rec.exitDelay);
+  if (!Number.isInteger(exitDelay) || exitDelay <= 0) throw new Error("Recovery Kit boarding delay is invalid");
+  return {
+    schema: "arkade-vault/board-v1",
+    program: "vault-board-v1",
+    template: "vault-board-v1-boarding-vault-and-operator",
+    network: rec.network,
+    boardingPub: requireLowerHex(String(rec.boardingPub || ""), "boarding pub", 33),
+    recoveryPhonePub: requireLowerHex(String(rec.recoveryPhonePub || ""), "boarding recovery pub", 33),
+    vaultBoardCosignerPub: requireLowerHex(String(rec.vaultBoardCosignerPub || ""), "vault board cosigner", 33),
+    operatorPub: requireLowerHex(String(rec.operatorPub || ""), "boarding operator pub", 33),
+    exitDelay,
+    exitDelayUnit: "seconds",
+    script: requireLowerHex(String(rec.script || ""), "boarding script"),
+    address: String(rec.address || "").trim()
+  };
+}
+function kitHasUnlock(kit2) {
+  return kit2.version === 4 && Boolean(kit2.unlock && kit2.rpId && kit2.clientOrigin);
+}
+function buildRecoveryKit(descriptor, emergency) {
+  const d = validateVaultProgramDescriptor(descriptor);
+  const publicKit = {
+    name: RECOVERY_KIT_NAME,
+    version: RECOVERY_KIT_VERSION_V3,
+    descriptor: d,
+    descriptorHash: hashVaultProgramDescriptor(d),
+    spendingPolicyDigest: d.policy.digest,
+    protectionTier: d.protectionTier
+  };
+  if (!emergency) return publicKit;
+  const unlock = parseKitUnlock(emergency.unlock);
+  const rpId = parseHostname(emergency.rpId, "RP ID");
+  const clientOrigin = parseOrigin(emergency.clientOrigin);
+  if (new URL(clientOrigin).hostname !== rpId && rpId !== "localhost") {
+    throw new Error("Recovery Kit origin host must equal the RP ID");
+  }
+  return {
+    ...publicKit,
+    version: RECOVERY_KIT_VERSION,
+    rpId,
+    clientOrigin,
+    unlock,
+    ...emergency.boarding ? { boarding: parseKitBoardingPins(emergency.boarding) } : {}
+  };
+}
+function parseRecoveryKit(raw2) {
+  if (!raw2 || typeof raw2 !== "object") throw new Error("not a Recovery Kit");
+  if (raw2 && typeof raw2 === "object" && "name" in raw2 && raw2.name === CONNECTOR_KIT_NAME)
+    return buildRecoveryKit(connectorRecoveryDescriptor(raw2));
+  const kit2 = raw2;
+  if (kit2.name !== RECOVERY_KIT_NAME) throw new Error("not a Recovery Kit");
+  if (kit2.version !== RECOVERY_KIT_VERSION_V3 && kit2.version !== RECOVERY_KIT_VERSION) {
+    throw new Error("unsupported Recovery Kit version");
+  }
+  const built = buildRecoveryKit(kit2.descriptor);
+  if (kit2.descriptorHash && kit2.descriptorHash !== built.descriptorHash) {
+    throw new Error("Recovery Kit hash does not match the rebuilt descriptor");
+  }
+  if (kit2.spendingPolicyDigest !== built.spendingPolicyDigest) {
+    throw new Error("Recovery Kit spending policy digest does not match the rebuilt descriptor");
+  }
+  if (kit2.protectionTier !== built.protectionTier) {
+    throw new Error("Recovery Kit protection tier does not match the rebuilt descriptor");
+  }
+  if (kit2.version === RECOVERY_KIT_VERSION_V3) return built;
+  return buildRecoveryKit(kit2.descriptor, {
+    rpId: String(kit2.rpId || ""),
+    clientOrigin: String(kit2.clientOrigin || ""),
+    unlock: parseKitUnlock(kit2.unlock),
+    boarding: kit2.boarding ? parseKitBoardingPins(kit2.boarding) : void 0
+  });
+}
+
+// tools/offline-recovery/src/lib/vault/program/kitBundle.ts
+function extractRecoveryKitJson(bytes2) {
+  if (!bytes2.length) throw new Error("That file is empty");
+  const asJson = jsonIfLooksLikeKit(bytes2);
+  if (asJson) return asJson;
+  if (bytes2[0] !== 80 || bytes2[1] !== 75) {
+    throw new Error("Choose Recovery Kit.json or the zip you saved from Vaulted");
+  }
+  const view3 = new DataView(bytes2.buffer, bytes2.byteOffset, bytes2.byteLength);
+  const decoder = new TextDecoder();
+  let offset = 0;
+  while (offset + 30 <= bytes2.length) {
+    const signature = view3.getUint32(offset, true);
+    if (signature !== 67324752) break;
+    const method = view3.getUint16(offset + 8, true);
+    const compressed2 = view3.getUint32(offset + 18, true);
+    const uncompressed = view3.getUint32(offset + 22, true);
+    const nameLength = view3.getUint16(offset + 26, true);
+    const extraLength = view3.getUint16(offset + 28, true);
+    const nameStart = offset + 30;
+    const name = decoder.decode(bytes2.subarray(nameStart, nameStart + nameLength));
+    const dataStart = nameStart + nameLength + extraLength;
+    const size = method === 0 ? uncompressed : compressed2;
+    const data = bytes2.subarray(dataStart, dataStart + size);
+    if (isKitJsonName(name)) {
+      if (method !== 0) throw new Error("Open the zip, then choose Recovery Kit.json");
+      const json = jsonIfLooksLikeKit(data);
+      if (!json) throw new Error("That zip does not contain a Recovery Kit");
+      return json;
+    }
+    offset = dataStart + size;
+  }
+  throw new Error("That zip does not contain Recovery Kit.json");
+}
+function jsonIfLooksLikeKit(bytes2) {
+  const text = new TextDecoder().decode(bytes2).replace(/^\uFEFF/, "").trim();
+  return text.startsWith("{") ? text : null;
+}
+function isKitJsonName(name) {
+  const base = name.split("/").pop() || name;
+  return base === "Recovery Kit.json" || base.toLowerCase() === "recovery kit.json";
+}
 
 // node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/index.js
 init_define_import_meta_env();
@@ -17870,9 +19674,9 @@ var ArkPsbtFieldKey = /* @__PURE__ */ ((ArkPsbtFieldKey2) => {
   return ArkPsbtFieldKey2;
 })(ArkPsbtFieldKey || {});
 var ArkPsbtFieldKeyType = 222;
-function setArkPsbtField(tx, inputIndex, coder, value) {
+function setArkPsbtField(tx, inputIndex, coder, value2) {
   tx.updateInput(inputIndex, {
-    unknown: [...tx.getInput(inputIndex)?.unknown ?? [], coder.encode(value)]
+    unknown: [...tx.getInput(inputIndex)?.unknown ?? [], coder.encode(value2)]
   });
 }
 function getArkPsbtFields(tx, inputIndex, coder) {
@@ -17886,7 +19690,7 @@ function getArkPsbtFields(tx, inputIndex, coder) {
 }
 var VtxoTaprootTree = {
   key: "taptree",
-  encode: (value) => [
+  encode: (value2) => [
     {
       type: ArkPsbtFieldKeyType,
       key: encodedPsbtFieldKey[
@@ -17894,20 +19698,20 @@ var VtxoTaprootTree = {
         /* VtxoTaprootTree */
       ]
     },
-    value
+    value2
   ],
-  decode: (value) => nullIfCatch(() => {
+  decode: (value2) => nullIfCatch(() => {
     if (!checkKeyMatch(
-      value[0],
+      value2[0],
       "taptree"
       /* VtxoTaprootTree */
     )) return null;
-    return value[1];
+    return value2[1];
   })
 };
 var ConditionWitness = {
   key: "condition",
-  encode: (value) => [
+  encode: (value2) => [
     {
       type: ArkPsbtFieldKeyType,
       key: encodedPsbtFieldKey[
@@ -17915,20 +19719,20 @@ var ConditionWitness = {
         /* ConditionWitness */
       ]
     },
-    RawWitness.encode(value)
+    RawWitness.encode(value2)
   ],
-  decode: (value) => nullIfCatch(() => {
+  decode: (value2) => nullIfCatch(() => {
     if (!checkKeyMatch(
-      value[0],
+      value2[0],
       "condition"
       /* ConditionWitness */
     )) return null;
-    return RawWitness.decode(value[1]);
+    return RawWitness.decode(value2[1]);
   })
 };
 var PrevArkTxField = {
   key: "prevarktx",
-  encode: (value) => [
+  encode: (value2) => [
     {
       type: ArkPsbtFieldKeyType,
       key: encodedPsbtFieldKey[
@@ -17936,28 +19740,28 @@ var PrevArkTxField = {
         /* PrevArkTx */
       ]
     },
-    value
+    value2
   ],
-  decode: (value) => nullIfCatch(() => {
+  decode: (value2) => nullIfCatch(() => {
     if (!checkKeyMatch(
-      value[0],
+      value2[0],
       "prevarktx"
       /* PrevArkTx */
     )) return null;
-    return value[1];
+    return value2[1];
   })
 };
 var CosignerPublicKey = {
   key: "cosigner",
-  encode: (value) => [
+  encode: (value2) => [
     {
       type: ArkPsbtFieldKeyType,
       key: new Uint8Array([...encodedPsbtFieldKey[
         "cosigner"
         /* Cosigner */
-      ], value.index])
+      ], value2.index])
     },
-    value.key
+    value2.key
   ],
   decode: (unknown) => nullIfCatch(() => {
     if (!checkKeyMatch(unknown[0], "cosigner", true)) return null;
@@ -17987,9 +19791,9 @@ function checkKeyMatch(key, arkPsbtFieldKey, prefixOnly = false) {
   }
   return true;
 }
-var getNetwork = (network) => {
-  const found = networks[network];
-  if (!found) throw new Error(`Unsupported network: ${network}`);
+var getNetwork = (network2) => {
+  const found = networks[network2];
+  if (!found) throw new Error(`Unsupported network: ${network2}`);
   return found;
 };
 var networks = {
@@ -18008,9 +19812,9 @@ var networks = {
     "regtest"
   )
 };
-function withArkPrefix(network, prefix2, name) {
+function withArkPrefix(network2, prefix2, name) {
   return {
-    ...network,
+    ...network2,
     hrp: prefix2,
     name
   };
@@ -18027,18 +19831,18 @@ var EMULATOR_PUBKEYS = {
   mutinynet: MUTINYNET_EMULATOR_PUBKEY,
   regtest: REGTEST_EMULATOR_PUBKEY
 };
-function defaultEmulatorPubkey(network) {
-  const pinned = network.name ? EMULATOR_PUBKEYS[network.name] : void 0;
+function defaultEmulatorPubkey(network2) {
+  const pinned = network2.name ? EMULATOR_PUBKEYS[network2.name] : void 0;
   if (!pinned) {
-    const cause = network.name ? `no emulator is deployed for ${network.name}` : `this Network carries no name, so it cannot be matched (build it with getNetwork(...) rather than by hand)`;
+    const cause = network2.name ? `no emulator is deployed for ${network2.name}` : `this Network carries no name, so it cannot be matched (build it with getNetwork(...) rather than by hand)`;
     throw new Error(
       `No emulator co-signer key is pinned for this network: ${cause}; pass emulatorPubkey: "<33-byte compressed hex>" to Arkade.connect to co-sign with your own emulator instead. Pinned networks: ${Object.keys(EMULATOR_PUBKEYS).join(", ")}`
     );
   }
   return pinned;
 }
-function resolveEmulatorPubkey(network, override) {
-  if (override === void 0) return defaultEmulatorPubkey(network);
+function resolveEmulatorPubkey(network2, override) {
+  if (override === void 0) return defaultEmulatorPubkey(network2);
   if (!COMPRESSED_PUBKEY.test(override)) {
     throw new Error(
       `Emulator pubkey override must be 33-byte compressed secp256k1 hex (66 lowercase chars, 02/03 prefix), got ${JSON.stringify(override)}.`
@@ -18134,7 +19938,7 @@ function decodeTapscript(script) {
   for (const type of types) {
     try {
       return type.decode(script);
-    } catch (error) {
+    } catch (error2) {
       continue;
     }
   }
@@ -18187,12 +19991,12 @@ var MultisigTapscript;
     }
     try {
       return decodeChecksigAdd(script);
-    } catch (error) {
+    } catch (error2) {
       try {
         return decodeChecksig(script);
-      } catch (error2) {
+      } catch (error22) {
         throw new Error(
-          `Failed to decode script: ${error2 instanceof Error ? error2.message : String(error2)}`
+          `Failed to decode script: ${error22 instanceof Error ? error22.message : String(error22)}`
         );
       }
     }
@@ -18333,9 +20137,9 @@ var CSVMultisigTapscript;
     let multisig2;
     try {
       multisig2 = MultisigTapscript.decode(multisigScript);
-    } catch (error) {
+    } catch (error2) {
       throw new Error(
-        `Invalid multisig script: ${error instanceof Error ? error.message : String(error)}`
+        `Invalid multisig script: ${error2 instanceof Error ? error2.message : String(error2)}`
       );
     }
     let sequenceNum;
@@ -18415,9 +20219,9 @@ var ConditionCSVMultisigTapscript;
     let csvMultisig;
     try {
       csvMultisig = CSVMultisigTapscript.decode(csvMultisigScript);
-    } catch (error) {
+    } catch (error2) {
       throw new Error(
-        `Invalid CSV multisig script: ${error instanceof Error ? error.message : String(error)}`
+        `Invalid CSV multisig script: ${error2 instanceof Error ? error2.message : String(error2)}`
       );
     }
     const reconstructed = encode22({
@@ -18497,9 +20301,9 @@ var ConditionMultisigTapscript;
     let multisig2;
     try {
       multisig2 = MultisigTapscript.decode(multisigScript);
-    } catch (error) {
+    } catch (error2) {
       throw new Error(
-        `Invalid multisig script: ${error instanceof Error ? error.message : String(error)}`
+        `Invalid multisig script: ${error2 instanceof Error ? error2.message : String(error2)}`
       );
     }
     const reconstructed = encode22({
@@ -18587,9 +20391,9 @@ var CLTVMultisigTapscript;
     let multisig2;
     try {
       multisig2 = MultisigTapscript.decode(multisigScript);
-    } catch (error) {
+    } catch (error2) {
       throw new Error(
-        `Invalid multisig script: ${error instanceof Error ? error.message : String(error)}`
+        `Invalid multisig script: ${error2 instanceof Error ? error2.message : String(error2)}`
       );
     }
     let absoluteTimelock;
@@ -18746,8 +20550,8 @@ var VtxoScript = class _VtxoScript {
    * @returns Taproot onchain address
    * @see address
    */
-  onchainAddress(network = DEFAULT_NETWORK) {
-    return Address(network).encode({
+  onchainAddress(network2 = DEFAULT_NETWORK) {
+    return Address(network2).encode({
       type: "tr",
       pubkey: this.tweakedPublicKey
     });
@@ -18816,8 +20620,8 @@ var EventSourceUnavailableError = class extends Error {
     this.name = "EventSourceUnavailableError";
   }
 };
-function isEventSourceUnavailableError(error) {
-  return error instanceof EventSourceUnavailableError || error instanceof Error && error.name === "EventSourceUnavailableError";
+function isEventSourceUnavailableError(error2) {
+  return error2 instanceof EventSourceUnavailableError || error2 instanceof Error && error2.name === "EventSourceUnavailableError";
 }
 var configured;
 function resolveEventSource(override) {
@@ -18833,11 +20637,11 @@ var FetchError = class extends Error {
   url;
   /** The HTTP method of the failed request (defaults to `"GET"`). */
   method;
-  constructor(message, options) {
-    super(message, { cause: options.cause });
+  constructor(message, options2) {
+    super(message, { cause: options2.cause });
     this.name = "FetchError";
-    this.url = options.url;
-    this.method = options.method;
+    this.url = options2.url;
+    this.method = options2.method;
   }
 };
 function baseFetch(input, init) {
@@ -18903,21 +20707,21 @@ var ArkErrorName = {
    */
   FORFEIT_CLOSURE_LOCKED: "FORFEIT_CLOSURE_LOCKED"
 };
-function isArkError(error, name) {
-  return error instanceof ArkError && (name === void 0 || error.name === name);
+function isArkError(error2, name) {
+  return error2 instanceof ArkError && (name === void 0 || error2.name === name);
 }
 var ProviderUnavailableError = class extends Error {
   /** Always `true`: this error type only ever wraps retryable conditions. */
   retryable = true;
-  constructor(message, options) {
-    super(message, { cause: options?.cause });
+  constructor(message, options2) {
+    super(message, { cause: options2?.cause });
     this.name = "ProviderUnavailableError";
   }
 };
 var ServerResponseMismatchError = class extends Error {
   retryable = false;
-  constructor(message, options) {
-    super(message, { cause: options?.cause });
+  constructor(message, options2) {
+    super(message, { cause: options2?.cause });
     this.name = "ServerResponseMismatchError";
   }
 };
@@ -18935,10 +20739,10 @@ function toProviderUnavailable(err2, kind) {
   }
   return err2;
 }
-function maybeArkError(error) {
+function maybeArkError(error2) {
   try {
-    if (!(error instanceof Error)) return void 0;
-    const decoded = JSON.parse(error.message);
+    if (!(error2 instanceof Error)) return void 0;
+    const decoded = JSON.parse(error2.message);
     if (Array.isArray(decoded.details)) {
       for (const details of decoded.details) {
         if (!("@type" in details)) continue;
@@ -18966,8 +20770,8 @@ function maybeArkError(error) {
     return void 0;
   }
 }
-function isMetadata(value) {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+function isMetadata(value2) {
+  return typeof value2 === "object" && value2 !== null && !Array.isArray(value2);
 }
 var Intent;
 ((Intent2) => {
@@ -19151,9 +20955,9 @@ function prepareCoinAsIntentProofInput(coin) {
   };
 }
 function createAbortError() {
-  const error = new Error("EventSource closed");
-  error.name = "AbortError";
-  return error;
+  const error2 = new Error("EventSource closed");
+  error2.name = "AbortError";
+  return error2;
 }
 function eventSourceIterator(eventSource) {
   const messageQueue = [];
@@ -19195,15 +20999,15 @@ function eventSourceIterator(eventSource) {
   };
   const errorHandler = () => {
     if (closed) return;
-    const error = new Error("EventSource error");
-    error.name = "EventSourceError";
+    const error2 = new Error("EventSource error");
+    error2.name = "EventSourceError";
     if (errorResolve) {
       const reject = errorResolve;
       messageResolve = null;
       errorResolve = null;
-      reject(error);
+      reject(error2);
     } else {
-      errorQueue.push(error);
+      errorQueue.push(error2);
     }
   };
   eventSource.addEventListener("message", messageHandler);
@@ -19216,8 +21020,8 @@ function eventSourceIterator(eventSource) {
           continue;
         }
         if (errorQueue.length > 0) {
-          const error = errorQueue.shift();
-          throw error;
+          const error2 = errorQueue.shift();
+          throw error2;
         }
         const result = await new Promise((resolve, reject) => {
           messageResolve = resolve;
@@ -19239,14 +21043,14 @@ function eventSourceIterator(eventSource) {
   const origReturn = gen.return.bind(gen);
   const managed = gen;
   managed.close = close;
-  managed.return = (value) => {
+  managed.return = (value2) => {
     close();
-    return origReturn(value);
+    return origReturn(value2);
   };
   return managed;
 }
-function isEventSourceError(error) {
-  return error instanceof Error && error.name === "EventSourceError";
+function isEventSourceError(error2) {
+  return error2 instanceof Error && error2.name === "EventSourceError";
 }
 var DEFAULT_MAX_CONCURRENT = 6;
 var DEFAULT_COOLDOWN_MS = 5e3;
@@ -19284,11 +21088,11 @@ var OriginRateGate = class {
   defaultCooldownMs;
   maxCooldownMs;
   jitterMs;
-  constructor(options) {
-    this.maxConcurrent = options?.maxConcurrent ?? DEFAULT_MAX_CONCURRENT;
-    this.defaultCooldownMs = options?.defaultCooldownMs ?? DEFAULT_COOLDOWN_MS;
-    this.maxCooldownMs = options?.maxCooldownMs ?? MAX_COOLDOWN_MS;
-    this.jitterMs = options?.jitterMs ?? DEFAULT_JITTER_MS;
+  constructor(options2) {
+    this.maxConcurrent = options2?.maxConcurrent ?? DEFAULT_MAX_CONCURRENT;
+    this.defaultCooldownMs = options2?.defaultCooldownMs ?? DEFAULT_COOLDOWN_MS;
+    this.maxCooldownMs = options2?.maxCooldownMs ?? MAX_COOLDOWN_MS;
+    this.jitterMs = options2?.jitterMs ?? DEFAULT_JITTER_MS;
   }
   /**
    * Run `fn` under the origin's concurrency cap and behind any active
@@ -19390,9 +21194,9 @@ function advertisedLimit(fromServer) {
   return limit > 0n ? limit : void 0;
 }
 var RestArkProvider = class {
-  constructor(serverUrl = DEFAULT_ARKADE_SERVER_URL, options = {}) {
+  constructor(serverUrl = DEFAULT_ARKADE_SERVER_URL, options2 = {}) {
     this.serverUrl = serverUrl;
-    this.eventSource = options.eventSource;
+    this.eventSource = options2.eventSource;
   }
   serverUrl;
   /** Overrides {@link configureEventSource} for this provider's streams. */
@@ -19701,20 +21505,20 @@ var RestArkProvider = class {
                 throw err2;
               }
             }
-          } catch (error) {
-            if (signal?.aborted || error instanceof Error && error.name === "AbortError") {
+          } catch (error2) {
+            if (signal?.aborted || error2 instanceof Error && error2.name === "AbortError") {
               break;
             }
-            if (isFetchTimeoutError(error)) {
+            if (isFetchTimeoutError(error2)) {
               console.debug("Timeout error ignored");
               continue;
             }
-            if (isEventSourceError(error)) {
-              throw error;
+            if (isEventSourceError(error2)) {
+              throw error2;
             }
-            if (isEventSourceUnavailableError(error)) throw error;
-            console.error("Event stream error:", error);
-            throw error;
+            if (isEventSourceUnavailableError(error2)) throw error2;
+            console.error("Event stream error:", error2);
+            throw error2;
           } finally {
             currentIterator.close();
             iterator = null;
@@ -19726,9 +21530,9 @@ var RestArkProvider = class {
       }
     })();
     const origReturn = gen.return.bind(gen);
-    gen.return = (value) => {
+    gen.return = (value2) => {
       closeIterator();
-      return origReturn(value);
+      return origReturn(value2);
     };
     return gen;
   }
@@ -19760,20 +21564,20 @@ var RestArkProvider = class {
                 throw err2;
               }
             }
-          } catch (error) {
-            if (signal?.aborted || error instanceof Error && error.name === "AbortError") {
+          } catch (error2) {
+            if (signal?.aborted || error2 instanceof Error && error2.name === "AbortError") {
               break;
             }
-            if (isFetchTimeoutError(error)) {
+            if (isFetchTimeoutError(error2)) {
               console.debug("Timeout error ignored");
               continue;
             }
-            if (isEventSourceError(error)) {
-              throw error;
+            if (isEventSourceError(error2)) {
+              throw error2;
             }
-            if (isEventSourceUnavailableError(error)) throw error;
-            console.error("Transaction stream error:", error);
-            throw error;
+            if (isEventSourceUnavailableError(error2)) throw error2;
+            console.error("Transaction stream error:", error2);
+            throw error2;
           } finally {
             closeIterator();
             iterator = null;
@@ -19785,9 +21589,9 @@ var RestArkProvider = class {
       }
     })();
     const origReturn = gen.return.bind(gen);
-    gen.return = (value) => {
+    gen.return = (value2) => {
       closeIterator();
-      return origReturn(value);
+      return origReturn(value2);
     };
     return gen;
   }
@@ -19950,10 +21754,10 @@ function decodeMusig2Nonces(noncesObject) {
   );
 }
 function isFetchTimeoutError(err2) {
-  const checkError = (error) => {
-    if (!(error instanceof Error)) return false;
-    const isCloudflare524 = error.name === "TypeError" && error.message === "Failed to fetch";
-    return isCloudflare524 || error.name === "HeadersTimeoutError" || error.name === "BodyTimeoutError" || error.code === "UND_ERR_HEADERS_TIMEOUT" || error.code === "UND_ERR_BODY_TIMEOUT";
+  const checkError = (error2) => {
+    if (!(error2 instanceof Error)) return false;
+    const isCloudflare524 = error2.name === "TypeError" && error2.message === "Failed to fetch";
+    return isCloudflare524 || error2.name === "HeadersTimeoutError" || error2.name === "BodyTimeoutError" || error2.code === "UND_ERR_HEADERS_TIMEOUT" || error2.code === "UND_ERR_BODY_TIMEOUT";
   };
   return checkError(err2) || checkError(err2.cause);
 }
@@ -19987,12 +21791,12 @@ function mapVtxo(vtxo) {
   };
 }
 function handleError(errorText, defaultMessage) {
-  const error = new Error(errorText);
-  const arkError = maybeArkError(error);
+  const error2 = new Error(errorText);
+  const arkError = maybeArkError(error2);
   throw arkError ?? new Error(defaultMessage);
 }
-function isRetryableProviderError(error) {
-  return error instanceof ProviderUnavailableError || error instanceof FetchError || isFetchTimeoutError(error);
+function isRetryableProviderError(error2) {
+  return error2 instanceof ProviderUnavailableError || error2 instanceof FetchError || isFetchTimeoutError(error2);
 }
 var DEFAULT_PAGE_SIZE = 500;
 var SCRIPT_QUERY_CHUNK_SIZE = 32;
@@ -20064,7 +21868,7 @@ function normalizeVtxo(v) {
 }
 function convertVtxo(vtxo) {
   const expiry = parseWireExpiry(vtxo.expiresAt);
-  const facts = {
+  const facts2 = {
     isSpent: vtxo.isSpent,
     isSwept: vtxo.isSwept,
     isPreconfirmed: vtxo.isPreconfirmed,
@@ -20079,8 +21883,8 @@ function convertVtxo(vtxo) {
       confirmed: !vtxo.isSwept && !vtxo.isPreconfirmed,
       isLeaf: !vtxo.isPreconfirmed
     },
-    ...facts,
-    virtualStatus: toVirtualStatus(facts),
+    ...facts2,
+    virtualStatus: toVirtualStatus(facts2),
     spentBy: vtxo.spentBy ?? "",
     settledBy: vtxo.settledBy,
     arkTxId: vtxo.arkTxid,
@@ -20228,20 +22032,20 @@ var BufferWriter = class {
   writeByte(byte) {
     this.buffer.push(byte & 255);
   }
-  writeUint16LE(value) {
+  writeUint16LE(value2) {
     const buf = new Uint8Array(2);
-    new DataView(buf.buffer).setUint16(0, value, true);
+    new DataView(buf.buffer).setUint16(0, value2, true);
     this.write(buf);
   }
-  writeVarUint(value) {
-    if (typeof value === "number") {
-      if (!Number.isInteger(value) || value < 0) {
+  writeVarUint(value2) {
+    if (typeof value2 === "number") {
+      if (!Number.isInteger(value2) || value2 < 0) {
         throw new RangeError("writeVarUint: value must be a non-negative integer");
       }
-    } else if (value < 0n) {
+    } else if (value2 < 0n) {
       throw new RangeError("writeVarUint: value must be a non-negative integer");
     }
-    const val = typeof value === "number" ? BigInt(value) : value;
+    const val = typeof value2 === "number" ? BigInt(value2) : value2;
     const bytes2 = [];
     let remaining = val;
     do {
@@ -20258,16 +22062,16 @@ var BufferWriter = class {
     this.writeVarUint(data.length);
     this.write(data);
   }
-  writeCompactSize(value) {
-    if (value < 253) {
-      this.writeByte(value);
-    } else if (value <= 65535) {
+  writeCompactSize(value2) {
+    if (value2 < 253) {
+      this.writeByte(value2);
+    } else if (value2 <= 65535) {
       this.writeByte(253);
-      this.writeUint16LE(value);
-    } else if (value <= 4294967295) {
+      this.writeUint16LE(value2);
+    } else if (value2 <= 4294967295) {
       this.writeByte(254);
       const b = new Uint8Array(4);
-      new DataView(b.buffer).setUint32(0, value, true);
+      new DataView(b.buffer).setUint32(0, value2, true);
       this.write(b);
     } else {
       throw new Error("CompactSize value too large");
@@ -20308,9 +22112,9 @@ var BufferReader = class {
     if (this.offset + 2 > this.view.byteLength) {
       throw new Error("unexpected end of buffer");
     }
-    const value = this.view.getUint16(this.offset, true);
+    const value2 = this.view.getUint16(this.offset, true);
     this.offset += 2;
-    return value;
+    return value2;
   }
   readVarUint() {
     let result = 0n;
@@ -20967,15 +22771,15 @@ var AssetOutputs = class _AssetOutputs {
   }
 };
 var Metadata = class _Metadata {
-  constructor(key, value) {
+  constructor(key, value2) {
     this.key = key;
-    this.value = value;
+    this.value = value2;
   }
   key;
   value;
   /** Create a metadata entry from raw key and value bytes. */
-  static create(key, value) {
-    const md = new _Metadata(key, value);
+  static create(key, value2) {
+    const md = new _Metadata(key, value2);
     md.validate();
     return md;
   }
@@ -21025,18 +22829,18 @@ var Metadata = class _Metadata {
   /** Decode metadata from a buffer reader. */
   static fromReader(reader) {
     let key;
-    let value;
+    let value2;
     try {
       key = reader.readVarSlice();
     } catch {
       throw new Error("invalid metadata length");
     }
     try {
-      value = reader.readVarSlice();
+      value2 = reader.readVarSlice();
     } catch {
       throw new Error("invalid metadata length");
     }
-    const md = new _Metadata(key, value);
+    const md = new _Metadata(key, value2);
     md.validate();
     return md;
   }
@@ -21567,14 +23371,14 @@ var assetIdVectors_default = {
     }
   ]
 };
-function deepFreeze(value) {
-  if (value !== null && typeof value === "object" && !Object.isFrozen(value)) {
-    Object.freeze(value);
-    for (const key of Object.getOwnPropertyNames(value)) {
-      deepFreeze(value[key]);
+function deepFreeze(value2) {
+  if (value2 !== null && typeof value2 === "object" && !Object.isFrozen(value2)) {
+    Object.freeze(value2);
+    for (const key of Object.getOwnPropertyNames(value2)) {
+      deepFreeze(value2[key]);
     }
   }
-  return value;
+  return value2;
 }
 var ASSET_ID_VECTORS = deepFreeze(assetIdVectors_default);
 var INDEXER_MAX_ATTEMPTS = 3;
@@ -21630,9 +23434,9 @@ var ChainTxType = /* @__PURE__ */ ((ChainTxType2) => {
   return ChainTxType2;
 })(ChainTxType || {});
 var RestIndexerProvider = class {
-  constructor(serverUrl = DEFAULT_ARKADE_SERVER_URL, options = {}) {
+  constructor(serverUrl = DEFAULT_ARKADE_SERVER_URL, options2 = {}) {
     this.serverUrl = serverUrl;
-    this.eventSource = options.eventSource;
+    this.eventSource = options2.eventSource;
   }
   serverUrl;
   /** Overrides {@link configureEventSource} for this provider's subscription. */
@@ -21658,7 +23462,7 @@ var RestIndexerProvider = class {
     }
     data.vtxoTree.forEach((tx) => {
       tx.children = Object.fromEntries(
-        Object.entries(tx.children).map(([key, value]) => [Number(key), value])
+        Object.entries(tx.children).map(([key, value2]) => [Number(key), value2])
       );
     });
     return data;
@@ -21729,7 +23533,7 @@ var RestIndexerProvider = class {
     }
     data.connectors.forEach((tx) => {
       tx.children = Object.fromEntries(
-        Object.entries(tx.children).map(([key, value]) => [Number(key), value])
+        Object.entries(tx.children).map(([key, value2]) => [Number(key), value2])
       );
     });
     return data;
@@ -21790,20 +23594,20 @@ var RestIndexerProvider = class {
                 throw err2;
               }
             }
-          } catch (error) {
-            if (abortSignal?.aborted || error instanceof Error && error.name === "AbortError") {
+          } catch (error2) {
+            if (abortSignal?.aborted || error2 instanceof Error && error2.name === "AbortError") {
               break;
             }
-            if (isFetchTimeoutError(error)) {
+            if (isFetchTimeoutError(error2)) {
               console.debug("Timeout error ignored");
               continue;
             }
-            if (isEventSourceError(error)) {
-              throw error;
+            if (isEventSourceError(error2)) {
+              throw error2;
             }
-            if (isEventSourceUnavailableError(error)) throw error;
-            console.error("Subscription error:", error);
-            throw error;
+            if (isEventSourceUnavailableError(error2)) throw error2;
+            console.error("Subscription error:", error2);
+            throw error2;
           } finally {
             closeIterator();
             iterator = null;
@@ -21815,9 +23619,9 @@ var RestIndexerProvider = class {
       }
     })();
     const origReturn = gen.return.bind(gen);
-    gen.return = (value) => {
+    gen.return = (value2) => {
       closeIterator();
-      return origReturn(value);
+      return origReturn(value2);
     };
     return gen;
   }
@@ -22010,20 +23814,20 @@ function parseAssetMetadata(metadata) {
   const metadataList = MetadataList.fromString(metadata);
   const out = {};
   const decoder = new TextDecoder();
-  for (const { key, value } of metadataList.items) {
+  for (const { key, value: value2 } of metadataList.items) {
     const keyString = decoder.decode(key);
     switch (keyString) {
       case "decimals":
-        const n = Number(decoder.decode(value));
-        out[keyString] = Number.isFinite(n) ? n : hex.encode(value);
+        const n = Number(decoder.decode(value2));
+        out[keyString] = Number.isFinite(n) ? n : hex.encode(value2);
         break;
       case "name":
       case "ticker":
       case "icon":
-        out[keyString] = decoder.decode(value);
+        out[keyString] = decoder.decode(value2);
         break;
       default:
-        out[keyString] = hex.encode(value);
+        out[keyString] = hex.encode(value2);
         break;
     }
   }
@@ -22197,8 +24001,8 @@ var DefaultVtxo;
 ((DefaultVtxo2) => {
   class Script3 extends VtxoScript {
     /** Create the default virtual output script with one forfeit path and one exit path. */
-    constructor(options) {
-      const { pubKey, serverPubKey, csvTimelock } = options;
+    constructor(options2) {
+      const { pubKey, serverPubKey, csvTimelock } = options2;
       const forfeitScript = MultisigTapscript.encode({
         pubkeys: [pubKey, serverPubKey]
       }).script;
@@ -22207,7 +24011,7 @@ var DefaultVtxo;
         pubkeys: [pubKey]
       }).script;
       super([forfeitScript, exitScript]);
-      this.options = options;
+      this.options = options2;
       this.forfeitScript = hex.encode(forfeitScript);
       this.exitScript = hex.encode(exitScript);
     }
@@ -22233,26 +24037,26 @@ var DefaultVtxo;
 function isMainnetDescriptor(descriptor) {
   return !descriptor.includes("tpub");
 }
-function isDescriptor(value) {
-  if (typeof value !== "string") return false;
-  if (!value.startsWith("tr(") || !value.endsWith(")")) return false;
-  return value.length > "tr()".length;
+function isDescriptor(value2) {
+  if (typeof value2 !== "string") return false;
+  if (!value2.startsWith("tr(") || !value2.endsWith(")")) return false;
+  return value2.length > "tr()".length;
 }
-function normalizeToDescriptor(value) {
-  if (typeof value !== "string" || value.length === 0) {
+function normalizeToDescriptor(value2) {
+  if (typeof value2 !== "string" || value2.length === 0) {
     throw new Error("normalizeToDescriptor: expected a non-empty string value");
   }
-  if (isDescriptor(value)) {
-    return value;
+  if (isDescriptor(value2)) {
+    return value2;
   }
-  return `tr(${value})`;
+  return `tr(${value2})`;
 }
 function extractPubKey(descriptor) {
   if (!isDescriptor(descriptor)) {
     return descriptor;
   }
-  const network = isMainnetDescriptor(descriptor) ? import_descriptors_scure.networks.bitcoin : import_descriptors_scure.networks.testnet;
-  const expansion = (0, import_descriptors_scure.expand)({ descriptor, network });
+  const network2 = isMainnetDescriptor(descriptor) ? import_descriptors_scure.networks.bitcoin : import_descriptors_scure.networks.testnet;
+  const expansion = (0, import_descriptors_scure.expand)({ descriptor, network: network2 });
   if (!expansion.expansionMap) {
     throw new Error("Cannot extract pubkey from descriptor: expansion failed.");
   }
@@ -22268,10 +24072,10 @@ function extractPubKey(descriptor) {
   return hex.encode(key.pubkey);
 }
 function deriveDescriptorLeafPubKey(descriptor) {
-  const network = isMainnetDescriptor(descriptor) ? import_descriptors_scure.networks.bitcoin : import_descriptors_scure.networks.testnet;
+  const network2 = isMainnetDescriptor(descriptor) ? import_descriptors_scure.networks.bitcoin : import_descriptors_scure.networks.testnet;
   let expansion;
   try {
-    expansion = (0, import_descriptors_scure.expand)({ descriptor, network });
+    expansion = (0, import_descriptors_scure.expand)({ descriptor, network: network2 });
   } catch (e) {
     throw new Error(
       `Cannot derive leaf pubkey from descriptor (length=${descriptor.length}): ensure it is materialized (no wildcard) and parsable.`,
@@ -22287,10 +24091,10 @@ function deriveDescriptorLeafPubKey(descriptor) {
   return key.pubkey;
 }
 function deriveDescriptorLeafCompressedPubKey(descriptor) {
-  const network = isMainnetDescriptor(descriptor) ? import_descriptors_scure.networks.bitcoin : import_descriptors_scure.networks.testnet;
+  const network2 = isMainnetDescriptor(descriptor) ? import_descriptors_scure.networks.bitcoin : import_descriptors_scure.networks.testnet;
   let expansion;
   try {
-    expansion = (0, import_descriptors_scure.expand)({ descriptor, network });
+    expansion = (0, import_descriptors_scure.expand)({ descriptor, network: network2 });
   } catch (e) {
     throw new Error(
       `Cannot derive compressed leaf pubkey from descriptor (length=${descriptor.length}): ensure it is materialized (no wildcard) and parsable.`,
@@ -22311,8 +24115,8 @@ function parseHDDescriptor(descriptor) {
   }
   let expansion;
   try {
-    const network = isMainnetDescriptor(descriptor) ? import_descriptors_scure.networks.bitcoin : import_descriptors_scure.networks.testnet;
-    expansion = (0, import_descriptors_scure.expand)({ descriptor, network });
+    const network2 = isMainnetDescriptor(descriptor) ? import_descriptors_scure.networks.bitcoin : import_descriptors_scure.networks.testnet;
+    expansion = (0, import_descriptors_scure.expand)({ descriptor, network: network2 });
   } catch {
     return null;
   }
@@ -22331,12 +24135,12 @@ async function identityDescriptor(identity2) {
   return normalizeToDescriptor(hex.encode(await identity2.xOnlyPublicKey()));
 }
 var WALLET_RECEIVE_SOURCE = "wallet-receive";
-function extractRawPubKey(value) {
-  if (!isDescriptor(value)) {
-    return value.toLowerCase();
+function extractRawPubKey(value2) {
+  if (!isDescriptor(value2)) {
+    return value2.toLowerCase();
   }
   try {
-    return extractPubKey(value).toLowerCase();
+    return extractPubKey(value2).toLowerCase();
   } catch {
     return void 0;
   }
@@ -22373,11 +24177,11 @@ function resolveRole(contract, context) {
   }
   return void 0;
 }
-function extractPubKeyBytes(value) {
-  return hex.decode(extractPubKey(normalizeToDescriptor(value)));
+function extractPubKeyBytes(value2) {
+  return hex.decode(extractPubKey(normalizeToDescriptor(value2)));
 }
-function deserializeCsvTimelock(value) {
-  return value !== void 0 && value !== "" ? sequenceToTimelock(Number(value)) : DefaultVtxo.Script.DEFAULT_TIMELOCK;
+function deserializeCsvTimelock(value2) {
+  return value2 !== void 0 && value2 !== "" ? sequenceToTimelock(Number(value2)) : DefaultVtxo.Script.DEFAULT_TIMELOCK;
 }
 var CLTV_HEIGHT_THRESHOLD = 500000000n;
 function isCltvSatisfied(context, locktime) {
@@ -22603,14 +24407,14 @@ var DelegateVtxo;
 ((DelegateVtxo2) => {
   class Script3 extends VtxoScript {
     /** Create a delegated virtual output script with forfeit, exit, and delegate paths. */
-    constructor(options) {
-      const defaultVtxo = new DefaultVtxo.Script(options);
-      const { delegatePubKey, pubKey, serverPubKey } = options;
+    constructor(options2) {
+      const defaultVtxo = new DefaultVtxo.Script(options2);
+      const { delegatePubKey, pubKey, serverPubKey } = options2;
       const delegateScript = MultisigTapscript.encode({
         pubkeys: [pubKey, delegatePubKey, serverPubKey]
       }).script;
       super([...defaultVtxo.scripts, delegateScript]);
-      this.options = options;
+      this.options = options2;
       this.defaultVtxo = defaultVtxo;
       this.delegateScript = hex.encode(delegateScript);
     }
@@ -22741,10 +24545,10 @@ var Bitset2 = {
     if (pos + len > bsLen)
       throw new Error(`wrong range=${pos}/${len} of ${bsLen}`);
   },
-  set: (bs, chunk, value, allowRewrite = true) => {
-    if (!allowRewrite && (bs[chunk] & value) !== 0)
+  set: (bs, chunk, value2, allowRewrite = true) => {
+    if (!allowRewrite && (bs[chunk] & value2) !== 0)
       return false;
-    bs[chunk] |= value;
+    bs[chunk] |= value2;
     return true;
   },
   pos: (pos, i) => ({
@@ -23098,17 +24902,17 @@ var _Writer2 = class {
     }
     return buf;
   }
-  bits(value, bits) {
+  bits(value2, bits) {
     if (bits > 32)
       throw this.err("writeBits: cannot write more than 32 bits in single call");
-    if (value >= 2 ** bits)
-      throw this.err(`writeBits: value (${value}) >= 2**bits (${bits})`);
+    if (value2 >= 2 ** bits)
+      throw this.err(`writeBits: value (${value2}) >= 2**bits (${bits})`);
     while (bits) {
       const take = Math.min(bits, 8 - this.bitPos);
-      this.bitBuf = this.bitBuf << take | value >> bits - take;
+      this.bitBuf = this.bitBuf << take | value2 >> bits - take;
       this.bitPos += take;
       bits -= take;
-      value &= 2 ** bits - 1;
+      value2 &= 2 ** bits - 1;
       if (this.bitPos === 8) {
         this.bitPos = 0;
         this.buffers.push(new Uint8Array([this.bitBuf]));
@@ -23123,9 +24927,9 @@ function _wrap2(inner) {
     encodeStream: inner.encodeStream,
     decodeStream: inner.decodeStream,
     size: inner.size,
-    encode: (value) => {
+    encode: (value2) => {
       const w = new _Writer2();
-      inner.encodeStream(w, value);
+      inner.encodeStream(w, value2);
       return w.finish();
     },
     decode: (data, opts = {}) => {
@@ -23143,10 +24947,10 @@ function validate2(inner, fn) {
     throw new Error("validate: fn should be function");
   return _wrap2({
     size: inner.size,
-    encodeStream: (w, value) => {
+    encodeStream: (w, value2) => {
       let res;
       try {
-        res = fn(value);
+        res = fn(value2);
       } catch (e) {
         throw w.err(e);
       }
@@ -23172,24 +24976,24 @@ function isCoder2(elm) {
 }
 var view2 = (len, opts) => wrap2({
   size: len,
-  encodeStream: (w, value) => w.writeView(len, (view22) => opts.write(view22, value)),
+  encodeStream: (w, value2) => w.writeView(len, (view22) => opts.write(view22, value2)),
   decodeStream: (r) => r.readView(len, opts.read),
-  validate: (value) => {
-    if (typeof value !== "number")
-      throw new Error(`viewCoder: expected number, got ${typeof value}`);
+  validate: (value2) => {
+    if (typeof value2 !== "number")
+      throw new Error(`viewCoder: expected number, got ${typeof value2}`);
     if (opts.validate)
-      opts.validate(value);
-    return value;
+      opts.validate(value2);
+    return value2;
   }
 });
 var intView2 = (len, signed, opts) => {
   const bits = len * 8;
   const maxVal = 2 ** bits;
-  const validateUnsigned = (value) => {
-    if (!isNum2(value))
-      throw new Error(`uintView: value is not safe integer: ${value}`);
-    if (0 > value || value >= maxVal) {
-      throw new Error(`uintView: value out of bounds. Expected 0 <= ${value} < ${maxVal}`);
+  const validateUnsigned = (value2) => {
+    if (!isNum2(value2))
+      throw new Error(`uintView: value is not safe integer: ${value2}`);
+    if (0 > value2 || value2 >= maxVal) {
+      throw new Error(`uintView: value out of bounds. Expected 0 <= ${value2} < ${maxVal}`);
     }
   };
   return view2(len, {
@@ -23200,15 +25004,15 @@ var intView2 = (len, signed, opts) => {
 };
 var U32LE2 = /* @__PURE__ */ intView2(4, false, {
   read: (view22, pos) => view22.getUint32(pos, true),
-  write: (view22, value) => view22.setUint32(0, value, true)
+  write: (view22, value2) => view22.setUint32(0, value2, true)
 });
 var U16LE2 = /* @__PURE__ */ intView2(2, false, {
   read: (view22, pos) => view22.getUint16(pos, true),
-  write: (view22, value) => view22.setUint16(0, value, true)
+  write: (view22, value2) => view22.setUint16(0, value2, true)
 });
 var U82 = /* @__PURE__ */ intView2(1, false, {
   read: (view22, pos) => view22.getUint8(pos),
-  write: (view22, value) => view22.setUint8(0, value)
+  write: (view22, value2) => view22.setUint8(0, value2)
 });
 var ARKADE_OP = {
   // Merkle Branch Verification (0xb3 — repurposed NOP4 slot)
@@ -23277,17 +25081,17 @@ var ARKADE_OP = {
 };
 var ARKADE_OPCODES = Object.values(ARKADE_OP);
 var ARKADE_OPCODE_NAMES = Object.fromEntries(
-  Object.entries(ARKADE_OP).map(([name, value]) => [value, name])
+  Object.entries(ARKADE_OP).map(([name, value2]) => [value2, name])
 );
 var ARKADE_OPCODE_VALUES = Object.fromEntries(
-  Object.entries(ARKADE_OPCODE_NAMES).map(([value, name]) => [name, Number(value)])
+  Object.entries(ARKADE_OPCODE_NAMES).map(([value2, name]) => [name, Number(value2)])
 );
 function buildBitcoinOpcodeNames() {
   const names = {};
-  for (const [key, value] of Object.entries(OP)) {
-    if (typeof value === "number") {
+  for (const [key, value2] of Object.entries(OP)) {
+    if (typeof value2 === "number") {
       const name = key.startsWith("OP_") ? key : `OP_${key}`;
-      names[value] = name;
+      names[value2] = name;
     }
   }
   names[0] = "OP_0";
@@ -23295,11 +25099,11 @@ function buildBitcoinOpcodeNames() {
 }
 function buildBitcoinOpcodeValues() {
   const values = {};
-  for (const [key, value] of Object.entries(OP)) {
-    if (typeof value === "number") {
+  for (const [key, value2] of Object.entries(OP)) {
+    if (typeof value2 === "number") {
       const name = key.startsWith("OP_") ? key : `OP_${key}`;
-      values[name] = value;
-      values[key] = value;
+      values[name] = value2;
+      values[key] = value2;
     }
   }
   return values;
@@ -23310,7 +25114,7 @@ var OPCODE_NAMES = {
   ...BITCOIN_OPCODE_NAMES,
   // Add Arkade opcodes with OP_ prefix
   ...Object.fromEntries(
-    Object.entries(ARKADE_OPCODE_NAMES).map(([value, name]) => [Number(value), `OP_${name}`])
+    Object.entries(ARKADE_OPCODE_NAMES).map(([value2, name]) => [Number(value2), `OP_${name}`])
   )
 };
 var OPCODE_VALUES = {
@@ -23318,14 +25122,14 @@ var OPCODE_VALUES = {
   // Add Arkade opcodes with and without OP_ prefix
   ...ARKADE_OPCODE_VALUES,
   ...Object.fromEntries(
-    Object.entries(ARKADE_OPCODE_VALUES).map(([name, value]) => [`OP_${name}`, value])
+    Object.entries(ARKADE_OPCODE_VALUES).map(([name, value2]) => [`OP_${name}`, value2])
   )
 };
-function getOpcodeName(value) {
-  if (value >= 1 && value <= 75) {
-    return `OP_DATA_${value}`;
+function getOpcodeName(value2) {
+  if (value2 >= 1 && value2 <= 75) {
+    return `OP_DATA_${value2}`;
   }
-  return OPCODE_NAMES[value];
+  return OPCODE_NAMES[value2];
 }
 function getOpcodeValue(name) {
   const dataMatch = name.match(/^OP_DATA_(\d+)$/);
@@ -23350,15 +25154,15 @@ var codec = ScriptNum(
   /* forceMinimal */
   true
 );
-function encode2(value) {
-  const result = codec.encode(value);
+function encode2(value2) {
+  const result = codec.encode(value2);
   if (result.length > BIGNUM_MAX_BYTES) {
     throw new Error(`BigNum value exceeds 520 bytes (encoded to ${result.length} bytes)`);
   }
   return result;
 }
-function decode2(value) {
-  return codec.decode(value);
+function decode2(value2) {
+  return codec.decode(value2);
 }
 var ARKADE_OPS = { ...OP, ...ARKADE_OP };
 var ArkadeOPNames = {};
@@ -23366,8 +25170,8 @@ for (const [k, v] of Object.entries(ARKADE_OPS)) {
   if (typeof v === "number") ArkadeOPNames[v] = k;
 }
 var ArkadeScript = wrap2({
-  encodeStream: (w, value) => {
-    for (let o of value) {
+  encodeStream: (w, value2) => {
+    for (let o of value2) {
       if (typeof o === "string") {
         const v = ARKADE_OPS[o];
         if (v === void 0) throw new Error(`Unknown opcode=${o}`);
@@ -23502,7 +25306,7 @@ function toXOnly(key, label = "public key") {
 }
 var TAG_SCRIPT = "ArkScriptHash";
 var TAG_WITNESS = "ArkWitnessHash";
-function arkadeScriptHash(script) {
+function arkadeScriptHash2(script) {
   return schnorr.utils.taggedHash(TAG_SCRIPT, script);
 }
 function arkadeWitnessHash(witness) {
@@ -23512,7 +25316,7 @@ function arkadeWitnessHash(witness) {
   return schnorr.utils.taggedHash(TAG_WITNESS, witness);
 }
 function computeArkadeScriptPublicKey(pubKey, script) {
-  const hash = arkadeScriptHash(script);
+  const hash = arkadeScriptHash2(script);
   const point = schnorr.utils.lift_x(bytesToNumberBE(toXOnly(pubKey, "emulator key")));
   const scalar2 = bytesToNumberBE(hash) % secp256k1.Point.CURVE().n;
   const tweak = secp256k1.Point.BASE.multiply(scalar2);
@@ -23534,8 +25338,8 @@ var VHTLC;
     nonInteractiveRefundArkadeScript;
     nonInteractiveRefundWithoutReceiverScript;
     nonInteractiveRefundWithoutReceiverArkadeScript;
-    constructor(options, preimageCondition) {
-      validateOptions(options);
+    constructor(options2, preimageCondition) {
+      validateOptions(options2);
       const {
         sender,
         receiver,
@@ -23545,7 +25349,7 @@ var VHTLC;
         unilateralClaimDelay: unilateralClaimDelay2,
         unilateralRefundDelay: unilateralRefundDelay2,
         unilateralRefundWithoutReceiverDelay: unilateralRefundWithoutReceiverDelay2
-      } = options;
+      } = options2;
       const conditionScript = preimageCondition(preimageHash);
       const claimScript = ConditionMultisigTapscript.encode({
         conditionScript,
@@ -23581,18 +25385,18 @@ var VHTLC;
       ];
       let arkadeScriptNic;
       let nonInteractiveClaimScript;
-      if (options.nonInteractiveClaim) {
+      if (options2.nonInteractiveClaim) {
         arkadeScriptNic = enforcePayToMaybeAsset(
-          options.nonInteractiveClaim.receiverPkScript,
-          options.asset,
-          options.nonInteractiveClaim.strict
+          options2.nonInteractiveClaim.receiverPkScript,
+          options2.asset,
+          options2.nonInteractiveClaim.strict
         );
         nonInteractiveClaimScript = ConditionMultisigTapscript.encode({
           conditionScript,
           pubkeys: [
             server,
             computeArkadeScriptPublicKey(
-              options.nonInteractiveClaim.emulatorPubkey,
+              options2.nonInteractiveClaim.emulatorPubkey,
               arkadeScriptNic
             )
           ]
@@ -23602,20 +25406,20 @@ var VHTLC;
       let arkadeScriptNir;
       let nonInteractiveRefundScript;
       let nonInteractiveRefundWithoutReceiverScript;
-      if (options.nonInteractiveRefund) {
+      if (options2.nonInteractiveRefund) {
         arkadeScriptNir = enforcePayToMaybeAsset(
-          options.nonInteractiveRefund.senderPkScript,
-          options.asset
+          options2.nonInteractiveRefund.senderPkScript,
+          options2.asset
         );
         const nirCosigner = computeArkadeScriptPublicKey(
-          options.nonInteractiveRefund.emulatorPubkey,
+          options2.nonInteractiveRefund.emulatorPubkey,
           arkadeScriptNir
         );
         nonInteractiveRefundScript = MultisigTapscript.encode({
           pubkeys: [server, receiver, nirCosigner]
         }).script;
         scripts.push(nonInteractiveRefundScript);
-        if (options.nonInteractiveRefund.withoutReceiver) {
+        if (options2.nonInteractiveRefund.withoutReceiver) {
           nonInteractiveRefundWithoutReceiverScript = CLTVMultisigTapscript.encode({
             absoluteTimelock: refundLocktime,
             pubkeys: [server, nirCosigner]
@@ -23624,7 +25428,7 @@ var VHTLC;
         }
       }
       super(scripts);
-      this.options = options;
+      this.options = options2;
       this.claimScript = hex.encode(claimScript);
       this.refundScript = hex.encode(refundScript);
       this.refundWithoutReceiverScript = hex.encode(refundWithoutReceiverScript);
@@ -23755,18 +25559,18 @@ var VHTLC;
     }
   }
   class Script3 extends BaseScript {
-    constructor(options) {
-      super(options, preimageConditionScript);
+    constructor(options2) {
+      super(options2, preimageConditionScript);
     }
   }
   VHTLC2.Script = Script3;
   class ScriptV2 extends BaseScript {
-    constructor(options) {
-      super(options, preimageConditionScriptV2);
+    constructor(options2) {
+      super(options2, preimageConditionScriptV2);
     }
   }
   VHTLC2.ScriptV2 = ScriptV2;
-  function validateOptions(options) {
+  function validateOptions(options2) {
     const {
       sender,
       receiver,
@@ -23776,26 +25580,26 @@ var VHTLC;
       unilateralClaimDelay: unilateralClaimDelay2,
       unilateralRefundDelay: unilateralRefundDelay2,
       unilateralRefundWithoutReceiverDelay: unilateralRefundWithoutReceiverDelay2
-    } = options;
+    } = options2;
     if (!preimageHash || preimageHash.length !== 20) {
       throw new Error("preimage hash must be 20 bytes");
     }
-    if (options.asset !== void 0 && !options.nonInteractiveClaim && !options.nonInteractiveRefund) {
+    if (options2.asset !== void 0 && !options2.nonInteractiveClaim && !options2.nonInteractiveRefund) {
       throw new Error(
         "asset has no effect without nonInteractiveClaim or nonInteractiveRefund"
       );
     }
-    const strict = options.nonInteractiveClaim?.strict;
+    const strict = options2.nonInteractiveClaim?.strict;
     if (strict !== void 0) {
       if (strict.amount <= 0n) {
         throw new Error(`strict claim amount must be positive, got ${strict.amount}`);
       }
-      if (options.asset !== void 0 && strict.assetAmount === void 0) {
+      if (options2.asset !== void 0 && strict.assetAmount === void 0) {
         throw new Error(
           "strict claim needs assetAmount when the contract is denominated in an asset: bounding only the sats would leave the asset amount unenforced"
         );
       }
-      if (options.asset === void 0 && strict.assetAmount !== void 0) {
+      if (options2.asset === void 0 && strict.assetAmount !== void 0) {
         throw new Error("strict claim assetAmount has no effect without asset");
       }
       if (strict.assetAmount !== void 0 && strict.assetAmount <= 0n) {
@@ -23804,8 +25608,8 @@ var VHTLC;
         );
       }
     }
-    if (options.nonInteractiveClaim) {
-      const { emulatorPubkey, receiverPkScript } = options.nonInteractiveClaim;
+    if (options2.nonInteractiveClaim) {
+      const { emulatorPubkey, receiverPkScript } = options2.nonInteractiveClaim;
       if (!emulatorPubkey || emulatorPubkey.length !== 32 && emulatorPubkey.length !== 33) {
         throw new Error("Invalid public key length (emulator)");
       }
@@ -23813,8 +25617,8 @@ var VHTLC;
         throw new Error("Invalid P2TR script");
       }
     }
-    if (options.nonInteractiveRefund) {
-      const { emulatorPubkey, senderPkScript } = options.nonInteractiveRefund;
+    if (options2.nonInteractiveRefund) {
+      const { emulatorPubkey, senderPkScript } = options2.nonInteractiveRefund;
       if (!emulatorPubkey || emulatorPubkey.length !== 32 && emulatorPubkey.length !== 33) {
         throw new Error("Invalid public key length (emulator)");
       }
@@ -24601,8 +26405,8 @@ var BoardingContractHandler = {
       csvTimelock: deps.boardingTimelock
     });
     const onchainAddress = script.onchainAddress(deps.onchainNetwork);
-    const coins = await deps.onchainProvider.getCoins(onchainAddress);
-    if (coins.length === 0) return [];
+    const coins2 = await deps.onchainProvider.getCoins(onchainAddress);
+    if (coins2.length === 0) return [];
     const scriptHex = hex.encode(script.pkScript);
     const boardingSeq = timelockToSequence(deps.boardingTimelock);
     return [
@@ -24639,15 +26443,15 @@ function bindValue(bind, name) {
   if (v === void 0) throw new Error(`unbound parameter '${name}'`);
   return v;
 }
-function resolveTimelockValue(value, args) {
-  if (typeof value === "bigint") return value;
-  if (value.startsWith("$")) {
-    const v = bindValue(args, value.slice(1));
+function resolveTimelockValue(value2, args) {
+  if (typeof value2 === "bigint") return value2;
+  if (value2.startsWith("$")) {
+    const v = bindValue(args, value2.slice(1));
     if (typeof v === "bigint" || typeof v === "number") return BigInt(v);
-    throw new Error(`timelock value '${value}' must resolve to a number`);
+    throw new Error(`timelock value '${value2}' must resolve to a number`);
   }
   throw new Error(
-    `invalid timelock value '${value}' \u2014 expected a bigint or a '$param' reference`
+    `invalid timelock value '${value2}' \u2014 expected a bigint or a '$param' reference`
   );
 }
 function resolveAsm(asm, bind) {
@@ -24713,22 +26517,22 @@ function collectParamRefs(program) {
   return refs;
 }
 var TYPED_BYTE_LENGTHS = { pubkey: 32, sig: 64 };
-function validateParamValue(def2, value) {
+function validateParamValue(def2, value2) {
   if (def2.type === "int") {
-    if (typeof value !== "bigint" && typeof value !== "number") {
+    if (typeof value2 !== "bigint" && typeof value2 !== "number") {
       throw new Error(`program parameter '${def2.name}' expects an int, got bytes`);
     }
     return;
   }
-  if (!(value instanceof Uint8Array)) {
+  if (!(value2 instanceof Uint8Array)) {
     throw new Error(
-      `program parameter '${def2.name}' expects ${def2.type} bytes, got ${typeof value}`
+      `program parameter '${def2.name}' expects ${def2.type} bytes, got ${typeof value2}`
     );
   }
   const length = TYPED_BYTE_LENGTHS[def2.type];
-  if (length !== void 0 && value.length !== length) {
+  if (length !== void 0 && value2.length !== length) {
     throw new Error(
-      `program parameter '${def2.name}' expects a ${length}-byte ${def2.type}, got ${value.length} bytes`
+      `program parameter '${def2.name}' expects a ${length}-byte ${def2.type}, got ${value2.length} bytes`
     );
   }
 }
@@ -24787,7 +26591,7 @@ function encodeTapscriptSegment(seg, pubkeys, args) {
   }
   return MultisigTapscript.encode({ pubkeys });
 }
-function compileFunctions(program, args, keys) {
+function compileFunctions(program, args, keys2) {
   if (program.version !== SUPPORTED_PROGRAM_VERSION) {
     throw new Error(
       `ArkadeContract: unsupported program version ${program.version} \u2014 this SDK supports version ${SUPPORTED_PROGRAM_VERSION}`
@@ -24801,7 +26605,7 @@ function compileFunctions(program, args, keys) {
   validateProgram(program, args);
   const defs = names.map((n) => functions[n]);
   const covenant = names.find((_, i) => defs[i].arkadeScript);
-  if (covenant && !keys.emulatorKey) {
+  if (covenant && !keys2.emulatorKey) {
     throw new Error(
       `ArkadeContract: function '${covenant}' has an arkadeScript but no emulator is configured \u2014 pass an \`emulator\` to Arkade.connect`
     );
@@ -24810,18 +26614,18 @@ function compileFunctions(program, args, keys) {
     validateTapscript(def2.tapscript);
     const pubkeys = def2.tapscript.signers.map((s) => resolveSigner(s, args));
     const arkadeScript = def2.arkadeScript ? resolveAsm(def2.arkadeScript.asm, args) : void 0;
-    const leafPubkeys = arkadeScript ? [...pubkeys, computeArkadeScriptPublicKey(keys.emulatorKey, arkadeScript)] : pubkeys;
+    const leafPubkeys = arkadeScript ? [...pubkeys, computeArkadeScriptPublicKey(keys2.emulatorKey, arkadeScript)] : pubkeys;
     const leafScript = encodeTapscriptSegment(def2.tapscript, leafPubkeys, args).script;
     return { name: names[i], def: def2, leafScript, arkadeScript, signerKeys: pubkeys };
   });
 }
 var ArkadeProgramScript = class extends VtxoScript {
-  constructor(program, args, keys) {
-    const partial = compileFunctions(program, args, keys);
+  constructor(program, args, keys2) {
+    const partial = compileFunctions(program, args, keys2);
     super(partial.map((p) => p.leafScript));
     this.program = program;
     this.args = args;
-    this.keys = keys;
+    this.keys = keys2;
     this.compiled = partial.map((p) => ({
       ...p,
       tapLeafScript: this.findLeaf(hex.encode(p.leafScript))
@@ -24972,10 +26776,10 @@ function deserializeArkadeContractParams(params) {
   };
 }
 function walletKeyFrom(context) {
-  const extract = (value) => {
-    if (!isDescriptor(value)) return value.toLowerCase();
+  const extract = (value2) => {
+    if (!isDescriptor(value2)) return value2.toLowerCase();
     try {
-      return extractPubKey(value).toLowerCase();
+      return extractPubKey(value2).toLowerCase();
     } catch {
       return void 0;
     }
@@ -25126,7 +26930,7 @@ var InvalidContributionErr = class extends Error {
     this.idx = idx;
   }
 };
-var { taggedHash: taggedHash2, pointToBytes: pointToBytes2 } = schnorr.utils;
+var { taggedHash: taggedHash3, pointToBytes: pointToBytes2 } = schnorr.utils;
 var Point3 = secp256k1.Point;
 var Fn3 = Point3.Fn;
 var PUBKEY_LEN = secp256k1.lengths.publicKey;
@@ -25143,12 +26947,12 @@ var PubNonce = struct({ R1: compressed, R2: compressed });
 var SecretNonce = struct({ k1: scalar, k2: scalar, publicKey: createBytes(PUBKEY_LEN) });
 function abytesOptional(b, ...lengths2) {
   if (b !== void 0)
-    abytes(b, ...lengths2);
+    abytes2(b, ...lengths2);
 }
 function abytesArray(lst, ...lengths2) {
   if (!Array.isArray(lst))
     throw new Error("expected array");
-  lst.forEach((i) => abytes(i, ...lengths2));
+  lst.forEach((i) => abytes2(i, ...lengths2));
 }
 function aXonly(lst) {
   if (!Array.isArray(lst))
@@ -25158,7 +26962,7 @@ function aXonly(lst) {
       throw new Error("expected boolean in xOnly array, got" + i + "(" + j + ")");
   });
 }
-var taggedInt = (tag, ...messages) => Fn3.create(Fn3.fromBytes(taggedHash2(tag, ...messages), true));
+var taggedInt = (tag, ...messages) => Fn3.create(Fn3.fromBytes(taggedHash3(tag, ...messages), true));
 var evenScalar = (p, n) => hasEven2(p.y) ? n : Fn3.neg(n);
 function mulBase(n) {
   return Point3.BASE.multiply(n);
@@ -25179,11 +26983,11 @@ function getSecondKey(publicKeys) {
 }
 function keyAggL(publicKeys) {
   abytesArray(publicKeys, PUBKEY_LEN);
-  return taggedHash2("KeyAgg list", ...publicKeys);
+  return taggedHash3("KeyAgg list", ...publicKeys);
 }
 function keyAggCoeffInternal(publicKey1, publicKey2, L3) {
-  abytes(publicKey1, PUBKEY_LEN);
-  abytes(publicKey2, PUBKEY_LEN);
+  abytes2(publicKey1, PUBKEY_LEN);
+  abytes2(publicKey2, PUBKEY_LEN);
   if (equalBytes(publicKey1, publicKey2))
     return 1n;
   return taggedInt("KeyAgg coefficient", L3, publicKey1);
@@ -25200,7 +27004,7 @@ function keyAggregate(publicKeys, tweaks = [], isXonly = []) {
     let Pi;
     try {
       Pi = Point3.fromBytes(publicKeys[i]);
-    } catch (error) {
+    } catch (error2) {
       throw new InvalidContributionErr(i, "pubkey");
     }
     aggPublicKey = aggPublicKey.add(Pi.multiply(keyAggCoeffInternal(publicKeys[i], pk2, L3)));
@@ -25219,7 +27023,7 @@ function keyAggregate(publicKeys, tweaks = [], isXonly = []) {
   return { aggPublicKey, gAcc, tweakAcc };
 }
 function aux(secret, rand) {
-  const rand2 = taggedHash2("MuSig/aux", rand);
+  const rand2 = taggedHash3("MuSig/aux", rand);
   if (secret.length !== rand2.length)
     throw new Error("Cannot XOR arrays of different lengths");
   const res = new Uint8Array(secret.length);
@@ -25227,23 +27031,23 @@ function aux(secret, rand) {
     res[i] = secret[i] ^ rand2[i];
   return res;
 }
-var nonceHash = (rand, publicKey, aggPublicKey, i, msgPrefixed, extraIn) => taggedInt("MuSig/nonce", rand, new Uint8Array([publicKey.length]), publicKey, new Uint8Array([aggPublicKey.length]), aggPublicKey, msgPrefixed, numberToBytesBE(extraIn.length, 4), extraIn, new Uint8Array([i]));
-function nonceGen(publicKey, secretKey, aggPublicKey = new Uint8Array(0), msg, extraIn = new Uint8Array(0), rand = randomBytes(32)) {
-  abytes(publicKey, PUBKEY_LEN);
+var nonceHash = (rand, publicKey2, aggPublicKey, i, msgPrefixed, extraIn) => taggedInt("MuSig/nonce", rand, new Uint8Array([publicKey2.length]), publicKey2, new Uint8Array([aggPublicKey.length]), aggPublicKey, msgPrefixed, numberToBytesBE(extraIn.length, 4), extraIn, new Uint8Array([i]));
+function nonceGen(publicKey2, secretKey, aggPublicKey = new Uint8Array(0), msg, extraIn = new Uint8Array(0), rand = randomBytes(32)) {
+  abytes2(publicKey2, PUBKEY_LEN);
   abytesOptional(secretKey, 32);
-  abytes(aggPublicKey);
+  abytes2(aggPublicKey);
   if (![0, 32].includes(aggPublicKey.length))
     throw new Error("wrong aggPublicKey");
   abytesOptional(msg);
-  abytes(extraIn);
-  abytes(rand, 32);
+  abytes2(extraIn);
+  abytes2(rand, 32);
   if (secretKey !== void 0)
     rand = aux(secretKey, rand);
   const msgPrefixed = msg !== void 0 ? concatBytes(Uint8Array.of(1), numberToBytesBE(msg.length, 8), msg) : Uint8Array.of(0);
-  const k1 = nonceHash(rand, publicKey, aggPublicKey, 0, msgPrefixed, extraIn);
-  const k2 = nonceHash(rand, publicKey, aggPublicKey, 1, msgPrefixed, extraIn);
+  const k1 = nonceHash(rand, publicKey2, aggPublicKey, 0, msgPrefixed, extraIn);
+  const k2 = nonceHash(rand, publicKey2, aggPublicKey, 1, msgPrefixed, extraIn);
   return {
-    secret: SecretNonce.encode({ k1, k2, publicKey }),
+    secret: SecretNonce.encode({ k1, k2, publicKey: publicKey2 }),
     public: PubNonce.encode({ R1: mulBase(k1), R2: mulBase(k2) })
   };
 }
@@ -25259,7 +27063,7 @@ function nonceAggregate(pubNonces) {
         throw new Error("infinity point");
       R1 = R1.add(R1n);
       R2 = R2.add(R2n);
-    } catch (error) {
+    } catch (error2) {
       throw new InvalidContributionErr(i, "pubnonce");
     }
   }
@@ -25292,7 +27096,7 @@ var Session = class {
     abytesArray(publicKeys, 33);
     abytesArray(tweaks, 32);
     aXonly(isXonly);
-    abytes(msg);
+    abytes2(msg);
     if (tweaks.length !== isXonly.length)
       throw new Error("The tweaks and isXonly arrays must have the same length");
     const { aggPublicKey, gAcc, tweakAcc } = keyAggregate(publicKeys, tweaks, isXonly);
@@ -25325,7 +27129,7 @@ var Session = class {
       throw new Error("The signer's pubkey must be included in the list of pubkeys");
     return keyAggCoeffInternal(pk, this.secondKey, this.L);
   }
-  partialSigVerifyInternal(partialSig, publicNonce, publicKey) {
+  partialSigVerifyInternal(partialSig, publicNonce, publicKey2) {
     const { Q, gAcc, b, R, e } = this;
     const s = Fn3.fromBytes(partialSig, true);
     if (!Fn3.isValid(s))
@@ -25333,7 +27137,7 @@ var Session = class {
     const { R1, R2 } = PubNonce.decode(publicNonce);
     const Re_s_ = R1.add(R2.multiply(b));
     const Re_s = hasEven2(R.y) ? Re_s_ : Re_s_.negate();
-    const P2 = Point3.fromBytes(publicKey);
+    const P2 = Point3.fromBytes(publicKey2);
     const a = this.getSessionKeyAggCoeff(P2);
     const g = Fn3.mul(evenScalar(Q, 1n), gAcc);
     const left = mulBase(s);
@@ -25350,7 +27154,7 @@ var Session = class {
    * @throws {Error} If the input is invalid, such as wrong array sizes, invalid nonce or secret key.
    */
   sign(secretNonce, secret, fastSign = false) {
-    abytes(secret, 32);
+    abytes2(secret, 32);
     if (typeof fastSign !== "boolean")
       throw new Error("expected boolean");
     const { Q, gAcc, b, R, e } = this;
@@ -25398,12 +27202,12 @@ var Session = class {
    */
   partialSigVerify(partialSig, pubNonces, i) {
     const { publicKeys, tweaks, isXonly } = this;
-    abytes(partialSig, 32);
+    abytes2(partialSig, 32);
     abytesArray(pubNonces, 66);
     abytesArray(publicKeys, PUBKEY_LEN);
     abytesArray(tweaks, 32);
     aXonly(isXonly);
-    anumber(i);
+    anumber2(i);
     if (pubNonces.length !== publicKeys.length)
       throw new Error("The pubNonces and publicKeys arrays must have the same length");
     if (tweaks.length !== isXonly.length)
@@ -25471,21 +27275,21 @@ var err = (message = "") => {
 var isBig = (n) => typeof n === "bigint";
 var isStr = (s) => typeof s === "string";
 var isBytes6 = (a) => a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
-var abytes3 = (value, length, title = "") => {
-  const bytes2 = isBytes6(value);
-  const len = value?.length;
+var abytes3 = (value2, length, title = "") => {
+  const bytes2 = isBytes6(value2);
+  const len = value2?.length;
   const needsLen = length !== void 0;
   if (!bytes2 || needsLen && len !== length) {
     const prefix2 = title && `"${title}" `;
     const ofLen = needsLen ? ` of length ${length}` : "";
-    const got = bytes2 ? `length=${len}` : `type=${typeof value}`;
+    const got = bytes2 ? `length=${len}` : `type=${typeof value2}`;
     err(prefix2 + "expected Uint8Array" + ofLen + ", got " + got);
   }
-  return value;
+  return value2;
 };
 var u8n = (len) => new Uint8Array(len);
 var padh = (n, pad) => n.toString(16).padStart(pad, "0");
-var bytesToHex2 = (b) => Array.from(abytes3(b)).map((e) => padh(e, 2)).join("");
+var bytesToHex3 = (b) => Array.from(abytes3(b)).map((e) => padh(e, 2)).join("");
 var C = { _0: 48, _9: 57, A: 65, F: 70, a: 97, f: 102 };
 var _ch = (ch) => {
   if (ch >= C._0 && ch <= C._9)
@@ -25496,7 +27300,7 @@ var _ch = (ch) => {
     return ch - (C.a - 10);
   return;
 };
-var hexToBytes2 = (hex2) => {
+var hexToBytes3 = (hex2) => {
   const e = "hex invalid";
   if (!isStr(hex2))
     return err(e);
@@ -25577,8 +27381,8 @@ var Point4 = class _Point {
   X;
   Y;
   Z;
-  constructor(X2, Y, Z) {
-    this.X = FpIsValid(X2);
+  constructor(X3, Y, Z) {
+    this.X = FpIsValid(X3);
     this.Y = FpIsValidNot0(Y);
     this.Z = FpIsValid(Z);
     Object.freeze(this);
@@ -25613,7 +27417,7 @@ var Point4 = class _Point {
     return p ? p.assertValidity() : err("bad point: not on curve");
   }
   static fromHex(hex2) {
-    return _Point.fromBytes(hexToBytes2(hex2));
+    return _Point.fromBytes(hexToBytes3(hex2));
   }
   get x() {
     return this.toAffine().x;
@@ -25624,9 +27428,9 @@ var Point4 = class _Point {
   /** Equality check: compare points P&Q. */
   equals(other) {
     const { X: X1, Y: Y1, Z: Z1 } = this;
-    const { X: X2, Y: Y2, Z: Z2 } = apoint(other);
+    const { X: X22, Y: Y2, Z: Z2 } = apoint(other);
     const X1Z2 = M(X1 * Z2);
-    const X2Z1 = M(X2 * Z1);
+    const X2Z1 = M(X22 * Z1);
     const Y1Z2 = M(Y1 * Z2);
     const Y2Z1 = M(Y2 * Z1);
     return X1Z2 === X2Z1 && Y1Z2 === Y2Z1;
@@ -25650,18 +27454,18 @@ var Point4 = class _Point {
   // prettier-ignore
   add(other) {
     const { X: X1, Y: Y1, Z: Z1 } = this;
-    const { X: X2, Y: Y2, Z: Z2 } = apoint(other);
+    const { X: X22, Y: Y2, Z: Z2 } = apoint(other);
     const a = 0n;
     const b = _b;
     let X3 = 0n, Y3 = 0n, Z3 = 0n;
     const b3 = M(b * 3n);
-    let t0 = M(X1 * X2), t1 = M(Y1 * Y2), t2 = M(Z1 * Z2), t3 = M(X1 + Y1);
-    let t4 = M(X2 + Y2);
+    let t0 = M(X1 * X22), t1 = M(Y1 * Y2), t2 = M(Z1 * Z2), t3 = M(X1 + Y1);
+    let t4 = M(X22 + Y2);
     t3 = M(t3 * t4);
     t4 = M(t0 + t1);
     t3 = M(t3 - t4);
     t4 = M(X1 + Z1);
-    let t5 = M(X2 + Z2);
+    let t5 = M(X22 + Z2);
     t4 = M(t4 * t5);
     t5 = M(t0 + t2);
     t4 = M(t4 - t5);
@@ -25753,7 +27557,7 @@ var Point4 = class _Point {
     return concatBytes4(u8of(4), x32b, numTo32b(y));
   }
   toHex(isCompressed) {
-    return bytesToHex2(this.toBytes(isCompressed));
+    return bytesToHex3(this.toBytes(isCompressed));
   }
 };
 var G = new Point4(Gx, Gy, 1n);
@@ -25763,10 +27567,10 @@ Point4.ZERO = I;
 var doubleScalarMulUns = (R, u1, u2) => {
   return G.multiply(u1, false).add(R.multiply(u2, false)).assertValidity();
 };
-var bytesToNumBE = (b) => big("0x" + (bytesToHex2(b) || "0"));
+var bytesToNumBE = (b) => big("0x" + (bytesToHex3(b) || "0"));
 var sliceBytesNumBE = (b, from, to) => bytesToNumBE(b.subarray(from, to));
 var B256 = 2n ** 256n;
-var numTo32b = (num2) => hexToBytes2(padh(arange(num2, 0n, B256), L2));
+var numTo32b = (num2) => hexToBytes3(padh(arange(num2, 0n, B256), L2));
 var secretKeyToScalar = (secretKey) => {
   const num2 = bytesToNumBE(abytes3(secretKey, L, "secret key"));
   return arange(num2, 1n, N, "invalid secret key: outside of range");
@@ -25969,7 +27773,7 @@ var getTag = (tag) => Uint8Array.from("BIP0340/" + tag, (c) => c.charCodeAt(0));
 var T_AUX = "aux";
 var T_NONCE = "nonce";
 var T_CHALLENGE = "challenge";
-var taggedHash3 = (tag, ...messages) => {
+var taggedHash4 = (tag, ...messages) => {
   const fn = callHash("sha256");
   const tagH = fn(getTag(tag));
   return fn(concatBytes4(tagH, tagH, ...messages));
@@ -25988,7 +27792,7 @@ var extpubSchnorr = (priv) => {
   return { d, px };
 };
 var bytesModN = (bytes2) => modN(bytesToNumBE(bytes2));
-var challenge2 = (...args) => bytesModN(taggedHash3(T_CHALLENGE, ...args));
+var challenge2 = (...args) => bytesModN(taggedHash4(T_CHALLENGE, ...args));
 var challengeAsync = async (...args) => bytesModN(await taggedHashAsync(T_CHALLENGE, ...args));
 var pubSchnorr2 = (secretKey) => {
   return extpubSchnorr(secretKey).px;
@@ -26011,9 +27815,9 @@ var createSigSchnorr = (k, px, e, d) => {
 var E_INVSIG = "invalid signature produced";
 var signSchnorr2 = (message, secretKey, auxRand = randomBytes2(L)) => {
   const { m, px, d, a } = prepSigSchnorr(message, secretKey, auxRand);
-  const aux2 = taggedHash3(T_AUX, a);
+  const aux2 = taggedHash4(T_AUX, a);
   const t = numTo32b(d ^ bytesToNumBE(aux2));
-  const rand = taggedHash3(T_NONCE, t, px, m);
+  const rand = taggedHash4(T_NONCE, t, px, m);
   const { rx, k } = extractK(rand);
   const e = challenge2(rx, px, m);
   const sig = createSigSchnorr(k, rx, e, d);
@@ -26036,10 +27840,10 @@ var signSchnorrAsync = async (message, secretKey, auxRand = randomBytes2(L)) => 
 var callSyncAsyncFn = (res, later) => {
   return res instanceof Promise ? res.then(later) : later(res);
 };
-var _verifSchnorr = (signature, message, publicKey, challengeFn) => {
+var _verifSchnorr = (signature, message, publicKey2, challengeFn) => {
   const sig = abytes3(signature, L2, "signature");
   const msg = abytes3(message, void 0, "message");
-  const pub = abytes3(publicKey, L, "publicKey");
+  const pub = abytes3(publicKey2, L, "publicKey");
   try {
     const x = bytesToNumBE(pub);
     const y = lift_x2(x);
@@ -26057,7 +27861,7 @@ var _verifSchnorr = (signature, message, publicKey, challengeFn) => {
         return false;
       return true;
     });
-  } catch (error) {
+  } catch (error2) {
     return false;
   }
 };
@@ -26246,9 +28050,9 @@ ${" ".repeat(9 + columnNum)}^`;
 
 ${highlight}`;
 }
-function attachErrorAst(error, node) {
-  if (error instanceof CelError) return error.withAst(node);
-  return error;
+function attachErrorAst(error2, node) {
+  if (error2 instanceof CelError) return error2.withAst(node);
+  return error2;
 }
 
 // node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/evaluator.js
@@ -26264,12 +28068,12 @@ init_define_import_meta_env();
 init_define_import_meta_env();
 var Optional = class _Optional {
   #value;
-  constructor(value) {
-    this.#value = value;
+  constructor(value2) {
+    this.#value = value2;
   }
-  static of(value) {
-    if (value === void 0) return OPTIONAL_NONE;
-    return new _Optional(value);
+  static of(value2) {
+    if (value2 === void 0) return OPTIONAL_NONE;
+    return new _Optional(value2);
   }
   static none() {
     return OPTIONAL_NONE;
@@ -26319,9 +28123,9 @@ function register(registry) {
   functionOverload("optional.hasValue(): bool", (v) => v.hasValue());
   functionOverload("optional<A>.value(): A", (v) => v.value());
   registry.registerFunctionOverload("OptionalNamespace.none(): optional<T>", () => Optional.none());
-  functionOverload("OptionalNamespace.of(A): optional<A>", (_, value) => Optional.of(value));
-  function ensureOptional(value, ast, description) {
-    if (value instanceof Optional) return value;
+  functionOverload("OptionalNamespace.of(A): optional<A>", (_, value2) => Optional.of(value2));
+  function ensureOptional(value2, ast, description) {
+    if (value2 instanceof Optional) return value2;
     throw evaluationError("optional_expected", `${description} must be optional`, ast);
   }
   function evaluateOptional(ev, macro, ctx) {
@@ -26329,8 +28133,8 @@ function register(registry) {
     if (v instanceof Promise) return v.then((_v) => handleOptionalResolved(_v, ev, macro, ctx));
     return handleOptionalResolved(v, ev, macro, ctx);
   }
-  function handleOptionalResolved(value, ev, macro, ctx) {
-    const optional = ensureOptional(value, macro.receiver, `${macro.functionDesc} receiver`);
+  function handleOptionalResolved(value2, ev, macro, ctx) {
+    const optional = ensureOptional(value2, macro.receiver, `${macro.functionDesc} receiver`);
     if (optional.hasValue()) return macro.onHasValue(optional);
     return macro.onEmpty(ev, macro, ctx);
   }
@@ -26447,8 +28251,8 @@ var RESERVED = /* @__PURE__ */ new Set([
 // node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/functions.js
 var UnsignedInt = class {
   #value;
-  constructor(value) {
-    this.verify(typeof value === "bigint" ? value : BigInt(value));
+  constructor(value2) {
+    this.verify(typeof value2 === "bigint" ? value2 : BigInt(value2));
   }
   get value() {
     return this.#value;
@@ -27081,22 +28885,22 @@ var TypeDeclaration = class {
     if (!message) return;
     const type = message.fields ? message.fields[key] : dynType;
     if (!type) return void 0;
-    const value = obj instanceof Map ? obj.get(key) : obj[key];
-    if (value === void 0) return;
-    if (type.matchesValueType(value, ev)) return value;
+    const value2 = obj instanceof Map ? obj.get(key) : obj[key];
+    if (value2 === void 0) return;
+    if (type.matchesValueType(value2, ev)) return value2;
     throw evaluationError(
       "field_type_mismatch",
-      `Field '${key}' is not of type '${type}', got '${ev.debugType(value)}'`,
+      `Field '${key}' is not of type '${type}', got '${ev.debugType(value2)}'`,
       ast
     );
   }
   #getMapField(obj, key, ast, ev) {
-    const value = obj instanceof Map ? obj.get(key) : obj && hasOwn(obj, key) ? obj[key] : void 0;
-    if (value === void 0) return;
-    if (this.valueType.matchesValueType(value, ev)) return value;
+    const value2 = obj instanceof Map ? obj.get(key) : obj && hasOwn(obj, key) ? obj[key] : void 0;
+    if (value2 === void 0) return;
+    if (this.valueType.matchesValueType(value2, ev)) return value2;
     throw evaluationError(
       "field_type_mismatch",
-      `Field '${key}' is not of type '${this.valueType}', got '${ev.debugType(value)}'`,
+      `Field '${key}' is not of type '${this.valueType}', got '${ev.debugType(value2)}'`,
       ast
     );
   }
@@ -27116,8 +28920,8 @@ var TypeDeclaration = class {
   #getListField(obj, key, ast, ev) {
     if (typeof key === "bigint") key = Number(key);
     else if (typeof key !== "number") return;
-    const value = this.#getListElementAtIndex(obj, key);
-    if (value === void 0) {
+    const value2 = this.#getListElementAtIndex(obj, key);
+    if (value2 === void 0) {
       if (!obj) return;
       throw evaluationError(
         "index_out_of_bounds",
@@ -27125,10 +28929,10 @@ var TypeDeclaration = class {
         ast
       );
     }
-    if (this.valueType.matchesValueType(value, ev)) return value;
+    if (this.valueType.matchesValueType(value2, ev)) return value2;
     throw evaluationError(
       "list_item_type_mismatch",
-      `List item with index '${key}' is not of type '${this.valueType}', got '${ev.debugType(value)}'`,
+      `List item with index '${key}' is not of type '${this.valueType}', got '${ev.debugType(value2)}'`,
       ast
     );
   }
@@ -27178,12 +28982,12 @@ function wrapMacroExpander(name, handler) {
   };
 }
 var VariableDeclaration = class {
-  constructor(name, type, description, value) {
+  constructor(name, type, description, value2) {
     this.name = name;
     this.type = type;
     this.description = description ?? null;
-    this.constant = value !== void 0;
-    this.value = value;
+    this.constant = value2 !== void 0;
+    this.value = value2;
     objFreeze(this);
   }
 };
@@ -27320,14 +29124,14 @@ var Candidates = class {
   findUnaryOverload(left) {
     const cached = (this.#matchCache ??= /* @__PURE__ */ new Map()).get(left);
     if (cached !== void 0) return cached;
-    let value = false;
+    let value2 = false;
     for (const decl of this.declarations) {
       if (decl.leftType !== left) continue;
-      value = decl;
+      value2 = decl;
       break;
     }
-    this.#matchCache.set(left, value);
-    return value;
+    this.#matchCache.set(left, value2);
+    return value2;
   }
   findBinaryOverload(left, right) {
     if (left.kind === "dyn" && left.valueType) right = right.wrappedType;
@@ -27580,17 +29384,17 @@ var Registry = class _Registry {
   registerVariable(name, type, opts) {
     if (this.#locked) throw new Error("Cannot modify frozen registry");
     let description = opts?.description;
-    let value;
+    let value2;
     if (typeof name === "string" && typeof type === "object" && !(type instanceof TypeDeclaration)) {
       description = type.description;
-      value = type.value;
+      value2 = type.value;
       if (type.schema) type = this.registerType({ name: `$${name}`, schema: type.schema }).type;
       else type = type.type;
     } else if (typeof name === "object") {
       if (name.schema) type = this.registerType({ name: `$${name.name}`, schema: name.schema }).type;
       else type = name.type;
       description = name.description;
-      value = name.value;
+      value2 = name.value;
       name = name.name;
     }
     if (typeof name !== "string" || !name) throw invalidVar(`name must be a string`);
@@ -27599,7 +29403,7 @@ var Registry = class _Registry {
     if (typeof type === "string") type = this.getType(type);
     else if (!(type instanceof TypeDeclaration)) throw invalidVar(`type is required`);
     this.#ensureOwnVariables();
-    this.variables.set(name, new VariableDeclaration(name, type, description, value));
+    this.variables.set(name, new VariableDeclaration(name, type, description, value2));
     return this;
   }
   #registerSchemaAsType(name, schema) {
@@ -27616,9 +29420,9 @@ var Registry = class _Registry {
     }
     return fields;
   }
-  registerConstant(name, type, value) {
+  registerConstant(name, type, value2) {
     if (typeof name === "object") this.registerVariable(name);
-    else this.registerVariable({ name, type, value });
+    else this.registerVariable({ name, type, value: value2 });
     return this;
   }
   getType(typename) {
@@ -27751,9 +29555,9 @@ var Registry = class _Registry {
     return all;
   }
   #createDefaultConvert(name, fields) {
-    const keys = objKeys(fields);
+    const keys2 = objKeys(fields);
     const conversions = /* @__PURE__ */ Object.create(null);
-    for (const k of keys) {
+    for (const k of keys2) {
       const type = fields[k];
       const decl = type.kind === "message" && this.objectTypes.get(type.name);
       if (decl === false) conversions[k] = false;
@@ -27767,7 +29571,7 @@ var Registry = class _Registry {
           this.#raw = v;
         }
         [Symbol.iterator]() {
-          if (this.size !== keys.length) for (const k of keys) this.get(k);
+          if (this.size !== keys2.length) for (const k of keys2) this.get(k);
           return super[Symbol.iterator]();
         }
         get(field2) {
@@ -28273,8 +30077,8 @@ function checkElementHomogenous(chk, ctx, expected, el2, code) {
 function checkElement(chk, ctx, expected, el2) {
   return expected.unify(chk.registry, chk.check(el2, ctx)) || dynType2;
 }
-function ternaryConditionError(ev, value, node) {
-  const type = ev.debugRuntimeType(value);
+function ternaryConditionError(ev, value2, node) {
+  const type = ev.debugRuntimeType(value2);
   return ev.createError(
     "invalid_condition_type",
     `${node.meta.label || "Ternary condition must be bool"}, got '${type}'`,
@@ -28286,8 +30090,8 @@ function handleTernary(c, ev, ast, ctx) {
   if (c === false) return ev.run(ast.right, ctx);
   throw ternaryConditionError(ev, c, ast.condition);
 }
-function logicalOperandError(ev, value, node) {
-  const type = ev.debugRuntimeType(value);
+function logicalOperandError(ev, value2, node) {
+  const type = ev.debugRuntimeType(value2);
   return ev.createError(
     "invalid_logical_operand",
     `Logical operator requires bool operands, got '${type}'`,
@@ -28399,13 +30203,13 @@ function callFunctionHandler(handler, ev, args, ast) {
   try {
     const result = handler.apply(ev, args);
     if (result instanceof Promise) {
-      return result.catch((error) => {
-        throw attachErrorAst(error, ast);
+      return result.catch((error2) => {
+        throw attachErrorAst(error2, ast);
       });
     }
     return result;
-  } catch (error) {
-    throw attachErrorAst(error, ast);
+  } catch (error2) {
+    throw attachErrorAst(error2, ast);
   }
 }
 function callFn(args, ast, ev) {
@@ -28514,36 +30318,36 @@ async function continueLoop(ev, ctx, args, items, accu, i) {
   }
   return args.result(accu);
 }
-function iterateQuantifier(ev, ctx, args, items, accu, i, error, stp) {
+function iterateQuantifier(ev, ctx, args, items, accu, i, error2, stp) {
   const condition = args.condition;
   const step = args.step;
   const len = items.length;
   while (i < len) {
     if (!condition(accu)) return args.result(accu);
     stp = ev.tryEval(step, ctx.setIterValue(items[i++], ev));
-    if (stp instanceof Promise) return continueQuantifier(ev, ctx, args, items, accu, i, error, stp);
-    if (stp instanceof Error && (error ??= stp)) continue;
+    if (stp instanceof Promise) return continueQuantifier(ev, ctx, args, items, accu, i, error2, stp);
+    if (stp instanceof Error && (error2 ??= stp)) continue;
     accu = stp;
   }
-  if (error && condition(accu)) throw error;
+  if (error2 && condition(accu)) throw error2;
   return args.result(accu);
 }
-async function continueQuantifier(ev, ctx, args, items, accu, i, error, stp) {
+async function continueQuantifier(ev, ctx, args, items, accu, i, error2, stp) {
   if (ctx === args.iterCtx) ctx.async = true;
   const condition = args.condition;
   const step = args.step;
   const len = items.length;
   stp = await stp;
-  if (stp instanceof Error) error ??= stp;
+  if (stp instanceof Error) error2 ??= stp;
   else accu = stp;
   while (i < len) {
     if (!condition(accu)) return args.result(accu);
     stp = ev.tryEval(step, ctx.setIterValue(items[i++], ev));
     if (stp instanceof Promise) stp = await stp;
-    if (stp instanceof Error && (error ??= stp)) continue;
+    if (stp instanceof Error && (error2 ??= stp)) continue;
     accu = stp;
   }
-  if (error && condition(accu)) throw error;
+  if (error2 && condition(accu)) throw error2;
   return args.result(accu);
 }
 function oFieldAccess(left, right, ast, ev) {
@@ -29116,17 +30920,17 @@ function registerOverloads(registry) {
   binaryOverload(GPT, "-", GPD, (a, b) => b.subtractTimestamp(a));
   binaryOverload(GPT, "+", GPD, (a, b) => b.extendTimestamp(a));
   binaryOverload(GPD, "+", GPT, (a, b) => a.extendTimestamp(b));
-  function listIncludes(value, list, ast, ev) {
-    if (list instanceof Set && list.has(value)) return true;
-    for (const v of list) if (isEqual(value, v, ast, ev)) return true;
+  function listIncludes(value2, list, ast, ev) {
+    if (list instanceof Set && list.has(value2)) return true;
+    for (const v of list) if (isEqual(value2, v, ast, ev)) return true;
     return false;
   }
   function mapIncludes(a, b) {
     if (b instanceof Map) return b.get(a) !== void 0;
     return hasOwn(b, a) ? b[a] !== void 0 : false;
   }
-  function listMembership(value, list, ast, ev) {
-    return listIncludes(value, list, ast, ev);
+  function listMembership(value2, list, ast, ev) {
+    return listIncludes(value2, list, ast, ev);
   }
   binaryOverload("V", "in", "list<V>", listMembership);
   binaryOverload("K", "in", "map<K, V>", mapIncludes);
@@ -29152,7 +30956,7 @@ function registerOverloads(registry) {
     }
     if (a instanceof Set && b instanceof Set) {
       if (a.size !== b.size) return false;
-      for (const value of a) if (!b.has(value)) return false;
+      for (const value2 of a) if (!b.has(value2)) return false;
       return true;
     }
     const arr = a instanceof Set ? b : a;
@@ -29166,8 +30970,8 @@ function registerOverloads(registry) {
     if (a === b) return true;
     if (a instanceof Map && b instanceof Map) {
       if (a.size !== b.size) return false;
-      for (const [key, value] of a)
-        if (!(b.has(key) && isEqual(value, b.get(key), ast, ev))) return false;
+      for (const [key, value2] of a)
+        if (!(b.has(key) && isEqual(value2, b.get(key), ast, ev))) return false;
       return true;
     }
     if (a instanceof Map || b instanceof Map) {
@@ -29175,8 +30979,8 @@ function registerOverloads(registry) {
       const map = a instanceof Map ? a : b;
       const keysObj = objKeys(obj);
       if (map.size !== keysObj.length) return false;
-      for (const [key, value] of map) {
-        if (!(key in obj && isEqual(value, obj[key], ast, ev))) return false;
+      for (const [key, value2] of map) {
+        if (!(key in obj && isEqual(value2, obj[key], ast, ev))) return false;
       }
       return true;
     }
@@ -29265,8 +31069,8 @@ var TypeChecker = class extends Base {
   check(ast, ctx) {
     try {
       return ast.checkedType ??= ast.check(this, ast, ctx);
-    } catch (error) {
-      throw attachErrorAst(error, ast);
+    } catch (error2) {
+      throw attachErrorAst(error2, ast);
     }
   }
   checkAccessOnType(ast, ctx, leftType, allowMissingField = false) {
@@ -29487,8 +31291,8 @@ var ASTNode = class _ASTNode {
   #evaluateMacro(ev, ast, ctx) {
     return (ast = this.#meta.macro).evaluate(ev, ast, ctx);
   }
-  setMeta(key, value) {
-    return this.#meta[key] = value, this;
+  setMeta(key, value2) {
+    return this.#meta[key] = value2, this;
   }
   get range() {
     return { start: this.start, end: this.end };
@@ -29511,10 +31315,10 @@ var Lexer = class {
     this.length = input.length;
     return input;
   }
-  token(pos, type, value) {
+  token(pos, type, value2) {
     this.tokenPos = pos;
     this.tokenType = type;
-    this.tokenValue = value;
+    this.tokenValue = value2;
     return this;
   }
   // Read next token
@@ -29616,9 +31420,9 @@ var Lexer = class {
     return c >= 97 || c >= 65 && c <= 90 || c <= 57 || c === 95;
   }
   _parseAsDouble(start, end) {
-    const value = Number(this.input.substring(start, end));
-    if (Number.isFinite(value)) return this.token(start, TOKEN.NUMBER, value);
-    throw parseError("invalid_number", `Invalid number: ${value}`, {
+    const value2 = Number(this.input.substring(start, end));
+    if (Number.isFinite(value2)) return this.token(start, TOKEN.NUMBER, value2);
+    throw parseError("invalid_number", `Invalid number: ${value2}`, {
       pos: start,
       start,
       end,
@@ -29704,8 +31508,8 @@ var Lexer = class {
         return this.token(pos - 1, TOKEN.STRING, rawValue);
       }
       default: {
-        const value = this.processEscapes(rawStart, rawValue, false);
-        return this.token(pos, TOKEN.STRING, value);
+        const value2 = this.processEscapes(rawStart, rawValue, false);
+        return this.token(pos, TOKEN.STRING, value2);
       }
     }
   }
@@ -29809,9 +31613,9 @@ var Lexer = class {
       } else if (next >= "0" && next <= "7") {
         const o = str2.substring(i + 1, i + 4);
         if (!/^[0-7]{3}$/.test(o)) throw this.#escapeErr("invalid_octal_escape", offset, len, i, 4);
-        const value = Number.parseInt(o, 8);
-        if (value > 255) throw this.#escapeErr("octal_escape_out_of_range", offset, len, i, 4, o);
-        result += String.fromCharCode(value);
+        const value2 = Number.parseInt(o, 8);
+        if (value2 > 255) throw this.#escapeErr("octal_escape_out_of_range", offset, len, i, 4, o);
+        result += String.fromCharCode(value2);
         i += 4;
       } else {
         throw this.#escapeErr("invalid_escape_sequence", offset, len, i, 2, next);
@@ -29823,8 +31627,8 @@ var Lexer = class {
     const { pos, input, length } = this;
     let p = pos;
     while (p < length && this._isIdentifierCharCode(input[p].charCodeAt(0))) p++;
-    const value = input.substring(pos, this.pos = p);
-    switch (value) {
+    const value2 = input.substring(pos, this.pos = p);
+    switch (value2) {
       case "true":
         return this.token(pos, TOKEN.BOOLEAN, true);
       case "false":
@@ -29834,7 +31638,7 @@ var Lexer = class {
       case "in":
         return this.token(pos, TOKEN.IN);
       default:
-        return this.token(pos, TOKEN.IDENTIFIER, value);
+        return this.token(pos, TOKEN.IDENTIFIER, value2);
     }
   }
 };
@@ -30081,23 +31885,23 @@ var Parser = class {
     return this.#advanceToken(this.#node(this.pos, this.lexer.pos, OPERATORS.value, this.value));
   }
   #parseIdentifierPrimary() {
-    const value = this.value;
+    const value2 = this.value;
     const end = this.lexer.pos;
     const start = this.consume(TOKEN.IDENTIFIER);
-    if (RESERVED.has(value)) {
-      throw parseError("reserved_identifier", `Reserved identifier: ${value}`, {
+    if (RESERVED.has(value2)) {
+      throw parseError("reserved_identifier", `Reserved identifier: ${value2}`, {
         pos: start,
         start,
         end,
         input: this.input
       });
     }
-    if (!this.match(TOKEN.LPAREN)) return this.#node(start, end, OPERATORS.id, value);
+    if (!this.match(TOKEN.LPAREN)) return this.#node(start, end, OPERATORS.id, value2);
     this.#advanceToken();
     const args = this.parseArgumentList();
     const closeEnd = this.lexer.pos;
     this.consume(TOKEN.RPAREN);
-    return this.#expandMacro(start, closeEnd, OPERATORS.call, [value, args]);
+    return this.#expandMacro(start, closeEnd, OPERATORS.call, [value2, args]);
   }
   #parseParenthesizedExpression() {
     this.consume(TOKEN.LPAREN);
@@ -30172,14 +31976,14 @@ var DEFAULT_LIMITS = objFreeze({
 });
 var LIMIT_KEYS = new Set(objKeys(DEFAULT_LIMITS));
 function createLimits(overrides, base = DEFAULT_LIMITS) {
-  const keys = overrides ? objKeys(overrides) : void 0;
-  if (!keys?.length) return base;
+  const keys2 = overrides ? objKeys(overrides) : void 0;
+  if (!keys2?.length) return base;
   const merged = { ...base };
-  for (const key of keys) {
+  for (const key of keys2) {
     if (!LIMIT_KEYS.has(key)) throw new TypeError(`Unknown limits option: ${key}`);
-    const value = overrides[key];
-    if (typeof value !== "number") continue;
-    merged[key] = value;
+    const value2 = overrides[key];
+    if (typeof value2 !== "number") continue;
+    merged[key] = value2;
   }
   return objFreeze(merged);
 }
@@ -30190,9 +31994,9 @@ var DEFAULT_OPTIONS = objFreeze({
   limits: DEFAULT_LIMITS
 });
 function bool(a, b, key) {
-  const value = a?.[key] ?? b?.[key];
-  if (typeof value !== "boolean") throw new TypeError(`Invalid option: ${key}`);
-  return value;
+  const value2 = a?.[key] ?? b?.[key];
+  if (typeof value2 !== "boolean") throw new TypeError(`Invalid option: ${key}`);
+  return value2;
 }
 function createOptions(opts, base = DEFAULT_OPTIONS) {
   if (!opts) return base;
@@ -30244,8 +32048,8 @@ var Environment = class _Environment {
     this.#registry.registerVariable(name, type, opts);
     return this;
   }
-  registerConstant(name, type, value) {
-    this.#registry.registerConstant(name, type, value);
+  registerConstant(name, type, value2) {
+    this.#registry.registerConstant(name, type, value2);
     return this;
   }
   hasVariable(name) {
@@ -30257,16 +32061,16 @@ var Environment = class _Environment {
   check(expression) {
     try {
       return this.#checkAST(this.#parser.parse(expression));
-    } catch (error) {
-      return { valid: false, error };
+    } catch (error2) {
+      return { valid: false, error: error2 };
     }
   }
   #checkAST(ast) {
     try {
       const typeDecl = this.#typeChecker.check(ast, new RootContext(this.#registry));
       return { valid: true, type: this.#formatTypeForCheck(typeDecl) };
-    } catch (error) {
-      return { valid: false, error };
+    } catch (error2) {
+      return { valid: false, error: error2 };
     }
   }
   #formatTypeForCheck(typeDecl) {
@@ -30302,19 +32106,19 @@ var Evaluator = class extends Base {
     if (coll instanceof Map) return coll.entries().next().value;
     for (const key in coll) return [key, coll[key]];
   }
-  debugRuntimeType(value, checkedType) {
-    return checkedType?.hasDynType === false ? checkedType : this.debugTypeDeep(value);
+  debugRuntimeType(value2, checkedType) {
+    return checkedType?.hasDynType === false ? checkedType : this.debugTypeDeep(value2);
   }
-  debugTypeDeep(value) {
-    const runtimeType = this.debugType(value);
+  debugTypeDeep(value2) {
+    const runtimeType = this.debugType(value2);
     switch (runtimeType.kind) {
       case "list": {
-        const first = value instanceof Array ? value[0] : value.values().next().value;
+        const first = value2 instanceof Array ? value2[0] : value2.values().next().value;
         if (first === void 0) return runtimeType;
         return this.registry.getListType(this.debugTypeDeep(first));
       }
       case "map": {
-        const first = this.#firstMapElement(value);
+        const first = this.#firstMapElement(value2);
         if (!first) return runtimeType;
         return this.registry.getMapType(
           runtimeType.keyType.hasDynType ? this.debugTypeDeep(first[0]) : runtimeType.keyType,
@@ -30346,19 +32150,19 @@ var globalEnvironment = new Environment({
 init_define_import_meta_env();
 
 // node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-XQJT2ACL.js
-function generateNonces(publicKey) {
-  const nonces = nonceGen(publicKey);
+function generateNonces(publicKey2) {
+  const nonces = nonceGen(publicKey2);
   return { secNonce: nonces.secret, pubNonce: nonces.public };
 }
 function aggregateNonces(pubNonces) {
   return nonceAggregate(pubNonces);
 }
-function aggregateKeys(publicKeys, sort, options = {}) {
+function aggregateKeys(publicKeys, sort, options2 = {}) {
   if (sort) {
     publicKeys = sortKeys([...publicKeys]);
   }
   const { aggPublicKey: preTweakedKey } = keyAggregate(publicKeys);
-  if (!options.taprootTweak) {
+  if (!options2.taprootTweak) {
     return {
       preTweakedKey: preTweakedKey.toBytes(true),
       finalKey: preTweakedKey.toBytes(true)
@@ -30367,7 +32171,7 @@ function aggregateKeys(publicKeys, sort, options = {}) {
   const tweakBytes = schnorr.utils.taggedHash(
     "TapTweak",
     preTweakedKey.toBytes(true).subarray(1),
-    options.taprootTweak ?? new Uint8Array(0)
+    options2.taprootTweak ?? new Uint8Array(0)
   );
   const { aggPublicKey: finalKey } = keyAggregate(publicKeys, [tweakBytes], [true]);
   return {
@@ -30417,27 +32221,27 @@ var PartialSig = class _PartialSig {
     return new _PartialSig(bytes2, R);
   }
 };
-function createSession(combinedNonce, publicKeys, message, options) {
-  const keys = sortKeys([...publicKeys]);
+function createSession(combinedNonce, publicKeys, message, options2) {
+  const keys2 = sortKeys([...publicKeys]);
   let tweakBytes;
-  if (options?.taprootTweak !== void 0) {
-    const { preTweakedKey } = aggregateKeys(keys, false);
+  if (options2?.taprootTweak !== void 0) {
+    const { preTweakedKey } = aggregateKeys(keys2, false);
     tweakBytes = schnorr.utils.taggedHash(
       "TapTweak",
       preTweakedKey.subarray(1),
-      options.taprootTweak
+      options2.taprootTweak
     );
   }
   return new Session(
     combinedNonce,
-    keys,
+    keys2,
     message,
     tweakBytes ? [tweakBytes] : void 0,
     tweakBytes ? [true] : void 0
   );
 }
-function sign(secNonce, privateKey, combinedNonce, publicKeys, message, options) {
-  const session = createSession(combinedNonce, publicKeys, message, options);
+function sign(secNonce, privateKey, combinedNonce, publicKeys, message, options2) {
+  const session = createSession(combinedNonce, publicKeys, message, options2);
   const partialSig = session.sign(secNonce, privateKey);
   return PartialSig.decode(partialSig);
 }
@@ -30527,9 +32331,9 @@ var TreeSignerSession = class _TreeSignerSession {
   generateNonces() {
     if (!this.graph) throw ErrMissingVtxoGraph;
     const myNonces = /* @__PURE__ */ new Map();
-    const publicKey = secp256k1.getPublicKey(this.secretKey);
+    const publicKey2 = secp256k1.getPublicKey(this.secretKey);
     for (const g of this.graph.iterator()) {
-      const nonces = generateNonces(publicKey);
+      const nonces = generateNonces(publicKey2);
       myNonces.set(g.txid, nonces);
     }
     return myNonces;
@@ -30681,9 +32485,9 @@ var SingleKey = class _SingleKey {
 };
 var ReadonlySingleKey = class _ReadonlySingleKey {
   /** Create a readonly identity from a compressed public key. */
-  constructor(publicKey) {
-    this.publicKey = publicKey;
-    if (publicKey.length !== 33) {
+  constructor(publicKey2) {
+    this.publicKey = publicKey2;
+    if (publicKey2.length !== 33) {
       throw new Error("Invalid public key length");
     }
   }
@@ -30699,8 +32503,8 @@ var ReadonlySingleKey = class _ReadonlySingleKey {
    * const readonlyKey = ReadonlySingleKey.fromPublicKey(pubkey);
    * ```
    */
-  static fromPublicKey(publicKey) {
-    return new _ReadonlySingleKey(publicKey);
+  static fromPublicKey(publicKey2) {
+    return new _ReadonlySingleKey(publicKey2);
   }
   xOnlyPublicKey() {
     return Promise.resolve(this.publicKey.slice(1));
@@ -30710,8 +32514,8 @@ var ReadonlySingleKey = class _ReadonlySingleKey {
   }
 };
 var ALL_SIGHASH2 = Object.values(SigHash).filter((x) => typeof x === "number");
-function isHDDeterministicSignCapable(value) {
-  return typeof value === "object" && value !== null && typeof value.signSchnorrDeterministicWithDescriptor === "function";
+function isHDDeterministicSignCapable(value2) {
+  return typeof value2 === "object" && value2 !== null && typeof value2.signSchnorrDeterministicWithDescriptor === "function";
 }
 var DescriptorIdentity = class {
   descriptor;
@@ -30761,26 +32565,26 @@ var DescriptorIdentity = class {
     return this.base.signSchnorrDeterministicWithDescriptor(this.descriptor, messageHash);
   }
 };
-function isHDCapableIdentity(value) {
-  if (typeof value !== "object" || value === null) return false;
-  const v = value;
+function isHDCapableIdentity(value2) {
+  if (typeof value2 !== "object" || value2 === null) return false;
+  const v = value2;
   return typeof v.descriptor === "string" && typeof v.isOurs === "function" && typeof v.signWithDescriptor === "function" && typeof v.signMessageWithDescriptor === "function";
 }
 function isBatchSignable(identity2) {
   return "signMultiple" in identity2 && typeof identity2.signMultiple === "function";
 }
 var ForeignDescriptorError = class extends Error {
-  constructor(descriptor, options) {
-    super(`this wallet holds no key for descriptor: ${descriptor}`, options);
+  constructor(descriptor, options2) {
+    super(`this wallet holds no key for descriptor: ${descriptor}`, options2);
     this.descriptor = descriptor;
   }
   descriptor;
   name = "ForeignDescriptorError";
 };
 async function resolveDescriptorSigner(descriptor, identity2, provider) {
-  const owner2 = provider?.isOurs(descriptor) ? provider : isHDCapableIdentity(identity2) && identity2.isOurs(descriptor) ? identity2 : void 0;
-  if (owner2 && parseHDDescriptor(descriptor)) {
-    return new DescriptorIdentity({ descriptor, signer: owner2, base: identity2 });
+  const owner = provider?.isOurs(descriptor) ? provider : isHDCapableIdentity(identity2) && identity2.isOurs(descriptor) ? identity2 : void 0;
+  if (owner && parseHDDescriptor(descriptor)) {
+    return new DescriptorIdentity({ descriptor, signer: owner, base: identity2 });
   }
   let key;
   try {
@@ -30838,16 +32642,16 @@ var EsploraProvider = class {
   async getTxOutspends(txid) {
     const response = await baseFetch(`${this.baseUrl}/tx/${txid}/outspends`);
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Failed to get transaction outspends: ${error}`);
+      const error2 = await response.text();
+      throw new Error(`Failed to get transaction outspends: ${error2}`);
     }
     return response.json();
   }
   async getTransactions(address) {
     const response = await baseFetch(`${this.baseUrl}/address/${address}/txs`);
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Failed to get transactions: ${error}`);
+      const error2 = await response.text();
+      throw new Error(`Failed to get transactions: ${error2}`);
     }
     return response.json();
   }
@@ -30895,8 +32699,8 @@ var EsploraProvider = class {
             newTxs.forEach((tx) => existingTxs.add(txKey2(tx)));
             callback(newTxs);
           }
-        } catch (error) {
-          console.error("Error in polling mechanism:", error);
+        } catch (error2) {
+          console.error("Error in polling mechanism:", error2);
         }
       }, this.pollingInterval);
     };
@@ -30930,8 +32734,8 @@ var EsploraProvider = class {
             }
           }
           if (newTxs.length > 0) callback(newTxs);
-        } catch (error) {
-          console.error("Failed to process WebSocket message:", error);
+        } catch (error2) {
+          console.error("Failed to process WebSocket message:", error2);
         }
       });
       ws.addEventListener("error", async () => {
@@ -30971,8 +32775,8 @@ var EsploraProvider = class {
       body: JSON.stringify([parent, child])
     });
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Failed to broadcast package: ${error}`);
+      const error2 = await response.text();
+      throw new Error(`Failed to broadcast package: ${error2}`);
     }
     return response.json();
   }
@@ -30985,8 +32789,8 @@ var EsploraProvider = class {
       body: tx
     });
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Failed to broadcast transaction: ${error}`);
+      const error2 = await response.text();
+      throw new Error(`Failed to broadcast transaction: ${error2}`);
     }
     return response.text();
   }
@@ -31086,8 +32890,8 @@ var TxWeightEstimator = class _TxWeightEstimator {
   /**
    * Adds an output by decoding the address to get the exact script size.
    */
-  addOutputAddress(address, network) {
-    const payment = Address(network).decode(address);
+  addOutputAddress(address, network2) {
+    const payment = Address(network2).decode(address);
     const script = OutScript.encode(payment);
     return this.addOutputScript(script);
   }
@@ -31103,10 +32907,10 @@ var TxWeightEstimator = class _TxWeightEstimator {
   }
 };
 var vsize = (weight) => {
-  const value = BigInt(Math.ceil(weight / TxWeightEstimator.WITNESS_SCALE_FACTOR));
+  const value2 = BigInt(Math.ceil(weight / TxWeightEstimator.WITNESS_SCALE_FACTOR));
   return {
-    value,
-    fee: (feeRate) => feeRate * value
+    value: value2,
+    fee: (feeRate) => feeRate * value2
   };
 };
 var ANCHOR_VALUE = 0n;
@@ -31136,14 +32940,14 @@ function findP2AOutput(tx) {
 }
 var CHILD_DUST_AMOUNT = 546;
 function buildAnchorChild(params) {
-  const { parent, feeRate, fundingCoins, changeAddress, tapInternalKey, network } = params;
+  const { parent, feeRate, fundingCoins, changeAddress, tapInternalKey, network: network2 } = params;
   const child = new Transaction2({ version: 3, allowLegacyWitnessUtxo: true });
   child.addInput(findP2AOutput(parent));
   const estimator = TxWeightEstimator.create().addP2AInput();
   for (const _ of fundingCoins) {
     estimator.addKeySpendInput(true);
   }
-  estimator.addOutputAddress(changeAddress, network);
+  estimator.addOutputAddress(changeAddress, network2);
   const childVsize = Number(estimator.vsize().value);
   const fee = Math.ceil(feeRate * (parent.vsize + childVsize));
   let total = 0n;
@@ -31162,7 +32966,7 @@ function buildAnchorChild(params) {
       `insufficient funding for anchor child: need change >= ${CHILD_DUST_AMOUNT}, got ${change}`
     );
   }
-  child.addOutputAddress(changeAddress, change, network);
+  child.addOutputAddress(changeAddress, change, network2);
   return { child, fee };
 }
 function buildForfeitTx(inputs, forfeitPkScript, txLocktime) {
@@ -31536,9 +33340,9 @@ function parsePacket(packetType, data) {
       return new UnknownPacket(packetType, data);
   }
 }
-function encodeVarUint(value) {
+function encodeVarUint(value2) {
   const bytes2 = [];
-  let remaining = value;
+  let remaining = value2;
   do {
     let byte = remaining & 127;
     remaining >>>= 7;
@@ -31598,7 +33402,7 @@ function assertFinalCommitmentMatchesValidated(finalCommitmentTx, validatedCommi
     `${context}: finalization commitment tx ${finalCommitmentTx.id} differs from the validated commitment tx ${validatedCommitmentTxid}`
   );
 }
-function validateBatchRecipients(commitmentTx, vtxoTreeLeaves, recipients, network) {
+function validateBatchRecipients(commitmentTx, vtxoTreeLeaves, recipients, network2) {
   const usedOutputs = /* @__PURE__ */ new Set();
   const usedOnchainOutputs = /* @__PURE__ */ new Set();
   for (const recipient of recipients) {
@@ -31606,26 +33410,26 @@ function validateBatchRecipients(commitmentTx, vtxoTreeLeaves, recipients, netwo
     try {
       arkAddress = ArkAddress.decode(recipient.address);
     } catch {
-      validateOnchainRecipient(commitmentTx, recipient, network, usedOnchainOutputs);
+      validateOnchainRecipient(commitmentTx, recipient, network2, usedOnchainOutputs);
       continue;
     }
     validateOffchainRecipient(vtxoTreeLeaves, arkAddress, recipient, usedOutputs);
   }
 }
-function validateBatchRecipientsWithoutTree(commitmentTx, recipients, network) {
+function validateBatchRecipientsWithoutTree(commitmentTx, recipients, network2) {
   const usedOnchainOutputs = /* @__PURE__ */ new Set();
   for (const recipient of recipients) {
     try {
       ArkAddress.decode(recipient.address);
     } catch {
-      validateOnchainRecipient(commitmentTx, recipient, network, usedOnchainOutputs);
+      validateOnchainRecipient(commitmentTx, recipient, network2, usedOnchainOutputs);
       continue;
     }
     throw ErrUnvalidatedOffchainOutput(recipient.address);
   }
 }
-function validateOnchainRecipient(commitmentTx, recipient, network, usedOutputs) {
-  const addr = Address(network).decode(recipient.address);
+function validateOnchainRecipient(commitmentTx, recipient, network2, usedOutputs) {
+  const addr = Address(network2).decode(recipient.address);
   const expectedPkScript = OutScript.encode(addr);
   if (!recipient.amount) {
     throw ErrInvalidOnchainOutputAmount(recipient.address);
@@ -31873,10 +33677,10 @@ function createDefaultActivityRegistry() {
   return registry;
 }
 var BoardingProgramScript = class extends VtxoScript {
-  constructor(program, options, collaborativeScript, exitScript) {
+  constructor(program, options2, collaborativeScript, exitScript) {
     super([collaborativeScript, exitScript]);
     this.program = program;
-    this.options = options;
+    this.options = options2;
     this.forfeitScript = hex.encode(collaborativeScript);
     this.exitScript = hex.encode(exitScript);
   }
@@ -31891,8 +33695,8 @@ var BoardingProgramScript = class extends VtxoScript {
     return this.findLeaf(this.exitScript);
   }
 };
-function keySet(keys) {
-  return new Set(keys.map((key) => hex.encode(key)));
+function keySet(keys2) {
+  return new Set(keys2.map((key) => hex.encode(key)));
 }
 function createBoardingProgramScript(program, serverPubKey, csvTimelock) {
   if (!/^[a-z0-9][a-z0-9._-]{0,63}$/.test(program.name)) {
@@ -32210,9 +34014,9 @@ function assertServerSignedLeaf(serverTx, localTx, inputIndex, serverPubkeyHex, 
       void 0,
       tapLeafHash(scriptFromTapLeafScript(leaf))
     );
-  } catch (error) {
+  } catch (error2) {
     throw new ServerResponseMismatchError(
-      `${context}: input ${inputIndex} is not signed by the server on the leaf being spent (${error instanceof Error ? error.message : String(error)})`
+      `${context}: input ${inputIndex} is not signed by the server on the leaf being spent (${error2 instanceof Error ? error2.message : String(error2)})`
     );
   }
 }
@@ -32247,7 +34051,7 @@ function assertCheckpointsMatchInputs(checkpoints, inputs, unrollCandidates, con
     }
   }
 }
-async function submitOffchainTx(provider, offchainTx, signer, hooks, options) {
+async function submitOffchainTx(provider, offchainTx, signer, hooks, options2) {
   const { arkTx: signedArkTx, userSignedCheckpoints } = await signer.signArkTx(
     offchainTx.arkTx,
     offchainTx.checkpoints
@@ -32265,7 +34069,7 @@ async function submitOffchainTx(provider, offchainTx, signer, hooks, options) {
   assertSubmittedArkTxid(response, signedArkTx, "submitTx");
   const { arkTxid, signedCheckpointTxs } = response;
   const matched = matchServerCheckpoints(signedCheckpointTxs, offchainTx.checkpoints, "submitTx");
-  const verify = options?.verifyServerSignatures;
+  const verify = options2?.verifyServerSignatures;
   if (verify) {
     if (response.finalArkTx === void 0) {
       throw new ServerResponseMismatchError(
@@ -32325,6 +34129,84 @@ async function signAndSubmitOffchainTx(params) {
   });
   return arkTxid;
 }
+async function recoverBoardingProgram(params) {
+  if (params.inputs.length === 0) {
+    throw new Error("No boarding inputs to recover");
+  }
+  if (!Number.isFinite(params.maxFeeRateSatVb) || params.maxFeeRateSatVb <= 0) {
+    throw new Error("maxFeeRateSatVb must be a positive finite number");
+  }
+  if (params.absoluteFeeCapSats <= 0n) {
+    throw new Error("absoluteFeeCapSats must be positive");
+  }
+  const recoveryPubKey = await params.recoveryIdentity.xOnlyPublicKey();
+  if (!equalBytes3(recoveryPubKey, params.program.recoveryPubKey)) {
+    throw new Error("recovery identity does not match the boarding program");
+  }
+  const controlledDestination = p2tr(recoveryPubKey, void 0, params.network).address;
+  if (!controlledDestination || params.destination !== controlledDestination) {
+    throw new Error("recovery destination is not controlled by the recovery identity");
+  }
+  const script = createBoardingProgramScript(
+    params.program,
+    params.operatorPubKey,
+    params.boardingTimelock
+  );
+  const encodedScript = script.encode();
+  const exitLeaf = script.exit();
+  const chainTip = params.boardingTimelock.type === "blocks" ? await params.onchainProvider.getChainTip() : void 0;
+  for (const input of params.inputs) {
+    if (!equalBytes3(input.tapTree, encodedScript)) {
+      throw new Error(`boarding input ${input.txid}:${input.vout} is not from this program`);
+    }
+    if (!input.status.confirmed) {
+      throw new Error(`boarding input ${input.txid}:${input.vout} is not confirmed`);
+    }
+    if (!hasBoardingTxExpired(input, params.boardingTimelock, chainTip?.height)) {
+      throw new Error(`boarding input ${input.txid}:${input.vout} is not mature`);
+    }
+  }
+  const feeRate = await params.onchainProvider.getFeeRate() ?? 1;
+  if (!Number.isFinite(feeRate) || feeRate <= 0 || feeRate > params.maxFeeRateSatVb) {
+    throw new Error("boarding recovery fee rate exceeds the approved maximum");
+  }
+  const leafScriptSize = scriptFromTapLeafScript(exitLeaf).length;
+  const controlPathSize = exitLeaf[0].merklePath.length * 32;
+  const estimator = TxWeightEstimator.create();
+  for (const _ of params.inputs) {
+    estimator.addTapscriptInput(64, leafScriptSize, controlPathSize);
+  }
+  estimator.addOutputAddress(params.destination, params.network);
+  const fee = BigInt(Math.ceil(Number(estimator.vsize().value) * feeRate));
+  if (fee > params.absoluteFeeCapSats) {
+    throw new Error("boarding recovery fee exceeds the approved absolute cap");
+  }
+  const outputAmount = params.inputs.reduce((sum, input) => sum + BigInt(input.value), 0n) - fee;
+  const dustAmount = params.dustAmount ?? 330n;
+  if (outputAmount < dustAmount) {
+    throw new Error("boarding recovery output is below dust after fees");
+  }
+  const tx = new Transaction2();
+  for (const input of params.inputs) {
+    tx.addInput({
+      txid: input.txid,
+      index: input.vout,
+      witnessUtxo: {
+        script: script.pkScript,
+        amount: BigInt(input.value)
+      },
+      tapLeafScript: [exitLeaf],
+      sequence: getSequence(exitLeaf)
+    });
+  }
+  tx.addOutputAddress(params.destination, outputAmount, params.network);
+  const signed = await params.recoveryIdentity.sign(
+    tx,
+    params.inputs.map((_, index) => index)
+  );
+  signed.finalize();
+  return params.onchainProvider.broadcastTransaction(signed.hex);
+}
 function isSubdust(vtxo, dust) {
   if (typeof vtxo === "bigint") return vtxo < dust;
   return vtxo.value < dust;
@@ -32374,8 +34256,8 @@ function createAssetPacket(assetInputs, receivers, changeReceiver) {
   }
   return Packet.create(groups);
 }
-function selectCoinsWithAsset(coins, assetId, requiredAmount) {
-  const coinsWithAsset = coins.filter((coin) => coin.assets?.some((a) => a.assetId === assetId));
+function selectCoinsWithAsset(coins2, assetId, requiredAmount) {
+  const coinsWithAsset = coins2.filter((coin) => coin.assets?.some((a) => a.assetId === assetId));
   coinsWithAsset.sort((a, b) => {
     const amountA = a.assets?.find((asset) => asset.assetId === assetId)?.amount ?? 0n;
     const amountB = b.assets?.find((asset) => asset.assetId === assetId)?.amount ?? 0n;
@@ -32439,14 +34321,14 @@ function classifyAgainstSignerSet(contractServerPubKeyHex, signerSet, nowSeconds
   }
   return { status: "MIGRATABLE", signerPubKey, cutoffDate, secondsUntilCutoff };
 }
-function isCooperativelyMigratable(status) {
-  return status === "MIGRATABLE" || status === "DUE_NOW";
+function isCooperativelyMigratable(status2) {
+  return status2 === "MIGRATABLE" || status2 === "DUE_NOW";
 }
-var isRegtest = (network) => network.bech32 === "bcrt";
+var isRegtest = (network2) => network2.bech32 === "bcrt";
 var NOMINAL_BLOCK_SECONDS = 600n;
-var toTimelock = (value) => ({
-  value,
-  type: value >= 512n ? "seconds" : "blocks"
+var toTimelock = (value2) => ({
+  value: value2,
+  type: value2 >= 512n ? "seconds" : "blocks"
 });
 var toSeconds = (t) => t.type === "seconds" ? t.value : t.value * NOMINAL_BLOCK_SECONDS;
 function assertTimelockInPolicy(timelock, policy, label, overrideOption) {
@@ -32463,16 +34345,16 @@ function assertTimelockInPolicy(timelock, policy, label, overrideOption) {
   }
   return timelock;
 }
-function assertTimelockWithinFloor(value, policy, label, overrideOption) {
-  return assertTimelockInPolicy(toTimelock(value), policy, label, overrideOption);
+function assertTimelockWithinFloor(value2, policy, label, overrideOption) {
+  return assertTimelockInPolicy(toTimelock(value2), policy, label, overrideOption);
 }
 var DEFAULT_MIN_BATCH_EXPIRY_SECONDS = 86400n;
 var REGTEST_MIN_BATCH_EXPIRY_SECONDS = 6000n;
-function defaultBatchExpiryPolicy(network) {
-  return isRegtest(network) ? { minSeconds: REGTEST_MIN_BATCH_EXPIRY_SECONDS, requireSeconds: false } : { minSeconds: DEFAULT_MIN_BATCH_EXPIRY_SECONDS, requireSeconds: true };
+function defaultBatchExpiryPolicy(network2) {
+  return isRegtest(network2) ? { minSeconds: REGTEST_MIN_BATCH_EXPIRY_SECONDS, requireSeconds: false } : { minSeconds: DEFAULT_MIN_BATCH_EXPIRY_SECONDS, requireSeconds: true };
 }
-function resolveBatchExpiryPolicy(network, overrides) {
-  return { ...defaultBatchExpiryPolicy(network), ...overrides };
+function resolveBatchExpiryPolicy(network2, overrides) {
+  return { ...defaultBatchExpiryPolicy(network2), ...overrides };
 }
 function assertValidBatchExpiry(batchExpiry, policy) {
   if (policy.advertisedVtxoTreeExpiry !== void 0 && batchExpiry !== policy.advertisedVtxoTreeExpiry) {
@@ -32490,18 +34372,18 @@ var HOSTED_MIN_CHECKPOINT_EXIT_DELAY_SECONDS = {
   signet: SIGNET_MIN_CHECKPOINT_EXIT_DELAY_SECONDS,
   mutinynet: MUTINYNET_MIN_CHECKPOINT_EXIT_DELAY_SECONDS
 };
-function defaultCheckpointExitDelayPolicy(network) {
-  if (isRegtest(network)) {
+function defaultCheckpointExitDelayPolicy(network2) {
+  if (isRegtest(network2)) {
     return { minSeconds: REGTEST_MIN_CHECKPOINT_EXIT_DELAY_SECONDS, requireSeconds: false };
   }
-  const hosted = network.name ? HOSTED_MIN_CHECKPOINT_EXIT_DELAY_SECONDS[network.name] : void 0;
+  const hosted = network2.name ? HOSTED_MIN_CHECKPOINT_EXIT_DELAY_SECONDS[network2.name] : void 0;
   return {
     minSeconds: hosted ?? DEFAULT_MIN_CHECKPOINT_EXIT_DELAY_SECONDS,
     requireSeconds: true
   };
 }
-function resolveCheckpointExitDelayPolicy(network, overrides) {
-  return { ...defaultCheckpointExitDelayPolicy(network), ...overrides };
+function resolveCheckpointExitDelayPolicy(network2, overrides) {
+  return { ...defaultCheckpointExitDelayPolicy(network2), ...overrides };
 }
 function assertValidServerUnrollScript(checkpointTapscript, policy) {
   let script;
@@ -32547,8 +34429,8 @@ var IntentOutputEnv = new Environment().registerVariable(AmountVariableName, "do
 var IntentOffchainInputEnv = new Environment().registerVariable(AmountVariableName, "double").registerVariable(ExpiryVariableName, "double").registerVariable(BirthVariableName, "double").registerVariable(WeightVariableName, "double").registerVariable(InputTypeVariableName, "string").registerFunction(nowFunction.signature, nowFunction.implementation);
 var IntentOnchainInputEnv = new Environment().registerVariable(AmountVariableName, "double").registerFunction(nowFunction.signature, nowFunction.implementation);
 var FeeAmount = class _FeeAmount {
-  constructor(value) {
-    this.value = value;
+  constructor(value2) {
+    this.value = value2;
   }
   value;
   static ZERO = new _FeeAmount(0);
@@ -32721,11 +34603,11 @@ function deriveContractTapscripts(contract) {
   if (isTapscriptDeriving(handler)) {
     return handler.deriveTapscripts(script, contract);
   }
-  const legacy2 = script;
+  const legacy = script;
   return {
-    forfeitTapLeafScript: legacy2.forfeit(),
-    intentTapLeafScript: legacy2.forfeit(),
-    tapTree: legacy2.encode()
+    forfeitTapLeafScript: legacy.forfeit(),
+    intentTapLeafScript: legacy.forfeit(),
+    tapTree: legacy.encode()
   };
 }
 function cloneTapLeafScript([
@@ -32768,8 +34650,8 @@ function extendVirtualCoinForContract(vtxo, contractOrMap, cache) {
   }
   return extendVtxoFromContract(vtxo, contract, cache);
 }
-function isContractMap(value) {
-  return typeof value.get === "function";
+function isContractMap(value2) {
+  return typeof value2.get === "function";
 }
 function resolveContract(vtxo, contractOrMap) {
   if (!contractOrMap) return void 0;
@@ -32784,14 +34666,14 @@ function assertRecipientArkAddress(encoded, address, context) {
       `Invalid Arkade address ${encoded}: expected prefix "${context.hrp}", got "${address.hrp}"`
     );
   }
-  const { status } = classifyAgainstSignerSet(
+  const { status: status2 } = classifyAgainstSignerSet(
     hex.encode(address.serverPubKey),
     context.signerSet
   );
-  if (status === "UNKNOWN_SIGNER") {
+  if (status2 === "UNKNOWN_SIGNER") {
     throw new Error(`Invalid Arkade address ${encoded}: unknown operator signer key`);
   }
-  if (status === "EXPIRED") {
+  if (status2 === "EXPIRED") {
     throw new Error(
       `Invalid Arkade address ${encoded}: operator signer key is past its rotation cutoff`
     );
@@ -32865,13 +34747,13 @@ function outpointExclusion(outpoints, reason) {
 function outpointReasons(reasons) {
   return (vtxo) => reasons.get(`${vtxo.txid}:${vtxo.vout}`);
 }
-function logExcludedVtxos(source, vtxos, exclusions) {
+function logExcludedVtxos(source2, vtxos, exclusions) {
   if (exclusions.length === 0) return;
   for (const vtxo of vtxos) {
     for (const exclusion of exclusions) {
       const reason = exclusion(vtxo);
       if (reason === void 0) continue;
-      console.debug(`[spendability] ${source}: ${vtxo.txid}:${vtxo.vout} ${reason}`);
+      console.debug(`[spendability] ${source2}: ${vtxo.txid}:${vtxo.vout} ${reason}`);
     }
   }
 }
@@ -33456,9 +35338,9 @@ var VtxoManager = class _VtxoManager {
    * const txid = await manager.renewVtxos(undefined, { thresholdSeconds: 6 * 60 * 60 });
    * ```
    */
-  async renewVtxos(eventCallback, options) {
-    if (options?.thresholdSeconds !== void 0) {
-      const { thresholdSeconds } = options;
+  async renewVtxos(eventCallback, options2) {
+    if (options2?.thresholdSeconds !== void 0) {
+      const { thresholdSeconds } = options2;
       if (typeof thresholdSeconds !== "number" || !Number.isFinite(thresholdSeconds) || thresholdSeconds <= 0) {
         throw new TypeError(
           `Invalid thresholdSeconds: expected a positive finite number, got ${String(thresholdSeconds)}`
@@ -33471,8 +35353,8 @@ var VtxoManager = class _VtxoManager {
     this.renewalInProgress = true;
     try {
       let threshold;
-      if (options?.thresholdSeconds !== void 0) {
-        threshold = options.thresholdSeconds * 1e3;
+      if (options2?.thresholdSeconds !== void 0) {
+        threshold = options2.thresholdSeconds * 1e3;
       } else if (this.settlementConfig !== false && this.settlementConfig?.vtxoThreshold !== void 0) {
         threshold = this.settlementConfig.vtxoThreshold * 1e3;
       } else {
@@ -33683,8 +35565,8 @@ var VtxoManager = class _VtxoManager {
    * Cooperatively migrate VTXOs minted under a now-deprecated server signer
    * to the wallet's active-signer address. See {@link IVtxoManager}.
    */
-  async migrateDeprecatedSignerVtxos(options) {
-    return this.migrateCore(options);
+  async migrateDeprecatedSignerVtxos(options2) {
+    return this.migrateCore(options2);
   }
   /**
    * Machine-readable status of every deprecated server signer the wallet
@@ -33709,7 +35591,7 @@ var VtxoManager = class _VtxoManager {
    * selects spendable VTXOs under deprecated-signer contracts (cutoff-first),
    * and settles them to the active-signer Ark address.
    */
-  async migrateCore(options) {
+  async migrateCore(options2) {
     const wallet = this.requireMigrationCapableWallet();
     const info = await wallet.arkProvider.getInfo();
     wallet.refreshDeprecatedSigners(info);
@@ -33793,7 +35675,7 @@ var VtxoManager = class _VtxoManager {
               inputs: capped.map((c) => c.coin),
               outputs: [{ address: arkAddress, amount: totalAmount }]
             },
-            options?.eventCallback
+            options2?.eventCallback
           );
         }
       );
@@ -33901,7 +35783,7 @@ var VtxoManager = class _VtxoManager {
       if (cls.status === "CURRENT") continue;
       const recoverable = vtxos.filter((v) => v.isSwept && !hasTerminalSpend(v));
       const spendable = vtxos.filter((v) => !hasTerminalSpend(v) && !v.isSwept);
-      const value = spendable.reduce((sum, v) => sum + v.value, 0);
+      const value2 = spendable.reduce((sum, v) => sum + v.value, 0);
       let recoverableCount = 0;
       let recoverableValue = 0;
       let awaitingSweepCount = 0;
@@ -33911,7 +35793,7 @@ var VtxoManager = class _VtxoManager {
         recoverableCount = recoverable.length;
         recoverableValue = recoverable.reduce((sum, v) => sum + v.value, 0);
         awaitingSweepCount = spendable.length;
-        awaitingSweepValue = value;
+        awaitingSweepValue = value2;
         for (const v of spendable) {
           const exp = toBatchExpiry(v);
           if (exp !== void 0 && (nextSweepEta === void 0 || exp < nextSweepEta)) {
@@ -33922,7 +35804,7 @@ var VtxoManager = class _VtxoManager {
       const existing = reportsBySigner.get(cls.signerPubKey);
       if (existing) {
         existing.vtxoCount += spendable.length;
-        existing.totalValue += value;
+        existing.totalValue += value2;
         existing.recoverableCount += recoverableCount;
         existing.recoverableValue += recoverableValue;
         existing.awaitingSweepCount += awaitingSweepCount;
@@ -33937,7 +35819,7 @@ var VtxoManager = class _VtxoManager {
           cutoffDate: cls.cutoffDate,
           secondsUntilCutoff: cls.secondsUntilCutoff,
           vtxoCount: spendable.length,
-          totalValue: value,
+          totalValue: value2,
           boardingCount: 0,
           boardingValue: 0,
           recoverableCount,
@@ -33995,11 +35877,11 @@ var VtxoManager = class _VtxoManager {
       if (cls.status === "CURRENT") continue;
       const confirmed = group.coins.filter((c) => c.status.confirmed);
       if (confirmed.length === 0) continue;
-      const value = confirmed.reduce((sum, c) => sum + c.value, 0);
+      const value2 = confirmed.reduce((sum, c) => sum + c.value, 0);
       const existing = reportsBySigner.get(cls.signerPubKey);
       if (existing) {
         existing.boardingCount += confirmed.length;
-        existing.boardingValue += value;
+        existing.boardingValue += value2;
       } else {
         reportsBySigner.set(cls.signerPubKey, {
           signerPubKey: cls.signerPubKey,
@@ -34009,7 +35891,7 @@ var VtxoManager = class _VtxoManager {
           vtxoCount: 0,
           totalValue: 0,
           boardingCount: confirmed.length,
-          boardingValue: value,
+          boardingValue: value2,
           // Boarding UTXOs don't carry an offchain sweep lifecycle; the
           // post-cutoff recover-on-sweep fields apply to VTXOs only and
           // are merged in from the VTXO classifier (mergeSignerReports).
@@ -34305,8 +36187,8 @@ var VtxoManager = class _VtxoManager {
    * `undefined` when the error isn't a parsed ArkError, isn't this code,
    * or doesn't carry the metadata.
    */
-  extractSpentOutpoint(error) {
-    const ark = maybeArkError(error);
+  extractSpentOutpoint(error2) {
+    const ark = maybeArkError(error2);
     if (!isArkError(ark, ArkErrorName.VTXO_ALREADY_SPENT)) return void 0;
     const raw2 = ark.metadata?.vtxo_outpoint;
     if (typeof raw2 !== "string") return void 0;
@@ -34604,9 +36486,9 @@ var ArkNote = class _ArkNote {
    * @param value - Note value in satoshis
    * @param HRP - Optional human-readable prefix for string encoding
    */
-  constructor(preimage, value, HRP = _ArkNote.DefaultHRP) {
+  constructor(preimage, value2, HRP = _ArkNote.DefaultHRP) {
     this.preimage = preimage;
-    this.value = value;
+    this.value = value2;
     this.HRP = HRP;
     const preimageHash = sha256(this.preimage);
     this.vtxoScript = new VtxoScript([noteTapscript(preimageHash)]);
@@ -34615,7 +36497,7 @@ var ArkNote = class _ArkNote {
     this.tapTree = this.vtxoScript.encode();
     this.forfeitTapLeafScript = leaf;
     this.intentTapLeafScript = leaf;
-    this.value = value;
+    this.value = value2;
     this.status = { confirmed: true };
     this.extraWitness = [this.preimage];
   }
@@ -34666,8 +36548,8 @@ var ArkNote = class _ArkNote {
       );
     }
     const preimage = data.subarray(0, _ArkNote.PreimageLength);
-    const value = readUInt32BE(data, _ArkNote.PreimageLength);
-    return new _ArkNote(preimage, value, hrp);
+    const value2 = readUInt32BE(data, _ArkNote.PreimageLength);
+    return new _ArkNote(preimage, value2, hrp);
   }
   /**
    * Decode a note from its base58 string form.
@@ -34702,9 +36584,9 @@ var ArkNote = class _ArkNote {
     return this.HRP + base58.encode(this.encode());
   }
 };
-function writeUInt32BE(array2, value, offset) {
+function writeUInt32BE(array2, value2, offset) {
   const view3 = new DataView(array2.buffer, array2.byteOffset + offset, 4);
-  view3.setUint32(0, value, false);
+  view3.setUint32(0, value2, false);
 }
 function readUInt32BE(array2, offset) {
   const view3 = new DataView(array2.buffer, array2.byteOffset + offset, 4);
@@ -34890,8 +36772,8 @@ async function buildExitDag(params) {
   const byTxid = /* @__PURE__ */ new Map();
   for (const vtxo of params.vtxos) {
     const outpoint2 = `${vtxo.txid}:${vtxo.vout}`;
-    const chain2 = await params.chain.getVtxoChain({ txid: vtxo.txid, vout: vtxo.vout });
-    for (const chainTx of chain2) {
+    const chain3 = await params.chain.getVtxoChain({ txid: vtxo.txid, vout: vtxo.vout });
+    for (const chainTx of chain3) {
       const existing = byTxid.get(chainTx.txid);
       if (existing) {
         existing.forVtxos.add(outpoint2);
@@ -34927,8 +36809,8 @@ async function buildExitDag(params) {
   for (const tx of order) {
     let confirmed = false;
     try {
-      const status = await params.onchain.getTxStatus(tx.txid);
-      confirmed = status.confirmed;
+      const status2 = await params.onchain.getTxStatus(tx.txid);
+      confirmed = status2.confirmed;
     } catch {
       confirmed = false;
     }
@@ -34983,17 +36865,17 @@ function chainTxTypeToChainedExit(t) {
       return 0;
   }
 }
-function orderAncestryFirst(chain2) {
-  const ids = new Set(chain2.map((c) => c.txid));
+function orderAncestryFirst(chain3) {
+  const ids = new Set(chain3.map((c) => c.txid));
   return topoSortByDeps(
-    chain2,
+    chain3,
     (c) => c.txid,
     (c) => c.spends.filter((s) => ids.has(s))
   );
 }
 async function captureExitBranch(params) {
-  const { resolver, repository, vtxo, value, mode, minExitWorthSats } = params;
-  if (value < minExitWorthSats) return;
+  const { resolver, repository, vtxo, value: value2, mode, minExitWorthSats } = params;
+  if (value2 < minExitWorthSats) return;
   if (await repository.hasBranch(vtxo)) return;
   const ordered = orderAncestryFirst(await resolver.getVtxoChain(vtxo));
   const psbtByTxid = /* @__PURE__ */ new Map();
@@ -35041,7 +36923,7 @@ var IndexerExitDataSource = class {
   indexer;
   name = "indexer";
   async getVtxoChain(vtxo) {
-    const chain2 = [];
+    const chain3 = [];
     let pageIndex = 0;
     let hasMore = true;
     while (hasMore) {
@@ -35049,11 +36931,11 @@ var IndexerExitDataSource = class {
         { txid: vtxo.txid, vout: vtxo.vout },
         { pageIndex, pageSize: DEFAULT_PAGE_SIZE }
       );
-      chain2.push(...page);
+      chain3.push(...page);
       hasMore = meta ? page.length === DEFAULT_PAGE_SIZE : false;
       pageIndex++;
     }
-    return chain2;
+    return chain3;
   }
   async getVirtualTxs(txids) {
     const out = /* @__PURE__ */ new Map();
@@ -35105,7 +36987,7 @@ var RepositoryExitDataSource = class {
   async getVtxoChain(vtxo) {
     const branch = await this.repo.getBranch(vtxo);
     if (branch.length === 0) return null;
-    const chain2 = [];
+    const chain3 = [];
     for (const v of branch) {
       const type = chainedTxTypeToChainTxType(v.type);
       let spends = [];
@@ -35113,14 +36995,14 @@ var RepositoryExitDataSource = class {
         if (!v.psbt) return null;
         spends = psbtInputTxids(v.psbt);
       }
-      chain2.push({
+      chain3.push({
         txid: v.txid,
         type,
         expiresAt: v.expiresAt != null ? String(v.expiresAt) : "",
         spends
       });
     }
-    return chain2;
+    return chain3;
   }
   async getVirtualTxs(txids) {
     const out = /* @__PURE__ */ new Map();
@@ -35140,10 +37022,10 @@ var OrderedExitChainResolver = class {
   persist;
   async getVtxoChain(vtxo) {
     let lastErr;
-    for (const source of this.sources) {
+    for (const source2 of this.sources) {
       try {
-        const chain2 = await source.getVtxoChain(vtxo);
-        if (chain2) return chain2;
+        const chain3 = await source2.getVtxoChain(vtxo);
+        if (chain3) return chain3;
       } catch (e) {
         lastErr = e;
       }
@@ -35154,11 +37036,11 @@ var OrderedExitChainResolver = class {
   async getVirtualTxs(txids) {
     const found = /* @__PURE__ */ new Map();
     let remaining = txids;
-    for (const [i, source] of this.sources.entries()) {
+    for (const [i, source2] of this.sources.entries()) {
       if (remaining.length === 0) break;
       let got;
       try {
-        got = await source.getVirtualTxs(remaining);
+        got = await source2.getVirtualTxs(remaining);
       } catch {
         continue;
       }
@@ -35249,8 +37131,8 @@ function cursorCutoff(requestStartedAt) {
 }
 var ARK_INFO_SNAPSHOT_KEY = "arkInfoSnapshot";
 var MalformedArkInfoSnapshotError = class extends Error {
-  constructor(message, options) {
-    super(message, { cause: options?.cause });
+  constructor(message, options2) {
+    super(message, { cause: options2?.cause });
     this.name = "MalformedArkInfoSnapshotError";
   }
 };
@@ -35331,22 +37213,22 @@ function hydrateArkInfo(snapshot) {
   };
 }
 var DECIMAL_STRING = /^-?\d+$/;
-function assertString(value, path) {
-  if (typeof value !== "string") {
+function assertString(value2, path) {
+  if (typeof value2 !== "string") {
     throw new MalformedArkInfoSnapshotError(`${path} must be a string`);
   }
 }
-function assertDecimalString(value, path) {
-  assertString(value, path);
-  if (!DECIMAL_STRING.test(value)) {
+function assertDecimalString(value2, path) {
+  assertString(value2, path);
+  if (!DECIMAL_STRING.test(value2)) {
     throw new MalformedArkInfoSnapshotError(`${path} must be a decimal integer string`);
   }
 }
-function assertFeeInfo(value, path) {
-  if (typeof value !== "object" || value === null) {
+function assertFeeInfo(value2, path) {
+  if (typeof value2 !== "object" || value2 === null) {
     throw new MalformedArkInfoSnapshotError(`${path} must be an object`);
   }
-  const fees = value;
+  const fees = value2;
   assertString(fees.txFeeRate, `${path}.txFeeRate`);
   if (typeof fees.intentFee !== "object" || fees.intentFee === null) {
     throw new MalformedArkInfoSnapshotError(`${path}.intentFee must be an object`);
@@ -35602,7 +37484,7 @@ var TxTree = class {
       try {
         child.update(txid, fn);
         return;
-      } catch (error) {
+      } catch (error2) {
         continue;
       }
     }
@@ -35648,8 +37530,8 @@ var Batch;
     Step2["TreeNoncesAggregated"] = "tree_nonces_aggregated";
     Step2["BatchFinalization"] = "batch_finalization";
   })(Step || (Step = {}));
-  async function join2(eventIterator, handler, options = {}) {
-    const { abortController, skipVtxoTreeSigning = false, eventCallback } = options;
+  async function join2(eventIterator, handler, options2 = {}) {
+    const { abortController, skipVtxoTreeSigning = false, eventCallback } = options2;
     let step = "start";
     const flatVtxoTree = [];
     const flatConnectorTree = [];
@@ -36260,16 +38142,16 @@ function castMetadata(metadata) {
   }
   const md = [];
   const textEncoder = new TextEncoder();
-  for (const [key, value] of Object.entries(metadata)) {
+  for (const [key, value2] of Object.entries(metadata)) {
     let valueBytes;
-    if (typeof value === "string") {
-      valueBytes = textEncoder.encode(value);
-    } else if (typeof value === "number") {
-      valueBytes = textEncoder.encode(String(value));
-    } else if (value instanceof Uint8Array) {
-      valueBytes = value;
-    } else if (value instanceof ArrayBuffer) {
-      valueBytes = new Uint8Array(value);
+    if (typeof value2 === "string") {
+      valueBytes = textEncoder.encode(value2);
+    } else if (typeof value2 === "number") {
+      valueBytes = textEncoder.encode(String(value2));
+    } else if (value2 instanceof Uint8Array) {
+      valueBytes = value2;
+    } else if (value2 instanceof ArrayBuffer) {
+      valueBytes = new Uint8Array(value2);
     } else {
       throw new Error("Invalid metadata value type");
     }
@@ -36314,10 +38196,10 @@ var DelegateManagerImpl = class {
           destinationScript,
           delegateAt
         );
-      } catch (error) {
+      } catch (error2) {
         return {
           delegated: [],
-          failed: [{ outpoints: eligible, error }]
+          failed: [{ outpoints: eligible, error: error2 }]
         };
       }
       return { delegated: eligible, failed: [] };
@@ -36346,10 +38228,10 @@ var DelegateManagerImpl = class {
           destinationScript,
           delegateAt
         );
-      } catch (error) {
+      } catch (error2) {
         return {
           delegated: [],
-          failed: [{ outpoints: recoverableVtxos, error }]
+          failed: [{ outpoints: recoverableVtxos, error: error2 }]
         };
       }
       return { delegated: recoverableVtxos, failed: [] };
@@ -36406,7 +38288,7 @@ async function delegate(identity2, delegateProvider, arkInfo, delegateInfo, vtxo
       }
     }
   }
-  const { fees, dust, forfeitAddress, network } = arkInfo;
+  const { fees, dust, forfeitAddress, network: network2 } = arkInfo;
   const delegateAtSeconds = delegateAt.getTime() / 1e3;
   const estimator = new Estimator({
     ...fees.intentFee,
@@ -36470,7 +38352,7 @@ async function delegate(identity2, delegateProvider, arkInfo, delegateInfo, vtxo
     destinationScript
   );
   const forfeitOutputScript = OutScript.encode(
-    Address(getNetwork(network)).decode(forfeitAddress)
+    Address(getNetwork(network2)).decode(forfeitAddress)
   );
   const forfeits = await Promise.all(
     vtxos.filter((v) => !canRecoverOnchain(v, { timestamp: /* @__PURE__ */ new Date() })).map(async (coin) => {
@@ -36511,11 +38393,11 @@ async function makeDelegateForfeitTx(input, connectorAmount, delegatePubkey, for
   );
   return identity2.sign(tx);
 }
-async function makeSignedDelegateIntent(identity2, coins, outputs, onchainOutputsIndexes, cosignerPubKeys, validAt, destinationScript) {
+async function makeSignedDelegateIntent(identity2, coins2, outputs, onchainOutputsIndexes, cosignerPubKeys, validAt, destinationScript) {
   const assetInputs = /* @__PURE__ */ new Map();
-  for (let i = 0; i < coins.length; i++) {
-    if ("assets" in coins[i]) {
-      const assets = coins[i].assets;
+  for (let i = 0; i < coins2.length; i++) {
+    if ("assets" in coins2[i]) {
+      const assets = coins2[i].assets;
       if (assets && assets.length > 0) {
         assetInputs.set(i + 1, assets);
       }
@@ -36556,7 +38438,7 @@ async function makeSignedDelegateIntent(identity2, coins, outputs, onchainOutput
     expire_at: 0,
     cosigners_public_keys: cosignerPubKeys
   };
-  const proof = Intent.create(message, coins, outputs);
+  const proof = Intent.create(message, coins2, outputs);
   const signedProof = await identity2.sign(proof);
   return {
     proof: base64.encode(signedProof.toPSBT()),
@@ -36584,19 +38466,19 @@ function findDelegateTapLeaf(vtxo, delegatePubkey) {
 function isAnnotated(v) {
   return v.tapTree !== void 0 && v.forfeitTapLeafScript !== void 0 && v.intentTapLeafScript !== void 0;
 }
-var promisifyRequest = (request) => new Promise((resolve, reject) => {
-  request.onsuccess = () => resolve(request.result);
-  request.onerror = () => reject(request.error);
+var promisifyRequest = (request2) => new Promise((resolve, reject) => {
+  request2.onsuccess = () => resolve(request2.result);
+  request2.onerror = () => reject(request2.error);
 });
 var awaitTransaction = (transaction) => new Promise((resolve, reject) => {
   transaction.oncomplete = () => resolve();
   transaction.onerror = () => reject(transaction.error);
   transaction.onabort = () => reject(transaction.error ?? new Error("transaction aborted"));
 });
-var deleteByIndex = (store, indexName, value) => {
-  const request = store.index(indexName).openCursor(IDBKeyRange.only(value));
-  request.onsuccess = () => {
-    const cursor = request.result;
+var deleteByIndex = (store, indexName, value2) => {
+  const request2 = store.index(indexName).openCursor(IDBKeyRange.only(value2));
+  request2.onsuccess = () => {
+    const cursor = request2.result;
     if (!cursor) return;
     cursor.delete();
     cursor.continue();
@@ -36605,7 +38487,7 @@ var deleteByIndex = (store, indexName, value) => {
 var getAllByIndexValues = (store, indexName, values) => {
   if (values.length === 0) return Promise.resolve([]);
   const index = store.index(indexName);
-  return Promise.all(values.map((value) => promisifyRequest(index.getAll(value)))).then(
+  return Promise.all(values.map((value2) => promisifyRequest(index.getAll(value2)))).then(
     (results) => results.flat()
   );
 };
@@ -36655,23 +38537,23 @@ async function openDatabase(dbName, dbVersion, initDatabase2) {
     return cached.promise;
   }
   const dbPromise = new Promise((resolve, reject) => {
-    const request = globalObject.indexedDB.open(dbName, dbVersion);
+    const request2 = globalObject.indexedDB.open(dbName, dbVersion);
     let settled = false;
     let blockedTimer;
     const clearBlockedTimer = () => {
       if (blockedTimer !== void 0) clearTimeout(blockedTimer);
       blockedTimer = void 0;
     };
-    request.onerror = () => {
+    request2.onerror = () => {
       clearBlockedTimer();
       if (settled) return;
       settled = true;
       forget(dbName, dbPromise);
-      reject(request.error);
+      reject(request2.error);
     };
-    request.onsuccess = () => {
+    request2.onsuccess = () => {
       clearBlockedTimer();
-      const db = request.result;
+      const db = request2.result;
       if (settled) {
         db.close();
         return;
@@ -36684,12 +38566,12 @@ async function openDatabase(dbName, dbVersion, initDatabase2) {
       db.addEventListener("close", () => forget(dbName, dbPromise));
       resolve(db);
     };
-    request.onupgradeneeded = (event) => {
+    request2.onupgradeneeded = (event) => {
       clearBlockedTimer();
-      const db = request.result;
-      initDatabase2(db, event.oldVersion, request.transaction);
+      const db = request2.result;
+      initDatabase2(db, event.oldVersion, request2.transaction);
     };
-    request.onblocked = () => {
+    request2.onblocked = () => {
       console.warn("Database upgrade blocked - close other tabs/connections");
       blockedTimer = setTimeout(() => {
         if (settled) return;
@@ -36978,10 +38860,10 @@ function backfillVtxoScripts(transaction) {
   cursorRequest.onsuccess = () => {
     const cursor = cursorRequest.result;
     if (!cursor) return;
-    const value = cursor.value;
-    if (!value.script) {
-      value.script = scriptFromArkAddress(value.address);
-      cursor.update(value);
+    const value2 = cursor.value;
+    if (!value2.script) {
+      value2.script = scriptFromArkAddress(value2.address);
+      cursor.update(value2);
     }
     cursor.continue();
   };
@@ -37339,10 +39221,10 @@ var ContractWatcher = class {
         const key = `${vtxo.txid}:${vtxo.vout}`;
         state.lastKnownVtxos.set(key, vtxo);
       }
-    } catch (error) {
+    } catch (error2) {
       console.error(
         `ContractWatcher: failed to seed lastKnownVtxos for ${state.contract.script}`,
-        error
+        error2
       );
     }
   }
@@ -37402,8 +39284,8 @@ var ContractWatcher = class {
    * Get virtual outputs for contracts, grouped by contract script.
    * @see WalletRepository for `repo`
    */
-  async getContractVtxos(options) {
-    const { contractScripts, includeSpent } = options;
+  async getContractVtxos(options2) {
+    const { contractScripts, includeSpent } = options2;
     const repo = this.config.walletRepository;
     const contractsToQuery = Array.from(this.contracts.values());
     const asyncResults = contractsToQuery.filter((_) => {
@@ -37513,12 +39395,12 @@ var ContractWatcher = class {
         });
         this.scheduleReconnect();
       });
-    } catch (error) {
-      if (!isEventSourceUnavailableError(error)) {
-        console.error("ContractWatcher connection failed:", error);
+    } catch (error2) {
+      if (!isEventSourceUnavailableError(error2)) {
+        console.error("ContractWatcher connection failed:", error2);
       }
       this.connectionState = "disconnected";
-      if (this.reportEventSourceUnavailable(error)) return;
+      if (this.reportEventSourceUnavailable(error2)) return;
       this.eventCallback?.({
         type: "connection_reset",
         timestamp: Date.now()
@@ -37539,12 +39421,12 @@ var ContractWatcher = class {
    * Failsafe polling keeps running, so the watcher stays correct and merely
    * slower; what it loses is push latency.
    */
-  reportEventSourceUnavailable(error) {
-    if (!isEventSourceUnavailableError(error)) return false;
+  reportEventSourceUnavailable(error2) {
+    if (!isEventSourceUnavailableError(error2)) return false;
     if (!this.eventSourceReported) {
       this.eventSourceReported = true;
       console.warn(
-        `ContractWatcher: contract events are OFF and will not be retried \u2014 falling back to polling every ${this.config.failsafePollIntervalMs}ms. ` + error.message
+        `ContractWatcher: contract events are OFF and will not be retried \u2014 falling back to polling every ${this.config.failsafePollIntervalMs}ms. ` + error2.message
       );
     }
     return true;
@@ -37581,8 +39463,8 @@ var ContractWatcher = class {
     }
     this.failsafePollIntervalId = setInterval(() => {
       if (this.isWatching) {
-        this.pollAllContracts().catch((error) => {
-          console.error("ContractWatcher failsafe poll failed:", error);
+        this.pollAllContracts().catch((error2) => {
+          console.error("ContractWatcher failsafe poll failed:", error2);
         });
       }
     }, this.config.failsafePollIntervalMs);
@@ -37631,8 +39513,8 @@ var ContractWatcher = class {
           this.emitVtxoEvent(contractScript, spentVtxos, "vtxo_spent", now);
         }
       }
-    } catch (error) {
-      console.error("ContractWatcher poll failed:", error);
+    } catch (error2) {
+      console.error("ContractWatcher poll failed:", error2);
     }
   }
   /**
@@ -37672,7 +39554,7 @@ var ContractWatcher = class {
     const hadSubscription = this.subscriptionId !== void 0;
     try {
       await this.updateSubscription();
-    } catch (error) {
+    } catch (error2) {
       return;
     }
     const justGotSubscription = !hadSubscription && this.subscriptionId !== void 0;
@@ -37683,8 +39565,8 @@ var ContractWatcher = class {
         this.reconnectTimeoutId = void 0;
       }
       this.reconnectAttempts = 0;
-      this.connect(true).catch((error) => {
-        console.warn("ContractWatcher cold-start connect failed:", error);
+      this.connect(true).catch((error2) => {
+        console.warn("ContractWatcher cold-start connect failed:", error2);
       });
     }
   }
@@ -37710,13 +39592,13 @@ var ContractWatcher = class {
         scriptsToWatch,
         this.subscriptionId
       );
-    } catch (error) {
-      const isStale = error instanceof Error && /subscription\b.*\bnot\s+found/i.test(error.message);
+    } catch (error2) {
+      const isStale = error2 instanceof Error && /subscription\b.*\bnot\s+found/i.test(error2.message);
       if (this.subscriptionId && isStale) {
         this.subscriptionId = void 0;
         this.subscriptionId = await this.config.indexerProvider.subscribeForScripts(scriptsToWatch);
       } else {
-        throw error;
+        throw error2;
       }
     }
   }
@@ -38071,8 +39953,8 @@ var ContractManager = class _ContractManager {
     }
     this.initialized = true;
     this.stopWatcherFn = await this.watcher.startWatching((event) => {
-      this.handleContractEvent(event).catch((error) => {
-        console.error("Error handling contract event:", error);
+      this.handleContractEvent(event).catch((error2) => {
+        console.error("Error handling contract event:", error2);
       });
     });
   }
@@ -38370,12 +40252,12 @@ var ContractManager = class _ContractManager {
           `Script mismatch: provided script does not match script derived from params. Expected ${derivedScript}, got ${params.script}`
         );
       }
-    } catch (error) {
-      if (error instanceof Error && error.message.includes("mismatch")) {
-        throw error;
+    } catch (error2) {
+      if (error2 instanceof Error && error2.message.includes("mismatch")) {
+        throw error2;
       }
       throw new Error(
-        `Invalid params for contract type '${params.type}': ${error instanceof Error ? error.message : String(error)}`
+        `Invalid params for contract type '${params.type}': ${error2 instanceof Error ? error2.message : String(error2)}`
       );
     }
     const [existing] = await this.getContracts({ script: params.script });
@@ -38486,9 +40368,9 @@ var ContractManager = class _ContractManager {
                 index,
                 await h.discoverAt(index, descriptor, opts.deps)
               );
-            } catch (error) {
+            } catch (error2) {
               probe.indeterminate.add(index);
-              probe.errors.set(index, { handler: h.type, index, error });
+              probe.errors.set(index, { handler: h.type, index, error: error2 });
             }
           })
         );
@@ -38496,20 +40378,20 @@ var ContractManager = class _ContractManager {
       }
       const from = entries[0].index;
       const to = entries[entries.length - 1].index;
-      const failRange = (error) => {
+      const failRange = (error2) => {
         for (const e of entries) probe.indeterminate.add(e.index);
         probe.errors.set(from, {
           handler: h.type,
           index: from,
           ...to > from && { toIndex: to },
-          error
+          error: error2
         });
       };
       let ranged;
       try {
         ranged = await h.discoverRange(entries, opts.deps);
-      } catch (error) {
-        failRange(error);
+      } catch (error2) {
+        failRange(error2);
         return probe;
       }
       for (const e of entries) {
@@ -38539,8 +40421,8 @@ var ContractManager = class _ContractManager {
         let hitAtThisIndex = false;
         let indeterminate = false;
         for (const probe of windowProbes) {
-          const error = probe.errors.get(index);
-          if (error) handlerErrors.push(error);
+          const error2 = probe.errors.get(index);
+          if (error2) handlerErrors.push(error2);
           if (probe.indeterminate.has(index)) indeterminate = true;
           for (const c of probe.found.get(index) ?? []) {
             await this.persistAndWatchContract(c);
@@ -38790,13 +40672,13 @@ var ContractManager = class _ContractManager {
    * before it is.
    */
   async currentChainTip() {
-    const source = this.config.chainTip;
-    if (!source) return void 0;
+    const source2 = this.config.chainTip;
+    if (!source2) return void 0;
     if (this.chainTipCache && Date.now() - this.chainTipCache.at < CHAIN_TIP_TTL_MS) {
       return { height: this.chainTipCache.height, time: this.chainTipCache.time };
     }
     if (!this.chainTipInflight) {
-      this.chainTipInflight = this.readChainTip(source).finally(() => {
+      this.chainTipInflight = this.readChainTip(source2).finally(() => {
         this.chainTipInflight = void 0;
       });
     }
@@ -38808,11 +40690,11 @@ var ContractManager = class _ContractManager {
    * before a tip existed at all, and a path query is not worth failing over
    * a provider hiccup.
    */
-  async readChainTip(source) {
+  async readChainTip(source2) {
     let timer;
     try {
       const tip = await Promise.race([
-        source(),
+        source2(),
         new Promise((resolve) => {
           timer = setTimeout(() => resolve(void 0), CHAIN_TIP_TIMEOUT_MS);
         })
@@ -38832,8 +40714,8 @@ var ContractManager = class _ContractManager {
    *
    * @param options - Options for getting spendable paths
    */
-  async getSpendablePaths(options) {
-    const { contractScript, collaborative = true, walletPubKey, vtxo } = options;
+  async getSpendablePaths(options2) {
+    const { contractScript, collaborative = true, walletPubKey, vtxo } = options2;
     const [contract] = await this.getContracts({ script: contractScript });
     if (!contract) return [];
     const handler = contractHandlers.get(contract.type);
@@ -38860,8 +40742,8 @@ var ContractManager = class _ContractManager {
    *
    * @param options - Options for getting spending paths
    */
-  async getAllSpendingPaths(options) {
-    const { contractScript, collaborative = true, walletPubKey } = options;
+  async getAllSpendingPaths(options2) {
+    const { contractScript, collaborative = true, walletPubKey } = options2;
     const [contract] = await this.getContracts({ script: contractScript });
     if (!contract) return [];
     const handler = contractHandlers.get(contract.type);
@@ -38963,8 +40845,8 @@ var ContractManager = class _ContractManager {
     for (const callback of this.eventCallbacks) {
       try {
         callback(event);
-      } catch (error) {
-        console.error("Error in contract event callback:", error);
+      } catch (error2) {
+        console.error("Error in contract event callback:", error2);
       }
     }
   }
@@ -39028,13 +40910,13 @@ var ContractManager = class _ContractManager {
    * leaves the cursor alone so a narrow poll can't hide data that
    * other contracts still need to pick up.
    */
-  async syncContracts(options) {
+  async syncContracts(options2) {
     const cursor = await getSyncCursor(this.config.walletRepository);
-    const window2 = options.window ?? computeSyncWindow(cursor);
-    const mustUpdateCursor = options.contracts === void 0 && options.window === void 0 && (window2.after ?? 0) <= cursor;
-    const contracts = options.contracts ?? (options.includeInactive ? await this.config.contractRepository.getContracts({}) : this.watcher.getWatchedContracts());
+    const window2 = options2.window ?? computeSyncWindow(cursor);
+    const mustUpdateCursor = options2.contracts === void 0 && options2.window === void 0 && (window2.after ?? 0) <= cursor;
+    const contracts = options2.contracts ?? (options2.includeInactive ? await this.config.contractRepository.getContracts({}) : this.watcher.getWatchedContracts());
     const requestStartedAt = Date.now();
-    const result = await this.fetchContractVxosFromIndexer(contracts, options.pageSize, window2);
+    const result = await this.fetchContractVxosFromIndexer(contracts, options2.pageSize, window2);
     if (mustUpdateCursor) {
       const cutoff = cursorCutoff(requestStartedAt);
       await advanceSyncCursor(this.config.walletRepository, cutoff);
@@ -39251,11 +41133,11 @@ var InMemoryContractRepository = class {
     if (!filter) {
       return [...contracts];
     }
-    const matches = (value, criterion) => {
+    const matches = (value2, criterion) => {
       if (criterion === void 0) {
         return true;
       }
-      return Array.isArray(criterion) ? criterion.includes(value) : value === criterion;
+      return Array.isArray(criterion) ? criterion.includes(value2) : value2 === criterion;
     };
     const results = [];
     for (const contract of contracts) {
@@ -39344,9 +41226,9 @@ var IndexedDBContractRepository = class {
       const transaction = db.transaction([STORE_CONTRACTS], "readwrite");
       transaction.objectStore(STORE_CONTRACTS).clear();
       await awaitTransaction(transaction);
-    } catch (error) {
-      console.error("Failed to clear contract data:", error);
-      throw error;
+    } catch (error2) {
+      console.error("Failed to clear contract data:", error2);
+      throw error2;
     }
   }
   async getContracts(filter) {
@@ -39384,8 +41266,8 @@ var IndexedDBContractRepository = class {
       }
       const allContracts = await promisifyRequest(store.getAll()) ?? [];
       return this.applyContractFilter(allContracts, normalizedFilter);
-    } catch (error) {
-      console.error("Failed to get contracts:", error);
+    } catch (error2) {
+      console.error("Failed to get contracts:", error2);
       return [];
     }
   }
@@ -39395,9 +41277,9 @@ var IndexedDBContractRepository = class {
       const transaction = db.transaction([STORE_CONTRACTS], "readwrite");
       transaction.objectStore(STORE_CONTRACTS).put(contract);
       await awaitTransaction(transaction);
-    } catch (error) {
-      console.error("Failed to save contract:", error);
-      throw error;
+    } catch (error2) {
+      console.error("Failed to save contract:", error2);
+      throw error2;
     }
   }
   async deleteContract(script) {
@@ -39406,9 +41288,9 @@ var IndexedDBContractRepository = class {
       const transaction = db.transaction([STORE_CONTRACTS], "readwrite");
       transaction.objectStore(STORE_CONTRACTS).delete(script);
       await awaitTransaction(transaction);
-    } catch (error) {
-      console.error(`Failed to delete contract ${script}:`, error);
-      throw error;
+    } catch (error2) {
+      console.error(`Failed to delete contract ${script}:`, error2);
+      throw error2;
     }
   }
   applyContractFilter(contracts, filter) {
@@ -39456,9 +41338,9 @@ var IndexedDBWalletRepository = class {
       const transaction = db.transaction(stores, "readwrite");
       for (const name of stores) transaction.objectStore(name).clear();
       await awaitTransaction(transaction);
-    } catch (error) {
-      console.error("Failed to clear wallet data:", error);
-      throw error;
+    } catch (error2) {
+      console.error("Failed to clear wallet data:", error2);
+      throw error2;
     }
   }
   async [Symbol.asyncDispose]() {
@@ -39472,8 +41354,8 @@ var IndexedDBWalletRepository = class {
         store.index("address").getAll(address)
       );
       return (results || []).map(deserializeVtxoWithBackfill);
-    } catch (error) {
-      console.error(`Failed to get VTXOs for address ${address}:`, error);
+    } catch (error2) {
+      console.error(`Failed to get VTXOs for address ${address}:`, error2);
       return [];
     }
   }
@@ -39487,9 +41369,9 @@ var IndexedDBWalletRepository = class {
         store.put({ address, ...serialized });
       }
       await awaitTransaction(transaction);
-    } catch (error) {
-      console.error(`Failed to save VTXOs for address ${address}:`, error);
-      throw error;
+    } catch (error2) {
+      console.error(`Failed to save VTXOs for address ${address}:`, error2);
+      throw error2;
     }
   }
   async deleteVtxos(address) {
@@ -39498,9 +41380,9 @@ var IndexedDBWalletRepository = class {
       const transaction = db.transaction([STORE_VTXOS], "readwrite");
       deleteByIndex(transaction.objectStore(STORE_VTXOS), "address", address);
       await awaitTransaction(transaction);
-    } catch (error) {
-      console.error(`Failed to clear VTXOs for address ${address}:`, error);
-      throw error;
+    } catch (error2) {
+      console.error(`Failed to clear VTXOs for address ${address}:`, error2);
+      throw error2;
     }
   }
   async getVtxosForScript(script) {
@@ -39524,9 +41406,9 @@ var IndexedDBWalletRepository = class {
         }
       }
       return Array.from(byOutpoint.values()).map(deserializeVtxoWithBackfill);
-    } catch (error) {
-      console.error(`Failed to get VTXOs for script ${script}:`, error);
-      throw error;
+    } catch (error2) {
+      console.error(`Failed to get VTXOs for script ${script}:`, error2);
+      throw error2;
     }
   }
   async saveVtxosForScript(key, vtxos) {
@@ -39548,9 +41430,9 @@ var IndexedDBWalletRepository = class {
       const transaction = db.transaction([STORE_VTXOS], "readwrite");
       deleteByIndex(transaction.objectStore(STORE_VTXOS), "script", script);
       await awaitTransaction(transaction);
-    } catch (error) {
-      console.error(`Failed to clear VTXOs for script ${script}:`, error);
-      throw error;
+    } catch (error2) {
+      console.error(`Failed to clear VTXOs for script ${script}:`, error2);
+      throw error2;
     }
   }
   async getUtxos(address) {
@@ -39559,8 +41441,8 @@ var IndexedDBWalletRepository = class {
       const store = db.transaction([STORE_UTXOS], "readonly").objectStore(STORE_UTXOS);
       const results = await promisifyRequest(store.index("address").getAll(address));
       return (results || []).map(deserializeUtxo);
-    } catch (error) {
-      console.error(`Failed to get UTXOs for address ${address}:`, error);
+    } catch (error2) {
+      console.error(`Failed to get UTXOs for address ${address}:`, error2);
       return [];
     }
   }
@@ -39571,9 +41453,9 @@ var IndexedDBWalletRepository = class {
       const store = transaction.objectStore(STORE_UTXOS);
       for (const utxo of utxos) store.put({ address, ...serializeUtxo(utxo) });
       await awaitTransaction(transaction);
-    } catch (error) {
-      console.error(`Failed to save UTXOs for address ${address}:`, error);
-      throw error;
+    } catch (error2) {
+      console.error(`Failed to save UTXOs for address ${address}:`, error2);
+      throw error2;
     }
   }
   async deleteUtxos(address) {
@@ -39582,9 +41464,9 @@ var IndexedDBWalletRepository = class {
       const transaction = db.transaction([STORE_UTXOS], "readwrite");
       deleteByIndex(transaction.objectStore(STORE_UTXOS), "address", address);
       await awaitTransaction(transaction);
-    } catch (error) {
-      console.error(`Failed to clear UTXOs for address ${address}:`, error);
-      throw error;
+    } catch (error2) {
+      console.error(`Failed to clear UTXOs for address ${address}:`, error2);
+      throw error2;
     }
   }
   async getTransactionHistory(address) {
@@ -39595,8 +41477,8 @@ var IndexedDBWalletRepository = class {
         store.index("address").getAll(address)
       );
       return (results || []).sort((a, b) => a.createdAt - b.createdAt);
-    } catch (error) {
-      console.error(`Failed to get transaction history for address ${address}:`, error);
+    } catch (error2) {
+      console.error(`Failed to get transaction history for address ${address}:`, error2);
       return [];
     }
   }
@@ -39615,9 +41497,9 @@ var IndexedDBWalletRepository = class {
         });
       }
       await awaitTransaction(transaction);
-    } catch (error) {
-      console.error(`Failed to save transactions for address ${address}:`, error);
-      throw error;
+    } catch (error2) {
+      console.error(`Failed to save transactions for address ${address}:`, error2);
+      throw error2;
     }
   }
   async deleteTransactions(address) {
@@ -39626,9 +41508,9 @@ var IndexedDBWalletRepository = class {
       const transaction = db.transaction([STORE_TRANSACTIONS], "readwrite");
       deleteByIndex(transaction.objectStore(STORE_TRANSACTIONS), "address", address);
       await awaitTransaction(transaction);
-    } catch (error) {
-      console.error(`Failed to clear transactions for address ${address}:`, error);
-      throw error;
+    } catch (error2) {
+      console.error(`Failed to clear transactions for address ${address}:`, error2);
+      throw error2;
     }
   }
   async getWalletState() {
@@ -39639,8 +41521,8 @@ var IndexedDBWalletRepository = class {
         store.get("state")
       );
       return result?.data ?? null;
-    } catch (error) {
-      console.error("Failed to get wallet state:", error);
+    } catch (error2) {
+      console.error("Failed to get wallet state:", error2);
       return null;
     }
   }
@@ -39650,9 +41532,9 @@ var IndexedDBWalletRepository = class {
       const transaction = db.transaction([STORE_WALLET_STATE], "readwrite");
       transaction.objectStore(STORE_WALLET_STATE).put({ key: "state", data: state });
       await awaitTransaction(transaction);
-    } catch (error) {
-      console.error("Failed to save wallet state:", error);
-      throw error;
+    } catch (error2) {
+      console.error("Failed to save wallet state:", error2);
+      throw error2;
     }
   }
   getDB() {
@@ -39814,8 +41696,8 @@ var HDDescriptorProvider = class _HDDescriptorProvider {
    */
   materializeDescriptorAt(index) {
     const descriptor = this.identity.descriptor;
-    const network = isMainnetDescriptor(descriptor) ? import_descriptors_scure2.networks.bitcoin : import_descriptors_scure2.networks.testnet;
-    const expansion = (0, import_descriptors_scure2.expand)({ descriptor, network, index });
+    const network2 = isMainnetDescriptor(descriptor) ? import_descriptors_scure2.networks.bitcoin : import_descriptors_scure2.networks.testnet;
+    const expansion = (0, import_descriptors_scure2.expand)({ descriptor, network: network2, index });
     const keyInfo = expansion.expansionMap?.["@0"];
     if (!keyInfo?.keyExpression) {
       throw new Error(
@@ -39894,8 +41776,8 @@ function strictSigningDescriptorIndex(descriptor) {
   return Number.isSafeInteger(n) && n >= 0 ? n : void 0;
 }
 var NonRangeableDescriptorError = class extends Error {
-  constructor(message, options) {
-    super(message, options);
+  constructor(message, options2) {
+    super(message, options2);
     this.name = "NonRangeableDescriptorError";
   }
 };
@@ -40447,9 +42329,9 @@ var InputSignerRouter = class {
   }
 };
 var getArkadeServerUrl = ({ arkServerUrl }) => arkServerUrl || DEFAULT_ARKADE_SERVER_URL;
-function intentProofJobs(coins) {
-  if (coins.length === 0) return [];
-  const coinJobs = coins.map((coin, i) => ({
+function intentProofJobs(coins2) {
+  if (coins2.length === 0) return [];
+  const coinJobs = coins2.map((coin, i) => ({
     index: i + 1,
     lookupScript: VtxoScript.decode(coin.tapTree).pkScript
   }));
@@ -40462,8 +42344,8 @@ function coinUsesScript(coin, script) {
     return false;
   }
 }
-function customBoardingProofIndexes(coins, script) {
-  const indexes = coins.flatMap(
+function customBoardingProofIndexes(coins2, script) {
+  const indexes = coins2.flatMap(
     (coin, index) => coinUsesScript(coin, script) ? [index + 1] : []
   );
   if (indexes.includes(1)) indexes.unshift(0);
@@ -40602,9 +42484,9 @@ var ArkadeCashCreateError = class extends Error {
   cause;
 };
 var ReadonlyWallet = class _ReadonlyWallet {
-  constructor(identity2, network, onchainProvider, indexerProvider, arkServerPublicKey, offchainTapscript, boardingTapscript, dustAmount, walletRepository, contractRepository, delegateProvider, watcherConfig, walletContractTimelocks) {
+  constructor(identity2, network2, onchainProvider, indexerProvider, arkServerPublicKey, offchainTapscript, boardingTapscript, dustAmount, walletRepository, contractRepository, delegateProvider, watcherConfig, walletContractTimelocks) {
     this.identity = identity2;
-    this.network = network;
+    this.network = network2;
     this.onchainProvider = onchainProvider;
     this.indexerProvider = indexerProvider;
     this.dustAmount = dustAmount;
@@ -40614,7 +42496,7 @@ var ReadonlyWallet = class _ReadonlyWallet {
     if ("descriptor" in identity2) {
       const descriptor = identity2.descriptor;
       const identityIsMainnet = !descriptor.includes("tpub");
-      const serverIsMainnet = network.bech32 === "bc";
+      const serverIsMainnet = network2.bech32 === "bc";
       if (identityIsMainnet !== serverIsMainnet) {
         throw new Error(
           `Network mismatch: identity uses ${identityIsMainnet ? "mainnet" : "testnet"} derivation but wallet network is ${serverIsMainnet ? "mainnet" : "testnet"}. Create identity with { isMainnet: ${serverIsMainnet} } to match.`
@@ -40918,7 +42800,7 @@ var ReadonlyWallet = class _ReadonlyWallet {
       source: serverInfoSource,
       lastOnlineAt: serverInfoLastOnlineAt
     } = await resolveArkInfo(arkProvider, walletRepository);
-    const network = getNetwork(info.network);
+    const network2 = getNetwork(info.network);
     if ("descriptor" in config.identity) {
       const descriptor = config.identity.descriptor;
       const identityIsMainnet = !descriptor.includes("tpub");
@@ -40937,8 +42819,8 @@ var ReadonlyWallet = class _ReadonlyWallet {
     const esploraUrl = config.esploraUrl || ESPLORA_URL[info.network];
     const onchainProvider = config.onchainProvider || new EsploraProvider(esploraUrl);
     if (config.exitTimelock) {
-      const { value, type } = config.exitTimelock;
-      if (value < 512n && type !== "blocks" || value >= 512n && type !== "seconds") {
+      const { value: value2, type } = config.exitTimelock;
+      if (value2 < 512n && type !== "blocks" || value2 >= 512n && type !== "seconds") {
         throw new Error("invalid exitTimelock");
       }
     }
@@ -40949,8 +42831,8 @@ var ReadonlyWallet = class _ReadonlyWallet {
       ...info.network === "bitcoin" ? [delayToTimelock(MAINNET_UNILATERAL_EXIT_DELAY)] : []
     ]);
     if (config.boardingTimelock) {
-      const { value, type } = config.boardingTimelock;
-      if (value < 512n && type !== "blocks" || value >= 512n && type !== "seconds") {
+      const { value: value2, type } = config.boardingTimelock;
+      if (value2 < 512n && type !== "blocks" || value2 >= 512n && type !== "seconds") {
         throw new Error("invalid boardingTimelock");
       }
     }
@@ -40993,7 +42875,7 @@ var ReadonlyWallet = class _ReadonlyWallet {
       arkProvider,
       indexerProvider,
       onchainProvider,
-      network,
+      network: network2,
       networkName: info.network,
       serverPubKey,
       offchainTapscript,
@@ -41159,12 +43041,12 @@ var ReadonlyWallet = class _ReadonlyWallet {
    * Public so the worker handler and plugins can report their own
    * explicit-input crossings through the same three checks.
    */
-  async logUngatedInputs(source, inputs) {
+  async logUngatedInputs(source2, inputs) {
     try {
       const manager = await this.getContractManager();
       const contracts = await manager.getContracts();
       const locked = await this.lockedOutpoints();
-      logExcludedVtxos(source, inputs, [
+      logExcludedVtxos(source2, inputs, [
         gateExclusion(gatedContracts(contracts)),
         this.expiredSignerExclusion(contracts),
         outpointExclusion(locked, "is locked by an in-flight settlement intent")
@@ -41483,8 +43365,8 @@ var ReadonlyWallet = class _ReadonlyWallet {
     const groups = [];
     for (const tapscript of tapscripts) {
       const address = tapscript.onchainAddress(this.network);
-      const coins = await this.onchainProvider.getCoins(address);
-      const utxos = coins.map((utxo) => extendCoinWithTapscript(tapscript, utxo));
+      const coins2 = await this.onchainProvider.getCoins(address);
+      const utxos = coins2.map((utxo) => extendCoinWithTapscript(tapscript, utxo));
       await this.walletRepository.saveUtxos(address, utxos);
       groups.push({
         tapscript,
@@ -41552,8 +43434,8 @@ var ReadonlyWallet = class _ReadonlyWallet {
         const stop = await this.onchainProvider.watchAddresses(
           boardingAddresses,
           (txs) => {
-            const coins = txs.flatMap((tx) => {
-              const { txid, status } = tx;
+            const coins2 = txs.flatMap((tx) => {
+              const { txid, status: status2 } = tx;
               const matched = [];
               tx.vout.forEach((v, vout) => {
                 if (boardingAddressSet.has(v.scriptpubkey_address)) {
@@ -41561,7 +43443,7 @@ var ReadonlyWallet = class _ReadonlyWallet {
                     txid,
                     vout,
                     value: Number(v.value),
-                    status
+                    status: status2
                   });
                 }
               });
@@ -41569,7 +43451,7 @@ var ReadonlyWallet = class _ReadonlyWallet {
             });
             eventCallback({
               type: "utxo",
-              coins
+              coins: coins2
             });
           }
         );
@@ -41606,10 +43488,10 @@ var ReadonlyWallet = class _ReadonlyWallet {
               newVtxos: event.type === "vtxo_received" ? annotated : [],
               spentVtxos: event.type === "vtxo_spent" ? annotated : []
             });
-          } catch (error) {
+          } catch (error2) {
             console.warn(
               "Dropping subscription update after annotation failed; next sync will reconcile:",
-              error
+              error2
             );
           }
         });
@@ -41708,9 +43590,9 @@ var ReadonlyWallet = class _ReadonlyWallet {
       const manager = await this._contractManagerInitializing;
       this._contractManager = manager;
       return manager;
-    } catch (error) {
+    } catch (error2) {
       this._contractManagerInitializing = void 0;
-      throw error;
+      throw error2;
     } finally {
       this._contractManagerInitializing = void 0;
     }
@@ -41863,10 +43745,10 @@ var ReadonlyWallet = class _ReadonlyWallet {
   }
 };
 var Wallet2 = class _Wallet extends ReadonlyWallet {
-  constructor(identity2, network, onchainProvider, arkProvider, indexerProvider, arkServerPublicKey, offchainTapscript, boardingTapscript, serverUnrollScript, forfeitOutputScript, forfeitPubkey, dustAmount, walletRepository, contractRepository, renewalConfig, delegateProvider, watcherConfig, settlementConfig, walletContractTimelocks, receiveRotator, descriptorProvider, lookAheadWindow, batchExpiryPolicy, checkpointExitDelayPolicy, boardingSigningAdapter) {
+  constructor(identity2, network2, onchainProvider, arkProvider, indexerProvider, arkServerPublicKey, offchainTapscript, boardingTapscript, serverUnrollScript, forfeitOutputScript, forfeitPubkey, dustAmount, walletRepository, contractRepository, renewalConfig, delegateProvider, watcherConfig, settlementConfig, walletContractTimelocks, receiveRotator, descriptorProvider, lookAheadWindow, batchExpiryPolicy, checkpointExitDelayPolicy, boardingSigningAdapter) {
     super(
       identity2,
-      network,
+      network2,
       onchainProvider,
       indexerProvider,
       arkServerPublicKey,
@@ -42535,8 +44417,8 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
     let rotatorError;
     try {
       await this._receiveRotator?.dispose();
-    } catch (error) {
-      rotatorError = error;
+    } catch (error2) {
+      rotatorError = error2;
     }
     const manager = this._vtxoManager ?? (this._vtxoManagerInitializing ? await this._vtxoManagerInitializing.catch(() => void 0) : void 0);
     try {
@@ -42976,16 +44858,16 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
       if (!this.boardingSigningAdapter) {
         throw new Error("named boarding signing adapter is unavailable");
       }
-      const prepared = await this.prepareNamedBoardingRegistration(
+      const prepared2 = await this.prepareNamedBoardingRegistration(
         params.inputs,
         recipients,
         customBoardingIndexes
       );
-      if (typeof prepared === "string") {
-        await this.updateDbAfterSettle(params.inputs, prepared);
-        return prepared;
+      if (typeof prepared2 === "string") {
+        await this.updateDbAfterSettle(params.inputs, prepared2);
+        return prepared2;
       }
-      boardingRegistration = prepared;
+      boardingRegistration = prepared2;
     }
     let session;
     const signingPublicKeys = [];
@@ -43078,15 +44960,15 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
       await this.updateDbAfterSettle(params.inputs, commitmentTxid);
       await this.maybeRotateBoardingAfterBoard(params.inputs);
       return commitmentTxid;
-    } catch (error) {
+    } catch (error2) {
       if (committedTxid !== void 0) {
         await persistIntent("batch_succeeded", {
           commitmentTransactionId: committedTxid
         });
-        throw error;
+        throw error2;
       }
       if (boardingRegistration) {
-        throw error;
+        throw error2;
       }
       const inputIds = params.inputs.map((i) => `${i.txid}:${i.vout}`).join(",");
       await this.arkProvider.deleteIntent(deleteIntent).catch((e) => {
@@ -43096,9 +44978,9 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
         );
       });
       await persistIntent("cancelled", {
-        cancellationReason: error instanceof Error ? error.message : String(error)
+        cancellationReason: error2 instanceof Error ? error2.message : String(error2)
       });
-      throw error;
+      throw error2;
     } finally {
       this._removePendingSpends(params.inputs);
       abortController.abort();
@@ -43552,27 +45434,27 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
     }
     try {
       return await this.arkProvider.registerIntent(intent);
-    } catch (error) {
-      if (error instanceof ArkError && error.code === 0 && error.message.includes("duplicated input")) {
+    } catch (error2) {
+      if (error2 instanceof ArkError && error2.code === 0 && error2.message.includes("duplicated input")) {
         const deleteIntent = await this.makeDeleteIntentSignature(inputs);
         await this.arkProvider.deleteIntent(deleteIntent);
         return this.arkProvider.registerIntent(intent);
       }
-      throw error;
+      throw error2;
     }
   }
-  async submitNamedBoardingRelease(inputs, boardingInputIndexes, prepared) {
+  async submitNamedBoardingRelease(inputs, boardingInputIndexes, prepared2) {
     if (!this.boardingSigningAdapter) return false;
-    const intent = await this.makeDeleteIntentSignature(inputs, prepared.deleteExpireAt);
+    const intent = await this.makeDeleteIntentSignature(inputs, prepared2.deleteExpireAt);
     const result = await this.boardingSigningAdapter.releaseIntent({
-      handle: prepared.handle,
+      handle: prepared2.handle,
       psbt: intent.proof,
       inputIndexes: boardingInputIndexes,
       message: intent.message
     });
     return result.status === "released";
   }
-  async makeRegisterIntentSignature(coins, outputs, onchainOutputsIndexes, cosignerPubKeys, validAt, expireAt) {
+  async makeRegisterIntentSignature(coins2, outputs, onchainOutputsIndexes, cosignerPubKeys, validAt, expireAt) {
     const message = {
       type: "register",
       onchain_output_indexes: onchainOutputsIndexes,
@@ -43580,32 +45462,32 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
       expire_at: expireAt ? Math.floor(expireAt) : 0,
       cosigners_public_keys: cosignerPubKeys
     };
-    const proof = Intent.create(message, coins, outputs);
-    const signedProof = await this._signerRouter.sign(proof, intentProofJobs(coins));
+    const proof = Intent.create(message, coins2, outputs);
+    const signedProof = await this._signerRouter.sign(proof, intentProofJobs(coins2));
     return {
       proof: base64.encode(signedProof.toPSBT()),
       message
     };
   }
-  async makeDeleteIntentSignature(coins, expireAt) {
+  async makeDeleteIntentSignature(coins2, expireAt) {
     const message = {
       type: "delete",
       expire_at: expireAt ? Math.floor(expireAt) : 0
     };
-    const proof = Intent.create(message, coins, []);
-    const signedProof = await this._signerRouter.sign(proof, intentProofJobs(coins));
+    const proof = Intent.create(message, coins2, []);
+    const signedProof = await this._signerRouter.sign(proof, intentProofJobs(coins2));
     return {
       proof: base64.encode(signedProof.toPSBT()),
       message
     };
   }
-  async makeGetPendingTxIntentSignature(coins) {
+  async makeGetPendingTxIntentSignature(coins2) {
     const message = {
       type: "get-pending-tx",
       expire_at: 0
     };
-    const proof = Intent.create(message, coins, []);
-    const signedProof = await this._signerRouter.sign(proof, intentProofJobs(coins));
+    const proof = Intent.create(message, coins2, []);
+    const signedProof = await this._signerRouter.sign(proof, intentProofJobs(coins2));
     return {
       proof: base64.encode(signedProof.toPSBT()),
       message
@@ -43707,10 +45589,10 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
             }
             await this.arkProvider.finalizeTx(pendingTx.arkTxid, finalCheckpoints);
             batchFinalized.push(pendingTx.arkTxid);
-          } catch (error) {
+          } catch (error2) {
             console.error(
               `Failed to finalize transaction ${pendingTx.arkTxid}:`,
-              error
+              error2
             );
           }
         }
@@ -43761,10 +45643,10 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
     const state = await this.walletRepository.getWalletState();
     return state?.settings?.hasPendingTx === true;
   }
-  async setPendingTxFlag(value) {
+  async setPendingTxFlag(value2) {
     await updateWalletState(this.walletRepository, (state) => ({
       ...state,
-      settings: { ...state.settings, hasPendingTx: value }
+      settings: { ...state.settings, hasPendingTx: value2 }
     }));
   }
   /**
@@ -43801,8 +45683,8 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
     const cashStr = cash.toString();
     try {
       await this.send({ address, amount });
-    } catch (error) {
-      throw new ArkadeCashCreateError(cashStr, error);
+    } catch (error2) {
+      throw new ArkadeCashCreateError(cashStr, error2);
     }
     return cashStr;
   }
@@ -43847,8 +45729,8 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
           cashScript,
           myPkScript
         );
-      } catch (error) {
-        console.error("Failed to drain pending arkadeCash txs:", error);
+      } catch (error2) {
+        console.error("Failed to drain pending arkadeCash txs:", error2);
       }
       if (drained.count > 0) {
         vtxos = await this.fetchAllVtxos(scripts);
@@ -43883,10 +45765,10 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
             serverUnrollScript
           });
           swept += vtxo.value;
-        } catch (error) {
+        } catch (error2) {
           console.error(
             `Failed to sweep arkadeCash VTXO ${vtxo.txid}:${vtxo.vout}:`,
-            error
+            error2
           );
           unclaimed.push(cashReport(vtxo, "sweep-failed"));
         }
@@ -44024,10 +45906,10 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
             result.claimed.add(`${hex.encode(input.txid)}:${input.index}`);
           }
         }
-      } catch (error) {
+      } catch (error2) {
         console.error(
           `Failed to finalize pending arkadeCash tx ${pendingTx.arkTxid}:`,
-          error
+          error2
         );
       }
     }
@@ -44454,8 +46336,8 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
       afterFinalize: async () => {
         try {
           await this.setPendingTxFlag(false);
-        } catch (error) {
-          console.error("Failed to clear pending tx flag:", error);
+        } catch (error2) {
+          console.error("Failed to clear pending tx flag:", error2);
         }
       }
     });
@@ -44678,8 +46560,8 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
     }
   }
 };
-function selectVirtualCoins(coins, targetAmount) {
-  const sortedCoins = coins.map(normalizeVtxo).sort((a, b) => {
+function selectVirtualCoins(coins2, targetAmount) {
+  const sortedCoins = coins2.map(normalizeVtxo).sort((a, b) => {
     const expiryA = toBatchExpiry(a) || Number.MAX_SAFE_INTEGER;
     const expiryB = toBatchExpiry(b) || Number.MAX_SAFE_INTEGER;
     if (expiryA !== expiryB) {
@@ -44712,9 +46594,9 @@ var MESSAGE_BUS_NOT_INITIALIZED = "MessageBus not initialized";
 var MESSAGE_BUS_INITIALIZING = `${MESSAGE_BUS_NOT_INITIALIZED}: initializing`;
 var LATE_DELIVERY_GRACE_MS = 5 * 6e4;
 var OnchainWallet = class _OnchainWallet {
-  constructor(identity2, network, onchainP2TR, provider) {
+  constructor(identity2, network2, onchainP2TR, provider) {
     this.identity = identity2;
-    this.network = network;
+    this.network = network2;
     this.onchainP2TR = onchainP2TR;
     this.provider = provider;
   }
@@ -44738,10 +46620,10 @@ var OnchainWallet = class _OnchainWallet {
     if (!pubkey) {
       throw new Error("Invalid configured public key");
     }
-    const network = getNetwork(networkName);
+    const network2 = getNetwork(networkName);
     const onchainProvider = provider || new EsploraProvider(ESPLORA_URL[networkName]);
-    const onchainP2TR = p2tr(pubkey, void 0, network);
-    return new _OnchainWallet(identity2, network, onchainP2TR, onchainProvider);
+    const onchainP2TR = p2tr(pubkey, void 0, network2);
+    return new _OnchainWallet(identity2, network2, onchainP2TR, onchainProvider);
   }
   get address() {
     return this.onchainP2TR.address || "";
@@ -44762,9 +46644,9 @@ var OnchainWallet = class _OnchainWallet {
    * @see getCoins
    */
   async getBalance() {
-    const coins = await this.getCoins();
-    const onchainConfirmed = coins.filter((coin) => coin.status.confirmed).reduce((sum, coin) => sum + coin.value, 0);
-    const onchainUnconfirmed = coins.filter((coin) => !coin.status.confirmed).reduce((sum, coin) => sum + coin.value, 0);
+    const coins2 = await this.getCoins();
+    const onchainConfirmed = coins2.filter((coin) => coin.status.confirmed).reduce((sum, coin) => sum + coin.value, 0);
+    const onchainUnconfirmed = coins2.filter((coin) => !coin.status.confirmed).reduce((sum, coin) => sum + coin.value, 0);
     const onchainTotal = onchainConfirmed + onchainUnconfirmed;
     return onchainTotal;
   }
@@ -44789,12 +46671,12 @@ var OnchainWallet = class _OnchainWallet {
    * @returns Selected inputs, change amount, and calculated fee
    * @throws Error if fee estimation fails to converge within max iterations
    */
-  estimateFeesAndSelectCoins(coins, amount, feeRate, recipientAddress) {
+  estimateFeesAndSelectCoins(coins2, amount, feeRate, recipientAddress) {
     const MAX_ITERATIONS = 10;
     let fee = 0;
     for (let i = 0; i < MAX_ITERATIONS; i++) {
       const totalNeeded = amount + fee;
-      const selected = selectCoins(coins, totalNeeded);
+      const selected = selectCoins(coins2, totalNeeded);
       const estimator = TxWeightEstimator.create();
       for (const _ of selected.inputs) {
         estimator.addKeySpendInput();
@@ -44827,7 +46709,7 @@ var OnchainWallet = class _OnchainWallet {
     if (params.amount < DUST_AMOUNT) {
       throw new Error("Amount is below dust limit");
     }
-    const coins = await this.getCoins();
+    const coins2 = await this.getCoins();
     let feeRate = params.feeRate;
     if (!feeRate) {
       feeRate = await this.provider.getFeeRate();
@@ -44836,7 +46718,7 @@ var OnchainWallet = class _OnchainWallet {
       feeRate = _OnchainWallet.MIN_FEE_RATE;
     }
     const { inputs, changeAmount } = this.estimateFeesAndSelectCoins(
-      coins,
+      coins2,
       params.amount,
       feeRate,
       params.address
@@ -44881,8 +46763,8 @@ var OnchainWallet = class _OnchainWallet {
     const child = await this.buildBumpPackage(parent, feeRate, await this.getCoins());
     try {
       await this.provider.broadcastTransaction(parent.hex, child.hex);
-    } catch (error) {
-      console.error(error);
+    } catch (error2) {
+      console.error(error2);
     } finally {
       return [parent.hex, child.hex];
     }
@@ -44903,8 +46785,8 @@ var OnchainWallet = class _OnchainWallet {
    */
   async bumpAnchor(parentHex, feeRate) {
     const parent = Transaction2.fromRaw(hex.decode(parentHex));
-    const coins = (await this.getCoins()).filter((c) => c.status.confirmed);
-    const child = await this.buildBumpPackage(parent, feeRate, coins);
+    const coins2 = (await this.getCoins()).filter((c) => c.status.confirmed);
+    const child = await this.buildBumpPackage(parent, feeRate, coins2);
     return [parent.hex, child.hex];
   }
   /**
@@ -44912,7 +46794,7 @@ var OnchainWallet = class _OnchainWallet {
    * fee with a single-input child, select coins for it, then build and sign
    * with the actual selection (the fee grows per extra input).
    */
-  async buildBumpPackage(parent, feeRate, coins) {
+  async buildBumpPackage(parent, feeRate, coins2) {
     let rate = feeRate;
     if (!rate || rate < _OnchainWallet.MIN_FEE_RATE) {
       rate = _OnchainWallet.MIN_FEE_RATE;
@@ -44924,7 +46806,7 @@ var OnchainWallet = class _OnchainWallet {
         `invalid fee, got ${probeFee} with vsize ${parent.vsize + Number(probeVsize)}, feeRate ${rate}`
       );
     }
-    const selected = selectCoins(coins, probeFee, true);
+    const selected = selectCoins(coins2, probeFee, true);
     const { child } = buildAnchorChild({
       parent,
       feeRate: rate,
@@ -44941,7 +46823,7 @@ var OnchainWallet = class _OnchainWallet {
     return signed;
   }
 };
-function selectCoins(coins, targetAmount, forceChange = false) {
+function selectCoins(coins2, targetAmount, forceChange = false) {
   if (isNaN(targetAmount)) {
     throw new Error("Target amount is NaN, got " + targetAmount);
   }
@@ -44951,7 +46833,7 @@ function selectCoins(coins, targetAmount, forceChange = false) {
   if (targetAmount === 0) {
     return { inputs: [], changeAmount: 0n };
   }
-  const sortedCoins = [...coins].sort((a, b) => b.value - a.value);
+  const sortedCoins = [...coins2].sort((a, b) => b.value - a.value);
   const selectedCoins = [];
   let selectedAmount = 0;
   for (const coin of sortedCoins) {
@@ -44976,9 +46858,9 @@ function selectCoins(coins, targetAmount, forceChange = false) {
 var TAG_BIP322 = "BIP0322-signed-message";
 var BIP322;
 ((BIP3222) => {
-  async function sign2(message, identity2, network) {
+  async function sign2(message, identity2, network2) {
     const xOnlyPubKey = await identity2.xOnlyPublicKey();
-    const payment = p2tr(xOnlyPubKey, void 0, network);
+    const payment = p2tr(xOnlyPubKey, void 0, network2);
     const toSpend = craftToSpendTx(message, payment.script, TAG_BIP322);
     const toSign = craftBIP322ToSignP2TR(toSpend, payment.script, xOnlyPubKey);
     const signed = await identity2.sign(toSign, [0]);
@@ -44990,10 +46872,10 @@ var BIP322;
     return base64.encode(RawWitness.encode(input.finalScriptWitness));
   }
   BIP3222.sign = sign2;
-  function verify(message, signature, address, network) {
+  function verify(message, signature, address, network2) {
     let decoded;
     try {
-      decoded = Address(network).decode(address);
+      decoded = Address(network2).decode(address);
     } catch {
       return false;
     }
@@ -45260,9 +47142,9 @@ var Unroll;
     virtualTxRepository;
     /** Create an unroll session by loading the virtual output chain from the indexer. */
     static async create(toUnroll, bumper, explorer, indexer, virtualTxRepository) {
-      const { chain: chain2 } = await indexer.getVtxoChain(toUnroll);
+      const { chain: chain3 } = await indexer.getVtxoChain(toUnroll);
       return new Session2(
-        { ...toUnroll, chain: chain2 },
+        { ...toUnroll, chain: chain3 },
         bumper,
         explorer,
         indexer,
@@ -45306,9 +47188,9 @@ var Unroll;
      */
     async next() {
       let nextTxToBroadcast;
-      const chain2 = this.toUnroll.chain;
-      for (let i = chain2.length - 1; i >= 0; i--) {
-        const chainTx = chain2[i];
+      const chain3 = this.toUnroll.chain;
+      for (let i = chain3.length - 1; i >= 0; i--) {
+        const chainTx = chain3[i];
         if (chainTx.type === "INDEXER_CHAINED_TX_TYPE_COMMITMENT" || chainTx.type === "INDEXER_CHAINED_TX_TYPE_UNSPECIFIED") {
           continue;
         }
@@ -45472,18 +47354,18 @@ function doWait(onchainProvider, txid) {
 function extraWitnessSize(path) {
   return (path.extraWitness ?? []).reduce((sum, item) => sum + 1 + item.length, 0);
 }
-function sweepFeeFor(path, outputAddress, network, feeRate) {
+function sweepFeeFor(path, outputAddress, network2, feeRate) {
   const [controlBlock, scriptWithVersion] = path.leaf;
   const estimator = TxWeightEstimator.create().addTapscriptInput(
     64 + extraWitnessSize(path),
     scriptWithVersion.length,
     TaprootControlBlock.encode(controlBlock).length
-  ).addOutputAddress(outputAddress, network);
+  ).addOutputAddress(outputAddress, network2);
   return Number(estimator.vsize().fee(BigInt(Math.ceil(feeRate))));
 }
 async function buildSignedSweep(params) {
-  const { vtxo, path, outputAddress, feeRate, network, identity: identity2 } = params;
-  const fee = sweepFeeFor(path, outputAddress, network, feeRate);
+  const { vtxo, path, outputAddress, feeRate, network: network2, identity: identity2 } = params;
+  const fee = sweepFeeFor(path, outputAddress, network2, feeRate);
   const sendAmount = BigInt(vtxo.value) - BigInt(fee);
   if (sendAmount < BigInt(DUST_AMOUNT)) {
     throw new Error(
@@ -45499,7 +47381,7 @@ async function buildSignedSweep(params) {
     witnessUtxo: { amount: BigInt(vtxo.value), script: vtxo.pkScript },
     sighashType: SigHash.DEFAULT
   });
-  tx.addOutputAddress(outputAddress, sendAmount, network);
+  tx.addOutputAddress(outputAddress, sendAmount, network2);
   const signed = await identity2.sign(tx);
   if (!path.extraWitness || path.extraWitness.length === 0) {
     signed.finalize();
@@ -45655,8 +47537,8 @@ async function computeExitLayout(opts, feeRate) {
       throw e;
     }
   }
-  const coins = (await onchainWallet.getCoins()).filter((c) => c.status.confirmed);
-  const balance = coins.reduce((sum, c) => sum + c.value, 0);
+  const coins2 = (await onchainWallet.getCoins()).filter((c) => c.status.confirmed);
+  const balance = coins2.reduce((sum, c) => sum + c.value, 0);
   const fundingTotal = steps.reduce((sum, s) => sum + s.funding, 0);
   const splitterFeeFor = (inputCount) => {
     if (steps.length === 0) return 0;
@@ -45670,9 +47552,9 @@ async function computeExitLayout(opts, feeRate) {
   const graph = resolveMode(opts) === "graph";
   let splitterFee = 0;
   if (!graph) {
-    splitterFee = splitterFeeFor(Math.max(1, coins.length));
+    splitterFee = splitterFeeFor(Math.max(1, coins2.length));
     if (steps.length > 0 && balance < fundingTotal + splitterFee) {
-      splitterFee = splitterFeeFor(coins.length + 1);
+      splitterFee = splitterFeeFor(coins2.length + 1);
     }
   }
   const stepFees = steps.reduce((s, x) => s + x.stepFee, 0);
@@ -45700,7 +47582,7 @@ async function computeExitLayout(opts, feeRate) {
     splitterFee,
     validUntil,
     balance,
-    coins
+    coins: coins2
   };
 }
 async function estimate(opts) {
@@ -46218,7 +48100,7 @@ __export2(arkade_exports, {
   OPCODE_VALUES: () => OPCODE_VALUES,
   SUPPORTED_PROGRAM_VERSION: () => SUPPORTED_PROGRAM_VERSION,
   Script: () => Script,
-  arkadeScriptHash: () => arkadeScriptHash,
+  arkadeScriptHash: () => arkadeScriptHash2,
   arkadeWitnessHash: () => arkadeWitnessHash,
   asmToBytes: () => asmToBytes,
   bytesToASM: () => bytesToASM,
@@ -46237,7 +48119,7 @@ __export2(arkade_exports, {
   witnessRefToBytes: () => witnessRefToBytes
 });
 var isVtxoCoin = (input) => isVirtualCoin(input);
-function createArkadeBatchHandler(intentId, inputs, signer, signedProof, message, session, arkProvider, emulator, network, recipients, batchExpiryPolicy) {
+function createArkadeBatchHandler(intentId, inputs, signer, signedProof, message, session, arkProvider, emulator, network2, recipients, batchExpiryPolicy) {
   let batchId;
   let sweepTapTreeRoot;
   let validatedCommitmentTxid;
@@ -46250,7 +48132,7 @@ function createArkadeBatchHandler(intentId, inputs, signer, signedProof, message
       const info = await arkProvider.getInfo();
       const timelock = assertValidBatchExpiry(
         event.batchExpiry,
-        resolveBatchExpiryPolicy(network, {
+        resolveBatchExpiryPolicy(network2, {
           advertisedVtxoTreeExpiry: info.vtxoTreeExpiry,
           ...batchExpiryPolicy
         })
@@ -46276,7 +48158,7 @@ function createArkadeBatchHandler(intentId, inputs, signer, signedProof, message
       const commitmentTx = Transaction2.fromPSBT(base64.decode(event.unsignedCommitmentTx));
       validateVtxoTxGraph(vtxoTree, commitmentTx, sweepTapTreeRoot);
       if (recipients && recipients.length > 0) {
-        validateBatchRecipients(commitmentTx, vtxoTree.leaves(), recipients, network);
+        validateBatchRecipients(commitmentTx, vtxoTree.leaves(), recipients, network2);
       }
       const sharedOutput = commitmentTx.getOutput(0);
       if (!sharedOutput?.amount) {
@@ -46300,7 +48182,7 @@ function createArkadeBatchHandler(intentId, inputs, signer, signedProof, message
     onBatchFinalization: async (event, _vtxoTree, connectorTree) => {
       const info = await arkProvider.getInfo();
       const forfeitOutputScript = OutScript.encode(
-        Address(network).decode(info.forfeitAddress)
+        Address(network2).decode(info.forfeitAddress)
       );
       if (connectorTree) {
         validateConnectorsTxGraph(event.commitmentTx, connectorTree);
@@ -46312,7 +48194,7 @@ function createArkadeBatchHandler(intentId, inputs, signer, signedProof, message
         "arkade batch finalization"
       );
       if (!validatedCommitmentTxid && recipients && recipients.length > 0) {
-        validateBatchRecipientsWithoutTree(commitmentPsbt, recipients, network);
+        validateBatchRecipientsWithoutTree(commitmentPsbt, recipients, network2);
       }
       const signedForfeits = [];
       let connectorIndex = 0;
@@ -46454,10 +48336,10 @@ var Arkade = class _Arkade {
     const info = await opts.arkade.getInfo();
     const serverKey = toXOnly(hex.decode(info.signerPubkey), "ark signer key");
     const checkpoint = CSVMultisigTapscript.decode(hex.decode(info.checkpointTapscript));
-    const network = opts.network ?? DEFAULT_NETWORK;
+    const network2 = opts.network ?? DEFAULT_NETWORK;
     let emulatorKey;
     if (opts.emulator) {
-      emulatorKey = hex.decode(resolveEmulatorPubkey(network, opts.emulatorPubkey));
+      emulatorKey = hex.decode(resolveEmulatorPubkey(network2, opts.emulatorPubkey));
     }
     let userKey;
     if (opts.identity) {
@@ -46466,7 +48348,7 @@ var Arkade = class _Arkade {
     return new _Arkade({
       arkProvider: opts.arkade,
       emulator: opts.emulator,
-      network,
+      network: network2,
       serverKey,
       emulatorKey,
       checkpoint,
@@ -46498,11 +48380,11 @@ var Arkade = class _Arkade {
   }
 };
 var ArkadeContract = class _ArkadeContract {
-  constructor(client, program, args = {}, keys) {
+  constructor(client, program, args = {}, keys2) {
     this.client = client;
     this.program = program;
     this.args = args;
-    this.keys = keys ?? {
+    this.keys = keys2 ?? {
       serverKey: client.serverKey,
       userKey: client.userKey,
       emulatorKey: client.emulatorKey
@@ -46594,7 +48476,7 @@ var ArkadeContract = class _ArkadeContract {
    * balances, and re-derivable offline via the `"arkade"` contract handler.
    * Idempotent — re-registering the same script is a no-op.
    */
-  async register(options) {
+  async register(options2) {
     const manager = this.client.contractManager;
     if (!manager) {
       throw new Error(
@@ -46603,8 +48485,8 @@ var ArkadeContract = class _ArkadeContract {
     }
     return manager.createContract({
       ...this.toContractParams(),
-      label: options?.label,
-      metadata: options?.metadata
+      label: options2?.label,
+      metadata: options2?.metadata
     });
   }
   /**
@@ -46662,8 +48544,8 @@ var ArkadeTransactionBuilder = class {
    * Add extra inputs the caller funds (e.g. a taker's own coins in a swap).
    * These become inputs 1..n and are signed with the client identity.
    */
-  fund(coins) {
-    this.fundingCoins.push(...coins);
+  fund(coins2) {
+    this.fundingCoins.push(...coins2);
     return this;
   }
   /** Transfer an asset group: which inputs supply it and which outputs receive it. */
@@ -46877,146 +48759,20 @@ function attachExtension(tx, newPackets) {
   tx.addOutput({ script: newOut.script, amount: newOut.amount });
 }
 
-// tools/light-emergency/recover.ts
-init_base();
-
-// src/lib/vault/light/backupCodec.ts
-init_define_import_meta_env();
-
-// src/lib/vault/recovery/compression.ts
-init_define_import_meta_env();
-var MAX_RECOVERY_PLAIN_BYTES = 13e6;
-async function compressRecoveryData(bytes2, decompress) {
-  const input = new ReadableStream({
-    start(controller2) {
-      controller2.enqueue(Uint8Array.from(bytes2));
-      controller2.close();
-    }
-  });
-  const stream = input.pipeThrough(decompress ? new DecompressionStream("gzip") : new CompressionStream("gzip"));
-  const reader = stream.getReader();
-  const chunks = [];
-  let length = 0;
-  try {
-    for (; ; ) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      length += value.length;
-      if (length > MAX_RECOVERY_PLAIN_BYTES) {
-        await reader.cancel();
-        throw new Error("Recovery archive is too large");
-      }
-      chunks.push(value);
-    }
-    const result = new Uint8Array(length);
-    let offset = 0;
-    for (const chunk of chunks) {
-      result.set(chunk, offset);
-      offset += chunk.length;
-    }
-    return result;
-  } finally {
-    reader.releaseLock();
-  }
-}
-
-// src/lib/vault/light/backupCodec.ts
+// tools/program-emergency/recover.ts
+init_btc_signer();
 init_base();
 init_secp256k1();
 
-// src/lib/vault/light/contract.ts
+// src/lib/vault/program/kit.ts
 init_define_import_meta_env();
+
+// src/lib/vault/program/connector.ts
+init_define_import_meta_env();
+init_base();
+init_btc_signer();
 init_secp256k1();
 init_sha2();
-init_base();
-
-// src/lib/vault/constants.ts
-init_define_import_meta_env();
-
-// src/lib/vault/network.ts
-init_define_import_meta_env();
-var SUPPORTED_NETWORKS = ["mutinynet", "mainnet"];
-function isSupportedVaultNetwork(value) {
-  return typeof value === "string" && SUPPORTED_NETWORKS.includes(value);
-}
-function requireSupportedVaultNetwork(value) {
-  if (!isSupportedVaultNetwork(value)) throw new Error(`unsupported Vault network ${String(value || "")}`);
-  return value;
-}
-function configuredReleaseNetwork(value, production) {
-  const configured2 = String(value || "").trim();
-  if (!configured2) {
-    if (production) throw new Error("Explicit Vault release network required");
-    return void 0;
-  }
-  return requireSupportedVaultNetwork(configured2);
-}
-
-// src/lib/vault/constants.ts
-var POLICY_VERSION = "vault-spending-policy-v1";
-var TX_RECIPIENT_CAP_SATS = 5e4;
-var PERIOD_ALLOWANCE_SATS = 1e5;
-var MUTINYNET_ABSOLUTE_FEE_CEILING_SATS = 5e3;
-var MUTINYNET_FEERATE_CEILING_SAT_PER_V = 10;
-var MAINNET_ABSOLUTE_FEE_CEILING_SATS = 2e4;
-var MAINNET_FEERATE_CEILING_SAT_PER_V = 25;
-var bakedReleaseNetwork = configuredReleaseNetwork(define_import_meta_env_default.VITE_VAULT_RELEASE_NETWORK, define_import_meta_env_default.PROD);
-var ABSOLUTE_FEE_CEILING_SATS = bakedReleaseNetwork === "mainnet" ? MAINNET_ABSOLUTE_FEE_CEILING_SATS : MUTINYNET_ABSOLUTE_FEE_CEILING_SATS;
-var FEERATE_CEILING_SAT_PER_V = bakedReleaseNetwork === "mainnet" ? MAINNET_FEERATE_CEILING_SAT_PER_V : MUTINYNET_FEERATE_CEILING_SAT_PER_V;
-var DUST_SATS = 330;
-
-// src/lib/vault/networkPins.ts
-init_define_import_meta_env();
-var PINS = {
-  mutinynet: {
-    network: "mutinynet",
-    operatorGetInfoNetwork: "mutinynet",
-    operatorOrigin: "https://mutinynet.arkade.sh",
-    operatorSignerPub: "03301078808e4f7bc0dadfe29e34b1df8eaf0108ef06b1722274075ebc107a127a",
-    checkpointForfeitPub: "02dfcaec558c7e78cf3e38b898ba8a43cfb5727266bae32c5c5b3aeb32c558aa0b",
-    checkpointTapscript: "03080040b27520dfcaec558c7e78cf3e38b898ba8a43cfb5727266bae32c5c5b3aeb32c558aa0bac",
-    checkpointDelaySeconds: 4096,
-    emulatorSignerPub: "03f823b9b2febc81f4af967e77aed2f541cbd3397c6d8f5a72e32eb7b471af889a",
-    policyExitDelay: 4608,
-    boardExitDelay: 604672,
-    arkdMinExitDelay: 2048,
-    delegatePub: "032903b15efe236d9609da10e536fb32cdf1d144778797bbf32a9b94e86601be6a",
-    delegateOrigin: "https://delegator.mutinynet.arkade.sh",
-    sdkNetwork: "mutinynet",
-    arkHrp: "tark",
-    esploraApiUrl: "https://mempool.mutinynet.arkade.sh/api",
-    absoluteFeeCeilingSats: 5e3,
-    feerateCeilingSatPerV: 10
-  },
-  mainnet: {
-    network: "mainnet",
-    operatorGetInfoNetwork: "bitcoin",
-    operatorOrigin: "https://arkade.computer",
-    operatorSignerPub: "038202bebddeb1f7442803897a85eaf3ce9254d07df0172fc3725ab5f0d097779c",
-    checkpointForfeitPub: "03b43a8363118c084a04d4f6a50ebfa58e81957f8cceceb2aee0ab64c9fd2d9977",
-    checkpointTapscript: "039e0440b27520b43a8363118c084a04d4f6a50ebfa58e81957f8cceceb2aee0ab64c9fd2d9977ac",
-    checkpointDelaySeconds: 605184,
-    emulatorSignerPub: "0239c196415da47b26456a101daaa12ba9e445bfe153197f1e2b750bf40e52092e",
-    policyExitDelay: 605184,
-    boardExitDelay: 7776256,
-    arkdMinExitDelay: 605184,
-    delegatePub: "026d7d45360014bce9a8ad30a10c28dd1571a22a2e90c9682268404d37b5b114a6",
-    delegateOrigin: "https://delegate.arkade.money",
-    sdkNetwork: "bitcoin",
-    arkHrp: "ark",
-    esploraApiUrl: "https://mempool.arkade.sh/api",
-    absoluteFeeCeilingSats: 2e4,
-    feerateCeilingSatPerV: 25
-  }
-};
-function networkPins(network) {
-  return PINS[requireSupportedVaultNetwork(network)];
-}
-function sdkNetworkName(network) {
-  if (network === "bitcoin" || network === "mainnet") return "bitcoin";
-  if (network === "mutinynet") return "mutinynet";
-  return void 0;
-}
 
 // src/lib/vault/spendingPolicy.ts
 init_define_import_meta_env();
@@ -47024,90 +48780,125 @@ init_sha2();
 
 // src/lib/vault/hex.ts
 init_define_import_meta_env();
-function requireLowerHex(value, name, exactBytes) {
-  if (!value || value !== value.toLowerCase() || value.length % 2 !== 0 || !/^[0-9a-f]+$/.test(value)) {
+function requireLowerHex2(value2, name, exactBytes) {
+  if (!value2 || value2 !== value2.toLowerCase() || value2.length % 2 !== 0 || !/^[0-9a-f]+$/.test(value2)) {
     throw new Error(`${name} must be canonical lowercase hex`);
   }
-  if (exactBytes !== void 0 && value.length !== exactBytes * 2) {
+  if (exactBytes !== void 0 && value2.length !== exactBytes * 2) {
     throw new Error(`${name} must be ${exactBytes} bytes`);
   }
-  return value;
+  return value2;
 }
-function hexToBytes3(value) {
-  const hex2 = requireLowerHex(value, "hex");
+function hexToBytes4(value2) {
+  const hex2 = requireLowerHex2(value2, "hex");
   const out = new Uint8Array(hex2.length / 2);
   for (let i = 0; i < out.length; i++) {
     out[i] = parseInt(hex2.slice(i * 2, i * 2 + 2), 16);
   }
   return out;
 }
-function bytesToHex3(bytes2) {
+function bytesToHex4(bytes2) {
   return Array.from(bytes2, (b) => b.toString(16).padStart(2, "0")).join("");
 }
-function encodeUtf8(value) {
-  return new TextEncoder().encode(value);
+function encodeUtf82(value2) {
+  return new TextEncoder().encode(value2);
 }
 
+// src/lib/vault/constants.ts
+init_define_import_meta_env();
+
+// src/lib/vault/network.ts
+init_define_import_meta_env();
+var SUPPORTED_NETWORKS2 = ["mutinynet", "mainnet"];
+function isSupportedVaultNetwork2(value2) {
+  return typeof value2 === "string" && SUPPORTED_NETWORKS2.includes(value2);
+}
+function requireSupportedVaultNetwork2(value2) {
+  if (!isSupportedVaultNetwork2(value2)) throw new Error(`unsupported Vault network ${String(value2 || "")}`);
+  return value2;
+}
+function configuredReleaseNetwork(value2, production) {
+  const configured2 = String(value2 || "").trim();
+  if (!configured2) {
+    if (production) throw new Error("Explicit Vault release network required");
+    return void 0;
+  }
+  return requireSupportedVaultNetwork2(configured2);
+}
+
+// src/lib/vault/constants.ts
+var POLICY_VERSION2 = "vault-spending-policy-v1";
+var TX_RECIPIENT_CAP_SATS2 = 5e4;
+var PERIOD_ALLOWANCE_SATS2 = 1e5;
+var MUTINYNET_ABSOLUTE_FEE_CEILING_SATS2 = 5e3;
+var MUTINYNET_FEERATE_CEILING_SAT_PER_V2 = 10;
+var MAINNET_ABSOLUTE_FEE_CEILING_SATS2 = 2e4;
+var MAINNET_FEERATE_CEILING_SAT_PER_V2 = 25;
+var bakedReleaseNetwork2 = configuredReleaseNetwork(define_import_meta_env_default.VITE_VAULT_RELEASE_NETWORK, define_import_meta_env_default.PROD);
+var ABSOLUTE_FEE_CEILING_SATS2 = bakedReleaseNetwork2 === "mainnet" ? MAINNET_ABSOLUTE_FEE_CEILING_SATS2 : MUTINYNET_ABSOLUTE_FEE_CEILING_SATS2;
+var FEERATE_CEILING_SAT_PER_V2 = bakedReleaseNetwork2 === "mainnet" ? MAINNET_FEERATE_CEILING_SAT_PER_V2 : MUTINYNET_FEERATE_CEILING_SAT_PER_V2;
+var DUST_SATS2 = 330;
+
 // src/lib/vault/spendingPolicy.ts
-var SPENDING_POLICY_PROGRAM = "vault-policy-v1";
-var SPENDING_POLICY_PERIOD = "rolling-24h";
-var SPENDING_POLICY_BOUNDS = {
+var SPENDING_POLICY_PROGRAM2 = "vault-policy-v1";
+var SPENDING_POLICY_PERIOD2 = "rolling-24h";
+var SPENDING_POLICY_BOUNDS2 = {
   periodAllowanceSats: { min: 330, max: 1e9 },
   txRecipientCapSats: { min: 330, max: 1e8 },
-  absoluteFeeCapSats: { min: ABSOLUTE_FEE_CEILING_SATS, max: ABSOLUTE_FEE_CEILING_SATS },
-  feerateCapSatPerV: { min: FEERATE_CEILING_SAT_PER_V, max: FEERATE_CEILING_SAT_PER_V }
+  absoluteFeeCapSats: { min: ABSOLUTE_FEE_CEILING_SATS2, max: ABSOLUTE_FEE_CEILING_SATS2 },
+  feerateCapSatPerV: { min: FEERATE_CEILING_SAT_PER_V2, max: FEERATE_CEILING_SAT_PER_V2 }
 };
-function policyBounds(network) {
-  if (network === void 0) return SPENDING_POLICY_BOUNDS;
-  requireSupportedVaultNetwork(network);
-  const fee = network === "mainnet" ? MAINNET_ABSOLUTE_FEE_CEILING_SATS : MUTINYNET_ABSOLUTE_FEE_CEILING_SATS;
-  const rate = network === "mainnet" ? MAINNET_FEERATE_CEILING_SAT_PER_V : MUTINYNET_FEERATE_CEILING_SAT_PER_V;
+function policyBounds2(network2) {
+  if (network2 === void 0) return SPENDING_POLICY_BOUNDS2;
+  requireSupportedVaultNetwork2(network2);
+  const fee = network2 === "mainnet" ? MAINNET_ABSOLUTE_FEE_CEILING_SATS2 : MUTINYNET_ABSOLUTE_FEE_CEILING_SATS2;
+  const rate = network2 === "mainnet" ? MAINNET_FEERATE_CEILING_SAT_PER_V2 : MUTINYNET_FEERATE_CEILING_SAT_PER_V2;
   return {
-    ...SPENDING_POLICY_BOUNDS,
+    ...SPENDING_POLICY_BOUNDS2,
     absoluteFeeCapSats: { min: fee, max: fee },
     feerateCapSatPerV: { min: rate, max: rate }
   };
 }
-function defaultSpendingPolicy(network) {
-  const bounds = policyBounds(network);
+function defaultSpendingPolicy2(network2) {
+  const bounds = policyBounds2(network2);
   return {
-    program: SPENDING_POLICY_PROGRAM,
-    schema: POLICY_VERSION,
-    period: SPENDING_POLICY_PERIOD,
-    periodAllowanceSats: PERIOD_ALLOWANCE_SATS,
-    txRecipientCapSats: TX_RECIPIENT_CAP_SATS,
+    program: SPENDING_POLICY_PROGRAM2,
+    schema: POLICY_VERSION2,
+    period: SPENDING_POLICY_PERIOD2,
+    periodAllowanceSats: PERIOD_ALLOWANCE_SATS2,
+    txRecipientCapSats: TX_RECIPIENT_CAP_SATS2,
     absoluteFeeCapSats: bounds.absoluteFeeCapSats.min,
     feerateCapSatPerV: bounds.feerateCapSatPerV.min
   };
 }
-var CURRENT_SPENDING_POLICY_CAPABILITIES = {
-  program: SPENDING_POLICY_PROGRAM,
-  schema: POLICY_VERSION,
-  period: SPENDING_POLICY_PERIOD,
-  bounds: SPENDING_POLICY_BOUNDS,
+var CURRENT_SPENDING_POLICY_CAPABILITIES2 = {
+  program: SPENDING_POLICY_PROGRAM2,
+  schema: POLICY_VERSION2,
+  period: SPENDING_POLICY_PERIOD2,
+  bounds: SPENDING_POLICY_BOUNDS2,
   presets: [
     {
       id: "lower-exposure",
       label: "Lower exposure",
       policy: {
-        ...defaultSpendingPolicy(),
+        ...defaultSpendingPolicy2(),
         txRecipientCapSats: 25e3,
         periodAllowanceSats: 5e4
       }
     },
-    { id: "everyday", label: "Everyday", policy: defaultSpendingPolicy() }
+    { id: "everyday", label: "Everyday", policy: defaultSpendingPolicy2() }
   ]
 };
-function requireBound(value, bound, name) {
-  if (!Number.isSafeInteger(value) || Number(value) < bound.min || Number(value) > bound.max) {
+function requireBound2(value2, bound, name) {
+  if (!Number.isSafeInteger(value2) || Number(value2) < bound.min || Number(value2) > bound.max) {
     throw new Error(`${name} must be between ${bound.min} and ${bound.max}`);
   }
-  return Number(value);
+  return Number(value2);
 }
-function validateSpendingPolicy(value, network) {
-  const bounds = policyBounds(network);
-  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("spending policy required");
-  const p = value;
+function validateSpendingPolicy2(value2, network2) {
+  const bounds = policyBounds2(network2);
+  if (!value2 || typeof value2 !== "object" || Array.isArray(value2)) throw new Error("spending policy required");
+  const p = value2;
   const expected = [
     "program",
     "schema",
@@ -47121,241 +48912,38 @@ function validateSpendingPolicy(value, network) {
   if (fields.length !== expected.length || expected.some((name) => !Object.prototype.hasOwnProperty.call(p, name))) {
     throw new Error("spending policy fields");
   }
-  if (p.program !== SPENDING_POLICY_PROGRAM) throw new Error("unsupported spending policy program");
-  if (p.schema !== POLICY_VERSION) throw new Error("unsupported spending policy schema");
-  if (p.period !== SPENDING_POLICY_PERIOD) throw new Error("unsupported spending policy period");
+  if (p.program !== SPENDING_POLICY_PROGRAM2) throw new Error("unsupported spending policy program");
+  if (p.schema !== POLICY_VERSION2) throw new Error("unsupported spending policy schema");
+  if (p.period !== SPENDING_POLICY_PERIOD2) throw new Error("unsupported spending policy period");
   const policy = {
-    program: SPENDING_POLICY_PROGRAM,
-    schema: POLICY_VERSION,
-    period: SPENDING_POLICY_PERIOD,
-    periodAllowanceSats: requireBound(p.periodAllowanceSats, bounds.periodAllowanceSats, "period allowance"),
-    txRecipientCapSats: requireBound(p.txRecipientCapSats, bounds.txRecipientCapSats, "transaction recipient cap"),
-    absoluteFeeCapSats: requireBound(p.absoluteFeeCapSats, bounds.absoluteFeeCapSats, "absolute fee cap"),
-    feerateCapSatPerV: requireBound(p.feerateCapSatPerV, bounds.feerateCapSatPerV, "feerate cap")
+    program: SPENDING_POLICY_PROGRAM2,
+    schema: POLICY_VERSION2,
+    period: SPENDING_POLICY_PERIOD2,
+    periodAllowanceSats: requireBound2(p.periodAllowanceSats, bounds.periodAllowanceSats, "period allowance"),
+    txRecipientCapSats: requireBound2(p.txRecipientCapSats, bounds.txRecipientCapSats, "transaction recipient cap"),
+    absoluteFeeCapSats: requireBound2(p.absoluteFeeCapSats, bounds.absoluteFeeCapSats, "absolute fee cap"),
+    feerateCapSatPerV: requireBound2(p.feerateCapSatPerV, bounds.feerateCapSatPerV, "feerate cap")
   };
   if (policy.periodAllowanceSats < policy.txRecipientCapSats) {
     throw new Error("period allowance must be at least the transaction recipient cap");
   }
   return policy;
 }
-function canonicalSpendingPolicy(policy, network) {
-  return JSON.stringify(validateSpendingPolicy(policy, network));
+function canonicalSpendingPolicy2(policy, network2) {
+  return JSON.stringify(validateSpendingPolicy2(policy, network2));
 }
-function spendingPolicyDigest(policy, network) {
-  return bytesToHex3(sha256(encodeUtf8(canonicalSpendingPolicy(policy, network))));
+function spendingPolicyDigest2(policy, network2) {
+  return bytesToHex4(sha256(encodeUtf82(canonicalSpendingPolicy2(policy, network2))));
 }
-
-// src/lib/vault/light/contract.ts
-var LIGHT_PROFILE = "vaulted-light-v1";
-var LIGHT_PROGRAM = "vault-light-policy-v1";
-var LIGHT_POLICY_SCHEMA = "vault-light-spending-policy-v1";
-var LIGHT_DESCRIPTOR_SCHEMA = "vaulted-light/descriptor-v1";
-function validateLightPolicy(value, network) {
-  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Light policy required");
-  const policy = value;
-  if (policy.program !== LIGHT_PROGRAM || policy.schema !== LIGHT_POLICY_SCHEMA) {
-    throw new Error("unsupported Light policy");
-  }
-  const base = defaultSpendingPolicy(network);
-  const validated = validateSpendingPolicy({ ...policy, program: base.program, schema: base.schema }, network);
-  return { ...validated, program: LIGHT_PROGRAM, schema: LIGHT_POLICY_SCHEMA };
-}
-function lightPolicyDigest(value, network) {
-  return hex.encode(sha256(new TextEncoder().encode(JSON.stringify(validateLightPolicy(value, network)))));
-}
-function requireLightPublicKey(value) {
-  if (typeof value !== "string" || !/^[0-9a-f]{64}$/.test(value)) throw new Error("Light key must be x-only hex");
-  schnorr.utils.lift_x(BigInt(`0x${value}`));
-  return value;
-}
-function validateLightScriptParams(params) {
-  requireSupportedVaultNetwork(params.network);
-  const pins = networkPins(params.network);
-  const ownerPub = requireLightPublicKey(params.ownerPub);
-  const cosignerPub = requireLightPublicKey(params.cosignerPub);
-  const operatorPub = requireLightPublicKey(params.operatorPub);
-  if ((/* @__PURE__ */ new Set([ownerPub, cosignerPub, operatorPub])).size !== 3) throw new Error("Light signing keys must be distinct");
-  if (operatorPub !== pins.operatorSignerPub.slice(2)) throw new Error("Light Operator does not match network pin");
-  if (params.exitDelaySeconds !== pins.policyExitDelay) throw new Error("Light exit delay does not match network pin");
-  return { network: params.network, ownerPub, cosignerPub, operatorPub, exitDelaySeconds: params.exitDelaySeconds };
-}
-var LightScript = class extends VtxoScript {
-  params;
-  spendScript;
-  exitScript;
-  constructor(params) {
-    const valid = validateLightScriptParams(params);
-    const spend = MultisigTapscript.encode({
-      pubkeys: [valid.ownerPub, valid.cosignerPub, valid.operatorPub].map((key) => hex.decode(key))
-    });
-    const exit = CSVMultisigTapscript.encode({
-      timelock: { type: "seconds", value: BigInt(valid.exitDelaySeconds) },
-      pubkeys: [hex.decode(valid.ownerPub)]
-    });
-    super([spend.script, exit.script]);
-    this.params = Object.freeze(valid);
-    this.spendScript = hex.encode(spend.script);
-    this.exitScript = hex.encode(exit.script);
-  }
-  forfeit() {
-    return this.findLeaf(this.spendScript);
-  }
-  exit() {
-    return this.findLeaf(this.exitScript);
-  }
-};
-function buildLightDescriptor(input) {
-  if (!/^[0-9a-f]{64}$/.test(input.vaultId)) throw new Error("Light vault ID must be 32-byte hex");
-  const params = validateLightScriptParams(input);
-  const policy = validateLightPolicy(input.spendingPolicy, params.network);
-  const script = new LightScript(params);
-  return {
-    schema: LIGHT_DESCRIPTOR_SCHEMA,
-    profile: LIGHT_PROFILE,
-    program: LIGHT_PROGRAM,
-    vaultId: input.vaultId,
-    ...params,
-    spendingPolicy: policy,
-    spendingPolicyDigest: lightPolicyDigest(policy, params.network),
-    scriptPubKey: hex.encode(script.pkScript)
-  };
-}
-function validateLightDescriptor(value) {
-  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Light descriptor required");
-  const supplied = value;
-  const rebuilt = buildLightDescriptor(supplied);
-  const keys = Object.keys(rebuilt);
-  if (Object.keys(supplied).length !== keys.length || keys.some(
-    (key) => key === "spendingPolicy" ? lightPolicyDigest(supplied.spendingPolicy, supplied.network) !== rebuilt.spendingPolicyDigest : supplied[key] !== rebuilt[key]
-  )) {
-    throw new Error("Light descriptor does not match its program");
-  }
-  return rebuilt;
-}
-function lightDescriptorDigest(value) {
-  return hex.encode(sha256(new TextEncoder().encode(JSON.stringify(validateLightDescriptor(value)))));
-}
-
-// src/lib/vault/light/enrollment.ts
-init_define_import_meta_env();
-
-// node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/nist.js
-init_define_import_meta_env();
-init_sha2();
-init_weierstrass();
-var p256_CURVE = /* @__PURE__ */ (() => ({
-  p: BigInt("0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff"),
-  n: BigInt("0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551"),
-  h: BigInt(1),
-  a: BigInt("0xffffffff00000001000000000000000000000000fffffffffffffffffffffffc"),
-  b: BigInt("0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b"),
-  Gx: BigInt("0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296"),
-  Gy: BigInt("0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5")
-}))();
-var p256_Point = /* @__PURE__ */ weierstrass(p256_CURVE);
-var p256 = /* @__PURE__ */ ecdsa(p256_Point, sha256);
-
-// src/lib/vault/status.ts
-init_define_import_meta_env();
-
-// src/lib/vault/light/status.ts
-init_define_import_meta_env();
-init_base();
-function requireLightStatus(status) {
-  const descriptor = validateLightDescriptor(status.lightDescriptor);
-  const pins = networkPins(descriptor.network);
-  if (!status.enrolled || status.vaultId !== descriptor.vaultId || status.network !== descriptor.network || status.templateVersion !== LIGHT_PROFILE || status.policyVersion !== LIGHT_POLICY_SCHEMA || status.protectionTier !== "light")
-    throw new Error("Light status identity mismatch");
-  if (status.lightDescriptorHash !== lightDescriptorDigest(descriptor))
-    throw new Error("Light descriptor digest mismatch");
-  const policy = validateLightPolicy(status.spendingPolicy, descriptor.network);
-  if (lightPolicyDigest(policy, descriptor.network) !== descriptor.spendingPolicyDigest || status.spendingPolicyDigest !== descriptor.spendingPolicyDigest)
-    throw new Error("Light policy mismatch");
-  if (policy.txRecipientCapSats !== status.txCap || policy.periodAllowanceSats !== status.periodAllowance || policy.absoluteFeeCapSats !== status.absoluteFeeCap || policy.feerateCapSatPerV !== status.feerateCapSatVb)
-    throw new Error("Light limit fields mismatch");
-  if (![status.periodSpent, status.periodRemaining].every((v) => Number.isSafeInteger(v) && v >= 0) || status.periodRemaining !== Math.max(0, status.periodAllowance - status.periodSpent))
-    throw new Error("Light allowance state invalid");
-  if (status.savingsAddress || status.savingsScript || status.externalOwnerWalletPub || status.recoveryKeyPub || "recoveryPub" in status && status.recoveryPub || status.arkadeCosignerBasePub || status.arkadeCosignerOrigin || status.arkadeCosignerVersion || status.vtxoDelegatePub || status.vtxoBoardingActive || status.vtxoBoardingAddress || status.vtxoBoardingScript || status.vtxoBoardingDescriptor)
-    throw new Error("Light status contains another profile");
-  if (status.phoneBip340Pub !== `02${descriptor.ownerPub}` || status.vtxoVaultCosignerPub !== `02${descriptor.cosignerPub}` || status.vaultCosignerBasePub !== status.vtxoVaultCosignerPub || status.vtxoExitDelay !== descriptor.exitDelaySeconds || status.vtxoExitDelayUnit !== "seconds")
-    throw new Error("Light signing keys or exit delay mismatch");
-  const address = ArkAddress.decode(String(status.spendingArkAddress || ""));
-  const script = new LightScript(descriptor);
-  if (address.hrp !== pins.arkHrp || hex.encode(address.serverPubKey) !== descriptor.operatorPub || hex.encode(address.pkScript) !== descriptor.scriptPubKey || hex.encode(script.pkScript) !== status.spendingArkScript)
-    throw new Error("Light receiving address mismatch");
-  return { ...status, savingsScript: "", lightDescriptor: descriptor };
-}
-function lightRecoveryStatus(value) {
-  const descriptor = validateLightDescriptor(value);
-  const p = descriptor.spendingPolicy;
-  return requireLightStatus({
-    enrolled: true,
-    network: descriptor.network,
-    clientOrigin: "",
-    rpId: "",
-    vaultId: descriptor.vaultId,
-    templateVersion: LIGHT_PROFILE,
-    policyVersion: LIGHT_POLICY_SCHEMA,
-    protectionTier: "light",
-    savingsAddress: "",
-    savingsScript: "",
-    arkadeCosignerOrigin: "",
-    arkadeCosignerVersion: "",
-    phoneBip340Pub: `02${descriptor.ownerPub}`,
-    vtxoVaultCosignerPub: `02${descriptor.cosignerPub}`,
-    vaultCosignerBasePub: `02${descriptor.cosignerPub}`,
-    spendingPolicy: p,
-    spendingPolicyDigest: descriptor.spendingPolicyDigest,
-    periodAllowance: p.periodAllowanceSats,
-    periodSpent: 0,
-    periodRemaining: p.periodAllowanceSats,
-    txCap: p.txRecipientCapSats,
-    absoluteFeeCap: p.absoluteFeeCapSats,
-    feerateCapSatVb: p.feerateCapSatPerV,
-    vtxoExitDelay: descriptor.exitDelaySeconds,
-    vtxoExitDelayUnit: "seconds",
-    spendingArkAddress: new ArkAddress(
-      hex.decode(descriptor.operatorPub),
-      new LightScript(descriptor).tweakedPublicKey,
-      networkPins(descriptor.network).arkHrp
-    ).encode(),
-    spendingArkScript: descriptor.scriptPubKey,
-    lightDescriptor: descriptor,
-    lightDescriptorHash: lightDescriptorDigest(descriptor)
-  });
-}
-
-// src/lib/vault/bounded.ts
-init_define_import_meta_env();
-var MAX_API_RESPONSE_BYTES = 1024 * 1024;
-
-// src/lib/vault/releaseNetwork.ts
-init_define_import_meta_env();
-function requireReleaseNetwork(network) {
-  const actual = requireSupportedVaultNetwork(network);
-  const expected = configuredReleaseNetwork(define_import_meta_env_default.VITE_VAULT_RELEASE_NETWORK, define_import_meta_env_default.PROD);
-  if (expected && actual !== expected) throw new Error(`Vault service network does not match the ${expected} release`);
-  return actual;
-}
-
-// src/lib/vault/productionDomains.ts
-init_define_import_meta_env();
-
-// src/lib/vault/program/connector.ts
-init_define_import_meta_env();
-init_base();
-init_btc_signer();
-init_secp256k1();
-init_sha2();
 
 // src/lib/vault/protectionTier.ts
 init_define_import_meta_env();
-function requireProtectionTier(value) {
-  if (value !== "standard" && value !== "advanced") throw new Error("unsupported protection tier");
-  return value;
+function requireProtectionTier2(value2) {
+  if (value2 !== "standard" && value2 !== "advanced") throw new Error("unsupported protection tier");
+  return value2;
 }
-function requireProtectionTierMatchesRecovery(tier, recoveryPub) {
-  const selected = requireProtectionTier(tier);
+function requireProtectionTierMatchesRecovery2(tier, recoveryPub) {
+  const selected = requireProtectionTier2(tier);
   const hasRecovery = typeof recoveryPub === "string" && recoveryPub.trim().length > 0;
   if (selected === "standard" && hasRecovery) throw new Error("Standard protection must not include a recovery key");
   if (selected === "advanced" && !hasRecovery) throw new Error("Advanced protection requires a recovery key");
@@ -47365,35 +48953,35 @@ function requireProtectionTierMatchesRecovery(tier, recoveryPub) {
 // src/lib/vault/addressNetwork.ts
 init_define_import_meta_env();
 init_btc_signer();
-function vaultAddressNetwork(network) {
-  if (network === "mutinynet") return TEST_NETWORK;
-  if (network === "bitcoin" || network === "mainnet") return NETWORK;
+function vaultAddressNetwork2(network2) {
+  if (network2 === "mutinynet") return TEST_NETWORK;
+  if (network2 === "bitcoin" || network2 === "mainnet") return NETWORK;
   throw new Error("unsupported network");
 }
 
 // src/lib/vault/savingsTree.ts
 init_define_import_meta_env();
-var TAPROOT_NUMS_XONLY = "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0";
-var OP_CHECKSIG = 172;
-var OP_CHECKSIGVERIFY = 173;
-var OP_CSV = 178;
-var OP_DROP = 117;
-var OP_0 = 0;
-var OP_1 = 81;
-function xOnlyFromCompressed(pub) {
-  const raw2 = hexToBytes3(pub);
+var TAPROOT_NUMS_XONLY2 = "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0";
+var OP_CHECKSIG2 = 172;
+var OP_CHECKSIGVERIFY2 = 173;
+var OP_CSV2 = 178;
+var OP_DROP2 = 117;
+var OP_02 = 0;
+var OP_12 = 81;
+function xOnlyFromCompressed2(pub) {
+  const raw2 = hexToBytes4(pub);
   if (raw2.length === 32) return raw2;
   if (raw2.length === 33 && (raw2[0] === 2 || raw2[0] === 3)) return raw2.slice(1);
   throw new Error("expected a compressed or x-only secp256k1 key");
 }
-function encodeScriptInt(value) {
-  if (!Number.isInteger(value) || value < 0 || value > 2147483647) {
+function encodeScriptInt2(value2) {
+  if (!Number.isInteger(value2) || value2 < 0 || value2 > 2147483647) {
     throw new Error("script integer out of range");
   }
-  if (value === 0) return new Uint8Array([OP_0]);
-  if (value <= 16) return new Uint8Array([OP_1 + value - 1]);
+  if (value2 === 0) return new Uint8Array([OP_02]);
+  if (value2 <= 16) return new Uint8Array([OP_12 + value2 - 1]);
   const bytes2 = [];
-  let n = value;
+  let n = value2;
   while (n > 0) {
     bytes2.push(n & 255);
     n >>= 8;
@@ -47401,20 +48989,20 @@ function encodeScriptInt(value) {
   if (bytes2[bytes2.length - 1] & 128) bytes2.push(0);
   return new Uint8Array([bytes2.length, ...bytes2]);
 }
-function checksigScript(pubs) {
+function checksigScript2(pubs) {
   if (pubs.length === 0) throw new Error("at least one key");
   const parts = [];
   pubs.forEach((pub, i) => {
     if (pub.length !== 32) throw new Error("x-only key required");
     parts.push(32, ...pub);
-    parts.push(i === pubs.length - 1 ? OP_CHECKSIG : OP_CHECKSIGVERIFY);
+    parts.push(i === pubs.length - 1 ? OP_CHECKSIG2 : OP_CHECKSIGVERIFY2);
   });
   return new Uint8Array(parts);
 }
-function csvChecksigScript(blocks, pub) {
-  const lock = encodeScriptInt(blocks);
-  const key = checksigScript([pub]);
-  return new Uint8Array([...lock, OP_CSV, OP_DROP, ...key]);
+function csvChecksigScript2(blocks, pub) {
+  const lock = encodeScriptInt2(blocks);
+  const key = checksigScript2([pub]);
+  return new Uint8Array([...lock, OP_CSV2, OP_DROP2, ...key]);
 }
 
 // src/lib/vault/program/context.ts
@@ -47425,40 +49013,40 @@ init_btc_signer();
 
 // src/lib/vault/program/constants.ts
 init_define_import_meta_env();
-var PROGRAM_SCHEMA = "arkade-vault/savings-v1";
-var SAVINGS_TEMPLATE = "phone-hww-recovery-savings-v1";
-function isSavingsTemplate(value) {
-  return value === SAVINGS_TEMPLATE;
+var PROGRAM_SCHEMA2 = "arkade-vault/savings-v1";
+var SAVINGS_TEMPLATE2 = "phone-hww-recovery-savings-v1";
+function isSavingsTemplate2(value2) {
+  return value2 === SAVINGS_TEMPLATE2;
 }
-var PROGRAM_INTERNAL_TAG = "arkade-vault/savings-v1/internal";
-var PROGRAM_CSV = {
+var PROGRAM_INTERNAL_TAG2 = "arkade-vault/savings-v1/internal";
+var PROGRAM_CSV2 = {
   hardware: 6,
   phone: 144,
   recovery: 288
 };
-var P2A_SCRIPT_HEX = "51024e73";
-var P2A_VALUE_SATS = 240;
-var P2A_OUTPUT_INDEX = 1;
-var PACKET_OUTPUT_INDEX = 2;
-var TRANSITION_OUTPUT_COUNT = 3;
-var TRANSITION_SEQUENCE = 4294967293;
-var WITNESS_BYTES_367 = 367;
-var WITNESS_BYTES_399 = 399;
-var WITNESS_BYTES_431 = 431;
-var CLAIMANTS = ["phone", "hardware", "recovery"];
-var TEMPLATE_REGISTRY = {
-  [SAVINGS_TEMPLATE]: { schema: PROGRAM_SCHEMA, recovery: true, serverFreeClawback: true }
+var P2A_SCRIPT_HEX2 = "51024e73";
+var P2A_VALUE_SATS2 = 240;
+var P2A_OUTPUT_INDEX2 = 1;
+var PACKET_OUTPUT_INDEX2 = 2;
+var TRANSITION_OUTPUT_COUNT2 = 3;
+var TRANSITION_SEQUENCE2 = 4294967293;
+var WITNESS_BYTES_3672 = 367;
+var WITNESS_BYTES_3992 = 399;
+var WITNESS_BYTES_4312 = 431;
+var CLAIMANTS2 = ["phone", "hardware", "recovery"];
+var TEMPLATE_REGISTRY2 = {
+  [SAVINGS_TEMPLATE2]: { schema: PROGRAM_SCHEMA2, recovery: true, serverFreeClawback: true }
 };
-function familyClaimants(hasRecovery) {
+function familyClaimants2(hasRecovery) {
   return hasRecovery ? ["phone", "hardware", "recovery"] : ["phone", "hardware"];
 }
-function familyKeysFor(hasRecovery) {
-  return familyClaimants(hasRecovery).map((claimant) => `savings-${claimant}`);
+function familyKeysFor2(hasRecovery) {
+  return familyClaimants2(hasRecovery).map((claimant) => `savings-${claimant}`);
 }
 
 // src/lib/vault/program/context.ts
-function taggedHash4(tag, ...messages) {
-  const tagH = sha256(encodeUtf8(tag));
+function taggedHash5(tag, ...messages) {
+  const tagH = sha256(encodeUtf82(tag));
   const prefix2 = new Uint8Array(64);
   prefix2.set(tagH, 0);
   prefix2.set(tagH, 32);
@@ -47472,23 +49060,23 @@ function taggedHash4(tag, ...messages) {
   }
   return sha256(out);
 }
-function appendText(parts, value, name) {
-  if (!value || value !== value.trim() || value !== value.toLowerCase()) {
+function appendText3(parts, value2, name) {
+  if (!value2 || value2 !== value2.trim() || value2 !== value2.toLowerCase()) {
     throw new Error(`${name} must be non-empty canonical lowercase`);
   }
-  const bytes2 = encodeUtf8(value);
+  const bytes2 = encodeUtf82(value2);
   const len = new Uint8Array(4);
   new DataView(len.buffer).setUint32(0, bytes2.length, false);
   parts.push(len, bytes2);
 }
-function encodeTreeContext(input) {
+function encodeTreeContext2(input) {
   const claimant = input.claimant || "";
-  if (claimant && !CLAIMANTS.includes(claimant)) throw new Error("unknown claimant");
+  if (claimant && !CLAIMANTS2.includes(claimant)) throw new Error("unknown claimant");
   const parts = [];
-  appendText(parts, input.vaultId, "vaultId");
-  appendText(parts, "savings", "kind");
-  appendText(parts, claimant === "" ? "-" : claimant, "claimant");
-  appendText(parts, input.templateVersion || SAVINGS_TEMPLATE, "templateVersion");
+  appendText3(parts, input.vaultId, "vaultId");
+  appendText3(parts, "savings", "kind");
+  appendText3(parts, claimant === "" ? "-" : claimant, "claimant");
+  appendText3(parts, input.templateVersion || SAVINGS_TEMPLATE2, "templateVersion");
   const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
   let offset = 0;
   for (const part of parts) {
@@ -47497,17 +49085,17 @@ function encodeTreeContext(input) {
   }
   return out;
 }
-function contextInternalKey(input) {
-  const context = taggedHash4(PROGRAM_INTERNAL_TAG, encodeTreeContext(input));
-  const [tweaked] = utils3.taprootTweakPubkey(hex.decode(TAPROOT_NUMS_XONLY), context);
+function contextInternalKey2(input) {
+  const context = taggedHash5(PROGRAM_INTERNAL_TAG2, encodeTreeContext2(input));
+  const [tweaked] = utils3.taprootTweakPubkey(hex.decode(TAPROOT_NUMS_XONLY2), context);
   return tweaked;
 }
 
 // src/lib/vault/program/packet.ts
 init_define_import_meta_env();
-var ARK_MAGIC = Uint8Array.of(65, 82, 75);
-var EMULATOR_PACKET_TYPE = 1;
-function concat3(parts) {
+var ARK_MAGIC2 = Uint8Array.of(65, 82, 75);
+var EMULATOR_PACKET_TYPE2 = 1;
+function concat6(parts) {
   const out = new Uint8Array(parts.reduce((sum, part) => sum + part.length, 0));
   let offset = 0;
   for (const part of parts) {
@@ -47516,22 +49104,22 @@ function concat3(parts) {
   }
   return out;
 }
-function writeCompactSize(value) {
-  if (!Number.isSafeInteger(value) || value < 0) throw new Error("compact size");
-  if (value < 253) return Uint8Array.of(value);
-  if (value <= 65535) return Uint8Array.of(253, value & 255, value >> 8 & 255);
-  if (value <= 4294967295) {
-    return Uint8Array.of(254, value & 255, value >> 8 & 255, value >> 16 & 255, value >> 24 & 255);
+function writeCompactSize2(value2) {
+  if (!Number.isSafeInteger(value2) || value2 < 0) throw new Error("compact size");
+  if (value2 < 253) return Uint8Array.of(value2);
+  if (value2 <= 65535) return Uint8Array.of(253, value2 & 255, value2 >> 8 & 255);
+  if (value2 <= 4294967295) {
+    return Uint8Array.of(254, value2 & 255, value2 >> 8 & 255, value2 >> 16 & 255, value2 >> 24 & 255);
   }
   throw new Error("compact size too large");
 }
-function writeWitness(items) {
-  return concat3([writeCompactSize(items.length), ...items.flatMap((item) => [writeCompactSize(item.length), item])]);
+function writeWitness2(items) {
+  return concat6([writeCompactSize2(items.length), ...items.flatMap((item) => [writeCompactSize2(item.length), item])]);
 }
-function writeUvarint(value) {
-  if (!Number.isSafeInteger(value) || value < 0) throw new Error("uvarint");
+function writeUvarint2(value2) {
+  if (!Number.isSafeInteger(value2) || value2 < 0) throw new Error("uvarint");
   const out = [];
-  let remaining = BigInt(value);
+  let remaining = BigInt(value2);
   while (remaining >= 0x80n) {
     out.push(Number(remaining & 0x7fn | 0x80n));
     remaining >>= 7n;
@@ -47539,46 +49127,46 @@ function writeUvarint(value) {
   out.push(Number(remaining));
   return Uint8Array.from(out);
 }
-function pushBytes(bytes2) {
-  if (bytes2.length < 76) return concat3([Uint8Array.of(bytes2.length), bytes2]);
-  if (bytes2.length <= 255) return concat3([Uint8Array.of(76, bytes2.length), bytes2]);
+function pushBytes2(bytes2) {
+  if (bytes2.length < 76) return concat6([Uint8Array.of(bytes2.length), bytes2]);
+  if (bytes2.length <= 255) return concat6([Uint8Array.of(76, bytes2.length), bytes2]);
   if (bytes2.length <= 65535) {
-    return concat3([Uint8Array.of(77, bytes2.length & 255, bytes2.length >> 8 & 255), bytes2]);
+    return concat6([Uint8Array.of(77, bytes2.length & 255, bytes2.length >> 8 & 255), bytes2]);
   }
   throw new Error("push too large");
 }
-function encodeExtensionScript(packets) {
+function encodeExtensionScript2(packets) {
   if (packets.length === 0) throw new Error("missing packets");
   const seen = /* @__PURE__ */ new Set();
-  const body = [ARK_MAGIC];
+  const body = [ARK_MAGIC2];
   for (const packet of packets) {
     if (!Number.isSafeInteger(packet.type) || packet.type < 0 || packet.type > 255) throw new Error("packet type");
     if (seen.has(packet.type)) throw new Error("duplicate packet type");
     seen.add(packet.type);
-    body.push(Uint8Array.of(packet.type), writeUvarint(packet.data.length), packet.data);
+    body.push(Uint8Array.of(packet.type), writeUvarint2(packet.data.length), packet.data);
   }
-  return concat3([Uint8Array.of(106), pushBytes(concat3(body))]);
+  return concat6([Uint8Array.of(106), pushBytes2(concat6(body))]);
 }
-function encodeEmulatorPacket(entry) {
+function encodeEmulatorPacket2(entry) {
   if (!Number.isSafeInteger(entry.vin) || entry.vin < 0 || entry.vin > 65535) throw new Error("emulator vin");
-  const witness = writeWitness(entry.witness);
-  return concat3([
-    writeCompactSize(1),
+  const witness = writeWitness2(entry.witness);
+  return concat6([
+    writeCompactSize2(1),
     Uint8Array.of(entry.vin & 255, entry.vin >> 8 & 255),
-    writeCompactSize(entry.script.length),
+    writeCompactSize2(entry.script.length),
     entry.script,
-    writeCompactSize(witness.length),
+    writeCompactSize2(witness.length),
     witness
   ]);
 }
-function exactPacketOutputPrefix(scriptLen, witnessItemLens) {
+function exactPacketOutputPrefix2(scriptLen, witnessItemLens) {
   if (scriptLen <= 0) throw new Error("authorization script length required");
-  const content = encodeEmulatorPacket({
+  const content = encodeEmulatorPacket2({
     vin: 0,
     script: new Uint8Array(scriptLen),
     witness: witnessItemLens.map((len) => new Uint8Array(len))
   });
-  const outputScript = encodeExtensionScript([{ type: EMULATOR_PACKET_TYPE, data: content }]);
+  const outputScript = encodeExtensionScript2([{ type: EMULATOR_PACKET_TYPE2, data: content }]);
   if (outputScript.length <= content.length) throw new Error("canonical packet output envelope");
   const prefix2 = outputScript.slice(0, outputScript.length - content.length);
   for (let i = 0; i < content.length; i++) {
@@ -47586,14 +49174,24 @@ function exactPacketOutputPrefix(scriptLen, witnessItemLens) {
   }
   return prefix2;
 }
-function packetWitnessShape(phoneBound) {
+function packetWitnessShape2(phoneBound) {
   return phoneBound ? [64] : [];
+}
+function emulatorPacketScript(authScript, phoneBound, phoneSig) {
+  const witness = phoneBound ? [phoneSig ?? new Uint8Array(64)] : [];
+  if (phoneBound && witness[0].length !== 64) throw new Error("PhoneDirect signature must be 64 bytes");
+  return encodeExtensionScript2([
+    {
+      type: EMULATOR_PACKET_TYPE2,
+      data: encodeEmulatorPacket2({ vin: 0, script: authScript, witness })
+    }
+  ]);
 }
 
 // src/lib/vault/program/script.ts
 init_define_import_meta_env();
 init_base();
-var OP2 = {
+var OP3 = {
   VERIFY: 105,
   EQUAL: 135,
   EQUALVERIFY: 136,
@@ -47621,32 +49219,32 @@ var OP2 = {
   INSPECTPACKET: 244,
   SIGHASH: 246
 };
-var DIRECT_P256_CSFS_PREFIX = 17;
-var TRANSITION_WITNESS_BYTES = WITNESS_BYTES_399;
-function initiateWitnessBytes(claimant, hasRecovery = true) {
+var DIRECT_P256_CSFS_PREFIX2 = 17;
+var TRANSITION_WITNESS_BYTES2 = WITNESS_BYTES_3992;
+function initiateWitnessBytes2(claimant, hasRecovery = true) {
   if (hasRecovery) {
-    return WITNESS_BYTES_399;
+    return WITNESS_BYTES_3992;
   }
-  if (claimant === "hardware") return WITNESS_BYTES_367;
-  return WITNESS_BYTES_399;
+  if (claimant === "hardware") return WITNESS_BYTES_3672;
+  return WITNESS_BYTES_3992;
 }
-function clawbackWitnessBytes(serverFree = false, hasRecovery = true) {
-  if (serverFree && hasRecovery) return WITNESS_BYTES_431;
-  return WITNESS_BYTES_399;
+function clawbackWitnessBytes2(serverFree = false, hasRecovery = true) {
+  if (serverFree && hasRecovery) return WITNESS_BYTES_4312;
+  return WITNESS_BYTES_3992;
 }
-function collaborativeWitnessBytes(script, controlBlock) {
-  return 2 + 1 + 3 * (1 + 64) + compactSizeLen(script.length) + script.length + compactSizeLen(controlBlock.length) + controlBlock.length;
+function collaborativeWitnessBytes2(script, controlBlock) {
+  return 2 + 1 + 3 * (1 + 64) + compactSizeLen2(script.length) + script.length + compactSizeLen2(controlBlock.length) + controlBlock.length;
 }
-function compactSizeLen(n) {
+function compactSizeLen2(n) {
   if (n < 253) return 1;
   if (n <= 65535) return 3;
   if (n <= 4294967295) return 5;
   return 9;
 }
-function scriptNum(value) {
-  if (value === 0n) return new Uint8Array();
-  const neg = value < 0n;
-  let abs = neg ? -value : value;
+function scriptNum2(value2) {
+  if (value2 === 0n) return new Uint8Array();
+  const neg = value2 < 0n;
+  let abs = neg ? -value2 : value2;
   const bytes2 = [];
   while (abs > 0n) {
     bytes2.push(Number(abs & 0xffn));
@@ -47656,20 +49254,20 @@ function scriptNum(value) {
   else if (neg) bytes2[bytes2.length - 1] |= 128;
   return new Uint8Array(bytes2);
 }
-function pushInt(value) {
-  const n = BigInt(value);
+function pushInt2(value2) {
+  const n = BigInt(value2);
   if (n === 0n) return new Uint8Array([0]);
   if (n >= 1n && n <= 16n) return new Uint8Array([80 + Number(n)]);
   if (n === -1n) return new Uint8Array([79]);
-  const raw2 = scriptNum(n);
+  const raw2 = scriptNum2(n);
   return new Uint8Array([raw2.length, ...raw2]);
 }
-function pushData(data) {
+function pushData2(data) {
   if (data.length <= 75) return new Uint8Array([data.length, ...data]);
   if (data.length <= 255) return new Uint8Array([76, data.length, ...data]);
   throw new Error("push too large");
 }
-function concat4(...parts) {
+function concat7(...parts) {
   const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
   let offset = 0;
   for (const part of parts) {
@@ -47678,135 +49276,135 @@ function concat4(...parts) {
   }
   return out;
 }
-function p2trProgram(scriptHex) {
+function p2trProgram2(scriptHex) {
   const raw2 = hex.decode(scriptHex);
   if (raw2.length !== 34 || raw2[0] !== 81 || raw2[1] !== 32) {
     throw new Error("dest must be a 34-byte p2tr script");
   }
   return raw2.slice(2);
 }
-function p2aProgram() {
-  const raw2 = hex.decode(P2A_SCRIPT_HEX);
+function p2aProgram2() {
+  const raw2 = hex.decode(P2A_SCRIPT_HEX2);
   if (raw2[0] !== 81 || raw2[1] !== 2) throw new Error("P2A script");
   return raw2.slice(2);
 }
-function requirePhoneDirect(pub) {
+function requirePhoneDirect2(pub) {
   if (pub.length !== 33) throw new Error("PhoneDirectP256 must be 33 bytes");
   if (pub[0] !== 2 && pub[0] !== 3) throw new Error("PhoneDirectP256 must be compressed");
   if (!p256.utils.isValidPublicKey(pub, true)) throw new Error("PhoneDirectP256 is off-curve");
   return pub;
 }
-function buildTransitionScript(input) {
-  const dest = p2trProgram(input.destScriptHex);
-  const feeCap = input.feeCap ?? ABSOLUTE_FEE_CEILING_SATS;
-  const feerateCap = input.feerateCap ?? FEERATE_CEILING_SAT_PER_V;
-  const witnessBytes = input.witnessBytes ?? TRANSITION_WITNESS_BYTES;
-  const phone = input.bindPhoneDirect ? requirePhoneDirect(input.bindPhoneDirect) : void 0;
-  const witnessShape = packetWitnessShape(!!phone);
+function buildTransitionScript2(input) {
+  const dest = p2trProgram2(input.destScriptHex);
+  const feeCap = input.feeCap ?? ABSOLUTE_FEE_CEILING_SATS2;
+  const feerateCap = input.feerateCap ?? FEERATE_CEILING_SAT_PER_V2;
+  const witnessBytes = input.witnessBytes ?? TRANSITION_WITNESS_BYTES2;
+  const phone2 = input.bindPhoneDirect ? requirePhoneDirect2(input.bindPhoneDirect) : void 0;
+  const witnessShape = packetWitnessShape2(!!phone2);
   let prefix2 = new Uint8Array();
   for (let i = 0; i < 8; i++) {
-    const script = assembleTransitionScript({
+    const script = assembleTransitionScript2({
       dest,
       prefix: prefix2,
-      phone,
+      phone: phone2,
       witnessBytes,
       feeCap,
       feerateCap
     });
-    const next = exactPacketOutputPrefix(script.length, witnessShape);
+    const next = exactPacketOutputPrefix2(script.length, witnessShape);
     if (next.length === prefix2.length && next.every((b, j) => b === prefix2[j])) return script;
     prefix2 = next;
   }
   throw new Error("authorization script packet envelope did not converge");
 }
-function assembleTransitionScript(input) {
+function assembleTransitionScript2(input) {
   const parts = [
-    new Uint8Array([OP2.INSPECTVERSION]),
-    pushInt(2),
-    new Uint8Array([OP2.EQUALVERIFY]),
-    new Uint8Array([OP2.INSPECTLOCKTIME]),
-    pushInt(0),
-    new Uint8Array([OP2.EQUALVERIFY]),
-    new Uint8Array([OP2.INSPECTNUMINPUTS]),
-    pushInt(1),
-    new Uint8Array([OP2.EQUALVERIFY]),
-    pushInt(0),
-    new Uint8Array([OP2.INSPECTINPUTSEQUENCE]),
-    pushInt(TRANSITION_SEQUENCE),
-    new Uint8Array([OP2.EQUALVERIFY]),
-    new Uint8Array([OP2.INSPECTNUMOUTPUTS]),
-    pushInt(TRANSITION_OUTPUT_COUNT),
-    new Uint8Array([OP2.EQUALVERIFY]),
-    pushInt(0),
-    new Uint8Array([OP2.INSPECTOUTPUTSCRIPTPUBKEY]),
-    pushInt(1),
-    new Uint8Array([OP2.EQUALVERIFY]),
-    pushData(input.dest),
-    new Uint8Array([OP2.EQUALVERIFY]),
-    pushInt(0),
-    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
-    pushInt(DUST_SATS),
-    new Uint8Array([OP2.GREATERTHANOREQUAL, OP2.VERIFY]),
-    pushInt(P2A_OUTPUT_INDEX),
-    new Uint8Array([OP2.INSPECTOUTPUTSCRIPTPUBKEY]),
-    pushInt(1),
-    new Uint8Array([OP2.EQUALVERIFY]),
-    pushData(p2aProgram()),
-    new Uint8Array([OP2.EQUALVERIFY]),
-    pushInt(P2A_OUTPUT_INDEX),
-    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
-    pushInt(P2A_VALUE_SATS),
-    new Uint8Array([OP2.EQUALVERIFY]),
-    pushInt(PACKET_OUTPUT_INDEX),
-    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
-    pushInt(0),
-    new Uint8Array([OP2.EQUALVERIFY]),
-    pushInt(EMULATOR_PACKET_TYPE),
-    new Uint8Array([OP2.INSPECTPACKET, OP2.VERIFY]),
-    pushData(input.prefix),
-    new Uint8Array([OP2.SWAP, OP2.CAT, OP2.SHA256]),
-    pushInt(PACKET_OUTPUT_INDEX),
-    new Uint8Array([OP2.INSPECTOUTPUTSCRIPTPUBKEY]),
-    pushInt(-1),
-    new Uint8Array([OP2.EQUALVERIFY, OP2.EQUALVERIFY]),
-    pushInt(0),
-    new Uint8Array([OP2.INSPECTINPUTVALUE]),
-    pushInt(0),
-    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
-    new Uint8Array([OP2.SUB]),
-    pushInt(P2A_OUTPUT_INDEX),
-    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
-    new Uint8Array([OP2.SUB]),
-    new Uint8Array([OP2.DUP]),
-    pushInt(0),
-    new Uint8Array([OP2.GREATERTHANOREQUAL, OP2.VERIFY]),
-    new Uint8Array([OP2.DUP]),
-    pushInt(input.feeCap),
-    new Uint8Array([OP2.LESSTHANOREQUAL, OP2.VERIFY]),
-    new Uint8Array([OP2.DUP]),
-    new Uint8Array([OP2.TXWEIGHT]),
-    pushInt(input.witnessBytes),
-    new Uint8Array([OP2.ADD]),
-    pushInt(3),
-    new Uint8Array([OP2.ADD]),
-    pushInt(4),
-    new Uint8Array([OP2.DIV]),
-    pushInt(input.feerateCap),
-    new Uint8Array([OP2.MUL]),
-    new Uint8Array([OP2.LESSTHANOREQUAL, OP2.VERIFY]),
-    new Uint8Array([OP2.DROP])
+    new Uint8Array([OP3.INSPECTVERSION]),
+    pushInt2(2),
+    new Uint8Array([OP3.EQUALVERIFY]),
+    new Uint8Array([OP3.INSPECTLOCKTIME]),
+    pushInt2(0),
+    new Uint8Array([OP3.EQUALVERIFY]),
+    new Uint8Array([OP3.INSPECTNUMINPUTS]),
+    pushInt2(1),
+    new Uint8Array([OP3.EQUALVERIFY]),
+    pushInt2(0),
+    new Uint8Array([OP3.INSPECTINPUTSEQUENCE]),
+    pushInt2(TRANSITION_SEQUENCE2),
+    new Uint8Array([OP3.EQUALVERIFY]),
+    new Uint8Array([OP3.INSPECTNUMOUTPUTS]),
+    pushInt2(TRANSITION_OUTPUT_COUNT2),
+    new Uint8Array([OP3.EQUALVERIFY]),
+    pushInt2(0),
+    new Uint8Array([OP3.INSPECTOUTPUTSCRIPTPUBKEY]),
+    pushInt2(1),
+    new Uint8Array([OP3.EQUALVERIFY]),
+    pushData2(input.dest),
+    new Uint8Array([OP3.EQUALVERIFY]),
+    pushInt2(0),
+    new Uint8Array([OP3.INSPECTOUTPUTVALUE]),
+    pushInt2(DUST_SATS2),
+    new Uint8Array([OP3.GREATERTHANOREQUAL, OP3.VERIFY]),
+    pushInt2(P2A_OUTPUT_INDEX2),
+    new Uint8Array([OP3.INSPECTOUTPUTSCRIPTPUBKEY]),
+    pushInt2(1),
+    new Uint8Array([OP3.EQUALVERIFY]),
+    pushData2(p2aProgram2()),
+    new Uint8Array([OP3.EQUALVERIFY]),
+    pushInt2(P2A_OUTPUT_INDEX2),
+    new Uint8Array([OP3.INSPECTOUTPUTVALUE]),
+    pushInt2(P2A_VALUE_SATS2),
+    new Uint8Array([OP3.EQUALVERIFY]),
+    pushInt2(PACKET_OUTPUT_INDEX2),
+    new Uint8Array([OP3.INSPECTOUTPUTVALUE]),
+    pushInt2(0),
+    new Uint8Array([OP3.EQUALVERIFY]),
+    pushInt2(EMULATOR_PACKET_TYPE2),
+    new Uint8Array([OP3.INSPECTPACKET, OP3.VERIFY]),
+    pushData2(input.prefix),
+    new Uint8Array([OP3.SWAP, OP3.CAT, OP3.SHA256]),
+    pushInt2(PACKET_OUTPUT_INDEX2),
+    new Uint8Array([OP3.INSPECTOUTPUTSCRIPTPUBKEY]),
+    pushInt2(-1),
+    new Uint8Array([OP3.EQUALVERIFY, OP3.EQUALVERIFY]),
+    pushInt2(0),
+    new Uint8Array([OP3.INSPECTINPUTVALUE]),
+    pushInt2(0),
+    new Uint8Array([OP3.INSPECTOUTPUTVALUE]),
+    new Uint8Array([OP3.SUB]),
+    pushInt2(P2A_OUTPUT_INDEX2),
+    new Uint8Array([OP3.INSPECTOUTPUTVALUE]),
+    new Uint8Array([OP3.SUB]),
+    new Uint8Array([OP3.DUP]),
+    pushInt2(0),
+    new Uint8Array([OP3.GREATERTHANOREQUAL, OP3.VERIFY]),
+    new Uint8Array([OP3.DUP]),
+    pushInt2(input.feeCap),
+    new Uint8Array([OP3.LESSTHANOREQUAL, OP3.VERIFY]),
+    new Uint8Array([OP3.DUP]),
+    new Uint8Array([OP3.TXWEIGHT]),
+    pushInt2(input.witnessBytes),
+    new Uint8Array([OP3.ADD]),
+    pushInt2(3),
+    new Uint8Array([OP3.ADD]),
+    pushInt2(4),
+    new Uint8Array([OP3.DIV]),
+    pushInt2(input.feerateCap),
+    new Uint8Array([OP3.MUL]),
+    new Uint8Array([OP3.LESSTHANOREQUAL, OP3.VERIFY]),
+    new Uint8Array([OP3.DROP])
   ];
   if (input.phone) {
     parts.push(
-      pushInt(0),
-      new Uint8Array([OP2.SIGHASH]),
-      pushData(new Uint8Array([DIRECT_P256_CSFS_PREFIX, ...input.phone])),
-      new Uint8Array([OP2.CHECKSIGFROMSTACK])
+      pushInt2(0),
+      new Uint8Array([OP3.SIGHASH]),
+      pushData2(new Uint8Array([DIRECT_P256_CSFS_PREFIX2, ...input.phone])),
+      new Uint8Array([OP3.CHECKSIGFROMSTACK])
     );
   } else {
-    parts.push(pushInt(1));
+    parts.push(pushInt2(1));
   }
-  return concat4(...parts);
+  return concat7(...parts);
 }
 
 // src/lib/vault/program/trees.ts
@@ -47820,21 +49418,30 @@ init_define_import_meta_env();
 // src/lib/vault/program/connectorOrigin.ts
 init_define_import_meta_env();
 
+// src/lib/vault/releaseNetwork.ts
+init_define_import_meta_env();
+function requireReleaseNetwork(network2) {
+  const actual = requireSupportedVaultNetwork2(network2);
+  const expected = configuredReleaseNetwork(define_import_meta_env_default.VITE_VAULT_RELEASE_NETWORK, define_import_meta_env_default.PROD);
+  if (expected && actual !== expected) throw new Error(`Vault service network does not match the ${expected} release`);
+  return actual;
+}
+
 // src/lib/vault/setupPlan.ts
-var FORBIDDEN_PUBLIC_KEY_G = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
-var FORBIDDEN_PUBLIC_KEY_2G = "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5";
+var FORBIDDEN_PUBLIC_KEY_G2 = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
+var FORBIDDEN_PUBLIC_KEY_2G2 = "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5";
 
 // src/lib/vault/program/tweak.ts
 init_define_import_meta_env();
 init_secp256k1();
 init_base();
-var ARK_SCRIPT_HASH_TAG = "ArkScriptHash";
-function arkadeScriptHash2(script) {
-  return schnorr.utils.taggedHash(ARK_SCRIPT_HASH_TAG, script);
+var ARK_SCRIPT_HASH_TAG2 = "ArkScriptHash";
+function arkadeScriptHash3(script) {
+  return schnorr.utils.taggedHash(ARK_SCRIPT_HASH_TAG2, script);
 }
-function tweakByArkScript(basePub, script) {
-  const xonly = xOnlyFromCompressed(basePub);
-  const hash = arkadeScriptHash2(script);
+function tweakByArkScript2(basePub, script) {
+  const xonly = xOnlyFromCompressed2(basePub);
+  const hash = arkadeScriptHash3(script);
   const evenY = secp256k1.Point.fromBytes(new Uint8Array([2, ...xonly]));
   const scalar2 = BigInt(`0x${hex.encode(hash)}`);
   if (scalar2 === 0n) throw new Error("ArkScriptHash is zero");
@@ -47842,30 +49449,30 @@ function tweakByArkScript(basePub, script) {
   if (tweaked.equals(secp256k1.Point.ZERO)) throw new Error("Arkade tweak is degenerate");
   return hex.encode(tweaked.toBytes(true));
 }
-function tweakPair(vaultBase, arkadeBase, script) {
+function tweakPair2(vaultBase, arkadeBase, script) {
   return {
-    vault: tweakByArkScript(vaultBase, script),
-    arkade: tweakByArkScript(arkadeBase, script)
+    vault: tweakByArkScript2(vaultBase, script),
+    arkade: tweakByArkScript2(arkadeBase, script)
   };
 }
 
 // src/lib/vault/program/trees.ts
-var UNSPENDABLE_PADDING = new Uint8Array([106]);
-function quarantineGuardians(claimant, hasRecovery = true) {
+var UNSPENDABLE_PADDING2 = new Uint8Array([106]);
+function quarantineGuardians2(claimant, hasRecovery = true) {
   if (claimant === "phone") return hasRecovery ? ["hardware", "recovery"] : ["hardware"];
   if (claimant === "hardware") return hasRecovery ? ["phone", "recovery"] : ["phone"];
   return ["phone", "hardware"];
 }
-function pendingGuardians(claimant, hasRecovery = true) {
+function pendingGuardians2(claimant, hasRecovery = true) {
   const roles = hasRecovery ? ["phone", "hardware", "recovery"] : ["phone", "hardware"];
   return roles.filter((role) => role !== claimant);
 }
-function pendingDelay(claimant) {
-  if (claimant === "hardware") return PROGRAM_CSV.hardware;
-  if (claimant === "phone") return PROGRAM_CSV.phone;
-  return PROGRAM_CSV.recovery;
+function pendingDelay2(claimant) {
+  if (claimant === "hardware") return PROGRAM_CSV2.hardware;
+  if (claimant === "phone") return PROGRAM_CSV2.phone;
+  return PROGRAM_CSV2.recovery;
 }
-function tapTreeFromScripts(scripts) {
+function tapTreeFromScripts2(scripts) {
   if (scripts.length === 0) throw new Error("no leaves");
   if (scripts.length === 1) return { script: scripts[0] };
   const leaves = scripts.map((script) => ({ script }));
@@ -47884,46 +49491,46 @@ function tapTreeFromScripts(scripts) {
   }
   return branches[0];
 }
-function requireDistinct(keys, name) {
+function requireDistinct2(keys2, name) {
   const seen = /* @__PURE__ */ new Set();
-  for (const key of keys) {
+  for (const key of keys2) {
     const hexKey = hex.encode(key);
     if (seen.has(hexKey)) throw new Error(`${name} keys must be x-only distinct`);
     seen.add(hexKey);
   }
 }
-var FORBIDDEN_XONLY = /* @__PURE__ */ new Set([
-  TAPROOT_NUMS_XONLY,
-  hex.encode(xOnlyFromCompressed(FORBIDDEN_PUBLIC_KEY_G)),
-  hex.encode(xOnlyFromCompressed(FORBIDDEN_PUBLIC_KEY_2G))
+var FORBIDDEN_XONLY2 = /* @__PURE__ */ new Set([
+  TAPROOT_NUMS_XONLY2,
+  hex.encode(xOnlyFromCompressed2(FORBIDDEN_PUBLIC_KEY_G2)),
+  hex.encode(xOnlyFromCompressed2(FORBIDDEN_PUBLIC_KEY_2G2))
 ]);
-function assertRoleSet(pubs, name) {
-  const xonlys = pubs.map(xOnlyFromCompressed);
-  requireDistinct(xonlys, name);
+function assertRoleSet2(pubs, name) {
+  const xonlys = pubs.map(xOnlyFromCompressed2);
+  requireDistinct2(xonlys, name);
   for (const pub of xonlys) {
-    if (FORBIDDEN_XONLY.has(hex.encode(pub))) throw new Error("family key is a forbidden point");
+    if (FORBIDDEN_XONLY2.has(hex.encode(pub))) throw new Error("family key is a forbidden point");
   }
 }
-function controlOf(payment, script) {
+function controlOf2(payment, script) {
   const leaf = payment.leaves?.find((item) => hex.encode(item.script) === hex.encode(script));
   if (!leaf?.controlBlock) throw new Error("leaf control block required");
   return leaf.controlBlock;
 }
-function buildQuarantine(input) {
+function buildQuarantine2(input) {
   const pubs = {
-    phone: xOnlyFromCompressed(input.phonePub),
-    hardware: xOnlyFromCompressed(input.hardwarePub)
+    phone: xOnlyFromCompressed2(input.phonePub),
+    hardware: xOnlyFromCompressed2(input.hardwarePub)
   };
-  if (input.recoveryPub) pubs.recovery = xOnlyFromCompressed(input.recoveryPub);
-  requireDistinct(Object.values(pubs), "user");
-  const names = quarantineGuardians(input.claimant, Boolean(input.recoveryPub));
-  const script = checksigScript(names.map((name) => pubs[name]));
-  const internal = contextInternalKey({
+  if (input.recoveryPub) pubs.recovery = xOnlyFromCompressed2(input.recoveryPub);
+  requireDistinct2(Object.values(pubs), "user");
+  const names = quarantineGuardians2(input.claimant, Boolean(input.recoveryPub));
+  const script = checksigScript2(names.map((name) => pubs[name]));
+  const internal = contextInternalKey2({
     vaultId: input.vaultId,
     claimant: input.claimant,
     templateVersion: input.templateVersion
   });
-  const payment = p2tr(internal, { script }, vaultAddressNetwork(input.network), true);
+  const payment = p2tr(internal, { script }, vaultAddressNetwork2(input.network), true);
   if (!payment.address) throw new Error("quarantine address required");
   return {
     role: "quarantine",
@@ -47935,31 +49542,31 @@ function buildQuarantine(input) {
     guardians: names
   };
 }
-function buildPending(input) {
+function buildPending2(input) {
   const pubs = {
-    phone: xOnlyFromCompressed(input.phonePub),
-    hardware: xOnlyFromCompressed(input.hardwarePub)
+    phone: xOnlyFromCompressed2(input.phonePub),
+    hardware: xOnlyFromCompressed2(input.hardwarePub)
   };
-  if (input.recoveryPub) pubs.recovery = xOnlyFromCompressed(input.recoveryPub);
-  const vault = xOnlyFromCompressed(input.vaultTweak);
-  const arkade = xOnlyFromCompressed(input.arkadeTweak);
-  requireDistinct([...Object.values(pubs), vault, arkade], "pending");
-  const claim = csvChecksigScript(pendingDelay(input.claimant), pubs[input.claimant]);
-  const clawbacks = pendingGuardians(input.claimant, Boolean(input.recoveryPub)).map(
-    (guardian) => checksigScript([pubs[guardian], vault, arkade])
+  if (input.recoveryPub) pubs.recovery = xOnlyFromCompressed2(input.recoveryPub);
+  const vault = xOnlyFromCompressed2(input.vaultTweak);
+  const arkade = xOnlyFromCompressed2(input.arkadeTweak);
+  requireDistinct2([...Object.values(pubs), vault, arkade], "pending");
+  const claim = csvChecksigScript2(pendingDelay2(input.claimant), pubs[input.claimant]);
+  const clawbacks = pendingGuardians2(input.claimant, Boolean(input.recoveryPub)).map(
+    (guardian) => checksigScript2([pubs[guardian], vault, arkade])
   );
   const scripts = [claim, ...clawbacks];
   if (input.serverFreeClawback) {
-    const guardians = pendingGuardians(input.claimant, Boolean(input.recoveryPub)).map((name) => pubs[name]);
-    scripts.push(checksigScript(guardians));
+    const guardians = pendingGuardians2(input.claimant, Boolean(input.recoveryPub)).map((name) => pubs[name]);
+    scripts.push(checksigScript2(guardians));
   }
-  scripts.push(UNSPENDABLE_PADDING);
-  const internal = contextInternalKey({
+  scripts.push(UNSPENDABLE_PADDING2);
+  const internal = contextInternalKey2({
     vaultId: input.vaultId,
     claimant: input.claimant,
     templateVersion: input.templateVersion
   });
-  const payment = p2tr(internal, tapTreeFromScripts(scripts), vaultAddressNetwork(input.network), true);
+  const payment = p2tr(internal, tapTreeFromScripts2(scripts), vaultAddressNetwork2(input.network), true);
   if (!payment.address) throw new Error("pending address required");
   return {
     role: "pending",
@@ -47970,37 +49577,37 @@ function buildPending(input) {
     leaves: payment.leaves,
     claim,
     clawbacks,
-    guardianExit: input.serverFreeClawback ? checksigScript(pendingGuardians(input.claimant, Boolean(input.recoveryPub)).map((name) => pubs[name])) : void 0,
-    delay: pendingDelay(input.claimant)
+    guardianExit: input.serverFreeClawback ? checksigScript2(pendingGuardians2(input.claimant, Boolean(input.recoveryPub)).map((name) => pubs[name])) : void 0,
+    delay: pendingDelay2(input.claimant)
   };
 }
-function buildNormal(input) {
-  const phone = xOnlyFromCompressed(input.phonePub);
-  const hardware = xOnlyFromCompressed(input.hardwarePub);
-  const recovery = input.recoveryPub ? xOnlyFromCompressed(input.recoveryPub) : void 0;
+function buildNormal2(input) {
+  const phone2 = xOnlyFromCompressed2(input.phonePub);
+  const hardware = xOnlyFromCompressed2(input.hardwarePub);
+  const recovery = input.recoveryPub ? xOnlyFromCompressed2(input.recoveryPub) : void 0;
   const claimants = recovery ? ["phone", "hardware", "recovery"] : ["phone", "hardware"];
   const tweaks = [];
   for (const claimant of claimants) {
     const pair = input.initiate[claimant];
     if (!pair) throw new Error(`missing ${claimant} initiate tweaks`);
-    tweaks.push(xOnlyFromCompressed(pair.vault), xOnlyFromCompressed(pair.arkade));
+    tweaks.push(xOnlyFromCompressed2(pair.vault), xOnlyFromCompressed2(pair.arkade));
   }
-  requireDistinct([phone, hardware, ...recovery ? [recovery] : [], ...tweaks], "normal");
-  const admin = checksigScript([phone, hardware]);
-  const role = { phone, hardware, recovery };
+  requireDistinct2([phone2, hardware, ...recovery ? [recovery] : [], ...tweaks], "normal");
+  const admin = checksigScript2([phone2, hardware]);
+  const role = { phone: phone2, hardware, recovery };
   const initiate = claimants.map((claimant) => {
     const pair = input.initiate[claimant];
     const pub = role[claimant];
     if (!pub) throw new Error(`missing ${claimant}`);
-    return checksigScript([pub, xOnlyFromCompressed(pair.vault), xOnlyFromCompressed(pair.arkade)]);
+    return checksigScript2([pub, xOnlyFromCompressed2(pair.vault), xOnlyFromCompressed2(pair.arkade)]);
   });
   const scripts = [admin, ...initiate];
-  const internal = contextInternalKey({
+  const internal = contextInternalKey2({
     vaultId: input.vaultId,
     claimant: "",
     templateVersion: input.templateVersion
   });
-  const payment = p2tr(internal, tapTreeFromScripts(scripts), vaultAddressNetwork(input.network), true);
+  const payment = p2tr(internal, tapTreeFromScripts2(scripts), vaultAddressNetwork2(input.network), true);
   if (!payment.address) throw new Error("normal address required");
   return {
     role: "normal",
@@ -48013,11 +49620,11 @@ function buildNormal(input) {
     initiate
   };
 }
-function buildVaultProgramFamily(input) {
-  const phoneDirect = hexToBytes3(input.phoneDirectP256);
+function buildVaultProgramFamily2(input) {
+  const phoneDirect = hexToBytes4(input.phoneDirectP256);
   const bases = [input.phonePub, input.hardwarePub, input.vaultCosignerBase, input.arkadeCosignerBase];
   if (input.recoveryPub) bases.splice(2, 0, input.recoveryPub);
-  assertRoleSet(bases, "family bases");
+  assertRoleSet2(bases, "family bases");
   const claimants = input.recoveryPub ? ["phone", "hardware", "recovery"] : ["phone", "hardware"];
   const hasRecovery = Boolean(input.recoveryPub);
   const quarantine = {};
@@ -48026,19 +49633,19 @@ function buildVaultProgramFamily(input) {
   const clawbackAuth = {};
   const pendingTweaks = {};
   const templateVersion = input.templateVersion;
-  const serverFreeClawback = input.serverFreeClawback ?? templateVersion === SAVINGS_TEMPLATE;
-  const expectedClawbackWitness = clawbackWitnessBytes(serverFreeClawback, hasRecovery);
+  const serverFreeClawback = input.serverFreeClawback ?? templateVersion === SAVINGS_TEMPLATE2;
+  const expectedClawbackWitness = clawbackWitnessBytes2(serverFreeClawback, hasRecovery);
   for (const claimant of claimants) {
     const key = `savings-${claimant}`;
-    quarantine[key] = buildQuarantine({ ...input, claimant, templateVersion });
-    clawbackAuth[key] = buildTransitionScript({
+    quarantine[key] = buildQuarantine2({ ...input, claimant, templateVersion });
+    clawbackAuth[key] = buildTransitionScript2({
       destScriptHex: hex.encode(quarantine[key].script),
       witnessBytes: expectedClawbackWitness,
       feeCap: input.absoluteFeeCapSats,
       feerateCap: input.feerateCapSatPerV
     });
-    pendingTweaks[key] = tweakPair(input.vaultCosignerBase, input.arkadeCosignerBase, clawbackAuth[key]);
-    pending[key] = buildPending({
+    pendingTweaks[key] = tweakPair2(input.vaultCosignerBase, input.arkadeCosignerBase, clawbackAuth[key]);
+    pending[key] = buildPending2({
       ...input,
       templateVersion,
       serverFreeClawback,
@@ -48046,30 +49653,30 @@ function buildVaultProgramFamily(input) {
       vaultTweak: pendingTweaks[key].vault,
       arkadeTweak: pendingTweaks[key].arkade
     });
-    initiateAuth[key] = buildTransitionScript({
+    initiateAuth[key] = buildTransitionScript2({
       destScriptHex: hex.encode(pending[key].script),
       bindPhoneDirect: claimant === "phone" ? phoneDirect : void 0,
-      witnessBytes: initiateWitnessBytes(claimant, hasRecovery),
+      witnessBytes: initiateWitnessBytes2(claimant, hasRecovery),
       feeCap: input.absoluteFeeCapSats,
       feerateCap: input.feerateCapSatPerV
     });
   }
   const savingsInitiate = {
-    phone: tweakPair(input.vaultCosignerBase, input.arkadeCosignerBase, initiateAuth["savings-phone"]),
-    hardware: tweakPair(input.vaultCosignerBase, input.arkadeCosignerBase, initiateAuth["savings-hardware"]),
-    ...hasRecovery ? { recovery: tweakPair(input.vaultCosignerBase, input.arkadeCosignerBase, initiateAuth["savings-recovery"]) } : {}
+    phone: tweakPair2(input.vaultCosignerBase, input.arkadeCosignerBase, initiateAuth["savings-phone"]),
+    hardware: tweakPair2(input.vaultCosignerBase, input.arkadeCosignerBase, initiateAuth["savings-hardware"]),
+    ...hasRecovery ? { recovery: tweakPair2(input.vaultCosignerBase, input.arkadeCosignerBase, initiateAuth["savings-recovery"]) } : {}
   };
-  const savings = buildNormal({
+  const savings = buildNormal2({
     ...input,
     initiate: savingsInitiate
   });
   savings.initiate.forEach((script, i) => {
     const claimant = claimants[i];
-    const got = collaborativeWitnessBytes(script, controlOf(savings, script));
-    const want = initiateWitnessBytes(claimant, hasRecovery);
+    const got = collaborativeWitnessBytes2(script, controlOf2(savings, script));
+    const want = initiateWitnessBytes2(claimant, hasRecovery);
     if (got !== want) throw new Error(`savings ${claimant} initiate witness ${got} != ${want}`);
   });
-  assertRoleSet(
+  assertRoleSet2(
     [
       input.phonePub,
       input.hardwarePub,
@@ -48093,10 +49700,10 @@ function buildVaultProgramFamily(input) {
 }
 
 // src/lib/vault/program/connector.ts
-var CONNECTOR_PROGRAM = "savings-connector-v1";
-var CONNECTOR_TEMPLATE = "phone-connector-recovery-savings-v1";
-var X = { inputScript: 202, toAlt: 107, fromAlt: 108, if: 99, endif: 104, boolOr: 155 };
-function buildConnectorProgram(r) {
+var CONNECTOR_PROGRAM2 = "savings-connector-v1";
+var CONNECTOR_TEMPLATE2 = "phone-connector-recovery-savings-v1";
+var X2 = { inputScript: 202, toAlt: 107, fromAlt: 108, if: 99, endif: 104, boolOr: 155 };
+function buildConnectorProgram2(r) {
   if (!(r.connectorScript.length === 22 && r.connectorScript[0] === 0 && r.connectorScript[1] === 20) && (r.connectorScript.length !== 34 || r.connectorScript[0] !== 81 || r.connectorScript[1] !== 32 || !secp256k1.utils.isValidPublicKey(new Uint8Array([2, ...r.connectorScript.slice(2)]), true)))
     throw new Error("connector native SegWit or Taproot script required");
   if (!Number.isSafeInteger(r.witnessBytes) || r.witnessBytes < 1 || r.witnessBytes > 1e4 || !Number.isSafeInteger(r.absoluteFeeCapSats) || r.absoluteFeeCapSats < 0 || r.absoluteFeeCapSats > 1e5 || !Number.isSafeInteger(r.feerateCapSatPerV) || r.feerateCapSatPerV < 1 || r.feerateCapSatPerV > 100)
@@ -48105,116 +49712,116 @@ function buildConnectorProgram(r) {
   for (let attempt = 0; attempt < 8; attempt++) {
     const chunks = [];
     const op = (...values) => chunks.push(Uint8Array.from(values));
-    const num2 = (n) => chunks.push(pushInt(n));
-    const data = (b) => chunks.push(pushData(b));
+    const num2 = (n) => chunks.push(pushInt2(n));
+    const data = (b) => chunks.push(pushData2(b));
     const equal = (opcode, n) => {
       op(opcode);
       num2(n);
-      op(OP2.EQUALVERIFY);
+      op(OP3.EQUALVERIFY);
     };
     const script = (opcode, index, b) => {
       num2(index);
       op(opcode);
       num2(b[0] === 81 ? 1 : 0);
-      op(OP2.EQUALVERIFY);
+      op(OP3.EQUALVERIFY);
       data(b.slice(2));
-      op(OP2.EQUALVERIFY);
+      op(OP3.EQUALVERIFY);
     };
     const withChange = () => {
-      op(OP2.INSPECTNUMOUTPUTS);
+      op(OP3.INSPECTNUMOUTPUTS);
       num2(5);
-      op(OP2.EQUAL, X.if);
+      op(OP3.EQUAL, X2.if);
     };
-    data(new TextEncoder().encode(CONNECTOR_PROGRAM));
-    op(OP2.DROP);
-    equal(OP2.INSPECTVERSION, 2);
-    equal(OP2.INSPECTLOCKTIME, 0);
-    equal(OP2.INSPECTNUMINPUTS, 2);
-    op(OP2.INSPECTNUMOUTPUTS, OP2.DUP);
+    data(new TextEncoder().encode(CONNECTOR_PROGRAM2));
+    op(OP3.DROP);
+    equal(OP3.INSPECTVERSION, 2);
+    equal(OP3.INSPECTLOCKTIME, 0);
+    equal(OP3.INSPECTNUMINPUTS, 2);
+    op(OP3.INSPECTNUMOUTPUTS, OP3.DUP);
     num2(4);
-    op(OP2.EQUAL, OP2.SWAP);
+    op(OP3.EQUAL, OP3.SWAP);
     num2(5);
-    op(OP2.EQUAL, X.boolOr, OP2.VERIFY);
+    op(OP3.EQUAL, X2.boolOr, OP3.VERIFY);
     for (const i of [0, 1]) {
       num2(i);
-      equal(OP2.INSPECTINPUTSEQUENCE, 4294967293);
+      equal(OP3.INSPECTINPUTSEQUENCE, 4294967293);
     }
-    script(X.inputScript, 1, r.connectorScript);
-    script(OP2.INSPECTOUTPUTSCRIPTPUBKEY, 1, r.connectorScript);
-    script(OP2.INSPECTOUTPUTSCRIPTPUBKEY, 2, hex.decode("51024e73"));
+    script(X2.inputScript, 1, r.connectorScript);
+    script(OP3.INSPECTOUTPUTSCRIPTPUBKEY, 1, r.connectorScript);
+    script(OP3.INSPECTOUTPUTSCRIPTPUBKEY, 2, hex.decode("51024e73"));
     withChange();
     num2(0);
-    op(X.inputScript, X.toAlt);
+    op(X2.inputScript, X2.toAlt);
     num2(4);
-    op(OP2.INSPECTOUTPUTSCRIPTPUBKEY, X.fromAlt, OP2.EQUALVERIFY, OP2.EQUALVERIFY);
+    op(OP3.INSPECTOUTPUTSCRIPTPUBKEY, X2.fromAlt, OP3.EQUALVERIFY, OP3.EQUALVERIFY);
     num2(4);
-    op(OP2.INSPECTOUTPUTVALUE);
+    op(OP3.INSPECTOUTPUTVALUE);
     num2(330);
-    op(OP2.GREATERTHANOREQUAL, OP2.VERIFY, X.endif);
+    op(OP3.GREATERTHANOREQUAL, OP3.VERIFY, X2.endif);
     num2(1);
-    equal(OP2.INSPECTINPUTVALUE, 1e3);
+    equal(OP3.INSPECTINPUTVALUE, 1e3);
     num2(1);
-    equal(OP2.INSPECTOUTPUTVALUE, 1e3);
+    equal(OP3.INSPECTOUTPUTVALUE, 1e3);
     num2(2);
-    equal(OP2.INSPECTOUTPUTVALUE, 240);
+    equal(OP3.INSPECTOUTPUTVALUE, 240);
     num2(3);
-    equal(OP2.INSPECTOUTPUTVALUE, 0);
+    equal(OP3.INSPECTOUTPUTVALUE, 0);
     num2(0);
-    op(OP2.INSPECTOUTPUTVALUE);
+    op(OP3.INSPECTOUTPUTVALUE);
     num2(294);
-    op(OP2.GREATERTHANOREQUAL, OP2.VERIFY);
+    op(OP3.GREATERTHANOREQUAL, OP3.VERIFY);
     num2(1);
-    op(OP2.INSPECTPACKET, OP2.VERIFY);
+    op(OP3.INSPECTPACKET, OP3.VERIFY);
     data(prefix2);
-    op(OP2.SWAP, OP2.CAT, OP2.SHA256);
+    op(OP3.SWAP, OP3.CAT, OP3.SHA256);
     num2(3);
-    op(OP2.INSPECTOUTPUTSCRIPTPUBKEY);
+    op(OP3.INSPECTOUTPUTSCRIPTPUBKEY);
     num2(-1);
-    op(OP2.EQUALVERIFY, OP2.EQUALVERIFY);
+    op(OP3.EQUALVERIFY, OP3.EQUALVERIFY);
     num2(0);
-    op(OP2.INSPECTINPUTVALUE);
+    op(OP3.INSPECTINPUTVALUE);
     for (const i of [0, 2]) {
       num2(i);
-      op(OP2.INSPECTOUTPUTVALUE, OP2.SUB);
+      op(OP3.INSPECTOUTPUTVALUE, OP3.SUB);
     }
     withChange();
     num2(4);
-    op(OP2.INSPECTOUTPUTVALUE, OP2.SUB, X.endif);
-    op(OP2.DUP);
+    op(OP3.INSPECTOUTPUTVALUE, OP3.SUB, X2.endif);
+    op(OP3.DUP);
     num2(0);
-    op(OP2.GREATERTHANOREQUAL, OP2.VERIFY, OP2.DUP);
+    op(OP3.GREATERTHANOREQUAL, OP3.VERIFY, OP3.DUP);
     num2(r.absoluteFeeCapSats);
-    op(OP2.LESSTHANOREQUAL, OP2.VERIFY, OP2.TXWEIGHT);
+    op(OP3.LESSTHANOREQUAL, OP3.VERIFY, OP3.TXWEIGHT);
     num2(r.witnessBytes);
-    op(OP2.ADD);
+    op(OP3.ADD);
     num2(3);
-    op(OP2.ADD);
+    op(OP3.ADD);
     num2(4);
-    op(OP2.DIV);
+    op(OP3.DIV);
     num2(r.feerateCapSatPerV);
-    op(OP2.MUL, OP2.LESSTHANOREQUAL);
-    const result = concat4(...chunks);
-    const next = exactPacketOutputPrefix(result.length, []);
+    op(OP3.MUL, OP3.LESSTHANOREQUAL);
+    const result = concat7(...chunks);
+    const next = exactPacketOutputPrefix2(result.length, []);
     if (hex.encode(next) === hex.encode(prefix2)) return result;
     prefix2 = next;
   }
   throw new Error("connector packet envelope did not converge");
 }
-function buildConnectorFamily(input) {
-  if (input.templateVersion && input.templateVersion !== CONNECTOR_TEMPLATE)
+function buildConnectorFamily2(input) {
+  if (input.templateVersion && input.templateVersion !== CONNECTOR_TEMPLATE2)
     throw new Error("connector template mismatch");
   if (input.network !== "mainnet" && input.network !== "mutinynet") throw new Error("unsupported connector network");
-  const selected = { ...input, templateVersion: CONNECTOR_TEMPLATE, serverFreeClawback: true };
-  const base = buildVaultProgramFamily(selected);
+  const selected = { ...input, templateVersion: CONNECTOR_TEMPLATE2, serverFreeClawback: true };
+  const base = buildVaultProgramFamily2(selected);
   if (input.connectorType !== "p2tr" && input.connectorType !== "p2wpkh") throw new Error("unsupported connector type");
-  const connector = input.connectorType === "p2tr" ? p2tr(xOnlyFromCompressed(input.hardwarePub), void 0, vaultAddressNetwork(input.network)) : p2wpkh(hex.decode(input.hardwarePub), vaultAddressNetwork(input.network));
+  const connector = input.connectorType === "p2tr" ? p2tr(xOnlyFromCompressed2(input.hardwarePub), void 0, vaultAddressNetwork2(input.network)) : p2wpkh(hex.decode(input.hardwarePub), vaultAddressNetwork2(input.network));
   const connectorWitnessBytes = input.connectorType === "p2tr" ? 66 : 45;
-  const internal = contextInternalKey({ vaultId: input.vaultId, claimant: "", templateVersion: CONNECTOR_TEMPLATE });
+  const internal = contextInternalKey2({ vaultId: input.vaultId, claimant: "", templateVersion: CONNECTOR_TEMPLATE2 });
   const makeNormal = (normal) => {
     const tree = p2tr(
       internal,
-      tapTreeFromScripts([normal, ...base.savings.initiate]),
-      vaultAddressNetwork(input.network),
+      tapTreeFromScripts2([normal, ...base.savings.initiate]),
+      vaultAddressNetwork2(input.network),
       true
     );
     const leaves = tree.leaves;
@@ -48223,16 +49830,16 @@ function buildConnectorFamily(input) {
     return { ...tree, normal, control };
   };
   const preliminary = makeNormal(
-    checksigScript([input.phonePub, input.vaultCosignerBase, input.arkadeCosignerBase].map(xOnlyFromCompressed))
+    checksigScript2([input.phonePub, input.vaultCosignerBase, input.arkadeCosignerBase].map(xOnlyFromCompressed2))
   );
   const rules = {
     connectorScript: connector.script,
-    witnessBytes: collaborativeWitnessBytes(preliminary.normal, preliminary.control) + connectorWitnessBytes,
+    witnessBytes: collaborativeWitnessBytes2(preliminary.normal, preliminary.control) + connectorWitnessBytes,
     absoluteFeeCapSats: input.absoluteFeeCapSats,
     feerateCapSatPerV: input.feerateCapSatPerV
   };
-  const program = buildConnectorProgram(rules);
-  const pair = tweakPair(input.vaultCosignerBase, input.arkadeCosignerBase, program);
+  const program = buildConnectorProgram2(rules);
+  const pair = tweakPair2(input.vaultCosignerBase, input.arkadeCosignerBase, program);
   const roles = [
     input.phonePub,
     input.hardwarePub,
@@ -48243,10 +49850,10 @@ function buildConnectorFamily(input) {
     pair.arkade,
     ...Object.values(base.initiateTweaks).flatMap((p) => [p.vault, p.arkade]),
     ...Object.values(base.pendingTweaks).flatMap((p) => [p.vault, p.arkade])
-  ].map((p) => hex.encode(xOnlyFromCompressed(p)));
+  ].map((p) => hex.encode(xOnlyFromCompressed2(p)));
   if (new Set(roles).size !== roles.length) throw new Error("connector family roles must be distinct");
-  const savings = makeNormal(checksigScript([input.phonePub, pair.vault, pair.arkade].map(xOnlyFromCompressed)));
-  if (collaborativeWitnessBytes(savings.normal, savings.control) + connectorWitnessBytes !== rules.witnessBytes)
+  const savings = makeNormal(checksigScript2([input.phonePub, pair.vault, pair.arkade].map(xOnlyFromCompressed2)));
+  if (collaborativeWitnessBytes2(savings.normal, savings.control) + connectorWitnessBytes !== rules.witnessBytes)
     throw new Error("connector witness shape changed");
   return {
     ...base,
@@ -48257,13 +49864,13 @@ function buildConnectorFamily(input) {
     normalTweaks: pair
   };
 }
-function connectorEnrollmentDigest(input, origin) {
+function connectorEnrollmentDigest2(input, origin) {
   if (input.network !== "mainnet" && input.network !== "mutinynet") throw new Error("unsupported connector network");
-  requireProtectionTierMatchesRecovery(input.protectionTier, input.recoveryPub);
-  const policy = validateSpendingPolicy(input.spendingPolicy, input.network);
+  requireProtectionTierMatchesRecovery2(input.protectionTier, input.recoveryPub);
+  const policy = validateSpendingPolicy2(input.spendingPolicy, input.network);
   if (policy.absoluteFeeCapSats !== input.absoluteFeeCapSats || policy.feerateCapSatPerV !== input.feerateCapSatPerV)
     throw new Error("connector fee policy mismatch");
-  const f = buildConnectorFamily(input);
+  const f = buildConnectorFamily2(input);
   if (hex.encode(origin.publicKey) !== hex.encode(hex.decode(input.hardwarePub)))
     throw new Error("hardware origin mismatch");
   const path = origin.path;
@@ -48275,7 +49882,7 @@ function connectorEnrollmentDigest(input, origin) {
   const canonical2 = (s) => hex.encode(hex.decode(s));
   const fields = [
     "arkade-vault/connector-enrollment-v1",
-    CONNECTOR_TEMPLATE,
+    CONNECTOR_TEMPLATE2,
     input.vaultId,
     input.network,
     input.protectionTier,
@@ -48285,7 +49892,7 @@ function connectorEnrollmentDigest(input, origin) {
     canonical2(input.phoneDirectP256),
     canonical2(input.vaultCosignerBase),
     canonical2(input.arkadeCosignerBase),
-    spendingPolicyDigest(policy, input.network),
+    spendingPolicyDigest2(policy, input.network),
     hex.encode(f.program),
     hex.encode(f.savings.script),
     hex.encode(f.connector.script),
@@ -48308,92 +49915,54 @@ function connectorEnrollmentDigest(input, origin) {
     new DataView(size.buffer).setUint32(0, data.length, false);
     return [size, data];
   });
-  return hex.encode(sha256(concat4(...chunks)));
+  return hex.encode(sha256(concat7(...chunks)));
 }
 
-// src/lib/vault/pin.ts
+// src/lib/vault/program/connectorEnrollmentCore.ts
 init_define_import_meta_env();
-var PIN_FIELD_NAMES = [
-  "vaultId",
-  "network",
-  "protectionTier",
-  "spendingPolicyCanonical",
-  "spendingPolicyDigest",
-  "savingsAddress",
-  "savingsScript",
-  "vtxoVaultCosignerPub",
-  "vtxoExitDelay",
-  "vtxoExitDelayUnit",
-  "spendingArkAddress",
-  "spendingArkScript",
-  "vtxoDelegatePub",
-  "vtxoBoardingActive",
-  "vtxoBoardingProgram",
-  "vtxoBoardingAddress",
-  "vtxoBoardingScript",
-  "vtxoBoardingExitDelay",
-  "vtxoBoardingExitDelayUnit"
-];
-var STORED_PIN_FIELD_NAMES = [...PIN_FIELD_NAMES, "pinHash"];
-
-// src/lib/vault/openEnrollmentSession.ts
-init_define_import_meta_env();
-
-// src/lib/vault/cosignerClient.ts
-init_define_import_meta_env();
-
-// src/lib/vault/api.ts
-init_define_import_meta_env();
-
-// src/lib/vault/tenantEnrollment.ts
-init_define_import_meta_env();
-
-// src/lib/vault/enrollmentStore.ts
-init_define_import_meta_env();
-
-// src/lib/vault/program/enroll.ts
-init_define_import_meta_env();
+init_base();
+init_sha2();
 
 // src/lib/vault/program/descriptor.ts
 init_define_import_meta_env();
 init_secp256k1();
 init_sha2();
 init_base();
-var COMPRESSED = 33;
-function appendU32(parts, value, name) {
-  if (!Number.isInteger(value) || value < 0 || value > 4294967295) {
+var COMPRESSED2 = 33;
+function appendU322(parts, value2, name) {
+  if (!Number.isInteger(value2) || value2 < 0 || value2 > 4294967295) {
     throw new Error(`${name} is not a uint32`);
   }
   const buf = new Uint8Array(4);
-  new DataView(buf.buffer).setUint32(0, value, false);
+  new DataView(buf.buffer).setUint32(0, value2, false);
   parts.push(buf);
 }
-function appendI64(parts, value, name) {
-  if (!Number.isInteger(value) || value < 0 || value > Number.MAX_SAFE_INTEGER) {
+function appendI642(parts, value2, name) {
+  if (!Number.isInteger(value2) || value2 < 0 || value2 > Number.MAX_SAFE_INTEGER) {
     throw new Error(`${name} is not a safe non-negative integer`);
   }
   const buf = new Uint8Array(8);
-  new DataView(buf.buffer).setBigUint64(0, BigInt(value), false);
+  new DataView(buf.buffer).setBigUint64(0, BigInt(value2), false);
   parts.push(buf);
 }
-function appendBytes(parts, bytes2) {
-  appendU32(parts, bytes2.length, "length");
+function appendBytes2(parts, bytes2) {
+  appendU322(parts, bytes2.length, "length");
   parts.push(bytes2);
 }
-function appendHex(parts, value, name, exactBytes) {
-  appendBytes(parts, hexToBytes3(requireLowerHex(value, name, exactBytes)));
+function appendHex2(parts, value2, name, exactBytes) {
+  appendBytes2(parts, hexToBytes4(requireLowerHex2(value2, name, exactBytes)));
 }
-function appendText2(parts, value, name) {
-  if (!value || value !== value.trim() || value !== value.toLowerCase()) {
+function appendText4(parts, value2, name) {
+  if (!value2 || value2 !== value2.trim() || value2 !== value2.toLowerCase()) {
     throw new Error(`${name} must be non-empty canonical lowercase`);
   }
-  appendBytes(parts, encodeUtf8(value));
+  appendBytes2(parts, encodeUtf82(value2));
 }
-function appendRawText(parts, value, name) {
-  if (!value || value !== value.trim()) throw new Error(`${name} required`);
-  appendBytes(parts, encodeUtf8(value));
+function appendRawText2(parts, value2, name) {
+  if (!value2 || value2 !== value2.trim()) throw new Error(`${name} required`);
+  appendBytes2(parts, encodeUtf82(value2));
 }
-function concat5(parts) {
+function concat8(parts) {
   const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
   let offset = 0;
   for (const part of parts) {
@@ -48402,60 +49971,60 @@ function concat5(parts) {
   }
   return out;
 }
-function requireSecp(pub, name) {
-  const hexKey = requireLowerHex(pub, name, COMPRESSED);
+function requireSecp2(pub, name) {
+  const hexKey = requireLowerHex2(pub, name, COMPRESSED2);
   if (hexKey[1] !== "2" && hexKey[1] !== "3") throw new Error(`${name} must be compressed`);
-  if (!secp256k1.utils.isValidPublicKey(hexToBytes3(hexKey), true)) {
+  if (!secp256k1.utils.isValidPublicKey(hexToBytes4(hexKey), true)) {
     throw new Error(`${name} is not a valid secp256k1 public key`);
   }
   return hexKey;
 }
-function requireP256(pub, name) {
-  const hexKey = requireLowerHex(pub, name, COMPRESSED);
+function requireP2562(pub, name) {
+  const hexKey = requireLowerHex2(pub, name, COMPRESSED2);
   if (hexKey[0] !== "0" || hexKey[1] !== "2" && hexKey[1] !== "3") {
     throw new Error(`${name} must be compressed`);
   }
-  if (!p256.utils.isValidPublicKey(hexToBytes3(hexKey), true)) {
+  if (!p256.utils.isValidPublicKey(hexToBytes4(hexKey), true)) {
     throw new Error(`${name} is not a valid P-256 public key`);
   }
   return hexKey;
 }
-function requirePair(pair, name) {
+function requirePair2(pair, name) {
   return {
-    vault: requireSecp(pair.vault, `${name}.vault`),
-    arkade: requireSecp(pair.arkade, `${name}.arkade`)
+    vault: requireSecp2(pair.vault, `${name}.vault`),
+    arkade: requireSecp2(pair.arkade, `${name}.arkade`)
   };
 }
 function treeRef(script, address) {
   return { script: hex.encode(script), address };
 }
 function buildVaultProgramDescriptor(input) {
-  const keys = {
-    phoneBip340: requireSecp(input.phonePub, "phone"),
-    phoneDirectP256: requireP256(input.phoneDirectP256, "phoneDirectP256"),
-    hardware: requireSecp(input.hardwarePub, "hardware"),
-    ...input.recoveryPub ? { recovery: requireSecp(input.recoveryPub, "recovery") } : {},
-    vaultCosignerBase: requireSecp(input.vaultCosignerBase, "vaultCosignerBase"),
-    arkadeCosignerBase: requireSecp(input.arkadeCosignerBase, "arkadeCosignerBase")
+  const keys2 = {
+    phoneBip340: requireSecp2(input.phonePub, "phone"),
+    phoneDirectP256: requireP2562(input.phoneDirectP256, "phoneDirectP256"),
+    hardware: requireSecp2(input.hardwarePub, "hardware"),
+    ...input.recoveryPub ? { recovery: requireSecp2(input.recoveryPub, "recovery") } : {},
+    vaultCosignerBase: requireSecp2(input.vaultCosignerBase, "vaultCosignerBase"),
+    arkadeCosignerBase: requireSecp2(input.arkadeCosignerBase, "arkadeCosignerBase")
   };
   if (!input.arkadeCosigner.origin.trim() || !input.arkadeCosigner.version.trim()) {
     throw new Error("arkade cosigner origin and version required");
   }
-  const selectedPolicy = validateSpendingPolicy(
-    input.spendingPolicy || defaultSpendingPolicy(input.network),
+  const selectedPolicy = validateSpendingPolicy2(
+    input.spendingPolicy || defaultSpendingPolicy2(input.network),
     input.network
   );
-  const protectionTier = requireProtectionTierMatchesRecovery(input.protectionTier, keys.recovery);
-  const family = buildDescriptorFamily({
+  const protectionTier = requireProtectionTierMatchesRecovery2(input.protectionTier, keys2.recovery);
+  const family = buildDescriptorFamily2({
     vaultId: input.vaultId,
-    phonePub: keys.phoneBip340,
-    hardwarePub: keys.hardware,
-    recoveryPub: keys.recovery,
-    phoneDirectP256: keys.phoneDirectP256,
-    vaultCosignerBase: keys.vaultCosignerBase,
-    arkadeCosignerBase: keys.arkadeCosignerBase,
+    phonePub: keys2.phoneBip340,
+    hardwarePub: keys2.hardware,
+    recoveryPub: keys2.recovery,
+    phoneDirectP256: keys2.phoneDirectP256,
+    vaultCosignerBase: keys2.vaultCosignerBase,
+    arkadeCosignerBase: keys2.arkadeCosignerBase,
     network: input.network,
-    templateVersion: input.templateVersion || SAVINGS_TEMPLATE,
+    templateVersion: input.templateVersion || SAVINGS_TEMPLATE2,
     ...input.connectorType ? { connectorType: input.connectorType } : {},
     absoluteFeeCapSats: selectedPolicy.absoluteFeeCapSats,
     feerateCapSatPerV: selectedPolicy.feerateCapSatPerV
@@ -48466,7 +50035,7 @@ function buildVaultProgramDescriptor(input) {
   };
   const pending = {};
   const quarantine = {};
-  for (const key of familyKeysFor(Boolean(keys.recovery))) {
+  for (const key of familyKeysFor2(Boolean(keys2.recovery))) {
     pending[key] = {
       ...treeRef(family.pending[key].script, family.pending[key].address),
       delay: family.pending[key].delay
@@ -48476,60 +50045,60 @@ function buildVaultProgramDescriptor(input) {
       guardians: family.quarantine[key].guardians
     };
   }
-  return validateVaultProgramDescriptor({
-    schema: PROGRAM_SCHEMA,
+  return validateVaultProgramDescriptor2({
+    schema: PROGRAM_SCHEMA2,
     network: input.network,
     vaultId: input.vaultId,
-    templateVersion: input.templateVersion || SAVINGS_TEMPLATE,
+    templateVersion: input.templateVersion || SAVINGS_TEMPLATE2,
     ...input.connectorType ? { connectorType: input.connectorType } : {},
-    policyVersion: POLICY_VERSION,
+    policyVersion: POLICY_VERSION2,
     protectionTier,
-    keys,
+    keys: keys2,
     tweaks,
     arkadeCosigner: {
       origin: input.arkadeCosigner.origin.trim(),
       version: input.arkadeCosigner.version.trim()
     },
-    csv: { ...PROGRAM_CSV },
+    csv: { ...PROGRAM_CSV2 },
     policy: {
       program: selectedPolicy.program,
       schema: selectedPolicy.schema,
       period: selectedPolicy.period,
-      digest: spendingPolicyDigest(selectedPolicy, input.network),
-      recipientDustSats: DUST_SATS,
+      digest: spendingPolicyDigest2(selectedPolicy, input.network),
+      recipientDustSats: DUST_SATS2,
       recipientCapSats: selectedPolicy.txRecipientCapSats,
       periodAllowanceSats: selectedPolicy.periodAllowanceSats,
       absoluteFeeCapSats: selectedPolicy.absoluteFeeCapSats,
       feerateCapSatVb: selectedPolicy.feerateCapSatPerV
     },
     p2a: {
-      script: P2A_SCRIPT_HEX,
-      valueSats: P2A_VALUE_SATS,
-      outputIndex: P2A_OUTPUT_INDEX
+      script: P2A_SCRIPT_HEX2,
+      valueSats: P2A_VALUE_SATS2,
+      outputIndex: P2A_OUTPUT_INDEX2
     },
-    transitionSequence: TRANSITION_SEQUENCE,
+    transitionSequence: TRANSITION_SEQUENCE2,
     savings: treeRef(family.savings.script, family.savings.address),
     pending,
     quarantine
   });
 }
-function validateVaultProgramDescriptor(d) {
-  if (d.schema !== PROGRAM_SCHEMA) throw new Error("unsupported vault schema");
-  if (!SUPPORTED_NETWORKS.includes(d.network)) throw new Error(`unsupported network ${d.network}`);
+function validateVaultProgramDescriptor2(d) {
+  if (d.schema !== PROGRAM_SCHEMA2) throw new Error("unsupported vault schema");
+  if (!SUPPORTED_NETWORKS2.includes(d.network)) throw new Error(`unsupported network ${d.network}`);
   if (!d.vaultId || String(d.vaultId).trim() === "") throw new Error("vault id required");
-  if (!isSavingsTemplate(d.templateVersion) && d.templateVersion !== CONNECTOR_TEMPLATE)
+  if (!isSavingsTemplate2(d.templateVersion) && d.templateVersion !== CONNECTOR_TEMPLATE2)
     throw new Error("template version is not this release");
-  if (d.policyVersion !== POLICY_VERSION) throw new Error("policy version is not this release");
-  requireProtectionTierMatchesRecovery(d.protectionTier, d.keys.recovery);
-  if (d.csv.hardware !== PROGRAM_CSV.hardware || d.csv.phone !== PROGRAM_CSV.phone || d.csv.recovery !== PROGRAM_CSV.recovery) {
+  if (d.policyVersion !== POLICY_VERSION2) throw new Error("policy version is not this release");
+  requireProtectionTierMatchesRecovery2(d.protectionTier, d.keys.recovery);
+  if (d.csv.hardware !== PROGRAM_CSV2.hardware || d.csv.phone !== PROGRAM_CSV2.phone || d.csv.recovery !== PROGRAM_CSV2.recovery) {
     throw new Error("csv delays do not match this release");
   }
-  if (d.p2a.script !== P2A_SCRIPT_HEX || d.p2a.valueSats !== P2A_VALUE_SATS || d.p2a.outputIndex !== P2A_OUTPUT_INDEX) {
+  if (d.p2a.script !== P2A_SCRIPT_HEX2 || d.p2a.valueSats !== P2A_VALUE_SATS2 || d.p2a.outputIndex !== P2A_OUTPUT_INDEX2) {
     throw new Error("P2A lock does not match this release");
   }
-  if (d.transitionSequence !== TRANSITION_SEQUENCE) throw new Error("transition sequence does not match this release");
-  if (d.policy.recipientDustSats !== DUST_SATS) throw new Error("dust does not match this release");
-  const selectedPolicy = validateSpendingPolicy(
+  if (d.transitionSequence !== TRANSITION_SEQUENCE2) throw new Error("transition sequence does not match this release");
+  if (d.policy.recipientDustSats !== DUST_SATS2) throw new Error("dust does not match this release");
+  const selectedPolicy = validateSpendingPolicy2(
     {
       program: d.policy.program,
       schema: d.policy.schema,
@@ -48541,24 +50110,24 @@ function validateVaultProgramDescriptor(d) {
     },
     d.network
   );
-  if (spendingPolicyDigest(selectedPolicy, d.network) !== d.policy.digest)
+  if (spendingPolicyDigest2(selectedPolicy, d.network) !== d.policy.digest)
     throw new Error("spending policy digest does not match");
-  requireSecp(d.keys.phoneBip340, "phone");
-  requireP256(d.keys.phoneDirectP256, "phoneDirectP256");
-  requireSecp(d.keys.hardware, "hardware");
-  if (d.keys.recovery) requireSecp(d.keys.recovery, "recovery");
-  requireSecp(d.keys.vaultCosignerBase, "vaultCosignerBase");
-  requireSecp(d.keys.arkadeCosignerBase, "arkadeCosignerBase");
+  requireSecp2(d.keys.phoneBip340, "phone");
+  requireP2562(d.keys.phoneDirectP256, "phoneDirectP256");
+  requireSecp2(d.keys.hardware, "hardware");
+  if (d.keys.recovery) requireSecp2(d.keys.recovery, "recovery");
+  requireSecp2(d.keys.vaultCosignerBase, "vaultCosignerBase");
+  requireSecp2(d.keys.arkadeCosignerBase, "arkadeCosignerBase");
   const hasRecovery = Boolean(d.keys.recovery);
-  const claimants = familyClaimants(hasRecovery);
-  const keys = familyKeysFor(hasRecovery);
+  const claimants = familyClaimants2(hasRecovery);
+  const keys2 = familyKeysFor2(hasRecovery);
   for (const claimant of claimants) {
-    requirePair(d.tweaks.initiate[claimant], `initiate.${claimant}`);
+    requirePair2(d.tweaks.initiate[claimant], `initiate.${claimant}`);
   }
-  for (const key of keys) {
-    requirePair(d.tweaks.pending[key], `pending.${key}`);
+  for (const key of keys2) {
+    requirePair2(d.tweaks.pending[key], `pending.${key}`);
   }
-  const rebuilt = buildDescriptorFamily({
+  const rebuilt = buildDescriptorFamily2({
     vaultId: d.vaultId,
     phonePub: d.keys.phoneBip340,
     hardwarePub: d.keys.hardware,
@@ -48577,7 +50146,7 @@ function validateVaultProgramDescriptor(d) {
       throw new Error("initiate tweaks do not match derived authorization scripts");
     }
   }
-  for (const key of keys) {
+  for (const key of keys2) {
     if (d.tweaks.pending[key].vault !== rebuilt.pendingTweaks[key].vault || d.tweaks.pending[key].arkade !== rebuilt.pendingTweaks[key].arkade) {
       throw new Error("pending tweaks do not match derived authorization scripts");
     }
@@ -48585,7 +50154,7 @@ function validateVaultProgramDescriptor(d) {
   if (d.savings.address !== rebuilt.savings.address || d.savings.script !== hex.encode(rebuilt.savings.script)) {
     throw new Error("savings tree does not match rebuilt descriptor");
   }
-  for (const key of keys) {
+  for (const key of keys2) {
     if (!d.pending[key] || !d.quarantine[key]) throw new Error(`missing ${key} trees`);
     if (d.pending[key].address !== rebuilt.pending[key].address)
       throw new Error(`${key} pending does not match rebuilt descriptor`);
@@ -48606,255 +50175,122 @@ function validateVaultProgramDescriptor(d) {
   }
   return d;
 }
-function encodeVaultProgramDescriptor(input) {
-  return encodeRawVaultProgramDescriptor(validateVaultProgramDescriptor(input));
+function encodeVaultProgramDescriptor2(input) {
+  return encodeRawVaultProgramDescriptor2(validateVaultProgramDescriptor2(input));
 }
-function encodeRawVaultProgramDescriptor(d) {
+function encodeRawVaultProgramDescriptor2(d) {
   const parts = [];
-  appendText2(parts, d.schema, "schema");
-  appendText2(parts, d.network, "network");
-  appendText2(parts, d.vaultId, "vaultId");
-  appendBytes(parts, encodeUtf8(d.templateVersion));
-  appendBytes(parts, encodeUtf8(d.policyVersion));
-  appendText2(parts, requireProtectionTier(d.protectionTier), "protectionTier");
-  appendHex(parts, d.keys.phoneBip340, "phone", COMPRESSED);
-  appendHex(parts, d.keys.phoneDirectP256, "phoneDirectP256", COMPRESSED);
-  appendHex(parts, d.keys.hardware, "hardware", COMPRESSED);
-  if (d.keys.recovery) appendHex(parts, d.keys.recovery, "recovery", COMPRESSED);
-  appendHex(parts, d.keys.vaultCosignerBase, "vaultCosignerBase", COMPRESSED);
-  appendHex(parts, d.keys.arkadeCosignerBase, "arkadeCosignerBase", COMPRESSED);
+  appendText4(parts, d.schema, "schema");
+  appendText4(parts, d.network, "network");
+  appendText4(parts, d.vaultId, "vaultId");
+  appendBytes2(parts, encodeUtf82(d.templateVersion));
+  appendBytes2(parts, encodeUtf82(d.policyVersion));
+  appendText4(parts, requireProtectionTier2(d.protectionTier), "protectionTier");
+  appendHex2(parts, d.keys.phoneBip340, "phone", COMPRESSED2);
+  appendHex2(parts, d.keys.phoneDirectP256, "phoneDirectP256", COMPRESSED2);
+  appendHex2(parts, d.keys.hardware, "hardware", COMPRESSED2);
+  if (d.keys.recovery) appendHex2(parts, d.keys.recovery, "recovery", COMPRESSED2);
+  appendHex2(parts, d.keys.vaultCosignerBase, "vaultCosignerBase", COMPRESSED2);
+  appendHex2(parts, d.keys.arkadeCosignerBase, "arkadeCosignerBase", COMPRESSED2);
   const hasRecovery = Boolean(d.keys.recovery);
-  for (const claimant of familyClaimants(hasRecovery)) {
-    appendHex(parts, d.tweaks.initiate[claimant].vault, `initiate.${claimant}.vault`, COMPRESSED);
-    appendHex(parts, d.tweaks.initiate[claimant].arkade, `initiate.${claimant}.arkade`, COMPRESSED);
+  for (const claimant of familyClaimants2(hasRecovery)) {
+    appendHex2(parts, d.tweaks.initiate[claimant].vault, `initiate.${claimant}.vault`, COMPRESSED2);
+    appendHex2(parts, d.tweaks.initiate[claimant].arkade, `initiate.${claimant}.arkade`, COMPRESSED2);
   }
-  for (const key of familyKeysFor(hasRecovery)) {
-    appendHex(parts, d.tweaks.pending[key].vault, `pending.${key}.vault`, COMPRESSED);
-    appendHex(parts, d.tweaks.pending[key].arkade, `pending.${key}.arkade`, COMPRESSED);
+  for (const key of familyKeysFor2(hasRecovery)) {
+    appendHex2(parts, d.tweaks.pending[key].vault, `pending.${key}.vault`, COMPRESSED2);
+    appendHex2(parts, d.tweaks.pending[key].arkade, `pending.${key}.arkade`, COMPRESSED2);
   }
-  appendRawText(parts, d.arkadeCosigner.origin, "arkade origin");
-  appendRawText(parts, d.arkadeCosigner.version, "arkade version");
-  appendU32(parts, d.csv.hardware, "csv.hardware");
-  appendU32(parts, d.csv.phone, "csv.phone");
-  appendU32(parts, d.csv.recovery, "csv.recovery");
-  appendBytes(parts, encodeUtf8(d.policy.program));
-  appendBytes(parts, encodeUtf8(d.policy.schema));
-  appendBytes(parts, encodeUtf8(d.policy.period));
-  appendHex(parts, d.policy.digest, "policy.digest", 32);
-  appendI64(parts, d.policy.recipientDustSats, "dust");
-  appendI64(parts, d.policy.recipientCapSats, "tx cap");
-  appendI64(parts, d.policy.periodAllowanceSats, "period");
-  appendI64(parts, d.policy.absoluteFeeCapSats, "fee cap");
-  appendI64(parts, d.policy.feerateCapSatVb, "feerate");
-  appendHex(parts, d.p2a.script, "p2a.script", d.p2a.script.length / 2);
-  appendI64(parts, d.p2a.valueSats, "p2a.value");
-  appendU32(parts, d.p2a.outputIndex, "p2a.index");
-  appendU32(parts, d.transitionSequence, "sequence");
-  appendHex(parts, d.savings.script, "savings.script", d.savings.script.length / 2);
-  appendText2(parts, d.savings.address, "savings.address");
-  for (const key of familyKeysFor(hasRecovery)) {
-    appendHex(parts, d.pending[key].script, `${key}.pending.script`, d.pending[key].script.length / 2);
-    appendText2(parts, d.pending[key].address, `${key}.pending.address`);
-    appendU32(parts, d.pending[key].delay, `${key}.pending.delay`);
+  appendRawText2(parts, d.arkadeCosigner.origin, "arkade origin");
+  appendRawText2(parts, d.arkadeCosigner.version, "arkade version");
+  appendU322(parts, d.csv.hardware, "csv.hardware");
+  appendU322(parts, d.csv.phone, "csv.phone");
+  appendU322(parts, d.csv.recovery, "csv.recovery");
+  appendBytes2(parts, encodeUtf82(d.policy.program));
+  appendBytes2(parts, encodeUtf82(d.policy.schema));
+  appendBytes2(parts, encodeUtf82(d.policy.period));
+  appendHex2(parts, d.policy.digest, "policy.digest", 32);
+  appendI642(parts, d.policy.recipientDustSats, "dust");
+  appendI642(parts, d.policy.recipientCapSats, "tx cap");
+  appendI642(parts, d.policy.periodAllowanceSats, "period");
+  appendI642(parts, d.policy.absoluteFeeCapSats, "fee cap");
+  appendI642(parts, d.policy.feerateCapSatVb, "feerate");
+  appendHex2(parts, d.p2a.script, "p2a.script", d.p2a.script.length / 2);
+  appendI642(parts, d.p2a.valueSats, "p2a.value");
+  appendU322(parts, d.p2a.outputIndex, "p2a.index");
+  appendU322(parts, d.transitionSequence, "sequence");
+  appendHex2(parts, d.savings.script, "savings.script", d.savings.script.length / 2);
+  appendText4(parts, d.savings.address, "savings.address");
+  for (const key of familyKeysFor2(hasRecovery)) {
+    appendHex2(parts, d.pending[key].script, `${key}.pending.script`, d.pending[key].script.length / 2);
+    appendText4(parts, d.pending[key].address, `${key}.pending.address`);
+    appendU322(parts, d.pending[key].delay, `${key}.pending.delay`);
   }
-  for (const key of familyKeysFor(hasRecovery)) {
-    appendHex(parts, d.quarantine[key].script, `${key}.quarantine.script`, d.quarantine[key].script.length / 2);
-    appendText2(parts, d.quarantine[key].address, `${key}.quarantine.address`);
-    appendText2(parts, d.quarantine[key].guardians[0], `${key}.guardian0`);
+  for (const key of familyKeysFor2(hasRecovery)) {
+    appendHex2(parts, d.quarantine[key].script, `${key}.quarantine.script`, d.quarantine[key].script.length / 2);
+    appendText4(parts, d.quarantine[key].address, `${key}.quarantine.address`);
+    appendText4(parts, d.quarantine[key].guardians[0], `${key}.guardian0`);
     if (d.quarantine[key].guardians[1]) {
-      appendText2(parts, d.quarantine[key].guardians[1], `${key}.guardian1`);
+      appendText4(parts, d.quarantine[key].guardians[1], `${key}.guardian1`);
     }
   }
-  return concat5(parts);
+  return concat8(parts);
 }
-function hashVaultProgramDescriptor(d) {
-  return bytesToHex3(sha256(encodeVaultProgramDescriptor(d)));
+function hashVaultProgramDescriptor2(d) {
+  return bytesToHex4(sha256(encodeVaultProgramDescriptor2(d)));
 }
-function buildDescriptorFamily(input) {
-  if (input.templateVersion !== CONNECTOR_TEMPLATE) {
+function familyFromDescriptor(d) {
+  const valid = validateVaultProgramDescriptor2(d);
+  return buildDescriptorFamily2({
+    vaultId: valid.vaultId,
+    phonePub: valid.keys.phoneBip340,
+    hardwarePub: valid.keys.hardware,
+    recoveryPub: valid.keys.recovery,
+    phoneDirectP256: valid.keys.phoneDirectP256,
+    vaultCosignerBase: valid.keys.vaultCosignerBase,
+    arkadeCosignerBase: valid.keys.arkadeCosignerBase,
+    network: valid.network,
+    templateVersion: valid.templateVersion,
+    connectorType: valid.connectorType,
+    absoluteFeeCapSats: valid.policy.absoluteFeeCapSats,
+    feerateCapSatPerV: valid.policy.feerateCapSatVb
+  });
+}
+function buildDescriptorFamily2(input) {
+  if (input.templateVersion !== CONNECTOR_TEMPLATE2) {
     if (input.connectorType !== void 0) throw new Error("connector type on a legacy descriptor");
-    return buildVaultProgramFamily(input);
+    return buildVaultProgramFamily2(input);
   }
   if (input.connectorType !== "p2tr" && input.connectorType !== "p2wpkh") throw new Error("connector type required");
-  return buildConnectorFamily({ ...input, connectorType: input.connectorType });
+  return buildConnectorFamily2({ ...input, connectorType: input.connectorType });
 }
-
-// src/lib/vault/program/enroll.ts
-init_sha2();
-
-// src/lib/vault/vtxo/board.ts
-init_define_import_meta_env();
-init_secp256k1();
-init_sha2();
-init_base();
-
-// src/lib/vault/vtxo/walletWorkerNames.ts
-init_define_import_meta_env();
-
-// src/lib/vault/vtxo/board.ts
-var BOARDING_PROGRAM = "vault-board-v1";
-var BOARDING_SCHEMA = "arkade-vault/board-v1";
-var BOARDING_TEMPLATE = "vault-board-v1-boarding-vault-and-operator";
-var BOARDING_EXIT_DELAY = networkPins("mutinynet").boardExitDelay;
-var BOARDING_EXIT_DELAY_UNIT = "seconds";
-var MUTINYNET_OPERATOR_SIGNER_PUB = networkPins("mutinynet").operatorSignerPub;
-var BOARDING_KEY_SALT = sha256(encodeUtf8("arkade-vault/vault-board-v1/boarding-key/hkdf-sha256-v1"));
-var SECP256K1_ORDER = BigInt("0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141");
-function boardingProgramDigestFor(network) {
-  const pins = networkPins(network);
-  return bytesToHex3(
-    sha256(
-      encodeUtf8(
-        JSON.stringify({
-          schema: BOARDING_SCHEMA,
-          program: BOARDING_PROGRAM,
-          template: BOARDING_TEMPLATE,
-          exitDelay: pins.boardExitDelay,
-          exitDelayUnit: BOARDING_EXIT_DELAY_UNIT
-        })
-      )
-    )
-  );
-}
-var BOARDING_PROGRAM_DIGEST = boardingProgramDigestFor("mutinynet");
-function requireCompressedKey(value, name) {
-  const key = requireLowerHex(value, name, 33);
-  const bytes2 = hexToBytes3(key);
-  if (bytes2[0] !== 2 && bytes2[0] !== 3 || !secp256k1.utils.isValidPublicKey(bytes2, true)) {
-    throw new Error(`${name} is not a compressed secp256k1 key`);
-  }
-  return key;
-}
-function requireBoardingDescriptor(raw2, expected) {
-  if (!raw2 || typeof raw2 !== "object") throw new Error("vault-board-v1 descriptor required");
-  const pins = networkPins(expected.network);
-  const descriptor = raw2;
-  if (descriptor.schema !== BOARDING_SCHEMA || descriptor.program !== BOARDING_PROGRAM || descriptor.template !== BOARDING_TEMPLATE || descriptor.network !== expected.network || descriptor.exitDelay !== pins.boardExitDelay || descriptor.exitDelayUnit !== BOARDING_EXIT_DELAY_UNIT) {
-    throw new Error("vault-board-v1 descriptor does not match this release");
-  }
-  const boardingPub = requireCompressedKey(descriptor.boardingPub, "boardingPub");
-  const recoveryPub = requireCompressedKey(descriptor.recoveryPhonePub, "recoveryPhonePub");
-  const cosignerPub = requireCompressedKey(descriptor.vaultBoardCosignerPub, "vaultBoardCosignerPub");
-  const operatorPub = requireCompressedKey(descriptor.operatorPub, "operatorPub");
-  if (operatorPub !== pins.operatorSignerPub) {
-    throw new Error("vault-board-v1 Operator does not match this release");
-  }
-  if (boardingPub !== expected.boardingPub || recoveryPub !== requireCompressedKey(expected.phonePub, "phoneBip340Pub")) {
-    throw new Error("vault-board-v1 descriptor keys do not match this wallet");
-  }
-  const xOnly3 = [boardingPub, recoveryPub, cosignerPub, operatorPub].map((key) => key.slice(2));
-  if (new Set(xOnly3).size !== xOnly3.length) throw new Error("vault-board-v1 roles must use distinct keys");
-  const program = createBoardingProgramScript(
-    {
-      name: BOARDING_PROGRAM,
-      boardingPubKey: hexToBytes3(boardingPub).slice(1),
-      cosignerPubKey: hexToBytes3(cosignerPub).slice(1),
-      recoveryPubKey: hexToBytes3(recoveryPub).slice(1)
-    },
-    hexToBytes3(pins.operatorSignerPub).slice(1),
-    { type: "seconds", value: BigInt(pins.boardExitDelay) }
-  );
-  const script = requireLowerHex(descriptor.script, "vault-board-v1 script", 34);
-  const address = program.onchainAddress(getNetwork(pins.sdkNetwork));
-  if (hex.encode(program.pkScript) !== script || descriptor.address !== address) {
-    throw new Error("vault-board-v1 script or address does not match its exact program");
-  }
-  return descriptor;
-}
-function requireBoardingStatus(status, expectedBoardingPub) {
-  if (status.vtxoBoardingProgram !== BOARDING_PROGRAM || !status.vtxoBoardingActive) {
-    throw new Error("vault is not enrolled for vault-board-v1");
-  }
-  const descriptor = requireBoardingDescriptor(status.vtxoBoardingDescriptor, {
-    vaultId: status.vaultId,
-    phonePub: String(status.phoneBip340Pub || ""),
-    boardingPub: expectedBoardingPub,
-    network: status.network
-  });
-  if (descriptor.script !== String(status.vtxoBoardingScript || "").toLowerCase() || descriptor.address !== status.vtxoBoardingAddress || descriptor.exitDelay !== status.vtxoBoardingExitDelay || descriptor.exitDelayUnit !== status.vtxoBoardingExitDelayUnit) {
-    throw new Error("vault-board-v1 status descriptor changed");
-  }
-  if (!status.vtxoBoardingDescriptorHash || !/^[0-9a-f]{64}$/.test(status.vtxoBoardingDescriptorHash)) {
-    throw new Error("vault-board-v1 descriptor hash required");
-  }
-  return descriptor;
-}
-
-// src/lib/vault/program/enroll.ts
-function appendLE32(parts, value) {
-  const bytes2 = new Uint8Array(4);
-  new DataView(bytes2.buffer).setUint32(0, value, true);
-  parts.push(bytes2);
-}
-function appendText3(parts, value) {
-  const bytes2 = encodeUtf8(value);
-  appendLE32(parts, bytes2.length);
-  parts.push(bytes2);
-}
-function hashBoardingEnrollmentDescriptor(descriptor) {
-  const savingsHash = hashVaultProgramDescriptor(descriptor.savings);
-  const fields = [
-    descriptor.schema,
-    descriptor.vaultId,
-    savingsHash,
-    descriptor.boarding.schema,
-    descriptor.boarding.program,
-    descriptor.boarding.template,
-    descriptor.boarding.network,
-    descriptor.boarding.boardingPub,
-    descriptor.boarding.recoveryPhonePub,
-    descriptor.boarding.vaultBoardCosignerPub,
-    descriptor.boarding.operatorPub,
-    descriptor.boarding.exitDelayUnit,
-    descriptor.boarding.script,
-    descriptor.boarding.address
-  ];
-  const parts = [];
-  for (const field2 of fields) appendText3(parts, field2);
-  appendLE32(parts, descriptor.boarding.exitDelay);
-  const payload = new Uint8Array(parts.reduce((length, part) => length + part.length, 0));
-  let offset = 0;
-  for (const part of parts) {
-    payload.set(part, offset);
-    offset += part.length;
-  }
-  const digest = bytesToHex3(sha256(payload));
-  payload.fill(0);
-  return digest;
-}
-
-// src/lib/vault/program/connectorEnroll.ts
-init_define_import_meta_env();
 
 // src/lib/vault/program/connectorEnrollmentCore.ts
-init_define_import_meta_env();
-init_base();
-init_sha2();
-var BOARDING_ENROLLMENT_SCHEMA = "arkade-vault/enrollment-with-board-v1";
-function fail(message) {
+var BOARDING_ENROLLMENT_SCHEMA2 = "arkade-vault/enrollment-with-board-v1";
+function fail2(message) {
   throw new Error(message);
 }
-function requireCompressedHex(value, name) {
-  const key = typeof value === "string" ? value.toLowerCase() : "";
-  if (!/^(02|03)[0-9a-f]{64}$/.test(key)) fail(`${name} must be a compressed public key`);
+function requireCompressedHex2(value2, name) {
+  const key = typeof value2 === "string" ? value2.toLowerCase() : "";
+  if (!/^(02|03)[0-9a-f]{64}$/.test(key)) fail2(`${name} must be a compressed public key`);
   return key;
 }
-function requireUint32(value, name) {
-  if (!Number.isInteger(value) || value < 0 || value > 4294967295)
-    fail(`${name} must be a uint32`);
-  return value;
+function requireUint322(value2, name) {
+  if (!Number.isInteger(value2) || value2 < 0 || value2 > 4294967295)
+    fail2(`${name} must be a uint32`);
+  return value2;
 }
-function appendLE322(parts, value) {
+function appendLE322(parts, value2) {
   const bytes2 = new Uint8Array(4);
-  new DataView(bytes2.buffer).setUint32(0, value, true);
+  new DataView(bytes2.buffer).setUint32(0, value2, true);
   parts.push(bytes2);
 }
-function appendField(parts, value) {
-  const bytes2 = new TextEncoder().encode(value);
+function appendField2(parts, value2) {
+  const bytes2 = new TextEncoder().encode(value2);
   appendLE322(parts, bytes2.length);
   parts.push(bytes2);
 }
-function concatParts(parts) {
+function concatParts2(parts) {
   const out = new Uint8Array(parts.reduce((size, part) => size + part.length, 0));
   let offset = 0;
   for (const part of parts) {
@@ -48863,10 +50299,10 @@ function concatParts(parts) {
   }
   return out;
 }
-function hashConnectorBoarding(vaultId, savingsHash, boarding) {
-  if (!/^[0-9a-f]{64}$/.test(savingsHash)) fail("connector savings hash required");
+function hashConnectorBoarding2(vaultId, savingsHash, boarding) {
+  if (!/^[0-9a-f]{64}$/.test(savingsHash)) fail2("connector savings hash required");
   const fields = [
-    BOARDING_ENROLLMENT_SCHEMA,
+    BOARDING_ENROLLMENT_SCHEMA2,
     vaultId,
     savingsHash,
     boarding.schema,
@@ -48882,13 +50318,13 @@ function hashConnectorBoarding(vaultId, savingsHash, boarding) {
     boarding.address
   ];
   const parts = [];
-  for (const field2 of fields) appendField(parts, field2);
+  for (const field2 of fields) appendField2(parts, field2);
   appendLE322(parts, boarding.exitDelay);
-  return hex.encode(sha256(concatParts(parts)));
+  return hex.encode(sha256(concatParts2(parts)));
 }
-function hashConnectorBoardComposite(digestHex, boardingHashHex) {
-  if (!/^[0-9a-f]{64}$/.test(digestHex)) fail("connector enrollment digest required");
-  if (!/^[0-9a-f]{64}$/.test(boardingHashHex)) fail("connector boarding hash required");
+function hashConnectorBoardComposite2(digestHex, boardingHashHex) {
+  if (!/^[0-9a-f]{64}$/.test(digestHex)) fail2("connector enrollment digest required");
+  if (!/^[0-9a-f]{64}$/.test(boardingHashHex)) fail2("connector boarding hash required");
   const payload = new Uint8Array(65);
   payload[0] = 1;
   payload.set(hex.decode(digestHex), 1);
@@ -48897,39 +50333,39 @@ function hashConnectorBoardComposite(digestHex, boardingHashHex) {
   payload.fill(0);
   return out;
 }
-function toOrigin(origin) {
+function toOrigin2(origin) {
   return {
-    publicKey: hex.decode(requireCompressedHex(origin.connectorPub, "connectorPub")),
-    fingerprint: requireUint32(origin.connectorFingerprint, "connectorFingerprint"),
+    publicKey: hex.decode(requireCompressedHex2(origin.connectorPub, "connectorPub")),
+    fingerprint: requireUint322(origin.connectorFingerprint, "connectorFingerprint"),
     path: [...origin.connectorPath]
   };
 }
-function buildConnectorEnrollmentPreview(input) {
-  const network = input.network === "mainnet" || input.network === "mutinynet" ? input.network : fail("unsupported network");
-  const protectionTier = requireProtectionTierMatchesRecovery(input.protectionTier, input.recoveryPub || "");
-  const policy = validateSpendingPolicy(input.spendingPolicy, network);
-  const origin = toOrigin(input.origin);
+function buildConnectorEnrollmentPreview2(input) {
+  const network2 = input.network === "mainnet" || input.network === "mutinynet" ? input.network : fail2("unsupported network");
+  const protectionTier = requireProtectionTierMatchesRecovery2(input.protectionTier, input.recoveryPub || "");
+  const policy = validateSpendingPolicy2(input.spendingPolicy, network2);
+  const origin = toOrigin2(input.origin);
   if (input.origin.connectorType !== "p2wpkh" && input.origin.connectorType !== "p2tr")
-    fail("connector type must be p2tr or p2wpkh");
+    fail2("connector type must be p2tr or p2wpkh");
   const familyInput = {
     connectorType: input.origin.connectorType,
     vaultId: input.vaultId,
-    network,
-    phonePub: requireCompressedHex(input.phonePub, "phonePub"),
-    hardwarePub: requireCompressedHex(input.origin.connectorPub, "connectorPub"),
-    ...input.recoveryPub ? { recoveryPub: requireCompressedHex(input.recoveryPub, "recoveryPub") } : {},
-    phoneDirectP256: requireCompressedHex(input.phoneDirectP256, "phoneDirectP256"),
-    vaultCosignerBase: requireCompressedHex(input.vaultCosignerBase, "vaultCosignerBase"),
-    arkadeCosignerBase: requireCompressedHex(input.arkadeCosignerBase, "arkadeCosignerBase"),
+    network: network2,
+    phonePub: requireCompressedHex2(input.phonePub, "phonePub"),
+    hardwarePub: requireCompressedHex2(input.origin.connectorPub, "connectorPub"),
+    ...input.recoveryPub ? { recoveryPub: requireCompressedHex2(input.recoveryPub, "recoveryPub") } : {},
+    phoneDirectP256: requireCompressedHex2(input.phoneDirectP256, "phoneDirectP256"),
+    vaultCosignerBase: requireCompressedHex2(input.vaultCosignerBase, "vaultCosignerBase"),
+    arkadeCosignerBase: requireCompressedHex2(input.arkadeCosignerBase, "arkadeCosignerBase"),
     absoluteFeeCapSats: policy.absoluteFeeCapSats,
     feerateCapSatPerV: policy.feerateCapSatPerV
   };
-  const family = buildConnectorFamily(familyInput);
-  const digest = connectorEnrollmentDigest({ ...familyInput, protectionTier, spendingPolicy: policy }, origin);
+  const family = buildConnectorFamily2(familyInput);
+  const digest = connectorEnrollmentDigest2({ ...familyInput, protectionTier, spendingPolicy: policy }, origin);
   const hasRecovery = Boolean(input.recoveryPub);
   const pending = {};
   const quarantine = {};
-  for (const key of familyKeysFor(hasRecovery)) {
+  for (const key of familyKeysFor2(hasRecovery)) {
     pending[key] = {
       script: hex.encode(family.pending[key].script),
       address: family.pending[key].address,
@@ -48943,11 +50379,11 @@ function buildConnectorEnrollmentPreview(input) {
   }
   const descriptor = {
     connectorType: input.origin.connectorType,
-    schema: PROGRAM_SCHEMA,
-    network,
+    schema: PROGRAM_SCHEMA2,
+    network: network2,
     vaultId: input.vaultId,
-    templateVersion: CONNECTOR_TEMPLATE,
-    policyVersion: POLICY_VERSION,
+    templateVersion: CONNECTOR_TEMPLATE2,
+    policyVersion: POLICY_VERSION2,
     protectionTier,
     keys: {
       phoneBip340: familyInput.phonePub,
@@ -48959,27 +50395,27 @@ function buildConnectorEnrollmentPreview(input) {
     },
     tweaks: { initiate: family.initiateTweaks, pending: family.pendingTweaks },
     arkadeCosigner: { origin: input.arkadeOrigin.trim(), version: input.arkadeVersion.trim() },
-    csv: { ...PROGRAM_CSV },
+    csv: { ...PROGRAM_CSV2 },
     policy: {
       program: policy.program,
       schema: policy.schema,
       period: policy.period,
-      digest: spendingPolicyDigest(policy, network),
-      recipientDustSats: DUST_SATS,
+      digest: spendingPolicyDigest2(policy, network2),
+      recipientDustSats: DUST_SATS2,
       recipientCapSats: policy.txRecipientCapSats,
       periodAllowanceSats: policy.periodAllowanceSats,
       absoluteFeeCapSats: policy.absoluteFeeCapSats,
       feerateCapSatVb: policy.feerateCapSatPerV
     },
-    p2a: { script: P2A_SCRIPT_HEX, valueSats: P2A_VALUE_SATS, outputIndex: P2A_OUTPUT_INDEX },
-    transitionSequence: TRANSITION_SEQUENCE,
+    p2a: { script: P2A_SCRIPT_HEX2, valueSats: P2A_VALUE_SATS2, outputIndex: P2A_OUTPUT_INDEX2 },
+    transitionSequence: TRANSITION_SEQUENCE2,
     savings: { script: hex.encode(family.savings.script), address: family.savings.address },
     pending,
     quarantine
   };
-  const savingsHash = hex.encode(sha256(encodeRawVaultProgramDescriptor(descriptor)));
-  const boardingHash = input.boarding ? hashConnectorBoarding(input.vaultId, savingsHash, input.boarding) : "";
-  const compositeHash = input.boarding ? hashConnectorBoardComposite(digest, boardingHash) : "";
+  const savingsHash = hex.encode(sha256(encodeRawVaultProgramDescriptor2(descriptor)));
+  const boardingHash = input.boarding ? hashConnectorBoarding2(input.vaultId, savingsHash, input.boarding) : "";
+  const compositeHash = input.boarding ? hashConnectorBoardComposite2(digest, boardingHash) : "";
   return {
     family,
     origin,
@@ -48992,376 +50428,92 @@ function buildConnectorEnrollmentPreview(input) {
     protectionTier
   };
 }
-var CONNECTOR_KIT_NAME = "arkade-connector-enrollment";
-var CONNECTOR_KIT_VERSION = 1;
-function parseConnectorRecoveryKit(raw2) {
-  const kit = raw2;
-  if (!kit || kit.name !== CONNECTOR_KIT_NAME) fail("not a connector enrollment kit");
-  if (kit.version !== CONNECTOR_KIT_VERSION) fail("unsupported connector kit version");
-  const rebuilt = buildConnectorEnrollmentPreview({
-    vaultId: kit.vaultId,
-    network: kit.network,
-    protectionTier: kit.protectionTier,
-    phonePub: kit.phonePub,
-    phoneDirectP256: kit.phoneDirectP256,
-    ...kit.recoveryPub ? { recoveryPub: kit.recoveryPub } : {},
-    vaultCosignerBase: kit.vaultCosignerBase,
-    arkadeCosignerBase: kit.arkadeCosignerBase,
-    arkadeOrigin: kit.arkadeOrigin,
-    arkadeVersion: kit.arkadeVersion,
-    spendingPolicy: kit.spendingPolicy,
-    origin: kit.origin,
-    boarding: kit.boarding
+var CONNECTOR_KIT_NAME2 = "arkade-connector-enrollment";
+var CONNECTOR_KIT_VERSION2 = 1;
+function parseConnectorRecoveryKit2(raw2) {
+  const kit2 = raw2;
+  if (!kit2 || kit2.name !== CONNECTOR_KIT_NAME2) fail2("not a connector enrollment kit");
+  if (kit2.version !== CONNECTOR_KIT_VERSION2) fail2("unsupported connector kit version");
+  const rebuilt = buildConnectorEnrollmentPreview2({
+    vaultId: kit2.vaultId,
+    network: kit2.network,
+    protectionTier: kit2.protectionTier,
+    phonePub: kit2.phonePub,
+    phoneDirectP256: kit2.phoneDirectP256,
+    ...kit2.recoveryPub ? { recoveryPub: kit2.recoveryPub } : {},
+    vaultCosignerBase: kit2.vaultCosignerBase,
+    arkadeCosignerBase: kit2.arkadeCosignerBase,
+    arkadeOrigin: kit2.arkadeOrigin,
+    arkadeVersion: kit2.arkadeVersion,
+    spendingPolicy: kit2.spendingPolicy,
+    origin: kit2.origin,
+    boarding: kit2.boarding
   });
-  if (rebuilt.digest !== kit.enrollmentDigest) fail("connector kit digest does not match rebuild");
-  if (rebuilt.savingsHash !== kit.savingsHash) fail("connector kit savings hash does not match rebuild");
-  if (rebuilt.boardingHash !== kit.boardingHash) fail("connector kit boarding hash does not match rebuild");
-  if (rebuilt.compositeHash !== kit.descriptorHash) fail("connector kit hash does not match rebuild");
-  if (rebuilt.descriptor.savings.script !== kit.savingsScript)
-    fail("connector kit Savings script does not match rebuild");
-  if (rebuilt.descriptor.savings.address !== kit.savingsAddress)
-    fail("connector kit Savings address does not match rebuild");
-  if (hex.encode(rebuilt.family.connector.script) !== kit.connectorScript)
-    fail("connector kit script does not match rebuild");
-  return kit;
+  if (rebuilt.digest !== kit2.enrollmentDigest) fail2("connector kit digest does not match rebuild");
+  if (rebuilt.savingsHash !== kit2.savingsHash) fail2("connector kit savings hash does not match rebuild");
+  if (rebuilt.boardingHash !== kit2.boardingHash) fail2("connector kit boarding hash does not match rebuild");
+  if (rebuilt.compositeHash !== kit2.descriptorHash) fail2("connector kit hash does not match rebuild");
+  if (rebuilt.descriptor.savings.script !== kit2.savingsScript)
+    fail2("connector kit Savings script does not match rebuild");
+  if (rebuilt.descriptor.savings.address !== kit2.savingsAddress)
+    fail2("connector kit Savings address does not match rebuild");
+  if (hex.encode(rebuilt.family.connector.script) !== kit2.connectorScript)
+    fail2("connector kit script does not match rebuild");
+  return kit2;
 }
-function connectorRecoveryDescriptor(raw2) {
-  const kit = parseConnectorRecoveryKit(raw2);
-  return buildConnectorEnrollmentPreview({
-    vaultId: kit.vaultId,
-    network: kit.network,
-    protectionTier: kit.protectionTier,
-    origin: kit.origin,
-    phonePub: kit.phonePub,
-    phoneDirectP256: kit.phoneDirectP256,
-    vaultCosignerBase: kit.vaultCosignerBase,
-    arkadeCosignerBase: kit.arkadeCosignerBase,
-    arkadeOrigin: kit.arkadeOrigin,
-    arkadeVersion: kit.arkadeVersion,
-    recoveryPub: kit.recoveryPub,
-    spendingPolicy: kit.spendingPolicy,
-    boarding: kit.boarding
+function connectorRecoveryDescriptor2(raw2) {
+  const kit2 = parseConnectorRecoveryKit2(raw2);
+  return buildConnectorEnrollmentPreview2({
+    vaultId: kit2.vaultId,
+    network: kit2.network,
+    protectionTier: kit2.protectionTier,
+    origin: kit2.origin,
+    phonePub: kit2.phonePub,
+    phoneDirectP256: kit2.phoneDirectP256,
+    vaultCosignerBase: kit2.vaultCosignerBase,
+    arkadeCosignerBase: kit2.arkadeCosignerBase,
+    arkadeOrigin: kit2.arkadeOrigin,
+    arkadeVersion: kit2.arkadeVersion,
+    recoveryPub: kit2.recoveryPub,
+    spendingPolicy: kit2.spendingPolicy,
+    boarding: kit2.boarding
   }).descriptor;
 }
 
-// src/lib/vault/program/connectorEnroll.ts
-function requirePinShape(pin) {
-  if (!pin || typeof pin !== "object") fail("connector enrollment pin required");
-  if (!pin.vaultId.trim() || pin.network !== "mainnet" && pin.network !== "mutinynet")
-    fail("connector enrollment pin required");
-  requireCompressedHex(pin.connectorPub, "connectorPub");
-  if (pin.connectorType !== "p2wpkh" && pin.connectorType !== "p2tr") fail("connector enrollment pin required");
-  requireUint32(pin.connectorFingerprint, "connectorFingerprint");
-  if (!Array.isArray(pin.connectorPath) || pin.connectorPath.length < 1 || pin.connectorPath.length > 255)
-    fail("connector enrollment pin required");
-  pin.connectorPath.forEach((step) => requireUint32(step, "connectorPath"));
-  if (!/^[0-9a-f]{64}$/.test(pin.enrollmentDigest) || !/^[0-9a-f]{64}$/.test(pin.descriptorHash))
-    fail("connector enrollment pin required");
-  if (!pin.savingsAddress.trim() || !/^[0-9a-f]+$/.test(pin.savingsScript)) fail("connector enrollment pin required");
-}
-function verifyConnectorStatus(status, pin, options) {
-  requirePinShape(pin);
-  if (!status?.enrolled) fail("vault is not enrolled");
-  if (status.vaultId !== pin.vaultId) fail("connector vault id does not match enrollment");
-  if (status.network !== pin.network) fail("connector network does not match enrollment");
-  if (status.templateVersion !== CONNECTOR_TEMPLATE) fail("vault is not a connector enrollment");
-  const identity2 = status.connectorEnrollment;
-  if (!identity2 || identity2.connectorPub !== pin.connectorPub || identity2.connectorType !== pin.connectorType || identity2.connectorFingerprint !== pin.connectorFingerprint || identity2.connectorPath.join("/") !== pin.connectorPath.join("/") || identity2.enrollmentDigest !== pin.enrollmentDigest || identity2.descriptorHash !== pin.descriptorHash)
-    fail("connector status origin does not match enrollment");
-  if (status.protectionTier !== pin.protectionTier) fail("connector protection tier changed");
-  if (String(status.externalOwnerWalletPub || "").toLowerCase() !== pin.connectorPub.toLowerCase())
-    fail("connector key does not match enrolled hardware");
-  if (status.savingsAddress !== pin.savingsAddress) fail("connector Savings address changed");
-  if (String(status.savingsScript || "").toLowerCase() !== pin.savingsScript.toLowerCase())
-    fail("connector Savings script changed");
-  const phonePub = String(status.phoneBip340Pub || "");
-  const phoneDirectP256 = String(status.phoneDirectP256 || "");
-  const vaultCosignerBase = String(status.vaultCosignerBasePub || "");
-  const arkadeCosignerBase = String(status.arkadeCosignerBasePub || "");
-  if (!phonePub || !phoneDirectP256 || !vaultCosignerBase || !arkadeCosignerBase)
-    fail("connector status is missing enrolled facts");
-  const policy = validateSpendingPolicy(status.spendingPolicy, pin.network);
-  if (status.spendingPolicyDigest && status.spendingPolicyDigest !== spendingPolicyDigest(policy, pin.network))
-    fail("connector spending policy changed");
-  const arkadeOrigin = String(options?.arkadeOrigin ?? status.arkadeCosignerOrigin ?? "").trim();
-  const arkadeVersion = String(options?.arkadeVersion ?? status.arkadeCosignerVersion ?? "").trim();
-  if (!arkadeOrigin || !arkadeVersion) fail("connector status is missing Arkade identity");
-  const recoveryPub = String(status.recoveryPub || status.recoveryKeyPub || "") || void 0;
-  let boarding;
-  if (status.vtxoBoardingDescriptor) {
-    boarding = requireBoardingDescriptor(status.vtxoBoardingDescriptor, {
-      vaultId: pin.vaultId,
-      phonePub,
-      boardingPub: options?.boardingPub ?? status.vtxoBoardingDescriptor.boardingPub,
-      network: pin.network
-    });
-  }
-  const preview = buildConnectorEnrollmentPreview({
-    vaultId: pin.vaultId,
-    network: pin.network,
-    protectionTier: pin.protectionTier,
-    phonePub,
-    phoneDirectP256,
-    ...recoveryPub ? { recoveryPub } : {},
-    vaultCosignerBase,
-    arkadeCosignerBase,
-    arkadeOrigin,
-    arkadeVersion,
-    spendingPolicy: policy,
-    origin: {
-      connectorPub: pin.connectorPub,
-      connectorType: pin.connectorType,
-      connectorFingerprint: pin.connectorFingerprint,
-      connectorPath: [...pin.connectorPath]
-    },
-    ...boarding ? { boarding } : {}
-  });
-  if (preview.digest !== pin.enrollmentDigest.toLowerCase())
-    fail("enrolled connector digest does not match this wallet");
-  if (boarding && preview.compositeHash !== identity2.descriptorHash) fail("connector composite hash changed");
-  if (!boarding) fail("connector boarding descriptor required");
-  if (boarding) {
-    if (!status.vtxoBoardingDescriptorHash) fail("vault-board-v1 descriptor hash required");
-    if (preview.boardingHash !== status.vtxoBoardingDescriptorHash.toLowerCase())
-      fail("enrolled boarding descriptor does not match this wallet");
-  }
-}
-function connectorPinFromVerifiedStatus(status) {
-  const identity2 = status.connectorEnrollment;
-  if (!identity2 || status.network !== "mainnet" && status.network !== "mutinynet" || status.protectionTier !== "standard" && status.protectionTier !== "advanced")
-    fail("connector enrollment identity required");
-  const pin = {
-    vaultId: status.vaultId,
-    network: status.network,
-    protectionTier: status.protectionTier,
-    ...identity2,
-    savingsAddress: status.savingsAddress,
-    savingsScript: status.savingsScript
-  };
-  verifyConnectorStatus(status, pin);
-  return pin;
-}
-
-// src/lib/vault/program/kitStore.ts
-init_define_import_meta_env();
-
 // src/lib/vault/program/kit.ts
-init_define_import_meta_env();
-var RECOVERY_KIT_NAME = "arkade-recovery-kit";
-var RECOVERY_KIT_VERSION = 3;
-function buildRecoveryKit(descriptor) {
-  const d = validateVaultProgramDescriptor(descriptor);
+var RECOVERY_KIT_NAME2 = "arkade-recovery-kit";
+var RECOVERY_KIT_VERSION2 = 3;
+function buildRecoveryKit2(descriptor) {
+  const d = validateVaultProgramDescriptor2(descriptor);
   return {
-    name: RECOVERY_KIT_NAME,
-    version: RECOVERY_KIT_VERSION,
+    name: RECOVERY_KIT_NAME2,
+    version: RECOVERY_KIT_VERSION2,
     descriptor: d,
-    descriptorHash: hashVaultProgramDescriptor(d),
+    descriptorHash: hashVaultProgramDescriptor2(d),
     spendingPolicyDigest: d.policy.digest,
     protectionTier: d.protectionTier
   };
 }
-function parseRecoveryKit(raw2) {
-  if (raw2 && typeof raw2 === "object" && "name" in raw2 && raw2.name === CONNECTOR_KIT_NAME)
-    return buildRecoveryKit(connectorRecoveryDescriptor(raw2));
-  const kit = raw2;
-  if (!kit || kit.name !== RECOVERY_KIT_NAME) throw new Error("not a Recovery Kit");
-  if (kit.version !== RECOVERY_KIT_VERSION) throw new Error("unsupported Recovery Kit version");
-  const built = buildRecoveryKit(kit.descriptor);
-  if (kit.descriptorHash && kit.descriptorHash !== built.descriptorHash) {
+function parseRecoveryKit2(raw2) {
+  if (raw2 && typeof raw2 === "object" && "name" in raw2 && raw2.name === CONNECTOR_KIT_NAME2)
+    return buildRecoveryKit2(connectorRecoveryDescriptor2(raw2));
+  const kit2 = raw2;
+  if (!kit2 || kit2.name !== RECOVERY_KIT_NAME2) throw new Error("not a Recovery Kit");
+  if (kit2.version !== RECOVERY_KIT_VERSION2) throw new Error("unsupported Recovery Kit version");
+  const built = buildRecoveryKit2(kit2.descriptor);
+  if (kit2.descriptorHash && kit2.descriptorHash !== built.descriptorHash) {
     throw new Error("Recovery Kit hash does not match the rebuilt descriptor");
   }
-  if (kit.spendingPolicyDigest !== built.spendingPolicyDigest) {
+  if (kit2.spendingPolicyDigest !== built.spendingPolicyDigest) {
     throw new Error("Recovery Kit spending policy digest does not match the rebuilt descriptor");
   }
-  if (kit.protectionTier !== built.protectionTier) {
+  if (kit2.protectionTier !== built.protectionTier) {
     throw new Error("Recovery Kit protection tier does not match the rebuilt descriptor");
   }
   return built;
 }
 
-// src/lib/vault/webauthn.ts
-init_define_import_meta_env();
-function passkeyTransports(mode = "any") {
-  const resolved = mode === true ? "local" : mode === false ? "any" : mode;
-  if (resolved === "local") return ["internal"];
-  if (resolved === "hybrid") return ["hybrid"];
-  return ["internal", "hybrid"];
-}
-function allowPasskey(id, mode = "any") {
-  return { type: "public-key", id, transports: passkeyTransports(mode) };
-}
-function bytesToBase64Url(bytes2) {
-  let bin = "";
-  for (const b of bytes2) bin += String.fromCharCode(b);
-  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-function prfExtension(salt, credentialId) {
-  const first = salt;
-  const evalInputs = { first };
-  const prf = {
-    eval: evalInputs
-  };
-  if (credentialId?.length) {
-    prf.evalByCredential = { [bytesToBase64Url(credentialId)]: evalInputs };
-  }
-  return { prf };
-}
-function prfFrom(cred) {
-  const ext = cred.getClientExtensionResults();
-  const first = ext?.prf?.results?.first ?? ext?.prf?.first;
-  if (!first) return null;
-  const bytes2 = first instanceof Uint8Array ? first : new Uint8Array(first);
-  return bytes2.length ? Uint8Array.from(bytes2) : null;
-}
-function passkeyGetOptions(options, mode = "any") {
-  const resolved = mode === true ? "local" : mode === false ? "any" : mode;
-  const next = {
-    ...options,
-    userVerification: "required",
-    hints: resolved === "local" ? ["client-device"] : resolved === "hybrid" ? ["hybrid"] : ["client-device", "hybrid"]
-  };
-  if (next.allowCredentials?.length) {
-    next.allowCredentials = next.allowCredentials.map((cred) => ({
-      ...cred,
-      transports: passkeyTransports(resolved)
-    }));
-  }
-  return next;
-}
-
-// src/lib/vault/tenantEnrollment.ts
-var PRF_SALT = new TextEncoder().encode("arkade-2fa-vault/prf/v1");
-var HKDF_INFO = new TextEncoder().encode("arkade-2fa-vault/kek/v1");
-var DIRECT_INFO = new TextEncoder().encode("arkade-2fa-vault/direct-p256/v1");
-
-// src/lib/vault/prfEnvelope.ts
-init_define_import_meta_env();
-
-// src/lib/vault/ceremony/directauth.ts
-init_define_import_meta_env();
-var DIRECT_P256_HKDF_PREFIX = new TextEncoder().encode("arkade-2fa-vault/direct-p256/v1");
-
-// src/lib/vault/prfEnvelope.ts
-var PRF_SALT_UTF8 = "arkade-2fa-vault/prf/v1";
-var KEK_HKDF_INFO_UTF8 = "arkade-2fa-vault/kek/v1";
-var PRF_SALT2 = new TextEncoder().encode(PRF_SALT_UTF8);
-var KEK_HKDF_INFO = new TextEncoder().encode(KEK_HKDF_INFO_UTF8);
-
-// src/lib/vault/light/keyBackup.ts
-init_define_import_meta_env();
-init_secp256k1();
-init_base();
-var NAME = "vaulted-light-owner-key";
-var VERSION = 1;
-var DOMAIN = "vaulted-light/owner-key-encryption/v1";
-function requirePurpose(value) {
-  if (value !== "passkey-prf" && value !== "recovery-secret") throw new Error("unsupported Light backup purpose");
-}
-function require32(value) {
-  if (!(value instanceof Uint8Array) || value.length !== 32) throw new Error("Light key material must be 32 bytes");
-  return Uint8Array.from(value);
-}
-function additionalData(backup) {
-  return new TextEncoder().encode(JSON.stringify(backup));
-}
-async function deriveKey(material, salt, purpose) {
-  const copy = require32(material);
-  try {
-    const key = await crypto.subtle.importKey("raw", copy, "HKDF", false, ["deriveKey"]);
-    return await crypto.subtle.deriveKey(
-      { name: "HKDF", hash: "SHA-256", salt, info: new TextEncoder().encode(`${DOMAIN}/${purpose}`) },
-      key,
-      { name: "AES-GCM", length: 256 },
-      false,
-      ["encrypt", "decrypt"]
-    );
-  } finally {
-    copy.fill(0);
-  }
-}
-function validateLightKeyBackup(value, descriptor) {
-  const valid = validateLightDescriptor(descriptor);
-  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Light key backup required");
-  const backup = value;
-  requirePurpose(backup.purpose);
-  const keys = ["name", "version", "purpose", "descriptorDigest", "ownerPub", "salt", "nonce", "ciphertext"];
-  if (Object.keys(backup).length !== keys.length || keys.some((key) => !Object.prototype.hasOwnProperty.call(backup, key)) || backup.name !== NAME || backup.version !== VERSION || backup.descriptorDigest !== lightDescriptorDigest(valid) || backup.ownerPub !== valid.ownerPub || typeof backup.salt !== "string" || !/^[0-9a-f]{64}$/.test(backup.salt) || typeof backup.nonce !== "string" || !/^[0-9a-f]{24}$/.test(backup.nonce) || typeof backup.ciphertext !== "string" || !/^[0-9a-f]{96}$/.test(backup.ciphertext)) {
-    throw new Error("Light key backup does not match its descriptor or format");
-  }
-  return {
-    name: NAME,
-    version: VERSION,
-    purpose: backup.purpose,
-    descriptorDigest: backup.descriptorDigest,
-    ownerPub: backup.ownerPub,
-    salt: backup.salt,
-    nonce: backup.nonce,
-    ciphertext: backup.ciphertext
-  };
-}
-async function unlockLightOwnerKey(value, material, purpose, descriptor) {
-  requirePurpose(purpose);
-  const backup = validateLightKeyBackup(value, descriptor);
-  if (backup.purpose !== purpose) throw new Error("Light backup purpose does not match");
-  const { ciphertext, ...header } = backup;
-  const key = await deriveKey(material, Uint8Array.from(hex.decode(backup.salt)), purpose);
-  let owner2;
-  try {
-    owner2 = new Uint8Array(
-      await crypto.subtle.decrypt(
-        {
-          name: "AES-GCM",
-          iv: Uint8Array.from(hex.decode(backup.nonce)),
-          additionalData: additionalData(header),
-          tagLength: 128
-        },
-        key,
-        Uint8Array.from(hex.decode(ciphertext))
-      )
-    );
-    if (owner2.length !== 32 || hex.encode(schnorr.getPublicKey(owner2)) !== backup.ownerPub) throw new Error();
-    return owner2;
-  } catch {
-    owner2?.fill(0);
-    throw new Error("Unable to unlock this Light key backup");
-  }
-}
-
-// src/lib/vault/light/enrollment.ts
-function validateLightEnrollment(value) {
-  if (!value || typeof value !== "object") throw new Error("Light backup required");
-  const record = value;
-  const descriptor = validateLightDescriptor(record.descriptor);
-  const enrollment = record.enrollment;
-  if (!enrollment || enrollment.vaultId !== descriptor.vaultId || enrollment.phoneBip340Pub !== `02${descriptor.ownerPub}` || !/^[0-9a-f]{2,2048}$/.test(enrollment.credId) || enrollment.credId.length % 2 || !/^(02|03)[0-9a-f]{64}$/.test(enrollment.webauthnP256) || !/^(02|03)[0-9a-f]{64}$/.test(enrollment.phoneDirectP256))
-    throw new Error("Light credential does not match its descriptor");
-  const passkeyBackup = validateLightKeyBackup(enrollment.lightKeyBackup, descriptor);
-  const recoveryBackup = record.recoveryBackup ? validateLightKeyBackup(record.recoveryBackup, descriptor) : void 0;
-  if (passkeyBackup.purpose !== "passkey-prf" || recoveryBackup && recoveryBackup.purpose !== "recovery-secret")
-    throw new Error("Light backup purposes do not match");
-  try {
-    p256.Point.fromHex(enrollment.webauthnP256);
-    p256.Point.fromHex(enrollment.phoneDirectP256);
-  } catch {
-    throw new Error("Light credential keys are invalid");
-  }
-  return {
-    descriptor,
-    enrollment: {
-      vaultId: descriptor.vaultId,
-      credId: enrollment.credId,
-      webauthnP256: enrollment.webauthnP256,
-      phoneDirectP256: enrollment.phoneDirectP256,
-      phoneBip340Pub: enrollment.phoneBip340Pub,
-      nonce: passkeyBackup.nonce,
-      ciphertext: passkeyBackup.ciphertext,
-      lightKeyBackup: passkeyBackup
-    },
-    ...recoveryBackup ? { recoveryBackup } : {}
-  };
-}
-
-// src/lib/vault/light/recovery.ts
+// src/lib/vault/recovery/backupCodec.ts
 init_define_import_meta_env();
 
 // src/lib/vault/recovery/journals.ts
@@ -49385,7 +50537,7 @@ var L1_NETWORKS = {
   testnet: TEST_NETWORK,
   regtest: { ...TEST_NETWORK, bech32: "bcrt" }
 };
-function onchainHtlcScript(params, network) {
+function onchainHtlcScript(params, network2) {
   if (params.claimKey.length !== 32 || params.refundKey.length !== 32) {
     throw new Error("claimKey and refundKey must be 32-byte x-only keys");
   }
@@ -49399,9 +50551,9 @@ function onchainHtlcScript(params, network) {
       `refundLocktime ${params.refundLocktime} is below LOCKTIME_THRESHOLD (${LOCKTIME_THRESHOLD}) and would be interpreted as a block height`
     );
   }
-  if (!Object.hasOwn(L1_NETWORKS, network)) {
+  if (!Object.hasOwn(L1_NETWORKS, network2)) {
     throw new Error(
-      `unknown L1 network '${String(network)}' \u2014 expected one of ${Object.keys(L1_NETWORKS).join(", ")}`
+      `unknown L1 network '${String(network2)}' \u2014 expected one of ${Object.keys(L1_NETWORKS).join(", ")}`
     );
   }
   const h160 = h160FromPaymentHash(params.paymentHash);
@@ -49425,7 +50577,7 @@ function onchainHtlcScript(params, network) {
   const payment = p2tr(
     TAPROOT_UNSPENDABLE_KEY,
     taprootListToTree([{ script: claim }, { script: refund }]),
-    L1_NETWORKS[network],
+    L1_NETWORKS[network2],
     true
   );
   const controlBlockFor = (leaf) => {
@@ -49445,7 +50597,7 @@ function onchainHtlcScript(params, network) {
     refundLocktime: params.refundLocktime
   };
 }
-var HKDF_INFO2 = new TextEncoder().encode("covclaimd/preimage/v1");
+var HKDF_INFO = new TextEncoder().encode("covclaimd/preimage/v1");
 var ARKADE_BTC = "arkade:BTC";
 var LIGHTNING_BTC = "lightning:BTC";
 var ONCHAIN_BTC = "onchain:BTC";
@@ -49596,14 +50748,14 @@ var RfqCorridorRegistry = class {
   }
 };
 var rfqCorridorHandlers = new RfqCorridorRegistry();
-var parseHex32 = (value, field2) => {
-  if (typeof value !== "string" || !/^[0-9a-fA-F]{64}$/.test(value)) {
-    throw new Error(`${field2} must be 32 bytes of hex, got ${JSON.stringify(value)}`);
+var parseHex32 = (value2, field2) => {
+  if (typeof value2 !== "string" || !/^[0-9a-fA-F]{64}$/.test(value2)) {
+    throw new Error(`${field2} must be 32 bytes of hex, got ${JSON.stringify(value2)}`);
   }
-  return value.toLowerCase();
+  return value2.toLowerCase();
 };
-var parseSigner = (value) => {
-  const signingDescriptor = value?.signingDescriptor;
+var parseSigner = (value2) => {
+  const signingDescriptor = value2?.signingDescriptor;
   if (typeof signingDescriptor !== "string" || signingDescriptor.length === 0) {
     throw new Error(
       `rfq profile.signer carries no signingDescriptor (got ${JSON.stringify(signingDescriptor)})`
@@ -49611,8 +50763,8 @@ var parseSigner = (value) => {
   }
   return { signingDescriptor };
 };
-var parseHashlock = (value) => {
-  const raw2 = value ?? {};
+var parseHashlock = (value2) => {
+  const raw2 = value2 ?? {};
   const hashlock = {
     paymentHash: parseHex32(raw2.paymentHash, "rfq profile.hashlock.paymentHash")
   };
@@ -49775,6 +50927,156 @@ function rebuildRfqSwap(record, params) {
 }
 var REFUND_MTP_LAG_SECONDS = 2 * 60 * 60;
 
+// src/lib/vault/light/contract.ts
+init_define_import_meta_env();
+init_secp256k1();
+init_sha2();
+init_base();
+
+// src/lib/vault/networkPins.ts
+init_define_import_meta_env();
+var PINS = {
+  mutinynet: {
+    network: "mutinynet",
+    operatorGetInfoNetwork: "mutinynet",
+    operatorOrigin: "https://mutinynet.arkade.sh",
+    operatorSignerPub: "03301078808e4f7bc0dadfe29e34b1df8eaf0108ef06b1722274075ebc107a127a",
+    checkpointForfeitPub: "02dfcaec558c7e78cf3e38b898ba8a43cfb5727266bae32c5c5b3aeb32c558aa0b",
+    checkpointTapscript: "03080040b27520dfcaec558c7e78cf3e38b898ba8a43cfb5727266bae32c5c5b3aeb32c558aa0bac",
+    checkpointDelaySeconds: 4096,
+    emulatorSignerPub: "03f823b9b2febc81f4af967e77aed2f541cbd3397c6d8f5a72e32eb7b471af889a",
+    policyExitDelay: 4608,
+    boardExitDelay: 604672,
+    arkdMinExitDelay: 2048,
+    delegatePub: "032903b15efe236d9609da10e536fb32cdf1d144778797bbf32a9b94e86601be6a",
+    delegateOrigin: "https://delegator.mutinynet.arkade.sh",
+    sdkNetwork: "mutinynet",
+    arkHrp: "tark",
+    esploraApiUrl: "https://mempool.mutinynet.arkade.sh/api",
+    absoluteFeeCeilingSats: 5e3,
+    feerateCeilingSatPerV: 10
+  },
+  mainnet: {
+    network: "mainnet",
+    operatorGetInfoNetwork: "bitcoin",
+    operatorOrigin: "https://arkade.computer",
+    operatorSignerPub: "038202bebddeb1f7442803897a85eaf3ce9254d07df0172fc3725ab5f0d097779c",
+    checkpointForfeitPub: "03b43a8363118c084a04d4f6a50ebfa58e81957f8cceceb2aee0ab64c9fd2d9977",
+    checkpointTapscript: "039e0440b27520b43a8363118c084a04d4f6a50ebfa58e81957f8cceceb2aee0ab64c9fd2d9977ac",
+    checkpointDelaySeconds: 605184,
+    emulatorSignerPub: "0239c196415da47b26456a101daaa12ba9e445bfe153197f1e2b750bf40e52092e",
+    policyExitDelay: 605184,
+    boardExitDelay: 7776256,
+    arkdMinExitDelay: 605184,
+    delegatePub: "026d7d45360014bce9a8ad30a10c28dd1571a22a2e90c9682268404d37b5b114a6",
+    delegateOrigin: "https://delegate.arkade.money",
+    sdkNetwork: "bitcoin",
+    arkHrp: "ark",
+    esploraApiUrl: "https://mempool.arkade.sh/api",
+    absoluteFeeCeilingSats: 2e4,
+    feerateCeilingSatPerV: 25
+  }
+};
+function networkPins(network2) {
+  return PINS[requireSupportedVaultNetwork2(network2)];
+}
+function sdkNetworkName(network2) {
+  if (network2 === "bitcoin" || network2 === "mainnet") return "bitcoin";
+  if (network2 === "mutinynet") return "mutinynet";
+  return void 0;
+}
+
+// src/lib/vault/light/contract.ts
+var LIGHT_PROFILE = "vaulted-light-v1";
+var LIGHT_PROGRAM = "vault-light-policy-v1";
+var LIGHT_POLICY_SCHEMA = "vault-light-spending-policy-v1";
+var LIGHT_DESCRIPTOR_SCHEMA = "vaulted-light/descriptor-v1";
+function validateLightPolicy(value2, network2) {
+  if (!value2 || typeof value2 !== "object" || Array.isArray(value2)) throw new Error("Light policy required");
+  const policy = value2;
+  if (policy.program !== LIGHT_PROGRAM || policy.schema !== LIGHT_POLICY_SCHEMA) {
+    throw new Error("unsupported Light policy");
+  }
+  const base = defaultSpendingPolicy2(network2);
+  const validated = validateSpendingPolicy2({ ...policy, program: base.program, schema: base.schema }, network2);
+  return { ...validated, program: LIGHT_PROGRAM, schema: LIGHT_POLICY_SCHEMA };
+}
+function lightPolicyDigest(value2, network2) {
+  return hex.encode(sha256(new TextEncoder().encode(JSON.stringify(validateLightPolicy(value2, network2)))));
+}
+function requireLightPublicKey(value2) {
+  if (typeof value2 !== "string" || !/^[0-9a-f]{64}$/.test(value2)) throw new Error("Light key must be x-only hex");
+  schnorr.utils.lift_x(BigInt(`0x${value2}`));
+  return value2;
+}
+function validateLightScriptParams(params) {
+  requireSupportedVaultNetwork2(params.network);
+  const pins = networkPins(params.network);
+  const ownerPub = requireLightPublicKey(params.ownerPub);
+  const cosignerPub = requireLightPublicKey(params.cosignerPub);
+  const operatorPub = requireLightPublicKey(params.operatorPub);
+  if ((/* @__PURE__ */ new Set([ownerPub, cosignerPub, operatorPub])).size !== 3) throw new Error("Light signing keys must be distinct");
+  if (operatorPub !== pins.operatorSignerPub.slice(2)) throw new Error("Light Operator does not match network pin");
+  if (params.exitDelaySeconds !== pins.policyExitDelay) throw new Error("Light exit delay does not match network pin");
+  return { network: params.network, ownerPub, cosignerPub, operatorPub, exitDelaySeconds: params.exitDelaySeconds };
+}
+var LightScript = class extends VtxoScript {
+  params;
+  spendScript;
+  exitScript;
+  constructor(params) {
+    const valid = validateLightScriptParams(params);
+    const spend = MultisigTapscript.encode({
+      pubkeys: [valid.ownerPub, valid.cosignerPub, valid.operatorPub].map((key) => hex.decode(key))
+    });
+    const exit = CSVMultisigTapscript.encode({
+      timelock: { type: "seconds", value: BigInt(valid.exitDelaySeconds) },
+      pubkeys: [hex.decode(valid.ownerPub)]
+    });
+    super([spend.script, exit.script]);
+    this.params = Object.freeze(valid);
+    this.spendScript = hex.encode(spend.script);
+    this.exitScript = hex.encode(exit.script);
+  }
+  forfeit() {
+    return this.findLeaf(this.spendScript);
+  }
+  exit() {
+    return this.findLeaf(this.exitScript);
+  }
+};
+function buildLightDescriptor(input) {
+  if (!/^[0-9a-f]{64}$/.test(input.vaultId)) throw new Error("Light vault ID must be 32-byte hex");
+  const params = validateLightScriptParams(input);
+  const policy = validateLightPolicy(input.spendingPolicy, params.network);
+  const script = new LightScript(params);
+  return {
+    schema: LIGHT_DESCRIPTOR_SCHEMA,
+    profile: LIGHT_PROFILE,
+    program: LIGHT_PROGRAM,
+    vaultId: input.vaultId,
+    ...params,
+    spendingPolicy: policy,
+    spendingPolicyDigest: lightPolicyDigest(policy, params.network),
+    scriptPubKey: hex.encode(script.pkScript)
+  };
+}
+function validateLightDescriptor(value2) {
+  if (!value2 || typeof value2 !== "object" || Array.isArray(value2)) throw new Error("Light descriptor required");
+  const supplied = value2;
+  const rebuilt = buildLightDescriptor(supplied);
+  const keys2 = Object.keys(rebuilt);
+  if (Object.keys(supplied).length !== keys2.length || keys2.some(
+    (key) => key === "spendingPolicy" ? lightPolicyDigest(supplied.spendingPolicy, supplied.network) !== rebuilt.spendingPolicyDigest : supplied[key] !== rebuilt[key]
+  )) {
+    throw new Error("Light descriptor does not match its program");
+  }
+  return rebuilt;
+}
+function lightDescriptorDigest(value2) {
+  return hex.encode(sha256(new TextEncoder().encode(JSON.stringify(validateLightDescriptor(value2)))));
+}
+
 // src/lib/vault/light/exitRepository.ts
 init_define_import_meta_env();
 function lightExitRepository(descriptor) {
@@ -49782,7 +51084,77 @@ function lightExitRepository(descriptor) {
   return new IndexedDBVirtualTxRepository(`vaulted-light:${valid.vaultId}:exit-paths`);
 }
 
+// src/lib/vault/light/status.ts
+init_define_import_meta_env();
+init_base();
+function requireLightStatus(status2) {
+  const descriptor = validateLightDescriptor(status2.lightDescriptor);
+  const pins = networkPins(descriptor.network);
+  if (!status2.enrolled || status2.vaultId !== descriptor.vaultId || status2.network !== descriptor.network || status2.templateVersion !== LIGHT_PROFILE || status2.policyVersion !== LIGHT_POLICY_SCHEMA || status2.protectionTier !== "light")
+    throw new Error("Light status identity mismatch");
+  if (status2.lightDescriptorHash !== lightDescriptorDigest(descriptor))
+    throw new Error("Light descriptor digest mismatch");
+  const policy = validateLightPolicy(status2.spendingPolicy, descriptor.network);
+  if (lightPolicyDigest(policy, descriptor.network) !== descriptor.spendingPolicyDigest || status2.spendingPolicyDigest !== descriptor.spendingPolicyDigest)
+    throw new Error("Light policy mismatch");
+  if (policy.txRecipientCapSats !== status2.txCap || policy.periodAllowanceSats !== status2.periodAllowance || policy.absoluteFeeCapSats !== status2.absoluteFeeCap || policy.feerateCapSatPerV !== status2.feerateCapSatVb)
+    throw new Error("Light limit fields mismatch");
+  if (![status2.periodSpent, status2.periodRemaining].every((v) => Number.isSafeInteger(v) && v >= 0) || status2.periodRemaining !== Math.max(0, status2.periodAllowance - status2.periodSpent))
+    throw new Error("Light allowance state invalid");
+  if (status2.savingsAddress || status2.savingsScript || status2.externalOwnerWalletPub || status2.recoveryKeyPub || "recoveryPub" in status2 && status2.recoveryPub || status2.arkadeCosignerBasePub || status2.arkadeCosignerOrigin || status2.arkadeCosignerVersion || status2.vtxoDelegatePub || status2.vtxoBoardingActive || status2.vtxoBoardingAddress || status2.vtxoBoardingScript || status2.vtxoBoardingDescriptor)
+    throw new Error("Light status contains another profile");
+  if (status2.phoneBip340Pub !== `02${descriptor.ownerPub}` || status2.vtxoVaultCosignerPub !== `02${descriptor.cosignerPub}` || status2.vaultCosignerBasePub !== status2.vtxoVaultCosignerPub || status2.vtxoExitDelay !== descriptor.exitDelaySeconds || status2.vtxoExitDelayUnit !== "seconds")
+    throw new Error("Light signing keys or exit delay mismatch");
+  const address = ArkAddress.decode(String(status2.spendingArkAddress || ""));
+  const script = new LightScript(descriptor);
+  if (address.hrp !== pins.arkHrp || hex.encode(address.serverPubKey) !== descriptor.operatorPub || hex.encode(address.pkScript) !== descriptor.scriptPubKey || hex.encode(script.pkScript) !== status2.spendingArkScript)
+    throw new Error("Light receiving address mismatch");
+  return { ...status2, savingsScript: "", lightDescriptor: descriptor };
+}
+function lightRecoveryStatus(value2) {
+  const descriptor = validateLightDescriptor(value2);
+  const p = descriptor.spendingPolicy;
+  return requireLightStatus({
+    enrolled: true,
+    network: descriptor.network,
+    clientOrigin: "",
+    rpId: "",
+    vaultId: descriptor.vaultId,
+    templateVersion: LIGHT_PROFILE,
+    policyVersion: LIGHT_POLICY_SCHEMA,
+    protectionTier: "light",
+    savingsAddress: "",
+    savingsScript: "",
+    arkadeCosignerOrigin: "",
+    arkadeCosignerVersion: "",
+    phoneBip340Pub: `02${descriptor.ownerPub}`,
+    vtxoVaultCosignerPub: `02${descriptor.cosignerPub}`,
+    vaultCosignerBasePub: `02${descriptor.cosignerPub}`,
+    spendingPolicy: p,
+    spendingPolicyDigest: descriptor.spendingPolicyDigest,
+    periodAllowance: p.periodAllowanceSats,
+    periodSpent: 0,
+    periodRemaining: p.periodAllowanceSats,
+    txCap: p.txRecipientCapSats,
+    absoluteFeeCap: p.absoluteFeeCapSats,
+    feerateCapSatVb: p.feerateCapSatPerV,
+    vtxoExitDelay: descriptor.exitDelaySeconds,
+    vtxoExitDelayUnit: "seconds",
+    spendingArkAddress: new ArkAddress(
+      hex.decode(descriptor.operatorPub),
+      new LightScript(descriptor).tweakedPublicKey,
+      networkPins(descriptor.network).arkHrp
+    ).encode(),
+    spendingArkScript: descriptor.scriptPubKey,
+    lightDescriptor: descriptor,
+    lightDescriptorHash: lightDescriptorDigest(descriptor)
+  });
+}
+
 // src/lib/vault/vtxo/exitRepository.ts
+init_define_import_meta_env();
+
+// src/lib/vault/vtxo/walletWorkerNames.ts
 init_define_import_meta_env();
 
 // src/lib/vault/lightningLifecycle.ts
@@ -49824,7 +51196,7 @@ function wholeSatsFromMillisats(amountMillisats) {
   }
   return amountSats;
 }
-function decodeVaultLightningInvoice(rawInvoice, network, nowSeconds2 = Math.floor(Date.now() / 1e3)) {
+function decodeVaultLightningInvoice(rawInvoice, network2, nowSeconds2 = Math.floor(Date.now() / 1e3)) {
   const invoice = rawInvoice.trim().replace(/^lightning:/i, "");
   let decoded;
   try {
@@ -49838,8 +51210,8 @@ function decodeVaultLightningInvoice(rawInvoice, network, nowSeconds2 = Math.flo
   const coinNetwork = decoded.sections.find((section) => section.name === "coin_network");
   const prefix2 = coinNetwork && "value" in coinNetwork ? String(coinNetwork.value?.bech32 ?? "") : "";
   const expiresAt = timestamp + (decoded.expiry ?? 3600);
-  if (prefix2 !== NETWORK_PREFIX[network]) {
-    throw new LightningInvoiceRejected("wrong_network", `This invoice is not for ${network}.`);
+  if (prefix2 !== NETWORK_PREFIX[network2]) {
+    throw new LightningInvoiceRejected("wrong_network", `This invoice is not for ${network2}.`);
   }
   if (!timestamp || nowSeconds2 >= expiresAt) {
     throw new LightningInvoiceRejected("expired", "This Lightning invoice has expired.");
@@ -49854,45 +51226,243 @@ function decodeVaultLightningInvoice(rawInvoice, network, nowSeconds2 = Math.flo
 // src/lib/vault/lightningLifecycle.ts
 var VAULT_LIGHTNING_PROFILE = "vaultLightning";
 var VAULT_LIGHTNING_PROFILE_VERSION = 2;
-function validFundingProof(value) {
-  const proof = value;
+function validFundingProof(value2) {
+  const proof = value2;
   return Boolean(
     proof && /^[0-9a-f-]{16,}$/i.test(String(proof.operationId || "")) && /^[0-9a-f]{64}$/.test(String(proof.bundleDigest || "")) && typeof proof.address === "string" && proof.address.length > 0 && Number.isSafeInteger(proof.amountSats) && proof.amountSats > 0 && (proof.fundingFeeSats === void 0 || Number.isSafeInteger(proof.fundingFeeSats) && proof.fundingFeeSats >= 0) && /^[0-9a-f]{64}$/.test(String(proof.rfqId || ""))
   );
 }
 function storedLightningProfile(record) {
-  const value = record.profile[VAULT_LIGHTNING_PROFILE];
-  const quote = value?.quote;
-  if (record.kind !== "lightning_send" || !value || value.version !== VAULT_LIGHTNING_PROFILE_VERSION || typeof value.invoice !== "string" || !quote || quote.rfq_id !== record.rfqId || !Number.isSafeInteger(quote.to_amount) || !Number.isSafeInteger(quote.from_amount) || !Number.isSafeInteger(quote.valid_until) || !Number.isSafeInteger(quote.refund_locktime) || !Number.isSafeInteger(record.amount) || quote.from_amount !== record.amount || !["quoted", "funding", "cancel_requested"].includes(String(value.fundingState)) || value.fundingState === "funding" && !validFundingProof(value.fundingProof)) {
+  const value2 = record.profile[VAULT_LIGHTNING_PROFILE];
+  const quote = value2?.quote;
+  if (record.kind !== "lightning_send" || !value2 || value2.version !== VAULT_LIGHTNING_PROFILE_VERSION || typeof value2.invoice !== "string" || !quote || quote.rfq_id !== record.rfqId || !Number.isSafeInteger(quote.to_amount) || !Number.isSafeInteger(quote.from_amount) || !Number.isSafeInteger(quote.valid_until) || !Number.isSafeInteger(quote.refund_locktime) || !Number.isSafeInteger(record.amount) || quote.from_amount !== record.amount || !["quoted", "funding", "cancel_requested"].includes(String(value2.fundingState)) || value2.fundingState === "funding" && !validFundingProof(value2.fundingProof)) {
     throw new Error(`Stored Lightning quote ${record.rfqId} is incomplete`);
   }
-  if (!["bitcoin", "testnet", "signet", "mutinynet", "regtest"].includes(String(value.network))) {
+  if (!["bitcoin", "testnet", "signet", "mutinynet", "regtest"].includes(String(value2.network))) {
     throw new Error(`Stored Lightning quote ${record.rfqId} has no network`);
   }
-  const invoice = decodeVaultLightningInvoice(value.invoice, value.network, 0);
+  const invoice = decodeVaultLightningInvoice(value2.invoice, value2.network, 0);
   if (quote.to_amount !== invoice.amountSats) {
     throw new Error(`Stored Lightning quote ${record.rfqId} does not match its invoice`);
   }
-  return value;
+  return value2;
 }
 
 // src/lib/vault/vtxo/spend.ts
 init_define_import_meta_env();
+
+// src/lib/vault/light/keyBackup.ts
+init_define_import_meta_env();
+init_secp256k1();
+init_base();
+var NAME = "vaulted-light-owner-key";
+var VERSION = 1;
+var DOMAIN = "vaulted-light/owner-key-encryption/v1";
+function requirePurpose(value2) {
+  if (value2 !== "passkey-prf" && value2 !== "recovery-secret") throw new Error("unsupported Light backup purpose");
+}
+function require32(value2) {
+  if (!(value2 instanceof Uint8Array) || value2.length !== 32) throw new Error("Light key material must be 32 bytes");
+  return Uint8Array.from(value2);
+}
+function additionalData(backup) {
+  return new TextEncoder().encode(JSON.stringify(backup));
+}
+async function deriveKey(material, salt, purpose) {
+  const copy2 = require32(material);
+  try {
+    const key = await crypto.subtle.importKey("raw", copy2, "HKDF", false, ["deriveKey"]);
+    return await crypto.subtle.deriveKey(
+      { name: "HKDF", hash: "SHA-256", salt, info: new TextEncoder().encode(`${DOMAIN}/${purpose}`) },
+      key,
+      { name: "AES-GCM", length: 256 },
+      false,
+      ["encrypt", "decrypt"]
+    );
+  } finally {
+    copy2.fill(0);
+  }
+}
+function validateLightKeyBackup(value2, descriptor) {
+  const valid = validateLightDescriptor(descriptor);
+  if (!value2 || typeof value2 !== "object" || Array.isArray(value2)) throw new Error("Light key backup required");
+  const backup = value2;
+  requirePurpose(backup.purpose);
+  const keys2 = ["name", "version", "purpose", "descriptorDigest", "ownerPub", "salt", "nonce", "ciphertext"];
+  if (Object.keys(backup).length !== keys2.length || keys2.some((key) => !Object.prototype.hasOwnProperty.call(backup, key)) || backup.name !== NAME || backup.version !== VERSION || backup.descriptorDigest !== lightDescriptorDigest(valid) || backup.ownerPub !== valid.ownerPub || typeof backup.salt !== "string" || !/^[0-9a-f]{64}$/.test(backup.salt) || typeof backup.nonce !== "string" || !/^[0-9a-f]{24}$/.test(backup.nonce) || typeof backup.ciphertext !== "string" || !/^[0-9a-f]{96}$/.test(backup.ciphertext)) {
+    throw new Error("Light key backup does not match its descriptor or format");
+  }
+  return {
+    name: NAME,
+    version: VERSION,
+    purpose: backup.purpose,
+    descriptorDigest: backup.descriptorDigest,
+    ownerPub: backup.ownerPub,
+    salt: backup.salt,
+    nonce: backup.nonce,
+    ciphertext: backup.ciphertext
+  };
+}
+async function unlockLightOwnerKey(value2, material, purpose, descriptor) {
+  requirePurpose(purpose);
+  const backup = validateLightKeyBackup(value2, descriptor);
+  if (backup.purpose !== purpose) throw new Error("Light backup purpose does not match");
+  const { ciphertext, ...header } = backup;
+  const key = await deriveKey(material, Uint8Array.from(hex.decode(backup.salt)), purpose);
+  let owner;
+  try {
+    owner = new Uint8Array(
+      await crypto.subtle.decrypt(
+        {
+          name: "AES-GCM",
+          iv: Uint8Array.from(hex.decode(backup.nonce)),
+          additionalData: additionalData(header),
+          tagLength: 128
+        },
+        key,
+        Uint8Array.from(hex.decode(ciphertext))
+      )
+    );
+    if (owner.length !== 32 || hex.encode(schnorr.getPublicKey(owner)) !== backup.ownerPub) throw new Error();
+    return owner;
+  } catch {
+    owner?.fill(0);
+    throw new Error("Unable to unlock this Light key backup");
+  }
+}
+
+// src/lib/vault/vtxo/spend.ts
 init_btc_signer();
 init_payment();
 init_base();
+
+// src/lib/vault/ceremony/directauth.ts
+init_define_import_meta_env();
+var DIRECT_P256_HKDF_PREFIX2 = new TextEncoder().encode("arkade-2fa-vault/direct-p256/v1");
+function zeroBytes2(...values) {
+  for (const value2 of values) value2?.fill(0);
+}
+
+// src/lib/vault/api.ts
+init_define_import_meta_env();
+
+// src/lib/vault/bounded.ts
+init_define_import_meta_env();
+var MAX_API_RESPONSE_BYTES = 1024 * 1024;
+async function readBounded(res, maxBytes = MAX_API_RESPONSE_BYTES) {
+  const declared = Number(res.headers.get("Content-Length"));
+  if (Number.isFinite(declared) && declared > maxBytes) {
+    throw new Error("API response too large");
+  }
+  if (!res.body?.getReader) {
+    const text = await res.text();
+    if (new TextEncoder().encode(text).byteLength > maxBytes) throw new Error("API response too large");
+    return text;
+  }
+  const reader = res.body.getReader();
+  const chunks = [];
+  let total = 0;
+  for (; ; ) {
+    const { done, value: value2 } = await reader.read();
+    if (done) break;
+    total += value2.byteLength;
+    if (total > maxBytes) {
+      await reader.cancel();
+      throw new Error("API response too large");
+    }
+    chunks.push(value2);
+  }
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    out.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder().decode(out);
+}
+
+// src/lib/vault/status.ts
+init_define_import_meta_env();
+
+// src/lib/vault/productionDomains.ts
+init_define_import_meta_env();
+var VAULTED_WALLET_ORIGIN = "https://app.getvaulted.xyz";
+var VAULTED_WALLET_RP_ID = "app.getvaulted.xyz";
+var VAULTED_RC_ORIGIN = "https://rc.getvaulted.xyz";
+var VAULTED_RC_RP_ID = "rc.getvaulted.xyz";
+var MAINNET_WALLET_ORIGINS = [VAULTED_WALLET_ORIGIN, VAULTED_RC_ORIGIN];
+var MAINNET_WALLET_RP_IDS = [VAULTED_WALLET_RP_ID, VAULTED_RC_RP_ID];
+function canonicalHttpOrigin(value2) {
+  const raw2 = String(value2 || "").trim();
+  let parsed;
+  try {
+    parsed = new URL(raw2);
+  } catch {
+    throw new Error("origin is not a valid URL");
+  }
+  if (parsed.username || parsed.password || parsed.search || parsed.hash || parsed.pathname !== "/") {
+    throw new Error("origin must contain only scheme and host");
+  }
+  if (parsed.protocol !== "https:") throw new Error("origin must be https");
+  const origin = `${parsed.protocol}//${parsed.host.toLowerCase()}`;
+  if (raw2 !== origin) throw new Error("origin must be canonical lowercase https://host");
+  return origin;
+}
+function requireMainnetWalletOrigin(value2) {
+  const origin = canonicalHttpOrigin(value2);
+  if (!MAINNET_WALLET_ORIGINS.includes(origin)) {
+    throw new Error("mainnet wallet origin is not this release");
+  }
+  return origin;
+}
+function requireMainnetWalletRpId(value2) {
+  const rpId = String(value2 || "").trim().toLowerCase();
+  if (!MAINNET_WALLET_RP_IDS.includes(rpId)) {
+    throw new Error("mainnet RP ID is not this release");
+  }
+  return rpId;
+}
+
+// src/lib/vault/pin.ts
+init_define_import_meta_env();
+var PIN_FIELD_NAMES = [
+  "vaultId",
+  "network",
+  "protectionTier",
+  "spendingPolicyCanonical",
+  "spendingPolicyDigest",
+  "savingsAddress",
+  "savingsScript",
+  "vtxoVaultCosignerPub",
+  "vtxoExitDelay",
+  "vtxoExitDelayUnit",
+  "spendingArkAddress",
+  "spendingArkScript",
+  "vtxoDelegatePub",
+  "vtxoBoardingActive",
+  "vtxoBoardingProgram",
+  "vtxoBoardingAddress",
+  "vtxoBoardingScript",
+  "vtxoBoardingExitDelay",
+  "vtxoBoardingExitDelayUnit"
+];
+var STORED_PIN_FIELD_NAMES = [...PIN_FIELD_NAMES, "pinHash"];
+
+// src/lib/vault/cosignerClient.ts
+init_define_import_meta_env();
 
 // src/lib/vault/savingsSpend.ts
 init_define_import_meta_env();
 
 // src/lib/vault/bitcoin.ts
 init_define_import_meta_env();
+init_base();
 init_btc_signer();
-function isVaultBitcoinAddress(value, network) {
-  const trimmed = value.trim();
+function isVaultBitcoinAddress(value2, network2) {
+  const trimmed = value2.trim();
   if (!trimmed) return false;
   try {
-    const net = network ? vaultAddressNetwork(network) : trimmed.startsWith("tb1") ? TEST_NETWORK : trimmed.startsWith("bc1") || /^[13]/.test(trimmed) ? NETWORK : null;
+    const net = network2 ? vaultAddressNetwork2(network2) : trimmed.startsWith("tb1") ? TEST_NETWORK : trimmed.startsWith("bc1") || /^[13]/.test(trimmed) ? NETWORK : null;
     if (!net) return false;
     Address(net).decode(trimmed);
     return true;
@@ -49900,16 +51470,221 @@ function isVaultBitcoinAddress(value, network) {
     return false;
   }
 }
+function scriptHexFromAddress(address, network2) {
+  const trimmed = address.trim();
+  try {
+    const decoded = Address(vaultAddressNetwork2(network2)).decode(trimmed);
+    return hex.encode(OutScript.encode(decoded));
+  } catch {
+    throw new Error("not a bitcoin address");
+  }
+}
+function bitcoinDustSats(address, network2) {
+  const script = hex.decode(scriptHexFromAddress(address, network2));
+  const type = OutScript.decode(script).type;
+  const outputVbytes = 8 + 1 + script.length;
+  const spendVbytes = type === "wpkh" || type === "wsh" || type === "tr" ? 67 : 148;
+  return 3 * (outputVbytes + spendVbytes);
+}
+
+// src/lib/vault/program/kitStore.ts
+init_define_import_meta_env();
 
 // src/lib/vault/program/liveKit.ts
 init_define_import_meta_env();
 
+// src/lib/vault/webauthn.ts
+init_define_import_meta_env();
+function isCoarsePhone() {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || "";
+  if (/iPhone|iPod|Android.+Mobile|CriOS|FxiOS|EdgiOS/i.test(ua)) return true;
+  if (/iPad|Android/i.test(ua)) return true;
+  if (/Macintosh/i.test(ua) && Number(navigator.maxTouchPoints || 0) > 1) return true;
+  const uaData = navigator.userAgentData;
+  return Boolean(uaData?.mobile);
+}
+function passkeyTransports(mode = "any") {
+  const resolved = mode === true ? "local" : mode === false ? "any" : mode;
+  if (resolved === "local") return ["internal"];
+  if (resolved === "hybrid") return ["hybrid"];
+  return ["internal", "hybrid"];
+}
+function allowPasskey(id, mode = "any") {
+  return { type: "public-key", id, transports: passkeyTransports(mode) };
+}
+function bytesToBase64Url(bytes2) {
+  let bin = "";
+  for (const b of bytes2) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function prfExtension(salt, credentialId) {
+  const first = salt;
+  const evalInputs = { first };
+  const prf = {
+    eval: evalInputs
+  };
+  if (credentialId?.length) {
+    prf.evalByCredential = { [bytesToBase64Url(credentialId)]: evalInputs };
+  }
+  return { prf };
+}
+function prfFrom(cred) {
+  const ext = cred.getClientExtensionResults();
+  const first = ext?.prf?.results?.first ?? ext?.prf?.first;
+  if (!first) return null;
+  const bytes2 = first instanceof Uint8Array ? first : new Uint8Array(first);
+  return bytes2.length ? Uint8Array.from(bytes2) : null;
+}
+function passkeyGetOptions(options2, mode = "any") {
+  const resolved = mode === true ? "local" : mode === false ? "any" : mode;
+  const next = {
+    ...options2,
+    userVerification: "required",
+    hints: resolved === "local" ? ["client-device"] : resolved === "hybrid" ? ["hybrid"] : ["client-device", "hybrid"]
+  };
+  if (next.allowCredentials?.length) {
+    next.allowCredentials = next.allowCredentials.map((cred) => ({
+      ...cred,
+      transports: passkeyTransports(resolved)
+    }));
+  }
+  return next;
+}
+function deviceSigningOptions(options2, credentialId) {
+  const mode = isCoarsePhone() ? "local" : "any";
+  return passkeyGetOptions(
+    {
+      ...options2,
+      allowCredentials: [allowPasskey(credentialId, mode)]
+    },
+    mode
+  );
+}
+
 // src/lib/vault/taprootSignatures.ts
 init_define_import_meta_env();
+init_base();
+init_btc_signer();
+init_payment();
+function xOnlyTapscriptPub(value2, name) {
+  const key = String(value2 || "").trim().toLowerCase();
+  const xonly = /^(02|03)[0-9a-f]{64}$/.test(key) ? key.slice(2) : key;
+  if (!/^[0-9a-f]{64}$/.test(xonly)) throw new Error(`${name} must be a compressed or x-only public key`);
+  return xonly;
+}
+function tapscriptSignatureRecords(tx, inputIndex) {
+  return (tx.getInput(inputIndex).tapScriptSig || []).map(([data, signature]) => `${hex.encode(data.pubKey)}:${hex.encode(data.leafHash)}:${hex.encode(signature)}`).sort();
+}
+function requireExactDefaultTapscriptSignatures(tx, inputIndex, expectedPubs) {
+  const input = tx.getInput(inputIndex);
+  if (input.tapKeySig) throw new Error(`input ${inputIndex} must not contain a Taproot key-path signature`);
+  if (input.sighashType !== void 0 && input.sighashType !== SigHash.DEFAULT) {
+    throw new Error(`input ${inputIndex} must use SIGHASH_DEFAULT`);
+  }
+  if (input.tapLeafScript?.length !== 1) throw new Error(`input ${inputIndex} must carry exactly one tapleaf`);
+  const expected = expectedPubs.map((pub, index) => xOnlyTapscriptPub(pub, `signer ${index}`)).sort();
+  const signatures = input.tapScriptSig || [];
+  const actual = signatures.map(([data]) => hex.encode(data.pubKey)).sort();
+  if (actual.length !== expected.length || actual.some((pub, index) => pub !== expected[index])) {
+    throw new Error(`input ${inputIndex} has the wrong tapscript signer set`);
+  }
+  const leaf = input.tapLeafScript[0];
+  const scriptWithVersion = leaf[1];
+  const leafHash = tapLeafHash(scriptFromTapLeafScript(leaf), scriptWithVersion[scriptWithVersion.length - 1]);
+  verifyTapscriptSignatures(tx, inputIndex, expected, [], [SigHash.DEFAULT], leafHash);
+}
 
 // src/lib/vault/savingsSpend.ts
-var PRF_SALT3 = new TextEncoder().encode("arkade-2fa-vault/prf/v1");
-var HKDF_INFO3 = new TextEncoder().encode("arkade-2fa-vault/kek/v1");
+var PRF_SALT2 = new TextEncoder().encode("arkade-2fa-vault/prf/v1");
+var HKDF_INFO2 = new TextEncoder().encode("arkade-2fa-vault/kek/v1");
+async function unlockPhoneBip340(rec, status2) {
+  const rpId = String(status2.rpId || "").toLowerCase();
+  if (!rpId || rpId !== location.hostname.toLowerCase()) {
+    throw new Error("deployment RP ID does not match this signing client host");
+  }
+  if (status2.clientOrigin !== location.origin) {
+    throw new Error("deployment origin does not match this signing client origin");
+  }
+  if (status2.network === "mainnet") {
+    requireMainnetWalletOrigin(status2.clientOrigin);
+    requireMainnetWalletRpId(rpId);
+  }
+  const challenge3 = crypto.getRandomValues(new Uint8Array(32));
+  const credentialId = hexToBytes4(rec.credId);
+  const get = await navigator.credentials.get({
+    publicKey: deviceSigningOptions(
+      {
+        challenge: challenge3,
+        rpId,
+        userVerification: "required",
+        extensions: prfExtension(PRF_SALT2, credentialId)
+      },
+      credentialId
+    )
+  });
+  if (!get) throw new Error("The operation was aborted.");
+  const prf = prfFrom(get);
+  if (!prf || prf.length !== 32) throw new Error("authenticator did not return PRF");
+  try {
+    if (status2.templateVersion === LIGHT_PROFILE) {
+      const valid = requireLightStatus(status2);
+      if (rec.vaultId !== valid.vaultId || rec.phoneBip340Pub !== valid.phoneBip340Pub)
+        throw new Error("Light enrollment does not match this vault");
+      return await unlockLightOwnerKey(rec.lightKeyBackup, prf, "passkey-prf", valid.lightDescriptor);
+    }
+    const kek = await crypto.subtle.deriveKey(
+      { name: "HKDF", hash: "SHA-256", salt: new Uint8Array(0), info: HKDF_INFO2 },
+      await crypto.subtle.importKey("raw", prf, "HKDF", false, ["deriveKey"]),
+      { name: "AES-GCM", length: 256 },
+      false,
+      ["decrypt"]
+    );
+    return new Uint8Array(
+      await crypto.subtle.decrypt({ name: "AES-GCM", iv: hexToBytes4(rec.nonce) }, kek, hexToBytes4(rec.ciphertext))
+    );
+  } finally {
+    zeroBytes2(prf);
+  }
+}
+
+// src/lib/vault/prfEnvelope.ts
+init_define_import_meta_env();
+var PRF_SALT_UTF82 = "arkade-2fa-vault/prf/v1";
+var KEK_HKDF_INFO_UTF82 = "arkade-2fa-vault/kek/v1";
+var PRF_SALT3 = new TextEncoder().encode(PRF_SALT_UTF82);
+var KEK_HKDF_INFO2 = new TextEncoder().encode(KEK_HKDF_INFO_UTF82);
+var ENVELOPE_NONCE_BYTES = 12;
+var PHONE_SECRET_BYTES = 32;
+var ENVELOPE_CIPHERTEXT_BYTES = 48;
+async function deriveKEK(prf, usages) {
+  if (prf.length !== 32) throw new Error("prf must be exactly 32 bytes");
+  return crypto.subtle.deriveKey(
+    { name: "HKDF", hash: "SHA-256", salt: new Uint8Array(0), info: KEK_HKDF_INFO2 },
+    await crypto.subtle.importKey("raw", prf, "HKDF", false, ["deriveKey"]),
+    { name: "AES-GCM", length: 256 },
+    false,
+    usages
+  );
+}
+async function unwrapPhoneSecret(prf, nonceHex, ciphertextHex) {
+  const nonce = hexToBytes4(requireLowerHex2(nonceHex, "envelope nonce", ENVELOPE_NONCE_BYTES));
+  const ciphertext = hexToBytes4(requireLowerHex2(ciphertextHex, "envelope ciphertext", ENVELOPE_CIPHERTEXT_BYTES));
+  try {
+    const kek = await deriveKEK(prf, ["decrypt"]);
+    const secret = new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: nonce }, kek, ciphertext));
+    if (secret.length !== PHONE_SECRET_BYTES) {
+      zeroBytes2(secret);
+      throw new Error("saved passkey envelope did not contain a phone key");
+    }
+    return secret;
+  } catch (error2) {
+    if (error2 instanceof Error && error2.message.startsWith("saved passkey envelope")) throw error2;
+    throw new Error("passkey PRF authentication succeeded but could not decrypt the saved phone key", {
+      cause: error2
+    });
+  }
+}
 
 // src/lib/vault/vtxo/feePolicy.ts
 init_define_import_meta_env();
@@ -49926,7 +51701,7 @@ var encoder2 = new TextEncoder();
 var VTXO_RESERVE_TAG = "arkade-vault/vtxo-reserve/v1";
 var VTXO_RESERVE_VERSION = 1;
 var VTXO_RESERVE_PURPOSE = "spend";
-function concat6(...parts) {
+function concat9(...parts) {
   const out = new Uint8Array(parts.reduce((length, part) => length + part.length, 0));
   let offset = 0;
   for (const part of parts) {
@@ -49935,20 +51710,20 @@ function concat6(...parts) {
   }
   return out;
 }
-function uint32LE(value) {
-  if (!Number.isSafeInteger(value) || value < 0 || value > 4294967295) throw new Error("uint32 out of range");
+function uint32LE(value2) {
+  if (!Number.isSafeInteger(value2) || value2 < 0 || value2 > 4294967295) throw new Error("uint32 out of range");
   const out = new Uint8Array(4);
-  new DataView(out.buffer).setUint32(0, value, true);
+  new DataView(out.buffer).setUint32(0, value2, true);
   return out;
 }
-function uint64LE(value) {
-  if (!Number.isSafeInteger(value) || value < 0) throw new Error("amount is not a safe uint64");
+function uint64LE(value2) {
+  if (!Number.isSafeInteger(value2) || value2 < 0) throw new Error("amount is not a safe uint64");
   const out = new Uint8Array(8);
-  new DataView(out.buffer).setBigUint64(0, BigInt(value), true);
+  new DataView(out.buffer).setBigUint64(0, BigInt(value2), true);
   return out;
 }
-function field(value) {
-  return concat6(uint32LE(value.length), value);
+function field(value2) {
+  return concat9(uint32LE(value2.length), value2);
 }
 function operationBytes(operationId) {
   if (!/^[0-9a-f]{32}$/.test(operationId)) throw new Error("invalid VTXO operation id");
@@ -49958,7 +51733,7 @@ function vtxoReserveDigest(input) {
   const vaultId = encoder2.encode(input.vaultId);
   if (vaultId.length === 0) throw new Error("vault id required");
   if (input.destScript.length === 0) throw new Error("destination script required");
-  const payload = concat6(
+  const payload = concat9(
     uint32LE(VTXO_RESERVE_VERSION),
     field(operationBytes(input.operationId)),
     field(vaultId),
@@ -49979,18 +51754,19 @@ init_define_import_meta_env();
 // src/lib/vault/vtxo/script.ts
 init_define_import_meta_env();
 init_base();
+var VAULT_POLICY_V1_TYPE = "vault-policy-v1";
 var VAULT_POLICY_V1_EXIT_DELAY_UNIT = "seconds";
 var VAULT_POLICY_V1_BIP68_SECONDS_MOD = 512n;
-function requireXOnly(value, name) {
-  if (!(value instanceof Uint8Array) || value.length !== 32) {
+function requireXOnly(value2, name) {
+  if (!(value2 instanceof Uint8Array) || value2.length !== 32) {
     throw new Error(`${name} must be a 32-byte x-only pubkey`);
   }
-  return value;
+  return value2;
 }
 function policyPins(params) {
   if (params.network) return networkPins(params.network);
-  const matches = SUPPORTED_NETWORKS.filter(
-    (network) => BigInt(networkPins(network).policyExitDelay) === params.exitDelay
+  const matches = SUPPORTED_NETWORKS2.filter(
+    (network2) => BigInt(networkPins(network2).policyExitDelay) === params.exitDelay
   );
   if (matches.length === 1) return networkPins(matches[0]);
   throw new Error(
@@ -50118,10 +51894,10 @@ function parsePersistedVtxoSpend(vaultId, parsed) {
   }
   return void 0;
 }
-function validateSpendingRecoveryJournal(status, raw2) {
+function validateSpendingRecoveryJournal(status2, raw2) {
   if (!raw2 || JSON.stringify(raw2).length > 8e6) throw new Error("Invalid Spending recovery journal");
   const journal = JSON.parse(JSON.stringify(raw2));
-  if (journal.version !== 1 || journal.vaultId !== status.vaultId || !Array.isArray(journal.operations) || journal.operations.length > MAX_VTXO_SPEND_JOURNAL)
+  if (journal.version !== 1 || journal.vaultId !== status2.vaultId || !Array.isArray(journal.operations) || journal.operations.length > MAX_VTXO_SPEND_JOURNAL)
     throw new Error("Invalid Spending recovery journal");
   if (journal.resolved !== void 0 && (!Array.isArray(journal.resolved) || journal.resolved.length > 1e4))
     throw new Error("Invalid resolved Spending history");
@@ -50129,16 +51905,16 @@ function validateSpendingRecoveryJournal(status, raw2) {
   for (const record of journal.resolved || []) {
     if (!isVtxoOperationId(record.operationId) || resolvedIds.has(record.operationId) || !Number.isSafeInteger(record.amountSats) || record.amountSats < VTXO_DUST_SATS || record.arkTxid !== "" && !/^[0-9a-f]{64}$/.test(record.arkTxid))
       throw new Error("Invalid resolved Spending operation");
-    vtxoDestinationScript(status, record.destAddress);
+    vtxoDestinationScript(status2, record.destAddress);
     resolvedIds.add(record.operationId);
   }
   const ids = /* @__PURE__ */ new Set();
   for (const record of journal.operations) {
-    if (!parsePersistedVtxoSpend(status.vaultId, record) || !(record.stage in VTXO_SPEND_STAGE_RANK) || ids.has(record.operationId) || !Number.isSafeInteger(record.amountSats) || record.amountSats < VTXO_DUST_SATS)
+    if (!parsePersistedVtxoSpend(status2.vaultId, record) || !(record.stage in VTXO_SPEND_STAGE_RANK) || ids.has(record.operationId) || !Number.isSafeInteger(record.amountSats) || record.amountSats < VTXO_DUST_SATS)
       throw new Error("Invalid pending Spending operation");
     ids.add(record.operationId);
-    vtxoDestinationScript(status, record.destAddress);
-    if (record.reservePhoneSignature && !reserveSignatureMatches(record, status))
+    vtxoDestinationScript(status2, record.destAddress);
+    if (record.reservePhoneSignature && !reserveSignatureMatches(record, status2))
       throw new Error("Spending reservation signature changed");
     if (record.operatorSubmitAttempted !== void 0 && typeof record.operatorSubmitAttempted !== "boolean")
       throw new Error("Invalid submission ambiguity flag");
@@ -50147,7 +51923,7 @@ function validateSpendingRecoveryJournal(status, raw2) {
         throw new Error("Pre-reservation contains later transaction evidence");
       continue;
     }
-    if (!/^[0-9a-f]{64}$/.test(record.bundleDigest) || !record.unsignedArkPsbt || !record.unsignedCheckpointPsbts?.length || record.checkpointTapscript !== networkPins(status.network).checkpointTapscript)
+    if (!/^[0-9a-f]{64}$/.test(record.bundleDigest) || !record.unsignedArkPsbt || !record.unsignedCheckpointPsbts?.length || record.checkpointTapscript !== networkPins(status2.network).checkpointTapscript)
       throw new Error("Spending operation is missing its exact transaction bundle");
     const unsigned = Transaction2.fromPSBT(base64.decode(record.unsignedArkPsbt));
     const rebuildRecord = record.sdkBundleVersion === 1 ? record : {
@@ -50170,11 +51946,11 @@ function validateSpendingRecoveryJournal(status, raw2) {
         return { scriptHex: hex.encode(output.script), amountSats: Number(output.amount) };
       })
     };
-    const { rebuilt } = buildPersistedVtxoSdkBundle(status, rebuildRecord);
+    const { rebuilt } = buildPersistedVtxoSdkBundle(status2, rebuildRecord);
     const validation = createVaultSdkOperationValidation(
-      status,
+      status2,
       rebuilt.arkTx,
-      xOnly2(networkPins(status.network).operatorSignerPub, "Operator")
+      xOnly(networkPins(status2.network).operatorSignerPub, "Operator")
     );
     validation.assertArkTransaction(unsigned, "unsigned");
     for (const { original, candidate } of checkpointPairsInCanonicalOrder(
@@ -50188,18 +51964,18 @@ function validateSpendingRecoveryJournal(status, raw2) {
     if (record.operatorArkPsbt)
       validation.assertArkTransaction(Transaction2.fromPSBT(base64.decode(record.operatorArkPsbt)), "operator-signed");
     if (record.authorizedPendingProof)
-      requireAuthorizedPendingProof(record.unsignedCheckpointPsbts, record.authorizedPendingProof, status);
+      requireAuthorizedPendingProof(record.unsignedCheckpointPsbts, record.authorizedPendingProof, status2);
     if (record.operatorCheckpointPsbts)
       matchOperatorSignedCheckpoints(
         record.unsignedCheckpointPsbts,
         record.operatorCheckpointPsbts,
-        xOnly2(networkPins(status.network).operatorSignerPub, "Operator")
+        xOnly(networkPins(status2.network).operatorSignerPub, "Operator")
       );
     if (record.checkpointPsbts)
       requireFullyAuthorizedCheckpoints(
         record,
-        status,
-        xOnly2(networkPins(status.network).operatorSignerPub, "Operator")
+        status2,
+        xOnly(networkPins(status2.network).operatorSignerPub, "Operator")
       );
     if (VTXO_SPEND_STAGE_RANK[record.stage] >= 1 && (!record.authorizedPsbt || !record.authorizedPendingProof))
       throw new Error("Authorized Spending operation has incomplete recovery evidence");
@@ -50210,76 +51986,76 @@ function validateSpendingRecoveryJournal(status, raw2) {
   }
   return journal;
 }
-function isVtxoOperationId(value) {
-  return typeof value === "string" && /^[0-9a-f]{32}$/.test(value);
+function isVtxoOperationId(value2) {
+  return typeof value2 === "string" && /^[0-9a-f]{32}$/.test(value2);
 }
-function requireHex(value, bytes2, name) {
+function requireHex(value2, bytes2, name) {
   let decoded;
   try {
-    decoded = hex.decode(String(value || "").toLowerCase());
+    decoded = hex.decode(String(value2 || "").toLowerCase());
   } catch {
     throw new Error(`${name} is not hex`);
   }
   if (decoded.length !== bytes2) throw new Error(`${name} must be ${bytes2} bytes`);
   return decoded;
 }
-function xOnly2(value, name) {
-  const raw2 = String(value || "").toLowerCase();
+function xOnly(value2, name) {
+  const raw2 = String(value2 || "").toLowerCase();
   if (/^(02|03)[0-9a-f]{64}$/.test(raw2)) return hex.decode(raw2.slice(2));
   return requireHex(raw2, 32, name);
 }
 function sameBytes(a, b) {
-  return a.length === b.length && a.every((value, index) => value === b[index]);
+  return a.length === b.length && a.every((value2, index) => value2 === b[index]);
 }
-function requireEnrolledSpendingStatus(status) {
-  const pins = networkPins(status.network);
-  if (!status.enrolled) throw new Error("regular VTXO spending requires an enrolled vault");
-  if (!status.vaultId) throw new Error("vault id required");
-  if (status.vtxoExitDelay !== pins.policyExitDelay) throw new Error("VTXO exit delay does not match");
-  if (status.vtxoExitDelayUnit !== VAULT_POLICY_V1_EXIT_DELAY_UNIT)
+function requireEnrolledSpendingStatus(status2) {
+  const pins = networkPins(status2.network);
+  if (!status2.enrolled) throw new Error("regular VTXO spending requires an enrolled vault");
+  if (!status2.vaultId) throw new Error("vault id required");
+  if (status2.vtxoExitDelay !== pins.policyExitDelay) throw new Error("VTXO exit delay does not match");
+  if (status2.vtxoExitDelayUnit !== VAULT_POLICY_V1_EXIT_DELAY_UNIT)
     throw new Error("VTXO exit delay unit does not match");
   return pins;
 }
-function spendingScriptFromStatus(status) {
-  if (status.templateVersion === LIGHT_PROFILE) {
-    const valid = requireLightStatus(status);
+function spendingScriptFromStatus(status2) {
+  if (status2.templateVersion === LIGHT_PROFILE) {
+    const valid = requireLightStatus(status2);
     return new LightScript(valid.lightDescriptor);
   }
-  return vaultPolicyV1ScriptFromStatus(status);
+  return vaultPolicyV1ScriptFromStatus(status2);
 }
-function vaultPolicyV1ScriptFromStatus(status) {
-  if (status.templateVersion === LIGHT_PROFILE) throw new Error("Light requires its own Spending script");
-  const pins = requireEnrolledSpendingStatus(status);
-  const address = ArkAddress.decode(String(status.spendingArkAddress || ""));
+function vaultPolicyV1ScriptFromStatus(status2) {
+  if (status2.templateVersion === LIGHT_PROFILE) throw new Error("Light requires its own Spending script");
+  const pins = requireEnrolledSpendingStatus(status2);
+  const address = ArkAddress.decode(String(status2.spendingArkAddress || ""));
   if (address.hrp !== pins.arkHrp) throw new Error("spending Ark address does not match this network");
   const params = {
-    userPub: xOnly2(status.phoneBip340Pub, "phone pubkey"),
-    vtxoVaultCosignerPub: xOnly2(status.vtxoVaultCosignerPub, "VTXO VaultCosigner pubkey"),
+    userPub: xOnly(status2.phoneBip340Pub, "phone pubkey"),
+    vtxoVaultCosignerPub: xOnly(status2.vtxoVaultCosignerPub, "VTXO VaultCosigner pubkey"),
     arkdServerPub: address.serverPubKey,
-    delegatePub: xOnly2(status.vtxoDelegatePub, "delegate pubkey"),
+    delegatePub: xOnly(status2.vtxoDelegatePub, "delegate pubkey"),
     exitDelay: BigInt(pins.policyExitDelay),
     exitDelayUnit: VAULT_POLICY_V1_EXIT_DELAY_UNIT,
     network: pins.network,
-    exitDevicePub: xOnly2(status.phoneBip340Pub, "phone pubkey"),
-    exitHardwarePub: xOnly2(status.externalOwnerWalletPub, "hardware pubkey"),
-    ...status.recoveryKeyPub || status.recoveryPub ? { exitRecoveryPub: xOnly2(status.recoveryKeyPub || status.recoveryPub, "recovery pubkey") } : {}
+    exitDevicePub: xOnly(status2.phoneBip340Pub, "phone pubkey"),
+    exitHardwarePub: xOnly(status2.externalOwnerWalletPub, "hardware pubkey"),
+    ...status2.recoveryKeyPub || status2.recoveryPub ? { exitRecoveryPub: xOnly(status2.recoveryKeyPub || status2.recoveryPub, "recovery pubkey") } : {}
   };
   const script = new VaultPolicyV1Script(params);
-  const advertised = requireHex(status.spendingArkScript, 34, "spending Ark script");
+  const advertised = requireHex(status2.spendingArkScript, 34, "spending Ark script");
   if (!sameBytes(script.pkScript, advertised) || !sameBytes(address.pkScript, advertised)) {
     throw new Error("spending Ark address does not match vault-policy-v1");
   }
   return script;
 }
-function vtxoDestinationScript(status, destAddress) {
-  const spendingAddress = ArkAddress.decode(String(status.spendingArkAddress || ""));
+function vtxoDestinationScript(status2, destAddress) {
+  const spendingAddress = ArkAddress.decode(String(status2.spendingArkAddress || ""));
   let destination;
   try {
     destination = ArkAddress.decode(destAddress.trim());
   } catch {
     throw new Error("regular VTXO destination must be an Arkade address");
   }
-  if (destination.hrp !== networkPins(status.network).arkHrp) {
+  if (destination.hrp !== networkPins(status2.network).arkHrp) {
     throw new Error("destination Arkade address does not match this network");
   }
   if (!sameBytes(destination.serverPubKey, spendingAddress.serverPubKey)) {
@@ -50287,33 +52063,33 @@ function vtxoDestinationScript(status, destAddress) {
   }
   return destination.pkScript;
 }
-function reserveDigestInput(pending, status) {
-  if (pending.vaultId !== status.vaultId) throw new Error("VTXO reservation vault does not match status");
+function reserveDigestInput(pending, status2) {
+  if (pending.vaultId !== status2.vaultId) throw new Error("VTXO reservation vault does not match status");
   return {
     operationId: pending.operationId,
     vaultId: pending.vaultId,
-    destScript: vtxoDestinationScript(status, pending.destAddress),
+    destScript: vtxoDestinationScript(status2, pending.destAddress),
     amountSats: pending.amountSats
   };
 }
-function reserveSignatureMatches(pending, status) {
+function reserveSignatureMatches(pending, status2) {
   if (!pending.reservePhoneSignature) return false;
   return verifyVtxoReserveSignature(
-    reserveDigestInput(pending, status),
+    reserveDigestInput(pending, status2),
     pending.reservePhoneSignature,
-    xOnly2(status.phoneBip340Pub, "phone pubkey")
+    xOnly(status2.phoneBip340Pub, "phone pubkey")
   );
 }
-function buildPersistedVtxoSdkBundle(status, pending) {
+function buildPersistedVtxoSdkBundle(status2, pending) {
   if (pending.sdkBundleVersion !== 1 || !pending.reservedInputs || !pending.reservedOutputs || !pending.checkpointTapscript || !persistedReservationFactsAreValid(pending)) {
     throw new Error("fresh SDK spend is missing its validated reservation bundle");
   }
-  const script = spendingScriptFromStatus(status);
+  const script = spendingScriptFromStatus(status2);
   const policyScriptHex = hex.encode(script.pkScript);
   for (const input of pending.reservedInputs) {
     if (input.scriptHex !== policyScriptHex) throw new Error("persisted SDK input is not current vault-policy-v1");
   }
-  const destinationScript = hex.encode(vtxoDestinationScript(status, pending.destAddress));
+  const destinationScript = hex.encode(vtxoDestinationScript(status2, pending.destAddress));
   if (pending.reservedOutputs[0].scriptHex !== destinationScript || pending.reservedOutputs[0].amountSats !== pending.amountSats) {
     throw new Error("persisted SDK destination changed from the reviewed reservation");
   }
@@ -50416,7 +52192,7 @@ function inputSpendLeafHash(tx, inputIndex) {
   const version2 = scriptWithVersion[scriptWithVersion.length - 1];
   return tapLeafHash(scriptFromTapLeafScript(leaves[0]), version2);
 }
-function requireAuthorizedPendingProof(unsignedCheckpointPsbts, authorizedPendingProof, status) {
+function requireAuthorizedPendingProof(unsignedCheckpointPsbts, authorizedPendingProof, status2) {
   const expected = pendingProofFromCheckpoints(unsignedCheckpointPsbts);
   const candidate = Transaction2.fromPSBT(base64.decode(authorizedPendingProof));
   if (candidate.id !== expected.id || candidate.inputsLength !== expected.inputsLength || candidate.outputsLength !== expected.outputsLength) {
@@ -50428,8 +52204,8 @@ function requireAuthorizedPendingProof(unsignedCheckpointPsbts, authorizedPendin
   if (!sameBytes(pendingProofWithoutTapscriptSignatures(expected), pendingProofWithoutTapscriptSignatures(candidate))) {
     throw new Error("Vault authorization changed the pending proof PSBT");
   }
-  const phonePub = xOnly2(status.phoneBip340Pub, "phone pubkey");
-  const vaultPub = xOnly2(status.vtxoVaultCosignerPub, "VTXO VaultCosigner pubkey");
+  const phonePub = xOnly(status2.phoneBip340Pub, "phone pubkey");
+  const vaultPub = xOnly(status2.vtxoVaultCosignerPub, "VTXO VaultCosigner pubkey");
   for (let index = 0; index < candidate.inputsLength; index++) {
     requireExactTapscriptSigners(
       candidate,
@@ -50489,9 +52265,9 @@ function requireNoTapscriptSignatures(tx, context) {
     if (tx.getInput(index).tapScriptSig?.length) throw new Error(`${context} is already signed`);
   }
 }
-function createVaultSdkOperationValidation(status, unsignedArk, operatorPub) {
-  const phonePub = xOnly2(status.phoneBip340Pub, "phone pubkey");
-  const vaultPub = xOnly2(status.vtxoVaultCosignerPub, "VTXO VaultCosigner pubkey");
+function createVaultSdkOperationValidation(status2, unsignedArk, operatorPub) {
+  const phonePub = xOnly(status2.phoneBip340Pub, "phone pubkey");
+  const vaultPub = xOnly(status2.vtxoVaultCosignerPub, "VTXO VaultCosigner pubkey");
   return {
     assertArkTransaction(candidate, stage) {
       requireArkShapeMatches(unsignedArk, candidate, `${stage} SDK validation`);
@@ -50551,12 +52327,12 @@ function matchOperatorSignedCheckpoints(expectedCheckpointPsbts, candidateCheckp
     }
   );
 }
-function requireFullyAuthorizedCheckpoints(pending, status, operatorPub, checkpointPsbts = pending.checkpointPsbts) {
+function requireFullyAuthorizedCheckpoints(pending, status2, operatorPub, checkpointPsbts = pending.checkpointPsbts) {
   if (!pending.unsignedCheckpointPsbts?.length || !checkpointPsbts?.length) {
     throw new VtxoSpendInFlightError(pending.arkTxid, pending.operationId);
   }
-  const phonePub = xOnly2(status.phoneBip340Pub, "phone pubkey");
-  const vaultPub = xOnly2(status.vtxoVaultCosignerPub, "VTXO VaultCosigner pubkey");
+  const phonePub = xOnly(status2.phoneBip340Pub, "phone pubkey");
+  const vaultPub = xOnly(status2.vtxoVaultCosignerPub, "VTXO VaultCosigner pubkey");
   return checkpointPairsInCanonicalOrder(pending.unsignedCheckpointPsbts, checkpointPsbts, "Vault authorization").map(
     ({ original, candidate }) => {
       requireExactTapscriptSigners(
@@ -50590,6 +52366,200 @@ init_define_import_meta_env();
 // src/lib/vault/signIn.ts
 init_define_import_meta_env();
 
+// src/lib/vault/program/connectorEnroll.ts
+init_define_import_meta_env();
+
+// src/lib/vault/vtxo/board.ts
+init_define_import_meta_env();
+init_secp256k1();
+init_sha2();
+init_base();
+var BOARDING_PROGRAM = "vault-board-v1";
+var BOARDING_SCHEMA = "arkade-vault/board-v1";
+var BOARDING_TEMPLATE = "vault-board-v1-boarding-vault-and-operator";
+var BOARDING_EXIT_DELAY = networkPins("mutinynet").boardExitDelay;
+var BOARDING_EXIT_DELAY_UNIT = "seconds";
+var MUTINYNET_OPERATOR_SIGNER_PUB = networkPins("mutinynet").operatorSignerPub;
+var BOARDING_KEY_SALT = sha256(encodeUtf82("arkade-vault/vault-board-v1/boarding-key/hkdf-sha256-v1"));
+var SECP256K1_ORDER = BigInt("0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141");
+function boardingProgramDigestFor(network2) {
+  const pins = networkPins(network2);
+  return bytesToHex4(
+    sha256(
+      encodeUtf82(
+        JSON.stringify({
+          schema: BOARDING_SCHEMA,
+          program: BOARDING_PROGRAM,
+          template: BOARDING_TEMPLATE,
+          exitDelay: pins.boardExitDelay,
+          exitDelayUnit: BOARDING_EXIT_DELAY_UNIT
+        })
+      )
+    )
+  );
+}
+var BOARDING_PROGRAM_DIGEST = boardingProgramDigestFor("mutinynet");
+function requireCompressedKey(value2, name) {
+  const key = requireLowerHex2(value2, name, 33);
+  const bytes2 = hexToBytes4(key);
+  if (bytes2[0] !== 2 && bytes2[0] !== 3 || !secp256k1.utils.isValidPublicKey(bytes2, true)) {
+    throw new Error(`${name} is not a compressed secp256k1 key`);
+  }
+  return key;
+}
+function requireBoardingDescriptor(raw2, expected) {
+  if (!raw2 || typeof raw2 !== "object") throw new Error("vault-board-v1 descriptor required");
+  const pins = networkPins(expected.network);
+  const descriptor = raw2;
+  if (descriptor.schema !== BOARDING_SCHEMA || descriptor.program !== BOARDING_PROGRAM || descriptor.template !== BOARDING_TEMPLATE || descriptor.network !== expected.network || descriptor.exitDelay !== pins.boardExitDelay || descriptor.exitDelayUnit !== BOARDING_EXIT_DELAY_UNIT) {
+    throw new Error("vault-board-v1 descriptor does not match this release");
+  }
+  const boardingPub = requireCompressedKey(descriptor.boardingPub, "boardingPub");
+  const recoveryPub = requireCompressedKey(descriptor.recoveryPhonePub, "recoveryPhonePub");
+  const cosignerPub = requireCompressedKey(descriptor.vaultBoardCosignerPub, "vaultBoardCosignerPub");
+  const operatorPub = requireCompressedKey(descriptor.operatorPub, "operatorPub");
+  if (operatorPub !== pins.operatorSignerPub) {
+    throw new Error("vault-board-v1 Operator does not match this release");
+  }
+  if (boardingPub !== expected.boardingPub || recoveryPub !== requireCompressedKey(expected.phonePub, "phoneBip340Pub")) {
+    throw new Error("vault-board-v1 descriptor keys do not match this wallet");
+  }
+  const xOnly3 = [boardingPub, recoveryPub, cosignerPub, operatorPub].map((key) => key.slice(2));
+  if (new Set(xOnly3).size !== xOnly3.length) throw new Error("vault-board-v1 roles must use distinct keys");
+  const program = createBoardingProgramScript(
+    {
+      name: BOARDING_PROGRAM,
+      boardingPubKey: hexToBytes4(boardingPub).slice(1),
+      cosignerPubKey: hexToBytes4(cosignerPub).slice(1),
+      recoveryPubKey: hexToBytes4(recoveryPub).slice(1)
+    },
+    hexToBytes4(pins.operatorSignerPub).slice(1),
+    { type: "seconds", value: BigInt(pins.boardExitDelay) }
+  );
+  const script = requireLowerHex2(descriptor.script, "vault-board-v1 script", 34);
+  const address = program.onchainAddress(getNetwork(pins.sdkNetwork));
+  if (hex.encode(program.pkScript) !== script || descriptor.address !== address) {
+    throw new Error("vault-board-v1 script or address does not match its exact program");
+  }
+  return descriptor;
+}
+function requireBoardingStatus(status2, expectedBoardingPub) {
+  if (status2.vtxoBoardingProgram !== BOARDING_PROGRAM || !status2.vtxoBoardingActive) {
+    throw new Error("vault is not enrolled for vault-board-v1");
+  }
+  const descriptor = requireBoardingDescriptor(status2.vtxoBoardingDescriptor, {
+    vaultId: status2.vaultId,
+    phonePub: String(status2.phoneBip340Pub || ""),
+    boardingPub: expectedBoardingPub,
+    network: status2.network
+  });
+  if (descriptor.script !== String(status2.vtxoBoardingScript || "").toLowerCase() || descriptor.address !== status2.vtxoBoardingAddress || descriptor.exitDelay !== status2.vtxoBoardingExitDelay || descriptor.exitDelayUnit !== status2.vtxoBoardingExitDelayUnit) {
+    throw new Error("vault-board-v1 status descriptor changed");
+  }
+  if (!status2.vtxoBoardingDescriptorHash || !/^[0-9a-f]{64}$/.test(status2.vtxoBoardingDescriptorHash)) {
+    throw new Error("vault-board-v1 descriptor hash required");
+  }
+  return descriptor;
+}
+
+// src/lib/vault/program/connectorEnroll.ts
+function requirePinShape(pin) {
+  if (!pin || typeof pin !== "object") fail2("connector enrollment pin required");
+  if (!pin.vaultId.trim() || pin.network !== "mainnet" && pin.network !== "mutinynet")
+    fail2("connector enrollment pin required");
+  requireCompressedHex2(pin.connectorPub, "connectorPub");
+  if (pin.connectorType !== "p2wpkh" && pin.connectorType !== "p2tr") fail2("connector enrollment pin required");
+  requireUint322(pin.connectorFingerprint, "connectorFingerprint");
+  if (!Array.isArray(pin.connectorPath) || pin.connectorPath.length < 1 || pin.connectorPath.length > 255)
+    fail2("connector enrollment pin required");
+  pin.connectorPath.forEach((step) => requireUint322(step, "connectorPath"));
+  if (!/^[0-9a-f]{64}$/.test(pin.enrollmentDigest) || !/^[0-9a-f]{64}$/.test(pin.descriptorHash))
+    fail2("connector enrollment pin required");
+  if (!pin.savingsAddress.trim() || !/^[0-9a-f]+$/.test(pin.savingsScript)) fail2("connector enrollment pin required");
+}
+function verifyConnectorStatus(status2, pin, options2) {
+  requirePinShape(pin);
+  if (!status2?.enrolled) fail2("vault is not enrolled");
+  if (status2.vaultId !== pin.vaultId) fail2("connector vault id does not match enrollment");
+  if (status2.network !== pin.network) fail2("connector network does not match enrollment");
+  if (status2.templateVersion !== CONNECTOR_TEMPLATE2) fail2("vault is not a connector enrollment");
+  const identity2 = status2.connectorEnrollment;
+  if (!identity2 || identity2.connectorPub !== pin.connectorPub || identity2.connectorType !== pin.connectorType || identity2.connectorFingerprint !== pin.connectorFingerprint || identity2.connectorPath.join("/") !== pin.connectorPath.join("/") || identity2.enrollmentDigest !== pin.enrollmentDigest || identity2.descriptorHash !== pin.descriptorHash)
+    fail2("connector status origin does not match enrollment");
+  if (status2.protectionTier !== pin.protectionTier) fail2("connector protection tier changed");
+  if (String(status2.externalOwnerWalletPub || "").toLowerCase() !== pin.connectorPub.toLowerCase())
+    fail2("connector key does not match enrolled hardware");
+  if (status2.savingsAddress !== pin.savingsAddress) fail2("connector Savings address changed");
+  if (String(status2.savingsScript || "").toLowerCase() !== pin.savingsScript.toLowerCase())
+    fail2("connector Savings script changed");
+  const phonePub = String(status2.phoneBip340Pub || "");
+  const phoneDirectP256 = String(status2.phoneDirectP256 || "");
+  const vaultCosignerBase = String(status2.vaultCosignerBasePub || "");
+  const arkadeCosignerBase = String(status2.arkadeCosignerBasePub || "");
+  if (!phonePub || !phoneDirectP256 || !vaultCosignerBase || !arkadeCosignerBase)
+    fail2("connector status is missing enrolled facts");
+  const policy = validateSpendingPolicy2(status2.spendingPolicy, pin.network);
+  if (status2.spendingPolicyDigest && status2.spendingPolicyDigest !== spendingPolicyDigest2(policy, pin.network))
+    fail2("connector spending policy changed");
+  const arkadeOrigin = String(options2?.arkadeOrigin ?? status2.arkadeCosignerOrigin ?? "").trim();
+  const arkadeVersion = String(options2?.arkadeVersion ?? status2.arkadeCosignerVersion ?? "").trim();
+  if (!arkadeOrigin || !arkadeVersion) fail2("connector status is missing Arkade identity");
+  const recoveryPub = String(status2.recoveryPub || status2.recoveryKeyPub || "") || void 0;
+  let boarding;
+  if (status2.vtxoBoardingDescriptor) {
+    boarding = requireBoardingDescriptor(status2.vtxoBoardingDescriptor, {
+      vaultId: pin.vaultId,
+      phonePub,
+      boardingPub: options2?.boardingPub ?? status2.vtxoBoardingDescriptor.boardingPub,
+      network: pin.network
+    });
+  }
+  const preview = buildConnectorEnrollmentPreview2({
+    vaultId: pin.vaultId,
+    network: pin.network,
+    protectionTier: pin.protectionTier,
+    phonePub,
+    phoneDirectP256,
+    ...recoveryPub ? { recoveryPub } : {},
+    vaultCosignerBase,
+    arkadeCosignerBase,
+    arkadeOrigin,
+    arkadeVersion,
+    spendingPolicy: policy,
+    origin: {
+      connectorPub: pin.connectorPub,
+      connectorType: pin.connectorType,
+      connectorFingerprint: pin.connectorFingerprint,
+      connectorPath: [...pin.connectorPath]
+    },
+    ...boarding ? { boarding } : {}
+  });
+  if (preview.digest !== pin.enrollmentDigest.toLowerCase())
+    fail2("enrolled connector digest does not match this wallet");
+  if (boarding && preview.compositeHash !== identity2.descriptorHash) fail2("connector composite hash changed");
+  if (!boarding) fail2("connector boarding descriptor required");
+  if (boarding) {
+    if (!status2.vtxoBoardingDescriptorHash) fail2("vault-board-v1 descriptor hash required");
+    if (preview.boardingHash !== status2.vtxoBoardingDescriptorHash.toLowerCase())
+      fail2("enrolled boarding descriptor does not match this wallet");
+  }
+}
+function connectorPinFromVerifiedStatus(status2) {
+  const identity2 = status2.connectorEnrollment;
+  if (!identity2 || status2.network !== "mainnet" && status2.network !== "mutinynet" || status2.protectionTier !== "standard" && status2.protectionTier !== "advanced")
+    fail2("connector enrollment identity required");
+  const pin = {
+    vaultId: status2.vaultId,
+    network: status2.network,
+    protectionTier: status2.protectionTier,
+    ...identity2,
+    savingsAddress: status2.savingsAddress,
+    savingsScript: status2.savingsScript
+  };
+  verifyConnectorStatus(status2, pin);
+  return pin;
+}
+
 // src/lib/vault/passkeyBinding.ts
 init_define_import_meta_env();
 var encoder3 = new TextEncoder();
@@ -50600,7 +52570,7 @@ var ZERO2 = Uint8Array.of(0);
 
 // src/lib/vault/signIn.ts
 var PRF_SALT4 = new TextEncoder().encode("arkade-2fa-vault/prf/v1");
-var HKDF_INFO4 = new TextEncoder().encode("arkade-2fa-vault/kek/v1");
+var HKDF_INFO3 = new TextEncoder().encode("arkade-2fa-vault/kek/v1");
 
 // src/lib/vault/program/kitBackup.ts
 function kitFromFacts(input) {
@@ -50617,7 +52587,7 @@ function kitFromFacts(input) {
   const spendingPolicy = input.status?.spendingPolicy;
   const statusSpendingPolicyDigest = String(input.status?.spendingPolicyDigest || "").trim();
   const protectionTier = input.status?.protectionTier;
-  if (liveBases && phonePub && phoneDirectP256 && vaultId && signerOrigin && signerVersion && spendingPolicy && spendingPolicy.program === "vault-policy-v1" && statusSpendingPolicyDigest && protectionTier && protectionTier !== "light" && isSupportedVaultNetwork(input.status?.network) && (liveTemplate === SAVINGS_TEMPLATE || liveTemplate === CONNECTOR_TEMPLATE)) {
+  if (liveBases && phonePub && phoneDirectP256 && vaultId && signerOrigin && signerVersion && spendingPolicy && spendingPolicy.program === "vault-policy-v1" && statusSpendingPolicyDigest && protectionTier && protectionTier !== "light" && isSupportedVaultNetwork2(input.status?.network) && (liveTemplate === SAVINGS_TEMPLATE2 || liveTemplate === CONNECTOR_TEMPLATE2)) {
     try {
       const descriptor = buildVaultProgramDescriptor({
         vaultId,
@@ -50646,7 +52616,7 @@ function kitFromFacts(input) {
       if (input.status?.savingsScript && descriptor.savings.script !== input.status.savingsScript) {
         throw new Error("rebuilt map does not match this vault");
       }
-      return buildRecoveryKit(descriptor);
+      return buildRecoveryKit2(descriptor);
     } catch {
       return null;
     }
@@ -50660,10 +52630,10 @@ init_base();
 var maxArchiveBytes = 12e6;
 var outpoint = (v) => `${v.txid}:${v.vout}`;
 var canonicalId = (id) => /^[0-9a-f]{64}$/.test(id);
-function normalizeRecoveryChain(chain2) {
-  if (chain2.length > 4096) throw new Error("Recovery path limit exceeded");
+function normalizeRecoveryChain(chain3) {
+  if (chain3.length > 4096) throw new Error("Recovery path limit exceeded");
   const unique = /* @__PURE__ */ new Map();
-  for (const node of chain2) {
+  for (const node of chain3) {
     const spends = node.spends.map((reference) => {
       if (canonicalId(reference)) return reference;
       const match2 = /^([0-9a-f]{64}):(0|[1-9][0-9]{0,9})$/.exec(reference);
@@ -50683,8 +52653,8 @@ function normalizeRecoveryChain(chain2) {
   }
   return [...unique.values()];
 }
-function packExitArchive(value) {
-  return JSON.stringify(value, (_, v) => typeof v === "bigint" ? { lightBigInt: String(v) } : v);
+function packExitArchive(value2) {
+  return JSON.stringify(value2, (_, v) => typeof v === "bigint" ? { lightBigInt: String(v) } : v);
 }
 function unpack(raw2) {
   return JSON.parse(raw2, (_, v) => {
@@ -50701,45 +52671,45 @@ function requireExitArchiveInfo(info, d) {
   if (info.network !== pins.operatorGetInfoNetwork || info.signerPubkey !== pins.operatorSignerPub || info.checkpointTapscript !== pins.checkpointTapscript || info.forfeitPubkey !== pins.checkpointForfeitPub)
     throw new Error("Recovery data does not match this release");
 }
-function validateExitArchive(value, d) {
-  if (!value || JSON.stringify(value).length > maxArchiveBytes || value.version !== 1 || value.descriptorHash !== d.descriptorHash || !Number.isFinite(Date.parse(value.capturedAt)))
+function validateExitArchive(value2, d) {
+  if (!value2 || JSON.stringify(value2).length > maxArchiveBytes || value2.version !== 1 || value2.descriptorHash !== d.descriptorHash || !Number.isFinite(Date.parse(value2.capturedAt)))
     throw new Error("Recovery data does not match this wallet");
-  const info = unpack(value.info);
+  const info = unpack(value2.info);
   requireExitArchiveInfo(info, d);
-  const rawCoins = unpack(value.coins);
+  const rawCoins = unpack(value2.coins);
   if (!Array.isArray(rawCoins) || rawCoins.length > 512) throw new Error("Recovery output limit exceeded");
-  const coins = rawCoins.map((coin) => ({
+  const coins2 = rawCoins.map((coin) => ({
     ...coin,
     createdAt: new Date(coin.createdAt),
     ...coin.expiresAt ? { expiresAt: new Date(coin.expiresAt) } : {}
   }));
   const seen = /* @__PURE__ */ new Set();
   const transactions = /* @__PURE__ */ new Map();
-  if (!value.transactions || Object.keys(value.transactions).length > 4096)
+  if (!value2.transactions || Object.keys(value2.transactions).length > 4096)
     throw new Error("Recovery transaction limit exceeded");
-  for (const [id, psbt] of Object.entries(value.transactions)) {
+  for (const [id, psbt] of Object.entries(value2.transactions)) {
     if (!canonicalId(id) || typeof psbt !== "string" || psbt.length > 1e6)
       throw new Error("Invalid saved recovery transaction");
     const tx = Transaction2.fromPSBT(base64.decode(psbt));
     if (tx.id !== id) throw new Error("Recovery transaction changed");
     transactions.set(id, tx);
   }
-  for (const coin of coins) {
+  for (const coin of coins2) {
     const key = outpoint(coin);
     if (!canonicalId(coin.txid) || !Number.isSafeInteger(coin.vout) || coin.vout < 0 || coin.vout > 4294967295 || !Number.isSafeInteger(coin.value) || coin.value <= 0 || coin.value > 21e14 || coin.script !== d.scriptPubKey || coin.isSpent || coin.spentBy || seen.has(key))
       throw new Error("Saved recovery output changed");
     seen.add(key);
-    const chain2 = value.branches?.[key];
-    if (!Array.isArray(chain2) || !chain2.length || chain2.length > 4096 || new Set(chain2.map((node) => node.txid)).size !== chain2.length || !chain2.some((node) => node.txid === coin.txid))
+    const chain3 = value2.branches?.[key];
+    if (!Array.isArray(chain3) || !chain3.length || chain3.length > 4096 || new Set(chain3.map((node) => node.txid)).size !== chain3.length || !chain3.some((node) => node.txid === coin.txid))
       throw new Error("Recovery path is incomplete");
-    for (const node of chain2) {
+    for (const node of chain3) {
       if (!canonicalId(node.txid) || !Array.isArray(node.spends) || node.spends.some((id) => !canonicalId(id)) || !Object.values(ChainTxType).includes(node.type) || node.type === ChainTxType.UNSPECIFIED || node.type !== ChainTxType.COMMITMENT && !transactions.has(node.txid))
         throw new Error("Recovery path is incomplete");
     }
-    const nodes = new Map(chain2.map((node) => [node.txid, node]));
-    if (!chain2.some((node) => node.type === ChainTxType.COMMITMENT))
+    const nodes = new Map(chain3.map((node) => [node.txid, node]));
+    if (!chain3.some((node) => node.type === ChainTxType.COMMITMENT))
       throw new Error("Recovery path has no Bitcoin commitment");
-    for (const node of chain2) {
+    for (const node of chain3) {
       if (node.type === ChainTxType.COMMITMENT) continue;
       const tx = transactions.get(node.txid);
       const physical = /* @__PURE__ */ new Set();
@@ -50768,11 +52738,11 @@ function validateExitArchive(value, d) {
     if (!output || output.amount !== BigInt(coin.value) || hex.encode(output.script) !== d.scriptPubKey)
       throw new Error("Recovery output does not match its transaction");
   }
-  return { archive: value, info, coins };
+  return { archive: value2, info, coins: coins2 };
 }
 function exitArchiveProviders(archive, d) {
-  const { info, coins } = validateExitArchive(archive, d);
-  const source = {
+  const { info, coins: coins2 } = validateExitArchive(archive, d);
+  const source2 = {
     name: "vaulted-device-archive",
     getVtxoChain: async (coin) => archive.branches[outpoint(coin)] ?? null,
     getVirtualTxs: async (ids) => new Map(ids.flatMap((id) => archive.transactions[id] ? [[id, archive.transactions[id]]] : []))
@@ -50802,9 +52772,9 @@ function exitArchiveProviders(archive, d) {
       if (!signal.aborted)
         await new Promise((resolve) => signal.addEventListener("abort", () => resolve(), { once: true }));
     },
-    getVtxos: async (options) => ({
-      vtxos: coins.filter(
-        (coin) => options?.outpoints?.some((v) => outpoint(v) === outpoint(coin)) || options?.scripts?.includes(coin.script)
+    getVtxos: async (options2) => ({
+      vtxos: coins2.filter(
+        (coin) => options2?.outpoints?.some((v) => outpoint(v) === outpoint(coin)) || options2?.scripts?.includes(coin.script)
       )
     }),
     getVtxoChain: async (coin) => ({ chain: archive.branches[outpoint(coin)] ?? [] }),
@@ -50812,7 +52782,7 @@ function exitArchiveProviders(archive, d) {
       txs: ids.flatMap((id) => archive.transactions[id] ? [archive.transactions[id]] : [])
     })
   });
-  return { arkProvider, indexerProvider, source, coins };
+  return { arkProvider, indexerProvider, source: source2, coins: coins2 };
 }
 async function captureExitArchive(d, repository, previous) {
   const url = networkPins(d.network).operatorOrigin;
@@ -50820,10 +52790,10 @@ async function captureExitArchive(d, repository, previous) {
   const info = await new RestArkProvider(url).getInfo();
   requireExitArchiveInfo(info, d);
   const getCoins = async () => (await indexer.getVtxos({ scripts: [d.scriptPubKey] })).vtxos.filter((v) => !v.isSpent);
-  const coins = await getCoins();
-  if (coins.length > 512) throw new Error("Recovery output limit exceeded");
+  const coins2 = await getCoins();
+  if (coins2.length > 512) throw new Error("Recovery output limit exceeded");
   const previousCoins = previous ? validateExitArchive(previous, d).coins : [];
-  const removed = previousCoins.filter((old) => !coins.some((coin) => outpoint(coin) === outpoint(old)));
+  const removed = previousCoins.filter((old) => !coins2.some((coin) => outpoint(coin) === outpoint(old)));
   if (removed.length) {
     const resolved = (await indexer.getVtxos({ outpoints: removed })).vtxos;
     if (removed.some((old) => !resolved.some((coin) => outpoint(coin) === outpoint(old) && coin.isSpent)))
@@ -50832,11 +52802,11 @@ async function captureExitArchive(d, repository, previous) {
   const resolver = createExitChainResolver({ indexer, repository });
   const branches = {};
   const wanted = /* @__PURE__ */ new Set();
-  for (const coin of coins) {
+  for (const coin of coins2) {
     const prior = previousCoins.find((old) => outpoint(old) === outpoint(coin) && old.value === coin.value);
-    const chain2 = prior ? previous.branches[outpoint(coin)] : normalizeRecoveryChain(await resolver.getVtxoChain(coin));
-    branches[outpoint(coin)] = chain2;
-    for (const node of chain2) if (node.type !== ChainTxType.COMMITMENT) wanted.add(node.txid);
+    const chain3 = prior ? previous.branches[outpoint(coin)] : normalizeRecoveryChain(await resolver.getVtxoChain(coin));
+    branches[outpoint(coin)] = chain3;
+    for (const node of chain3) if (node.type !== ChainTxType.COMMITMENT) wanted.add(node.txid);
     if (wanted.size > 4096) throw new Error("Recovery transaction limit exceeded");
   }
   const transactions = {};
@@ -50848,15 +52818,15 @@ async function captureExitArchive(d, repository, previous) {
       transactions[Transaction2.fromPSBT(base64.decode(psbt)).id] = psbt;
     }
   }
-  const fingerprint2 = (values) => values.map((v) => `${outpoint(v)}:${v.value}:${v.script}`).sort().join("|");
-  if (fingerprint2(coins) !== fingerprint2(await getCoins()))
+  const fingerprint3 = (values) => values.map((v) => `${outpoint(v)}:${v.value}:${v.script}`).sort().join("|");
+  if (fingerprint3(coins2) !== fingerprint3(await getCoins()))
     throw new Error("Your balance changed while saving recovery data");
   const archive = {
     version: 1,
     descriptorHash: d.descriptorHash,
     capturedAt: (/* @__PURE__ */ new Date()).toISOString(),
     info: packExitArchive(info),
-    coins: packExitArchive(coins),
+    coins: packExitArchive(coins2),
     branches,
     transactions
   };
@@ -50864,23 +52834,68 @@ async function captureExitArchive(d, repository, previous) {
   return archive;
 }
 
+// src/lib/vault/program/enroll.ts
+init_define_import_meta_env();
+init_sha2();
+function appendLE323(parts, value2) {
+  const bytes2 = new Uint8Array(4);
+  new DataView(bytes2.buffer).setUint32(0, value2, true);
+  parts.push(bytes2);
+}
+function appendText5(parts, value2) {
+  const bytes2 = encodeUtf82(value2);
+  appendLE323(parts, bytes2.length);
+  parts.push(bytes2);
+}
+function hashBoardingEnrollmentDescriptor(descriptor) {
+  const savingsHash = hashVaultProgramDescriptor2(descriptor.savings);
+  const fields = [
+    descriptor.schema,
+    descriptor.vaultId,
+    savingsHash,
+    descriptor.boarding.schema,
+    descriptor.boarding.program,
+    descriptor.boarding.template,
+    descriptor.boarding.network,
+    descriptor.boarding.boardingPub,
+    descriptor.boarding.recoveryPhonePub,
+    descriptor.boarding.vaultBoardCosignerPub,
+    descriptor.boarding.operatorPub,
+    descriptor.boarding.exitDelayUnit,
+    descriptor.boarding.script,
+    descriptor.boarding.address
+  ];
+  const parts = [];
+  for (const field2 of fields) appendText5(parts, field2);
+  appendLE323(parts, descriptor.boarding.exitDelay);
+  const payload = new Uint8Array(parts.reduce((length, part) => length + part.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    payload.set(part, offset);
+    offset += part.length;
+  }
+  const digest = bytesToHex4(sha256(payload));
+  payload.fill(0);
+  return digest;
+}
+
 // src/lib/vault/vtxo/recoveryArchive.ts
-function vaultRecoveryBinding(kit, status) {
-  const valid = parseRecoveryKit(kit);
-  const rebuilt = kitFromFacts({ status });
-  if (!rebuilt || rebuilt.descriptorHash !== valid.descriptorHash || status.vaultId !== valid.descriptor.vaultId)
+function vaultRecoveryBinding(kit2, status2) {
+  const valid = parseRecoveryKit2(kit2);
+  const rebuilt = kitFromFacts({ status: status2 });
+  if (!rebuilt || rebuilt.descriptorHash !== valid.descriptorHash || status2.vaultId !== valid.descriptor.vaultId)
     throw new Error("Recovery status does not match the saved vault descriptor");
-  const script = vaultPolicyV1ScriptFromStatus(status);
-  if (hex.encode(script.params.arkdServerPub) !== networkPins(status.network).operatorSignerPub.slice(2))
+  const script = vaultPolicyV1ScriptFromStatus(status2);
+  if (hex.encode(script.params.arkdServerPub) !== networkPins(status2.network).operatorSignerPub.slice(2))
     throw new Error("Recovery Operator does not match this release");
-  const boarding = requireBoardingStatus(status, String(status.vtxoBoardingDescriptor?.boardingPub || ""));
-  if (status.templateVersion === CONNECTOR_TEMPLATE) connectorPinFromVerifiedStatus(status);
+  const boarding = requireBoardingStatus(status2, String(status2.vtxoBoardingDescriptor?.boardingPub || ""));
+  if (status2.templateVersion === CONNECTOR_TEMPLATE2) connectorPinFromVerifiedStatus(status2);
   else if (hashBoardingEnrollmentDescriptor({
     schema: "arkade-vault/enrollment-with-board-v1",
-    vaultId: status.vaultId,
+    vaultId: status2.vaultId,
     savings: valid.descriptor,
     boarding
-  }) !== status.vtxoBoardingDescriptorHash)
+  }) !== status2.vtxoBoardingDescriptorHash)
     throw new Error("Recovery enrollment composite changed");
   const descriptorHash = hex.encode(
     sha256(
@@ -50896,6 +52911,42 @@ function vaultRecoveryBinding(kit, status) {
     )
   );
   return { descriptorHash, scriptPubKey: hex.encode(script.pkScript), network: valid.descriptor.network };
+}
+function validateVaultRecoveryArchive(value2) {
+  if (!value2 || value2.name !== "vaulted-program-recovery-data" || value2.version !== 1)
+    throw new Error("Invalid program recovery data");
+  const binding2 = vaultRecoveryBinding(value2.kit, value2.status);
+  validateExitArchive(value2.spending, binding2);
+  if (!Array.isArray(value2.onchain) || value2.onchain.length > 1024 || JSON.stringify(value2).length > 24e6)
+    throw new Error("Onchain recovery data exceeds the archive limit");
+  const scripts = new Set(archiveAddresses(value2.kit, value2.status).map((tree) => tree.script));
+  const seen = /* @__PURE__ */ new Set();
+  for (const coin of value2.onchain) {
+    const outpoint2 = `${coin.txid}:${coin.vout}`;
+    if (!/^[0-9a-f]{64}$/.test(coin.txid) || !Number.isSafeInteger(coin.vout) || coin.vout < 0 || !Number.isSafeInteger(coin.value) || coin.value <= 0 || !scripts.has(coin.script) || seen.has(outpoint2) || typeof coin.parentHex !== "string" || coin.parentHex.length > 8e6)
+      throw new Error("Invalid onchain recovery output");
+    seen.add(outpoint2);
+    const parent = Transaction2.fromRaw(hex.decode(coin.parentHex), {
+      allowUnknownInputs: true,
+      allowUnknownOutputs: true
+    });
+    const output = parent.getOutput(coin.vout);
+    if (parent.id !== coin.txid || output.amount !== BigInt(coin.value) || hex.encode(output.script) !== coin.script)
+      throw new Error("Onchain recovery parent changed");
+  }
+  return value2;
+}
+function archiveAddresses(kit2, status2) {
+  return [
+    kit2.descriptor.savings,
+    ...Object.values(kit2.descriptor.pending),
+    ...Object.values(kit2.descriptor.quarantine),
+    requireBoardingStatus(status2, status2.vtxoBoardingDescriptor.boardingPub)
+  ];
+}
+function vaultArchiveProviders(value2) {
+  const valid = validateVaultRecoveryArchive(value2);
+  return exitArchiveProviders(valid.spending, vaultRecoveryBinding(valid.kit, valid.status));
 }
 
 // src/lib/vault/recovery/journals.ts
@@ -50914,14 +52965,17 @@ init_define_import_meta_env();
 var MAX_ENTRIES = 256;
 var MAX_JOURNAL_BYTES = 12e6;
 var encoder4 = new TextEncoder();
-var isHex32 = (value) => typeof value === "string" && /^[0-9a-f]{64}$/.test(value);
-function canonical(value) {
+var isHex32 = (value2) => typeof value2 === "string" && /^[0-9a-f]{64}$/.test(value2);
+function canonical(value2) {
   return JSON.stringify(
-    value,
+    value2,
     (_, item) => item && typeof item === "object" && !Array.isArray(item) ? Object.fromEntries(
       Object.keys(item).sort().map((key) => [key, item[key]])
     ) : item
   );
+}
+function copy(value2) {
+  return JSON.parse(JSON.stringify(value2));
 }
 function requireBinding(binding2) {
   if (!binding2 || typeof binding2.vaultId !== "string" || !binding2.vaultId || binding2.vaultId.length > 128 || !["mainnet", "mutinynet"].includes(binding2.network) || !isHex32(binding2.descriptorHash) || !/^5120[0-9a-f]{64}$/.test(binding2.spendingScript) || !/^(02|03)[0-9a-f]{64}$/.test(binding2.phonePub))
@@ -50992,27 +53046,552 @@ function validateLightningRecoveryJournal(journal, binding2) {
   }
   return journal;
 }
-
-// src/lib/vault/recovery/journals.ts
-function recoveryLightningBinding(status) {
-  const light = status.templateVersion === LIGHT_PROFILE ? requireLightStatus(status) : null;
-  const kit = light ? null : kitFromFacts({ status });
-  if (!light && !kit) throw new Error("Missing recovery descriptor");
+function lightningArchiveProviders(entry, binding2) {
+  const exitBinding = lightningExitBinding(entry, binding2);
   return {
-    vaultId: status.vaultId,
-    network: status.network,
-    phonePub: String(status.phoneBip340Pub || ""),
-    spendingScript: hex.encode(spendingScriptFromStatus(status).pkScript),
-    descriptorHash: light ? lightDescriptorDigest(light.lightDescriptor) : vaultRecoveryBinding(kit, status).descriptorHash
+    ...exitArchiveProviders(entry.exit, exitBinding),
+    contract: copy(entry.contract),
+    signingDescriptor: rfqSignerOf(entry.record).signingDescriptor,
+    binding: exitBinding
   };
 }
-function validateRecoveryJournals(status, data) {
-  validateSpendingRecoveryJournal(status, data.spendingJournal);
-  validateLightningRecoveryJournal(data.lightningJournal, recoveryLightningBinding(status));
+
+// src/lib/vault/recovery/journals.ts
+function recoveryLightningBinding(status2) {
+  const light = status2.templateVersion === LIGHT_PROFILE ? requireLightStatus(status2) : null;
+  const kit2 = light ? null : kitFromFacts({ status: status2 });
+  if (!light && !kit2) throw new Error("Missing recovery descriptor");
+  return {
+    vaultId: status2.vaultId,
+    network: status2.network,
+    phonePub: String(status2.phoneBip340Pub || ""),
+    spendingScript: hex.encode(spendingScriptFromStatus(status2).pkScript),
+    descriptorHash: light ? lightDescriptorDigest(light.lightDescriptor) : vaultRecoveryBinding(kit2, status2).descriptorHash
+  };
+}
+function validateRecoveryJournals(status2, data) {
+  validateSpendingRecoveryJournal(status2, data.spendingJournal);
+  validateLightningRecoveryJournal(data.lightningJournal, recoveryLightningBinding(status2));
   return data;
 }
 
+// src/lib/vault/recovery/backupCodec.ts
+init_base();
+init_secp256k1();
+
+// src/lib/vault/program/connectorStore.ts
+init_define_import_meta_env();
+init_base();
+init_btc_signer();
+
+// src/lib/vault/program/connectorPayment.ts
+init_define_import_meta_env();
+init_base();
+init_btc_signer();
+init_psbt();
+init_payment();
+init_secp256k1();
+var OPTIONS = { version: 2, allowUnknownInputs: true, allowUnknownOutputs: true, allowUnknown: true };
+function prepareConnectorPayment(input) {
+  if (connectorEnrollmentDigest2(input.contract, input.origin) !== input.enrollmentDigest)
+    throw new Error("connector enrollment pin mismatch");
+  const phonePub = input.contract.phonePub;
+  const connectorPublicKey = input.origin.publicKey.slice();
+  const connectorType = input.contract.connectorType;
+  const f = buildConnectorFamily2(input.contract);
+  const scripts = [f.savings.script, f.connector.script];
+  const coins2 = [input.savings, input.reserve];
+  if (coins2[0].txid === coins2[1].txid && coins2[0].vout === coins2[1].vout) throw new Error("duplicate connector input");
+  const tx = new Transaction(OPTIONS);
+  const values = [];
+  const signingLeaf = f.savings.tapLeafScript?.find(
+    ([, script]) => hex.encode(script.slice(0, -1)) === hex.encode(f.savings.normal)
+  );
+  if (!signingLeaf) throw new Error("normal signing leaf missing");
+  const derivation = [
+    [
+      input.origin.publicKey.slice(1),
+      { hashes: [], der: { fingerprint: input.origin.fingerprint, path: [...input.origin.path] } }
+    ]
+  ];
+  const connectorMetadata = input.contract.connectorType === "p2tr" ? { tapInternalKey: input.origin.publicKey.slice(1), tapBip32Derivation: derivation } : {
+    bip32Derivation: [
+      [input.origin.publicKey.slice(), { fingerprint: input.origin.fingerprint, path: [...input.origin.path] }]
+    ]
+  };
+  for (const [index, coin] of coins2.entries()) {
+    if (!/^[0-9a-f]{64}$/.test(coin.txid) || !Number.isInteger(coin.vout) || coin.vout < 0 || coin.vout > 4294967295 || coin.parentHex.length > 2e6)
+      throw new Error("invalid connector parent");
+    const raw2 = hex.decode(coin.parentHex);
+    const parent = Transaction.fromRaw(raw2, OPTIONS);
+    if (parent.id !== coin.txid) throw new Error("connector parent hash mismatch");
+    const out = parent.getOutput(coin.vout);
+    if (out.amount === void 0 || out.amount <= 0n || out.amount > 2100000000000000n || !out.script || hex.encode(out.script) !== hex.encode(scripts[index]))
+      throw new Error("connector prevout mismatch");
+    values.push(out.amount);
+    tx.addInput({
+      txid: coin.txid,
+      index: coin.vout,
+      sequence: 4294967293,
+      nonWitnessUtxo: raw2,
+      witnessUtxo: { amount: out.amount, script: out.script },
+      ...index === 0 ? { tapLeafScript: [signingLeaf], tapInternalKey: f.savings.tapInternalKey } : { ...connectorMetadata, ...input.contract.connectorType === "p2wpkh" ? { sighashType: 1 } : {} }
+    });
+    tx.updateInput(index, { unknown: [[{ type: 222, key: new TextEncoder().encode("prevouttx") }, raw2]] });
+  }
+  if (values[1] !== 1000n || values[0] + values[1] > 2100000000000000n)
+    throw new Error("invalid reserve or total value");
+  const recipientScript = hex.decode(scriptHexFromAddress(input.recipient, input.contract.network));
+  if (!["pkh", "sh", "wpkh", "wsh", "tr"].includes(OutScript.decode(recipientScript).type))
+    throw new Error("unsupported Bitcoin payment script");
+  const dust = bitcoinDustSats(input.recipient, input.contract.network);
+  if (!Number.isSafeInteger(input.amountSats) || input.amountSats < dust || !Number.isSafeInteger(input.feeSats) || input.feeSats < 0 || input.feeSats > f.rules.absoluteFeeCapSats)
+    throw new Error("invalid connector amount or fee");
+  const change = values[0] - BigInt(input.amountSats) - BigInt(input.feeSats) - 240n;
+  if (change < 0n || change > 0n && change < 330n) throw new Error("Savings change must be absent or non-dust");
+  tx.addOutput({
+    script: recipientScript,
+    amount: BigInt(input.amountSats)
+  });
+  tx.addOutput({
+    script: f.connector.script,
+    amount: 1000n,
+    ...connectorMetadata
+  });
+  tx.addOutput({ script: hex.decode("51024e73"), amount: 240n });
+  tx.addOutput({ script: emulatorPacketScript(f.program, false), amount: 0n });
+  if (change > 0n) tx.addOutput({ script: f.savings.script, amount: change });
+  const unsigned = tx.unsignedTx;
+  const vbytes = Math.ceil((unsigned.length * 4 + f.rules.witnessBytes) / 4);
+  if (input.feeSats > vbytes * f.rules.feerateCapSatPerV) throw new Error("connector feerate cap exceeded");
+  const prepared2 = tx.toPSBT();
+  const verifyPhoneStage = (response) => {
+    if (response.length > 4e6) throw new Error("phone signing response too large");
+    const wire = RawPSBTV0.decode(hex.decode(response));
+    const signatures = wire.inputs[0]?.tapScriptSig;
+    if (signatures?.length !== 1) throw new Error("exactly one phone signature required");
+    const [[key, signature]] = signatures;
+    if (signature.length !== 64 || hex.encode(key.pubKey) !== hex.encode(xOnlyFromCompressed2(phonePub)) || hex.encode(key.leafHash) !== hex.encode(tapLeafHash(f.savings.normal)) || !schnorr.verify(
+      signature,
+      tx.preimageWitnessV1(0, scripts, 0, values, -1, f.savings.normal),
+      xOnlyFromCompressed2(phonePub)
+    ))
+      throw new Error("invalid phone signature");
+    delete wire.inputs[0].tapScriptSig;
+    if (hex.encode(RawPSBTV0.encode(wire)) !== hex.encode(RawPSBTV0.encode(RawPSBTV0.decode(prepared2))))
+      throw new Error("phone changed connector candidate");
+    wire.inputs[0].tapScriptSig = signatures;
+    return hex.encode(RawPSBTV0.encode(wire));
+  };
+  return {
+    psbt: () => hex.encode(prepared2.slice()),
+    // The policy uses a lower witness bound for its ceiling. Fee estimation
+    // instead allows a maximum-size ECDSA signature or Taproot ALL signature.
+    estimatedVbytes: Math.ceil(
+      (unsigned.length * 4 + f.rules.witnessBytes + (connectorType === "p2wpkh" ? 64 : 1)) / 4
+    ),
+    verifyPhoneStage,
+    signPhone(privateKey) {
+      const phone2 = Transaction.fromPSBT(prepared2, OPTIONS);
+      phone2.signIdx(privateKey, 0, [0]);
+      return verifyPhoneStage(hex.encode(phone2.toPSBT()));
+    },
+    forHardware(witness) {
+      if (witness.length !== 5 || witness.slice(0, 3).some((sig) => sig.length !== 64) || hex.encode(witness[3]) !== hex.encode(f.savings.normal) || hex.encode(witness[4]) !== hex.encode(f.savings.control))
+        throw new Error("invalid Savings witness");
+      const message = tx.preimageWitnessV1(0, scripts, 0, values, -1, f.savings.normal);
+      const pubs = [f.normalTweaks.arkade, f.normalTweaks.vault, phonePub].map(xOnlyFromCompressed2);
+      if (pubs.some((pub, i) => !schnorr.verify(witness[i], message, pub))) throw new Error("invalid Savings signature");
+      const savedWitness = witness.map((item) => item.slice());
+      const hardware = Transaction.fromPSBT(prepared2, OPTIONS);
+      hardware.updateInput(0, {
+        finalScriptWitness: savedWitness,
+        finalScriptSig: new Uint8Array(),
+        tapLeafScript: void 0,
+        tapInternalKey: void 0
+      });
+      const finalized = RawPSBTV0.decode(hardware.toPSBT());
+      finalized.inputs[0].finalScriptSig = new Uint8Array();
+      const hardwarePSBT = RawPSBTV0.encode(finalized);
+      return {
+        psbt: () => hex.encode(hardwarePSBT.slice()),
+        accept(responseText) {
+          if (responseText.length > 4e6) throw new Error("signer response too large");
+          const text = responseText.replace(/\s+/g, "");
+          const raw2 = /^[0-9a-f]+$/i.test(text) && text.length % 2 === 0 ? hex.decode(text) : base64.decode(text);
+          const isPSBT = hex.encode(raw2.slice(0, 5)) === "70736274ff";
+          const response = isPSBT ? Transaction.fromPSBT(raw2, OPTIONS) : Transaction.fromRaw(raw2, OPTIONS);
+          if (hex.encode(response.unsignedTx) !== hex.encode(unsigned)) throw new Error("hardware changed transaction");
+          for (let i = 0; i < 2; i++) {
+            const returned = response.getInput(i);
+            if (returned.sighashType !== void 0 && returned.sighashType !== 0 && (i !== 1 || returned.sighashType !== 1))
+              throw new Error("signature must commit all outputs");
+            if (returned.finalScriptSig?.length) throw new Error("unexpected scriptSig");
+            if (returned.witnessUtxo && (returned.witnessUtxo.amount !== values[i] || hex.encode(returned.witnessUtxo.script) !== hex.encode(scripts[i])))
+              throw new Error("hardware changed prevout");
+          }
+          const approval = response.getInput(1);
+          if (approval.tapScriptSig?.length || approval.finalScriptSig?.length)
+            throw new Error("unexpected connector signing path");
+          let finalWitness = approval.finalScriptWitness;
+          if (connectorType === "p2tr") {
+            if (approval.partialSig?.length || finalWitness && finalWitness.length !== 1)
+              throw new Error("invalid Taproot witness");
+            const sig = finalWitness?.[0] ?? approval.tapKeySig;
+            if (!sig || sig.length !== 64 && (sig.length !== 65 || sig[64] !== 1) || finalWitness && approval.tapKeySig && hex.encode(sig) !== hex.encode(approval.tapKeySig))
+              throw new Error("invalid Taproot signature encoding");
+            const sighash = sig.length === 64 ? 0 : 1;
+            if (approval.sighashType === 1 && sighash !== 1) throw new Error("signature sighash mismatch");
+            if (!schnorr.verify(
+              sig.slice(0, 64),
+              tx.preimageWitnessV1(1, scripts, sighash, values),
+              f.connector.script.slice(2)
+            ))
+              throw new Error("invalid connector signature");
+            finalWitness = [sig.slice()];
+          } else {
+            if (approval.tapKeySig || (approval.partialSig?.length ?? 0) > 1)
+              throw new Error("unexpected connector signature");
+            const partial = approval.partialSig?.[0];
+            if (partial) {
+              if (finalWitness && (finalWitness.length !== 2 || hex.encode(finalWitness[0]) !== hex.encode(partial[1]) || hex.encode(finalWitness[1]) !== hex.encode(partial[0])))
+                throw new Error("conflicting connector signatures");
+              finalWitness = [partial[1], partial[0]];
+            }
+            if (!finalWitness || finalWitness.length !== 2) throw new Error("native SegWit witness required");
+            const [sig, pub] = finalWitness;
+            if (sig.length < 9 || sig.length > 73 || sig[sig.length - 1] !== 1 || hex.encode(pub) !== hex.encode(connectorPublicKey))
+              throw new Error("native SegWit ALL signature required");
+            const scriptCode = new Uint8Array([118, 169, 20, ...f.connector.script.slice(2), 136, 172]);
+            const message2 = tx.preimageWitnessV0(1, scriptCode, 1, values[1]);
+            if (!secp256k1.verify(sig.slice(0, -1), message2, pub, { format: "der", prehash: false, lowS: true }))
+              throw new Error("invalid connector signature");
+            finalWitness = finalWitness.map((item) => item.slice());
+          }
+          const result = Transaction.fromPSBT(hardwarePSBT, OPTIONS);
+          result.updateInput(1, { finalScriptWitness: finalWitness });
+          return { txHex: hex.encode(result.extract()), txid: result.id };
+        }
+      };
+    }
+  };
+}
+
+// src/lib/vault/program/connectorStore.ts
+var OPTIONS2 = { version: 2, allowUnknownInputs: true, allowUnknownOutputs: true, allowUnknown: true };
+var CONNECTOR_STORE_VERSION = 1;
+function toOrigin3(origin) {
+  return { publicKey: hex.decode(origin.publicKey), fingerprint: origin.fingerprint, path: [...origin.path] };
+}
+function isRecordShape(value2) {
+  if (!value2 || typeof value2 !== "object") return false;
+  const record = value2;
+  return record.version === CONNECTOR_STORE_VERSION && typeof record.enrollmentDigest === "string" && typeof record.candidatePsbt === "string" && typeof record.signaturesMayHaveIssued === "boolean" && (record.phoneSignedPsbt === void 0 || typeof record.phoneSignedPsbt === "string") && (record.operationId === void 0 || typeof record.operationId === "string" && /^[0-9a-f]{32}$/.test(record.operationId)) && typeof record.recipient === "string" && Number.isSafeInteger(record.amountSats) && Number.isSafeInteger(record.feeSats) && !!record.contract && typeof record.contract.vaultId === "string" && !!record.origin && !!record.savings && !!record.reserve && (record.savingsWitness === void 0 || Array.isArray(record.savingsWitness)) && (record.signedTxHex === void 0 || typeof record.signedTxHex === "string") && (record.txid === void 0 || typeof record.txid === "string");
+}
+function validateConnectorRecoveryRecord(expected, raw2) {
+  const vaultId = expected.vaultId.trim();
+  if (!vaultId) throw new Error("vault id required");
+  if (!/^[0-9a-f]{64}$/i.test(expected.enrollmentDigest)) throw new Error("connector enrollment pin required");
+  if (!isRecordShape(raw2)) throw new Error("corrupt connector operation");
+  const record = raw2;
+  if (record.contract.vaultId !== vaultId) throw new Error("connector vault identity mismatch");
+  if (record.enrollmentDigest !== expected.enrollmentDigest.toLowerCase())
+    throw new Error("connector enrollment pin mismatch");
+  const prepared2 = prepareConnectorPayment({
+    contract: record.contract,
+    origin: toOrigin3(record.origin),
+    enrollmentDigest: expected.enrollmentDigest,
+    savings: record.savings,
+    reserve: record.reserve,
+    recipient: record.recipient,
+    amountSats: record.amountSats,
+    feeSats: record.feeSats
+  });
+  if (record.candidatePsbt !== prepared2.psbt()) throw new Error("connector candidate mismatch on restore");
+  const candidateTxid = Transaction.fromPSBT(hex.decode(prepared2.psbt()), OPTIONS2).id;
+  if (record.phoneSignedPsbt !== void 0) {
+    if (prepared2.verifyPhoneStage(record.phoneSignedPsbt) !== record.phoneSignedPsbt)
+      throw new Error("noncanonical saved phone signing stage");
+    if (!record.signaturesMayHaveIssued) throw new Error("phone signing stage without retained ownership");
+  }
+  if (record.savingsWitness) {
+    if (!record.signaturesMayHaveIssued) throw new Error("Savings witness without retained ownership");
+    const hardware = prepared2.forHardware(record.savingsWitness.map((item) => hex.decode(item)));
+    if (record.signedTxHex) {
+      const derived = hardware.accept(record.signedTxHex);
+      if (hex.encode(hex.decode(derived.txHex)) !== hex.encode(hex.decode(record.signedTxHex)))
+        throw new Error("connector signed transaction mismatch on restore");
+      if (record.txid && derived.txid !== record.txid) throw new Error("connector txid mismatch on restore");
+    }
+  } else if (record.signedTxHex) {
+    throw new Error("connector Savings witness required before signed tx");
+  }
+  if (record.txid && !record.signedTxHex) throw new Error("connector txid without signed transaction");
+  return { prepared: prepared2, record, candidateTxid };
+}
+function validateConnectorRecoveryJournal(expected, raw2) {
+  const journal = JSON.parse(JSON.stringify(raw2));
+  if (!journal || journal.version !== 1 || !Array.isArray(journal.history) || journal.history.length > 1024)
+    throw new Error("invalid connector recovery journal");
+  if (JSON.stringify(journal).length > 12e6) throw new Error("connector recovery journal too large");
+  if (journal.pending !== null) validateConnectorRecoveryRecord(expected, journal.pending);
+  const seen = /* @__PURE__ */ new Set();
+  for (const record of journal.history) {
+    const { candidateTxid } = validateConnectorRecoveryRecord(expected, record);
+    if (seen.has(candidateTxid)) throw new Error("duplicate connector recovery history");
+    seen.add(candidateTxid);
+  }
+  return journal;
+}
+
+// src/lib/vault/recovery/compression.ts
+init_define_import_meta_env();
+var MAX_RECOVERY_PLAIN_BYTES = 13e6;
+async function compressRecoveryData(bytes2, decompress) {
+  const input = new ReadableStream({
+    start(controller2) {
+      controller2.enqueue(Uint8Array.from(bytes2));
+      controller2.close();
+    }
+  });
+  const stream = input.pipeThrough(decompress ? new DecompressionStream("gzip") : new CompressionStream("gzip"));
+  const reader = stream.getReader();
+  const chunks = [];
+  let length = 0;
+  try {
+    for (; ; ) {
+      const { value: value2, done } = await reader.read();
+      if (done) break;
+      length += value2.length;
+      if (length > MAX_RECOVERY_PLAIN_BYTES) {
+        await reader.cancel();
+        throw new Error("Recovery archive is too large");
+      }
+      chunks.push(value2);
+    }
+    const result = new Uint8Array(length);
+    let offset = 0;
+    for (const chunk of chunks) {
+      result.set(chunk, offset);
+      offset += chunk.length;
+    }
+    return result;
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+// src/lib/vault/recovery/backupCodec.ts
+var encoder5 = new TextEncoder();
+var MAX_RECOVERY_BACKUP_BYTES = 3e6;
+function recoveryBinding(kit2, status2) {
+  vaultRecoveryBinding(kit2, status2);
+  return {
+    vaultId: status2.vaultId,
+    network: status2.network,
+    templateVersion: status2.templateVersion,
+    protectionTier: kit2.protectionTier,
+    policyVersion: status2.policyVersion,
+    spendingPolicyDigest: kit2.spendingPolicyDigest,
+    descriptorHash: status2.templateVersion === CONNECTOR_TEMPLATE2 ? status2.connectorEnrollment.descriptorHash : status2.vtxoBoardingDescriptorHash
+  };
+}
+function recoveryStatusFacts(status2) {
+  const names = [
+    "vaultId",
+    "network",
+    "clientOrigin",
+    "rpId",
+    "templateVersion",
+    "policyVersion",
+    "protectionTier",
+    "phoneBip340Pub",
+    "phoneDirectP256",
+    "externalOwnerWalletPub",
+    "recoveryPub",
+    "recoveryKeyPub",
+    "vaultCosignerBasePub",
+    "arkadeCosignerBasePub",
+    "arkadeCosignerOrigin",
+    "arkadeCosignerVersion",
+    "savingsAddress",
+    "savingsScript",
+    "spendingPolicy",
+    "spendingPolicyDigest",
+    "vtxoVaultCosignerPub",
+    "vtxoDelegatePub",
+    "vtxoExitDelay",
+    "vtxoExitDelayUnit",
+    "spendingArkAddress",
+    "spendingArkScript",
+    "vtxoBoardingProgram",
+    "vtxoBoardingDescriptor",
+    "vtxoBoardingDescriptorHash",
+    "vtxoBoardingScript",
+    "vtxoBoardingAddress",
+    "vtxoBoardingExitDelay",
+    "vtxoBoardingExitDelayUnit",
+    "connectorEnrollment"
+  ];
+  return JSON.parse(
+    JSON.stringify({
+      enrolled: true,
+      vtxoBoardingActive: true,
+      ...Object.fromEntries(names.map((name) => [name, status2[name]]))
+    })
+  );
+}
+function validateRecoveryHeader(header) {
+  if (!header || JSON.stringify(header).length > 96 * 1024) throw new Error("Invalid recovery header");
+  const binding2 = recoveryBinding(header.kit, header.status);
+  if (JSON.stringify(header.binding) !== JSON.stringify(binding2)) throw new Error("Recovery enrollment binding changed");
+  if (JSON.stringify(header.status) !== JSON.stringify(recoveryStatusFacts(header.status)))
+    throw new Error("Recovery header must contain immutable status facts");
+  const e = header.enrollment;
+  if (!e || e.vaultId !== binding2.vaultId || e.phoneBip340Pub !== header.kit.descriptor.keys.phoneBip340 || e.phoneDirectP256 !== header.kit.descriptor.keys.phoneDirectP256 || !/^(?:[0-9a-f]{2}){1,1024}$/.test(e.credId) || !/^(02|03)[0-9a-f]{64}$/.test(e.webauthnP256) || !/^[0-9a-f]{24}$/.test(e.nonce) || !/^[0-9a-f]{96}$/.test(e.ciphertext))
+    throw new Error("Recovery passkey envelope does not match the vault");
+  if (typeof header.origin !== "string" || new URL(header.origin).origin !== header.origin || new URL(header.origin).hostname !== header.rpId || header.origin !== header.status.clientOrigin || header.rpId !== header.status.rpId)
+    throw new Error("Recovery passkey origin changed");
+  return header;
+}
+function validateVaultRecoveryFile(file) {
+  if (!file || file.name !== "vaulted-recovery" || file.version !== 1 || JSON.stringify(file).length > MAX_RECOVERY_PLAIN_BYTES)
+    throw new Error("Invalid recovery file");
+  const header = validateRecoveryHeader(file.header);
+  const archive = validateVaultRecoveryArchive(file.archive);
+  if (JSON.stringify(recoveryStatusFacts(archive.status)) !== JSON.stringify(header.status) || archive.kit.descriptorHash !== header.kit.descriptorHash)
+    throw new Error("Recovery data does not match its encrypted identity");
+  if (header.binding.templateVersion === CONNECTOR_TEMPLATE2) {
+    validateConnectorRecoveryJournal(
+      { vaultId: header.binding.vaultId, enrollmentDigest: header.status.connectorEnrollment.enrollmentDigest },
+      file.connectorJournal
+    );
+  } else if (file.connectorJournal !== void 0) throw new Error("Connector journal on another program");
+  if (file.spendingJournal !== void 0 || file.lightningJournal !== void 0)
+    validateRecoveryJournals(header.status, file);
+  return file;
+}
+async function recoveryBackupKey(phone2, header) {
+  const valid = validateRecoveryHeader(header);
+  if (phone2.length !== 32 || hex.encode(schnorr.getPublicKey(phone2)) !== valid.enrollment.phoneBip340Pub.slice(2))
+    throw new Error("Backup key does not belong to this vault");
+  const material = await crypto.subtle.importKey("raw", Uint8Array.from(phone2), "HKDF", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey(
+    {
+      name: "HKDF",
+      hash: "SHA-256",
+      salt: Uint8Array.from(hex.decode(vaultRecoveryBinding(valid.kit, valid.status).descriptorHash)),
+      info: encoder5.encode("vaulted/full-recovery-backup/v1")
+    },
+    material,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"]
+  );
+}
+function parseEncryptedRecoveryBackup(raw2) {
+  const file = raw2;
+  if (!file || file.name !== "vaulted-recovery-backup" || file.version !== 1 || Object.keys(file).length !== 5 || JSON.stringify(file).length > MAX_RECOVERY_BACKUP_BYTES || !/^[0-9a-f]{24}$/.test(file.nonce) || typeof file.ciphertext !== "string" || !/^[A-Za-z0-9+/]+={0,2}$/.test(file.ciphertext))
+    throw new Error("Invalid encrypted recovery backup");
+  validateRecoveryHeader(file.header);
+  return file;
+}
+async function decryptRecoveryBackup(raw2, key) {
+  const file = parseEncryptedRecoveryBackup(raw2);
+  const compressed2 = new Uint8Array(
+    await crypto.subtle.decrypt(
+      {
+        name: "AES-GCM",
+        iv: Uint8Array.from(hex.decode(file.nonce)),
+        additionalData: encoder5.encode(JSON.stringify(file.header))
+      },
+      key,
+      Uint8Array.from(base64.decode(file.ciphertext))
+    )
+  );
+  let plain;
+  try {
+    plain = await compressRecoveryData(compressed2, true);
+    const decoded = validateVaultRecoveryFile(JSON.parse(new TextDecoder().decode(plain)));
+    if (JSON.stringify(decoded.header) !== JSON.stringify(file.header)) throw new Error("Recovery header changed");
+    return decoded;
+  } finally {
+    compressed2.fill(0);
+    plain?.fill(0);
+  }
+}
+async function openLocalRecoveryBackup(raw2, restored) {
+  const file = parseEncryptedRecoveryBackup(raw2);
+  if (location.origin !== file.header.origin || location.hostname !== file.header.rpId)
+    throw new Error(`Open recovery at ${file.header.origin} to use the original passkey`);
+  const phone2 = await unlockPhoneBip340(file.header.enrollment, file.header.status);
+  try {
+    const decoded = await decryptRecoveryBackup(file, await recoveryBackupKey(phone2, file.header));
+    if (restored) await restored(decoded, phone2);
+    return decoded;
+  } finally {
+    phone2.fill(0);
+  }
+}
+
+// src/lib/vault/light/backupCodec.ts
+init_define_import_meta_env();
+init_base();
+init_secp256k1();
+
+// src/lib/vault/light/enrollment.ts
+init_define_import_meta_env();
+
+// src/lib/vault/openEnrollmentSession.ts
+init_define_import_meta_env();
+
+// src/lib/vault/tenantEnrollment.ts
+init_define_import_meta_env();
+
+// src/lib/vault/enrollmentStore.ts
+init_define_import_meta_env();
+
+// src/lib/vault/tenantEnrollment.ts
+var PRF_SALT5 = new TextEncoder().encode("arkade-2fa-vault/prf/v1");
+var HKDF_INFO4 = new TextEncoder().encode("arkade-2fa-vault/kek/v1");
+var DIRECT_INFO = new TextEncoder().encode("arkade-2fa-vault/direct-p256/v1");
+
+// src/lib/vault/light/enrollment.ts
+function validateLightEnrollment(value2) {
+  if (!value2 || typeof value2 !== "object") throw new Error("Light backup required");
+  const record = value2;
+  const descriptor = validateLightDescriptor(record.descriptor);
+  const enrollment = record.enrollment;
+  if (!enrollment || enrollment.vaultId !== descriptor.vaultId || enrollment.phoneBip340Pub !== `02${descriptor.ownerPub}` || !/^[0-9a-f]{2,2048}$/.test(enrollment.credId) || enrollment.credId.length % 2 || !/^(02|03)[0-9a-f]{64}$/.test(enrollment.webauthnP256) || !/^(02|03)[0-9a-f]{64}$/.test(enrollment.phoneDirectP256))
+    throw new Error("Light credential does not match its descriptor");
+  const passkeyBackup = validateLightKeyBackup(enrollment.lightKeyBackup, descriptor);
+  const recoveryBackup = record.recoveryBackup ? validateLightKeyBackup(record.recoveryBackup, descriptor) : void 0;
+  if (passkeyBackup.purpose !== "passkey-prf" || recoveryBackup && recoveryBackup.purpose !== "recovery-secret")
+    throw new Error("Light backup purposes do not match");
+  try {
+    p256.Point.fromHex(enrollment.webauthnP256);
+    p256.Point.fromHex(enrollment.phoneDirectP256);
+  } catch {
+    throw new Error("Light credential keys are invalid");
+  }
+  return {
+    descriptor,
+    enrollment: {
+      vaultId: descriptor.vaultId,
+      credId: enrollment.credId,
+      webauthnP256: enrollment.webauthnP256,
+      phoneDirectP256: enrollment.phoneDirectP256,
+      phoneBip340Pub: enrollment.phoneBip340Pub,
+      nonce: passkeyBackup.nonce,
+      ciphertext: passkeyBackup.ciphertext,
+      lightKeyBackup: passkeyBackup
+    },
+    ...recoveryBackup ? { recoveryBackup } : {}
+  };
+}
+
 // src/lib/vault/light/recovery.ts
+init_define_import_meta_env();
 init_secp256k1();
 init_sha2();
 
@@ -51045,8 +53624,8 @@ var LightContractHandler = {
   },
   selectPath: () => null,
   getAllSpendingPaths: (script, _contract, context) => {
-    const owner2 = script.params.ownerPub;
-    if (context.collaborative || context.walletDescriptor !== `tr(${owner2})` && context.walletPubKey !== owner2)
+    const owner = script.params.ownerPub;
+    if (context.collaborative || context.walletDescriptor !== `tr(${owner})` && context.walletPubKey !== owner)
       return [];
     return [
       {
@@ -51084,7 +53663,7 @@ async function unlockLightWithPasskey(record) {
       challenge: crypto.getRandomValues(new Uint8Array(32)),
       allowCredentials: [allowPasskey(id)],
       userVerification: "required",
-      extensions: prfExtension(PRF_SALT2, id)
+      extensions: prfExtension(PRF_SALT3, id)
     })
   });
   if (!credential || hex.encode(new Uint8Array(credential.rawId)) !== valid.enrollment.credId)
@@ -51107,29 +53686,29 @@ function binding(descriptor) {
   const d = validateLightDescriptor(descriptor);
   return { ...d, descriptorHash: lightDescriptorDigest(d) };
 }
-function validateLightRecoveryArchive(value, d) {
-  return validateExitArchive(value, binding(d));
+function validateLightRecoveryArchive(value2, d) {
+  return validateExitArchive(value2, binding(d));
 }
 function database(d) {
   validateLightDescriptor(d);
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(`vaulted-light:${d.vaultId}:recovery`, 1);
-    request.onupgradeneeded = () => request.result.createObjectStore("archive");
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
+    const request2 = indexedDB.open(`vaulted-light:${d.vaultId}:recovery`, 1);
+    request2.onupgradeneeded = () => request2.result.createObjectStore("archive");
+    request2.onsuccess = () => resolve(request2.result);
+    request2.onerror = () => reject(request2.error);
   });
 }
 async function loadLightRecoveryArchive(d) {
   const db = await database(d);
   try {
     return await new Promise((resolve, reject) => {
-      const request = db.transaction("archive").objectStore("archive").get("current");
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
+      const request2 = db.transaction("archive").objectStore("archive").get("current");
+      request2.onerror = () => reject(request2.error);
+      request2.onsuccess = () => {
         try {
-          resolve(request.result ? validateLightRecoveryArchive(request.result, d).archive : null);
-        } catch (error) {
-          reject(error);
+          resolve(request2.result ? validateLightRecoveryArchive(request2.result, d).archive : null);
+        } catch (error2) {
+          reject(error2);
         }
       };
     });
@@ -51190,28 +53769,28 @@ function lightArchiveProviders(archive, d) {
 }
 function assertLightArchiveMatchesVtxos(archive, d, expected) {
   if (!expected) return;
-  const { coins } = validateLightRecoveryArchive(archive, d);
-  const fingerprint2 = (values) => values.map((v) => `${v.txid}:${v.vout}:${v.value}:${v.script}`).sort().join("|");
-  if (fingerprint2(expected) !== fingerprint2(coins))
+  const { coins: coins2 } = validateLightRecoveryArchive(archive, d);
+  const fingerprint3 = (values) => values.map((v) => `${v.txid}:${v.vout}:${v.value}:${v.script}`).sort().join("|");
+  if (fingerprint3(expected) !== fingerprint3(coins2))
     throw new Error("Transaction paths are catching up with your wallet. The previous backup is retained.");
 }
 
 // src/lib/vault/light/recovery.ts
-async function prepareLightRecoveryWithOwner(record, owner2, recoveryAddress, suppliedArchive, useSavedData = false) {
+async function prepareLightRecoveryWithOwner(record, owner, recoveryAddress, suppliedArchive, useSavedData = false) {
   if (!isVaultBitcoinAddress(recoveryAddress, record.descriptor.network))
     throw new Error("Enter a Bitcoin recovery address for this network");
   requireReleaseNetwork(record.descriptor.network);
   registerLightContractHandler();
-  const network = sdkNetworkName(record.descriptor.network);
-  const identity2 = SingleKey.fromPrivateKey(owner2);
+  const network2 = sdkNetworkName(record.descriptor.network);
+  const identity2 = SingleKey.fromPrivateKey(owner);
   const onchain = new EsploraProvider("/esplora");
-  const onchainWallet = await OnchainWallet.create(identity2, network, onchain);
+  const onchainWallet = await OnchainWallet.create(identity2, network2, onchain);
   const walletRepository = new InMemoryWalletRepository();
   const contractRepository = new InMemoryContractRepository();
   const savedArchive = async () => {
     const imported = suppliedArchive ? validateLightRecoveryArchive(suppliedArchive, record.descriptor).archive : null;
-    const stored = await loadLightRecoveryArchive(record.descriptor).catch((error) => {
-      if (!imported) throw error;
+    const stored = await loadLightRecoveryArchive(record.descriptor).catch((error2) => {
+      if (!imported) throw error2;
       return null;
     });
     const candidates = [stored, imported].filter((v) => !!v);
@@ -51222,15 +53801,15 @@ async function prepareLightRecoveryWithOwner(record, owner2, recoveryAddress, su
   };
   const archive = useSavedData ? await savedArchive() : await captureLightRecoveryArchive(record.descriptor);
   const local = lightArchiveProviders(archive, record.descriptor);
-  const coins = local.coins;
-  const file2 = {
+  const coins2 = local.coins;
+  const file = {
     name: "vaulted-light-recovery",
     version: 1,
     createdAt: (/* @__PURE__ */ new Date()).toISOString(),
     ...record,
     archive
   };
-  if (!coins.length) return file2;
+  if (!coins2.length) return file;
   const wallet = await Wallet2.create({
     identity: identity2,
     arkServerUrl: networkPins(record.descriptor.network).operatorOrigin,
@@ -51250,43 +53829,43 @@ async function prepareLightRecoveryWithOwner(record, owner2, recoveryAddress, su
       networkPins(record.descriptor.network).arkHrp
     ).encode();
     await manager.createContract(lightContract(script, address));
-    const options = {
+    const options2 = {
       wallet,
       onchainWallet,
       sweepAddress: recoveryAddress,
-      vtxos: coins.map(({ txid, vout }) => ({ txid, vout })),
+      vtxos: coins2.map(({ txid, vout }) => ({ txid, vout })),
       mode: "graph",
-      networkName: network
+      networkName: network2
     };
-    const quote = await UnilateralExit.estimate(options);
+    const quote = await UnilateralExit.estimate(options2);
     if (quote.vtxos.some((v) => v.skipped))
       throw new Error(
         "Some outputs cannot be included in an emergency exit at the current network fee. Keep the recovery file and try again with a larger balance or lower fees."
       );
-    const pkg = await UnilateralExit.prepare(options);
-    if (pkg.mode !== "graph" || pkg.vtxos.some((v) => v.skipped) || pkg.vtxos.length !== coins.length)
+    const pkg = await UnilateralExit.prepare(options2);
+    if (pkg.mode !== "graph" || pkg.vtxos.some((v) => v.skipped) || pkg.vtxos.length !== coins2.length)
       throw new Error("Emergency exit did not include every current output");
-    file2.exitPackage = deserializeExitPackage(serializeExitPackage(pkg));
-    file2.feeFundingAddress = onchainWallet.address;
-    file2.exitPackageSignature = hex.encode(schnorr.sign(exitPackageDigest(file2), owner2));
-    return file2;
+    file.exitPackage = deserializeExitPackage(serializeExitPackage(pkg));
+    file.feeFundingAddress = onchainWallet.address;
+    file.exitPackageSignature = hex.encode(schnorr.sign(exitPackageDigest(file), owner));
+    return file;
   } finally {
     await wallet.dispose();
     await Promise.allSettled([walletRepository[Symbol.asyncDispose](), contractRepository[Symbol.asyncDispose]()]);
   }
 }
-function exitPackageDigest(file2) {
-  if (!file2.exitPackage) throw new Error("This file has no prepared exit. Update your recovery file first.");
-  const pkg = deserializeExitPackage(serializeExitPackage(file2.exitPackage));
+function exitPackageDigest(file) {
+  if (!file.exitPackage) throw new Error("This file has no prepared exit. Update your recovery file first.");
+  const pkg = deserializeExitPackage(serializeExitPackage(file.exitPackage));
   return sha256(
     new TextEncoder().encode(
-      `vaulted-light/exit-package/v1:${lightDescriptorDigest(file2.descriptor)}:${file2.feeFundingAddress}:${serializeExitPackage(pkg)}`
+      `vaulted-light/exit-package/v1:${lightDescriptorDigest(file.descriptor)}:${file.feeFundingAddress}:${serializeExitPackage(pkg)}`
     )
   );
 }
-function validateLightRecoveryFile(value) {
-  const valid = validateLightEnrollment(value);
-  const supplied = value;
+function validateLightRecoveryFile(value2) {
+  const valid = validateLightEnrollment(value2);
+  const supplied = value2;
   if (supplied.name !== "vaulted-light-recovery" || supplied.version !== 1)
     throw new Error("Unsupported Light recovery file");
   const archive = supplied.archive ? validateLightRecoveryArchive(supplied.archive, valid.descriptor).archive : void 0;
@@ -51298,7 +53877,7 @@ function validateLightRecoveryFile(value) {
   if (!supplied.exitPackage)
     return { ...valid, name: supplied.name, version: 1, createdAt: supplied.createdAt || "", archive, ...savedJournals };
   const pkg = deserializeExitPackage(serializeExitPackage(supplied.exitPackage));
-  const file2 = {
+  const file = {
     ...valid,
     name: supplied.name,
     version: 1,
@@ -51309,13 +53888,13 @@ function validateLightRecoveryFile(value) {
     feeFundingAddress: supplied.feeFundingAddress,
     archive
   };
-  if (!isVaultBitcoinAddress(file2.feeFundingAddress || "", valid.descriptor.network) || !isVaultBitcoinAddress(pkg.sweepAddress, valid.descriptor.network) || pkg.mode !== "graph" || pkg.network !== sdkNetworkName(valid.descriptor.network) || !/^[0-9a-f]{128}$/.test(file2.exitPackageSignature || "") || !schnorr.verify(
-    hex.decode(file2.exitPackageSignature),
-    exitPackageDigest(file2),
+  if (!isVaultBitcoinAddress(file.feeFundingAddress || "", valid.descriptor.network) || !isVaultBitcoinAddress(pkg.sweepAddress, valid.descriptor.network) || pkg.mode !== "graph" || pkg.network !== sdkNetworkName(valid.descriptor.network) || !/^[0-9a-f]{128}$/.test(file.exitPackageSignature || "") || !schnorr.verify(
+    hex.decode(file.exitPackageSignature),
+    exitPackageDigest(file),
     hex.decode(valid.descriptor.ownerPub)
   ))
     throw new Error("Emergency exit is not signed by this wallet owner");
-  return file2;
+  return file;
 }
 async function requireConfirmedLightRecovery(pkg, events, onEvent) {
   const expected = new Map(
@@ -51335,13 +53914,13 @@ async function requireConfirmedLightRecovery(pkg, events, onEvent) {
       "Recovery is incomplete. Keep the saved exit file and review the failed transactions before resuming."
     );
 }
-async function executeLightRecoveryWithOwner(file2, owner2, signal, onEvent) {
-  const valid = validateLightRecoveryFile(file2);
+async function executeLightRecoveryWithOwner(file, owner, signal, onEvent) {
+  const valid = validateLightRecoveryFile(file);
   requireReleaseNetwork(valid.descriptor.network);
   signal.throwIfAborted();
-  if (!valid.exitPackage || hex.encode(schnorr.getPublicKey(owner2)) !== valid.descriptor.ownerPub)
+  if (!valid.exitPackage || hex.encode(schnorr.getPublicKey(owner)) !== valid.descriptor.ownerPub)
     throw new Error("Prepare a current emergency exit first");
-  const identity2 = SingleKey.fromPrivateKey(owner2);
+  const identity2 = SingleKey.fromPrivateKey(owner);
   const provider = new EsploraProvider("/esplora");
   const feeWallet = await OnchainWallet.create(identity2, sdkNetworkName(valid.descriptor.network), provider);
   if (valid.feeFundingAddress !== feeWallet.address)
@@ -51353,18 +53932,18 @@ async function executeLightRecoveryWithOwner(file2, owner2, signal, onEvent) {
 
 // src/lib/vault/light/backupCodec.ts
 var MAX_LIGHT_BACKUP_BYTES = 3e6;
-var encoder5 = new TextEncoder();
-async function lightBackupKey(owner2, record) {
+var encoder6 = new TextEncoder();
+async function lightBackupKey(owner, record) {
   const valid = validateLightEnrollment(record);
-  if (owner2.length !== 32 || hex.encode(schnorr.getPublicKey(owner2)) !== valid.descriptor.ownerPub)
+  if (owner.length !== 32 || hex.encode(schnorr.getPublicKey(owner)) !== valid.descriptor.ownerPub)
     throw new Error("Backup key does not belong to this wallet");
-  const material = await crypto.subtle.importKey("raw", Uint8Array.from(owner2), "HKDF", false, ["deriveKey"]);
+  const material = await crypto.subtle.importKey("raw", Uint8Array.from(owner), "HKDF", false, ["deriveKey"]);
   return crypto.subtle.deriveKey(
     {
       name: "HKDF",
       hash: "SHA-256",
       salt: Uint8Array.from(hex.decode(lightDescriptorDigest(valid.descriptor))),
-      info: encoder5.encode("vaulted-light/full-recovery-backup/v2")
+      info: encoder6.encode("vaulted-light/full-recovery-backup/v2")
     },
     material,
     { name: "AES-GCM", length: 256 },
@@ -51373,7 +53952,7 @@ async function lightBackupKey(owner2, record) {
   );
 }
 function aad(header) {
-  return encoder5.encode(
+  return encoder6.encode(
     JSON.stringify({
       name: "vaulted-light-backup",
       version: 2,
@@ -51381,32 +53960,32 @@ function aad(header) {
     })
   );
 }
-function parseLightEncryptedBackup(value) {
-  if (!value || typeof value !== "object") throw new Error("Encrypted Light backup required");
-  const file2 = value;
-  if (JSON.stringify(value).length > MAX_LIGHT_BACKUP_BYTES || file2.name !== "vaulted-light-backup" || file2.version !== 2 || Object.keys(file2).length !== 5 || !/^[0-9a-f]{24}$/.test(file2.nonce) || typeof file2.ciphertext !== "string" || !/^[A-Za-z0-9+/]+={0,2}$/.test(file2.ciphertext))
+function parseLightEncryptedBackup(value2) {
+  if (!value2 || typeof value2 !== "object") throw new Error("Encrypted Light backup required");
+  const file = value2;
+  if (JSON.stringify(value2).length > MAX_LIGHT_BACKUP_BYTES || file.name !== "vaulted-light-backup" || file.version !== 2 || Object.keys(file).length !== 5 || !/^[0-9a-f]{24}$/.test(file.nonce) || typeof file.ciphertext !== "string" || !/^[A-Za-z0-9+/]+={0,2}$/.test(file.ciphertext))
     throw new Error("Invalid encrypted Light backup");
-  const record = validateLightEnrollment(file2.header);
-  const { origin, rpId } = file2.header;
+  const record = validateLightEnrollment(file.header);
+  const { origin, rpId } = file.header;
   if (typeof origin !== "string" || typeof rpId !== "string" || new URL(origin).origin !== origin || new URL(origin).hostname !== rpId)
     throw new Error("Invalid backup passkey origin");
   const header = { ...record, origin, rpId };
-  return { name: file2.name, version: file2.version, header, nonce: file2.nonce, ciphertext: file2.ciphertext };
+  return { name: file.name, version: file.version, header, nonce: file.nonce, ciphertext: file.ciphertext };
 }
-async function decryptLightBackup(value, key) {
-  const file2 = parseLightEncryptedBackup(value);
+async function decryptLightBackup(value2, key) {
+  const file = parseLightEncryptedBackup(value2);
   const compressed2 = new Uint8Array(
     await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: Uint8Array.from(hex.decode(file2.nonce)), additionalData: aad(file2.header) },
+      { name: "AES-GCM", iv: Uint8Array.from(hex.decode(file.nonce)), additionalData: aad(file.header) },
       key,
-      Uint8Array.from(base64.decode(file2.ciphertext))
+      Uint8Array.from(base64.decode(file.ciphertext))
     )
   );
   let plain;
   try {
     plain = await compressRecoveryData(compressed2, true);
     const decoded = validateLightRecoveryFile(JSON.parse(new TextDecoder().decode(plain)));
-    if (!decoded.archive || JSON.stringify(validateLightEnrollment(decoded)) !== JSON.stringify(validateLightEnrollment(file2.header)))
+    if (!decoded.archive || JSON.stringify(validateLightEnrollment(decoded)) !== JSON.stringify(validateLightEnrollment(file.header)))
       throw new Error("Recovery backup identity or transaction data changed");
     return decoded;
   } finally {
@@ -51414,201 +53993,1665 @@ async function decryptLightBackup(value, key) {
     plain?.fill(0);
   }
 }
-async function openLocalLightBackup(value) {
-  const encrypted = parseLightEncryptedBackup(value);
+async function openLocalLightBackup(value2) {
+  const encrypted = parseLightEncryptedBackup(value2);
   if (location.origin !== encrypted.header.origin || location.hostname !== encrypted.header.rpId)
     throw new Error(`Open recovery at ${encrypted.header.origin} to use this wallet\u2019s passkey`);
-  const owner2 = await unlockLightWithPasskey(encrypted.header);
+  const owner = await unlockLightWithPasskey(encrypted.header);
   try {
-    const key = await lightBackupKey(owner2, encrypted.header);
+    const key = await lightBackupKey(owner, encrypted.header);
     return { file: await decryptLightBackup(encrypted, key), key };
   } finally {
-    owner2.fill(0);
+    owner.fill(0);
   }
 }
 
-// src/lib/vault/light/recoveryProgress.ts
+// src/lib/vault/program/onchainRecovery.ts
 init_define_import_meta_env();
+init_base();
+init_btc_signer();
 
-// src/lib/vault/policy.ts
+// src/lib/vault/program/spend.ts
 init_define_import_meta_env();
-function humanDuration(seconds) {
-  if (seconds < 90) return "about a minute";
-  if (seconds < 3600) {
-    const minutes = Math.max(1, Math.round(seconds / 60));
-    return `about ${minutes} minute${minutes === 1 ? "" : "s"}`;
-  }
-  if (seconds < 86400) {
-    const hours = Math.max(1, Math.round(seconds / 3600));
-    return `about ${hours} hour${hours === 1 ? "" : "s"}`;
-  }
-  const days = Math.max(1, Math.round(seconds / 86400));
-  return `about ${days} day${days === 1 ? "" : "s"}`;
+init_base();
+init_btc_signer();
+var TX_OPTS = { version: 2, lockTime: 0, allowUnknownInputs: true, allowUnknownOutputs: true };
+function familyKey(claimant) {
+  return `savings-${claimant}`;
 }
-
-// src/lib/vault/light/recoveryProgress.ts
-var lightExitDelayLabel = (seconds) => seconds < 86400 ? `about ${Math.ceil(seconds / 60).toLocaleString()} minutes` : humanDuration(seconds);
-function lightRecoveryProgress(event) {
-  const step = `Step ${event.stepIndex + 1}`;
-  switch (event.status) {
-    case "waiting_csv":
-      if (event.maturesAtTime && Number.isFinite(event.maturesAtTime))
-        return `${step}: the owner-only delay ends around ${new Date(event.maturesAtTime * 1e3).toLocaleString()}.`;
-      if (event.maturesAtHeight) return `${step}: waiting for Bitcoin block ${event.maturesAtHeight.toLocaleString()}.`;
-      return `${step}: waiting for the owner-only recovery delay.`;
-    case "broadcast":
-      return `${step}: submitted to Bitcoin; waiting for confirmation.`;
-    case "confirmed":
-      return `${step}: confirmed on Bitcoin.`;
-    case "skipped":
-      if (event.txid && !event.reason) return `${step}: already confirmed on Bitcoin.`;
-      return `${step}: skipped${event.reason ? ` \u2014 ${event.reason}` : ""}.`;
-    case "failed":
-    case "warning":
-      return `${step}: needs attention${event.reason ? ` \u2014 ${event.reason}` : ""}.`;
-  }
+function requireCoin(coin) {
+  const txid = coin.txid.trim().toLowerCase();
+  if (!/^[0-9a-f]{64}$/.test(txid)) throw new Error("txid must be 32-byte hex");
+  if (!Number.isInteger(coin.vout) || coin.vout < 0) throw new Error("vout required");
+  if (!Number.isInteger(coin.value) || coin.value < DUST_SATS2) throw new Error("coin value required");
+  return { txid, vout: coin.vout, value: coin.value };
 }
-
-// tools/light-emergency/recover.ts
-var el = (id) => document.getElementById(id);
-var raw;
-var file;
-var legacy = false;
-var controller;
-var busy = false;
-async function run(action) {
-  if (busy) return;
-  busy = true;
-  el("error").textContent = "";
-  el("status").textContent = "";
-  document.querySelectorAll("button:not(#stop)").forEach((button) => {
-    button.disabled = true;
+function requireFee(feeSats) {
+  if (!Number.isInteger(feeSats) || feeSats < 0) throw new Error("fee required");
+  if (feeSats > ABSOLUTE_FEE_CEILING_SATS2) throw new Error("fee exceeds the absolute cap");
+  return feeSats;
+}
+function tapLeafForScript(tapLeafScript, script) {
+  const leaf = tapLeafScript?.find((entry) => hex.encode(entry[1].slice(0, -1)) === hex.encode(script));
+  if (!leaf) throw new Error("tap leaf missing from tree");
+  return leaf;
+}
+function buildGuardianExitPsbt(input) {
+  const coin = requireCoin(input.coin);
+  const feeSats = requireFee(input.feeSats);
+  const destSats = coin.value - feeSats;
+  if (destSats < bitcoinDustSats(input.destAddress, input.network)) throw new Error("cancel dest is below dust");
+  const key = familyKey(input.claimant);
+  const source2 = input.family.pending[key];
+  if (!source2.guardianExit) throw new Error("this vault cannot cancel pending recovery without the services");
+  const dest = hex.decode(scriptHexFromAddress(input.destAddress, input.network));
+  const leaf = tapLeafForScript(source2.tapLeafScript, source2.guardianExit);
+  const tx = new Transaction(TX_OPTS);
+  tx.addInput({
+    txid: hex.decode(coin.txid),
+    index: coin.vout,
+    witnessUtxo: { script: source2.script, amount: BigInt(coin.value) },
+    tapInternalKey: source2.tapInternalKey,
+    tapLeafScript: [leaf],
+    sequence: 4294967293
   });
-  try {
-    await action();
-  } catch (error) {
-    el("error").textContent = error instanceof Error ? error.message : "Recovery failed";
-  } finally {
-    busy = false;
-    document.querySelectorAll("button:not(#stop)").forEach((button) => {
-      button.disabled = false;
+  tx.addOutput({ script: dest, amount: BigInt(destSats) });
+  return { psbtHex: hex.encode(tx.toPSBT()), destSats };
+}
+function buildClaimPsbt(input) {
+  const coin = requireCoin(input.coin);
+  const feeSats = requireFee(input.feeSats);
+  const destSats = coin.value - feeSats;
+  if (destSats < bitcoinDustSats(input.destAddress, input.network)) throw new Error("claim dest is below dust");
+  const key = familyKey(input.claimant);
+  const source2 = input.family.pending[key];
+  const dest = hex.decode(scriptHexFromAddress(input.destAddress, input.network));
+  const leaf = tapLeafForScript(source2.tapLeafScript, source2.claim);
+  const tx = new Transaction(TX_OPTS);
+  tx.addInput({
+    txid: hex.decode(coin.txid),
+    index: coin.vout,
+    witnessUtxo: { script: source2.script, amount: BigInt(coin.value) },
+    tapInternalKey: source2.tapInternalKey,
+    tapLeafScript: [leaf],
+    sequence: pendingDelay2(input.claimant)
+  });
+  tx.addOutput({ script: dest, amount: BigInt(destSats) });
+  return { psbtHex: hex.encode(tx.toPSBT()), destSats };
+}
+
+// src/lib/vault/program/onchainRecovery.ts
+var options = { version: 2, lockTime: 0, allowUnknownInputs: true, allowUnknownOutputs: true };
+function pathFacts(kit2, path) {
+  const d = kit2.descriptor;
+  const family = familyFromDescriptor(d);
+  if (path.program === "savings-admin") {
+    if (d.templateVersion === CONNECTOR_TEMPLATE2)
+      throw new Error("Connector Savings requires its saved payment and cosigner authorization");
+    return {
+      tree: family.savings,
+      leaf: family.savings.admin,
+      signers: ["phone", "hardware"],
+      sequence: 4294967293
+    };
+  }
+  if (!["phone", "hardware", "recovery"].includes(path.claimant)) throw new Error("Invalid recovery claimant");
+  const key = `savings-${path.claimant}`;
+  if (!d.pending[key]) throw new Error("This vault has no recovery path for that key");
+  if (path.program === "quarantine") {
+    const tree2 = family.quarantine[key];
+    return { tree: tree2, leaf: tree2.admin, signers: tree2.guardians, sequence: 4294967293 };
+  }
+  const tree = family.pending[key];
+  if (path.program === "pending-claim")
+    return { tree, leaf: tree.claim, signers: [path.claimant], sequence: tree.delay };
+  if (path.program !== "pending-cancel" || !tree.guardianExit)
+    throw new Error("This vault has no service-independent cancellation path");
+  return {
+    tree,
+    leaf: tree.guardianExit,
+    signers: pendingGuardians2(path.claimant, Boolean(d.keys.recovery)),
+    sequence: 4294967293
+  };
+}
+function build(input) {
+  const kit2 = parseRecoveryKit2(input.kit);
+  const facts2 = pathFacts(kit2, input.path);
+  if (!/^(?:[0-9a-f]{2})+$/.test(input.parentHex) || input.parentHex.length > 8e6)
+    throw new Error("Canonical parent transaction required");
+  const parent = Transaction.fromRaw(hex.decode(input.parentHex), options);
+  if (!Number.isSafeInteger(input.vout) || input.vout < 0 || input.vout >= parent.outputsLength)
+    throw new Error("Recovery parent output missing");
+  const output = parent.getOutput(input.vout);
+  if (!output.script || hex.encode(output.script) !== hex.encode(facts2.tree.script) || output.amount === void 0)
+    throw new Error("Recovery parent does not pay the selected program");
+  if (output.amount <= 0n || output.amount > 21000000n * 100000000n) throw new Error("Invalid recovery value");
+  if (!Number.isSafeInteger(input.feeSats) || input.feeSats < 0 || input.feeSats > kit2.descriptor.policy.absoluteFeeCapSats)
+    throw new Error("Recovery fee exceeds the vault cap");
+  const amount = output.amount - BigInt(input.feeSats);
+  if (amount < BigInt(bitcoinDustSats(input.destination, kit2.descriptor.network)))
+    throw new Error("Recovery output is below dust");
+  let tx;
+  if (input.path.program === "pending-claim" || input.path.program === "pending-cancel") {
+    const builder = input.path.program === "pending-claim" ? buildClaimPsbt : buildGuardianExitPsbt;
+    const built = builder({
+      family: familyFromDescriptor(kit2.descriptor),
+      claimant: input.path.claimant,
+      coin: { txid: parent.id, vout: input.vout, value: Number(output.amount) },
+      destAddress: input.destination,
+      feeSats: input.feeSats,
+      network: kit2.descriptor.network
+    });
+    tx = Transaction.fromPSBT(hex.decode(built.psbtHex), options);
+    tx.updateInput(0, { nonWitnessUtxo: hex.decode(input.parentHex) });
+  } else {
+    tx = new Transaction(options);
+    tx.addInput({
+      txid: parent.id,
+      index: input.vout,
+      sequence: facts2.sequence,
+      witnessUtxo: { script: output.script, amount: output.amount },
+      nonWitnessUtxo: hex.decode(input.parentHex),
+      tapInternalKey: facts2.tree.tapInternalKey,
+      tapLeafScript: [tapLeafForScript(facts2.tree.tapLeafScript, facts2.leaf)]
+    });
+    tx.addOutput({ script: hex.decode(scriptHexFromAddress(input.destination, kit2.descriptor.network)), amount });
+  }
+  const pubs = facts2.signers.map((role) => {
+    const pub = role === "phone" ? kit2.descriptor.keys.phoneBip340 : kit2.descriptor.keys[role];
+    if (!pub) throw new Error("Missing required recovery key");
+    return pub.slice(2);
+  });
+  return { tx, kit: kit2, ...facts2, pubs, parentTxid: parent.id };
+}
+function prepareSavingsRecovery(input) {
+  const { tx, kit: kit2 } = build(input);
+  return { ...input, kit: kit2, name: "vaulted-savings-recovery", version: 1, psbt: hex.encode(tx.toPSBT()) };
+}
+function validateSavingsRecovery(raw2) {
+  if (!raw2 || raw2.name !== "vaulted-savings-recovery" || raw2.version !== 1 || typeof raw2.psbt !== "string" || raw2.psbt.length > 1e7)
+    throw new Error("Invalid Savings recovery file");
+  const rebuilt = build(raw2);
+  const tx = Transaction.fromPSBT(hex.decode(raw2.psbt), options);
+  const signatures = tx.getInput(0).tapScriptSig || [];
+  const signedPubs = signatures.map(([key]) => hex.encode(key.pubKey));
+  if (signedPubs.some((pub) => !rebuilt.pubs.includes(pub))) throw new Error("Unexpected recovery signer");
+  if (signatures.length) rebuilt.tx.updateInput(0, { tapScriptSig: signatures });
+  if (hex.encode(tx.toPSBT()) !== hex.encode(rebuilt.tx.toPSBT()))
+    throw new Error("Recovery transaction or signing metadata changed");
+  if (signatures.length) requireExactDefaultTapscriptSignatures(tx, 0, signedPubs);
+  return { ...rebuilt, tx, signedPubs, complete: signedPubs.length === rebuilt.pubs.length };
+}
+function finalizeSavingsRecovery(file) {
+  const view3 = validateSavingsRecovery(file);
+  if (!view3.complete) throw new Error("Every required recovery key must sign");
+  view3.tx.finalize();
+  if (file.feeSats > Math.ceil(view3.tx.vsize * view3.kit.descriptor.policy.feerateCapSatVb))
+    throw new Error("Recovery fee rate exceeds the vault cap");
+  return { txid: view3.tx.id, txHex: hex.encode(view3.tx.extract()) };
+}
+async function executeSavingsRecovery(value2, chain3) {
+  const file = JSON.parse(JSON.stringify(value2));
+  const view3 = validateSavingsRecovery(file);
+  const signed = finalizeSavingsRecovery(file);
+  const spend = await chain3.outspend(view3.parentTxid, file.vout);
+  if (spend.spent) {
+    if (spend.txid !== signed.txid) throw new Error("Recovery input is spent by another transaction; retain this file");
+    return { ...signed, confirmed: (await chain3.status(signed.txid)).confirmed };
+  }
+  if (file.path.program === "pending-claim") {
+    const parent = await chain3.status(view3.parentTxid);
+    const tip = await chain3.tipHeight();
+    if (!parent.confirmed || !Number.isSafeInteger(parent.blockHeight) || parent.blockHeight <= 0 || !Number.isSafeInteger(tip) || tip + 1 < parent.blockHeight + view3.sequence)
+      throw new Error("Pending recovery delay has not elapsed");
+  }
+  const txid = await chain3.broadcast(signed.txHex);
+  if (txid !== signed.txid) throw new Error("Recovery broadcast outcome is uncertain; retain this file");
+  return { ...signed, confirmed: false };
+}
+
+// src/lib/vault/vtxo/spendingRecovery.ts
+init_define_import_meta_env();
+
+// src/lib/vault/recovery/graphPackage.ts
+init_define_import_meta_env();
+init_btc_signer();
+init_base();
+function canonicalRecoveryGraph(input) {
+  const { archive, archiveBinding, phonePub, pkg, sweeps, feeLimits: feeLimits2 } = input;
+  const { coins: coins2 } = validateExitArchive(archive, archiveBinding);
+  const pins = networkPins(archiveBinding.network);
+  if (!Number.isSafeInteger(feeLimits2.absoluteFeeCapSats) || feeLimits2.absoluteFeeCapSats < 0 || !Number.isFinite(feeLimits2.feerateCapSatVb) || feeLimits2.feerateCapSatVb < 1 || !pkg || pkg.version !== 1 || pkg.mode !== "graph" || pkg.network !== pins.sdkNetwork || !Number.isFinite(pkg.feeRate) || pkg.feeRate < 1 || pkg.feeRate > feeLimits2.feerateCapSatVb || !Number.isSafeInteger(pkg.createdAt) || pkg.createdAt <= 0 || sweeps.length !== coins2.length || !coins2.length || !/^(02|03)[0-9a-f]{64}$/.test(phonePub))
+    throw new Error("Recovery package does not cover the saved outputs");
+  const destination = scriptHexFromAddress(pkg.sweepAddress, archiveBinding.network);
+  const signed = /* @__PURE__ */ new Map();
+  for (const item of sweeps) {
+    const key = `${item.coin.txid}:${item.coin.vout}`;
+    const coin = coins2.find((coin2) => `${coin2.txid}:${coin2.vout}` === key);
+    if (!coin || coin.value !== item.coin.value || signed.has(key) || item.tx.inputsLength !== 1 || item.tx.outputsLength !== 1 || hex.encode(item.tx.getInput(0).txid) !== coin.txid || item.tx.getInput(0).index !== coin.vout || hex.encode(item.tx.getOutput(0).script) !== destination || item.tx.getOutput(0).amount !== BigInt(coin.value - item.fee) || !Number.isSafeInteger(item.fee) || item.fee < 0 || item.fee > feeLimits2.absoluteFeeCapSats || item.fee > Math.ceil(item.tx.vsize * feeLimits2.feerateCapSatVb))
+      throw new Error("Recovery sweep transaction or fee changed");
+    item.tx.extract();
+    signed.set(key, item);
+  }
+  const parents = /* @__PURE__ */ new Map();
+  for (const coin of coins2) {
+    const outpoint2 = `${coin.txid}:${coin.vout}`;
+    const chain3 = new Map(archive.branches[outpoint2].map((node) => [node.txid, node]));
+    const visited = /* @__PURE__ */ new Set();
+    const visit = (id) => {
+      if (visited.has(id)) return;
+      visited.add(id);
+      const node = chain3.get(id);
+      if (node.type === ChainTxType.COMMITMENT) return;
+      node.spends.forEach(visit);
+      const existing = parents.get(id);
+      if (existing) {
+        if (existing.type !== node.type) throw new Error("Recovery ancestors disagree about transaction type");
+        existing.forVtxos.add(outpoint2);
+        return;
+      }
+      const tx = Transaction2.fromPSBT(base64.decode(archive.transactions[id]));
+      if (node.type === ChainTxType.TREE) {
+        const input2 = tx.getInput(0);
+        if (!input2.tapKeySig) throw new Error("Recovery tree signature missing");
+        tx.updateInput(0, { finalScriptWitness: [input2.tapKeySig] });
+      } else tx.finalize();
+      parents.set(id, { tx, forVtxos: /* @__PURE__ */ new Set([outpoint2]), type: node.type });
+    };
+    visit(coin.txid);
+  }
+  const network2 = getNetwork(pins.sdkNetwork);
+  const feeAddress = p2tr(hex.decode(phonePub).slice(1), void 0, network2).address;
+  const childVsize = Number(
+    TxWeightEstimator.create().addP2AInput().addKeySpendInput(true).addOutputAddress(feeAddress, network2).vsize().value
+  );
+  const funding2 = [...parents.values()].reduce(
+    (sum, parent) => sum + Math.ceil(pkg.feeRate * (parent.tx.vsize + childVsize)),
+    0
+  );
+  if (!Number.isSafeInteger(funding2)) throw new Error("Recovery fee estimate exceeds supported amount");
+  const vtxos = coins2.map((coin) => {
+    const outpoint2 = `${coin.txid}:${coin.vout}`, item = signed.get(outpoint2);
+    return { outpoint: outpoint2, value: coin.value, sweepFee: item.fee, path: item.path, delay: item.delay };
+  });
+  const steps = [...parents.values()].map(({ tx, forVtxos }) => ({
+    kind: "bump",
+    parentTxid: tx.id,
+    parentHex: hex.encode(tx.extract()),
+    forVtxos: [...forVtxos].sort()
+  }));
+  for (const vtxo of vtxos) {
+    const item = signed.get(vtxo.outpoint);
+    steps.push({
+      kind: "sweep",
+      vtxo: vtxo.outpoint,
+      txid: item.tx.id,
+      hex: hex.encode(item.tx.extract()),
+      dependsOnTxid: item.coin.txid,
+      delay: item.delay
     });
   }
+  return {
+    version: 1,
+    mode: "graph",
+    network: pins.sdkNetwork,
+    createdAt: pkg.createdAt,
+    feeRate: pkg.feeRate,
+    sweepAddress: pkg.sweepAddress,
+    steps,
+    vtxos,
+    totals: {
+      txCount: parents.size * 2 + coins2.length,
+      fundingRequiredSats: funding2,
+      totalFeeSats: funding2 + vtxos.reduce((sum, v) => sum + v.sweepFee, 0),
+      recoveredSats: vtxos.reduce((sum, v) => sum + v.value - v.sweepFee, 0)
+    }
+  };
 }
-async function owner() {
-  if (!file) throw new Error("Open your backup first");
-  if (!legacy) return unlockLightWithPasskey(file);
-  const secret = el("secret").value.trim();
-  if (!/^[0-9a-f]{64}$/.test(secret)) throw new Error("Enter the complete recovery code");
-  const material = hex.decode(secret);
+
+// src/lib/vault/vtxo/spendingRecovery.ts
+init_base();
+
+// src/lib/vault/vtxo/contractHandler.ts
+init_define_import_meta_env();
+init_base();
+function publicKey(value2, name) {
+  if (!value2) throw new Error(`${name} is required`);
+  let decoded;
   try {
-    return await unlockLightOwnerKey(file.recoveryBackup, material, "recovery-secret", file.descriptor);
+    decoded = hex.decode(value2);
+  } catch {
+    throw new Error(`${name} must be hex`);
+  }
+  if (decoded.length !== 32) throw new Error(`${name} must be a 32-byte x-only pubkey`);
+  return decoded;
+}
+var VaultPolicyV1ContractHandler = {
+  type: VAULT_POLICY_V1_TYPE,
+  createScript(params) {
+    return new VaultPolicyV1Script(this.deserializeParams(params));
+  },
+  serializeParams(params) {
+    return {
+      userPub: hex.encode(params.userPub),
+      vtxoVaultCosignerPub: hex.encode(params.vtxoVaultCosignerPub),
+      arkdServerPub: hex.encode(params.arkdServerPub),
+      delegatePub: hex.encode(params.delegatePub),
+      exitDelay: params.exitDelay.toString(),
+      exitDelayUnit: params.exitDelayUnit,
+      exitDevicePub: hex.encode(params.exitDevicePub),
+      exitHardwarePub: hex.encode(params.exitHardwarePub),
+      ...params.network ? { network: params.network } : {},
+      ...params.exitRecoveryPub ? { exitRecoveryPub: hex.encode(params.exitRecoveryPub) } : {}
+    };
+  },
+  deserializeParams(params) {
+    let exitDelay;
+    try {
+      exitDelay = BigInt(params.exitDelay);
+    } catch {
+      throw new Error("exitDelay must be an integer");
+    }
+    const network2 = isSupportedVaultNetwork2(params.network) ? params.network : void 0;
+    return {
+      userPub: publicKey(params.userPub, "userPub"),
+      vtxoVaultCosignerPub: publicKey(params.vtxoVaultCosignerPub, "vtxoVaultCosignerPub"),
+      arkdServerPub: publicKey(params.arkdServerPub, "arkdServerPub"),
+      delegatePub: publicKey(params.delegatePub, "delegatePub"),
+      exitDelay,
+      exitDelayUnit: params.exitDelayUnit,
+      exitDevicePub: publicKey(params.exitDevicePub, "exitDevicePub"),
+      exitHardwarePub: publicKey(params.exitHardwarePub, "exitHardwarePub"),
+      ...network2 ? { network: network2 } : {},
+      ...params.exitRecoveryPub ? { exitRecoveryPub: publicKey(params.exitRecoveryPub, "exitRecoveryPub") } : {}
+    };
+  },
+  // Vault funds are selected only by the explicit VaultCosigner-authorized
+  // path. Generic SDK send, renewal and sweep must never select them.
+  selectPath: () => null,
+  getAllSpendingPaths: () => [],
+  getSpendablePaths: () => [],
+  isGenericallySpendable: () => false
+};
+
+// src/lib/vault/vtxo/spendingRecovery.ts
+var RECOVERY_TYPE = "vault-policy-v1-recovery";
+function registerVaultSpendingRecoveryHandler() {
+  if (contractHandlers.has(RECOVERY_TYPE)) return;
+  const handler = {
+    ...VaultPolicyV1ContractHandler,
+    type: RECOVERY_TYPE,
+    getAllSpendingPaths: (script, _contract, context) => context.collaborative ? [] : [{ leaf: script.exit(), sequence: timelockToSequence({ type: "seconds", value: script.params.exitDelay }) }]
+  };
+  contractHandlers.register(handler);
+}
+function sweepFacts(archive, destination, psbt, complete) {
+  const local = vaultArchiveProviders(archive);
+  const script = vaultPolicyV1ScriptFromStatus(archive.status);
+  const tx = Transaction2.fromPSBT(hex.decode(psbt));
+  if (tx.inputsLength !== 1 || tx.outputsLength !== 1)
+    throw new Error("Recovery sweep must have one input and one output");
+  const input = tx.getInput(0);
+  const coin = local.coins.find((coin2) => coin2.txid === hex.encode(input.txid) && coin2.vout === input.index);
+  if (!coin) throw new Error("Recovery sweep input is not in the saved archive");
+  const output = tx.getOutput(0);
+  const fee = coin.value - Number(output.amount);
+  if (!Number.isSafeInteger(fee) || fee < 0 || fee > archive.kit.descriptor.policy.absoluteFeeCapSats || Number(output.amount) < bitcoinDustSats(destination, archive.status.network))
+    throw new Error("Recovery sweep fee is outside the vault limits");
+  const expected = new Transaction2({ version: 2 });
+  expected.addInput({
+    txid: coin.txid,
+    index: coin.vout,
+    tapLeafScript: [script.exit()],
+    sequence: timelockToSequence({ type: "seconds", value: script.params.exitDelay }),
+    witnessUtxo: { amount: BigInt(coin.value), script: script.pkScript },
+    sighashType: 0
+  });
+  expected.addOutput({
+    amount: output.amount,
+    script: hex.decode(scriptHexFromAddress(destination, archive.status.network))
+  });
+  const keys2 = archive.kit.descriptor.keys;
+  const requiredKeys = keys2.recovery ? [
+    { role: "hardware", publicKey: keys2.hardware },
+    { role: "recovery", publicKey: keys2.recovery }
+  ] : [
+    { role: "phone", publicKey: keys2.phoneBip340 },
+    { role: "hardware", publicKey: keys2.hardware }
+  ];
+  const signatures = input.tapScriptSig ?? [];
+  if (signatures.length) expected.updateInput(0, { tapScriptSig: signatures });
+  if (hex.encode(tx.toPSBT()) !== hex.encode(expected.toPSBT()))
+    throw new Error("Recovery sweep transaction or metadata changed");
+  const pubs = requiredKeys.map((key) => key.publicKey.slice(2));
+  if (complete) requireExactDefaultTapscriptSignatures(tx, 0, pubs);
+  else if (signatures.length) {
+    const signed = signatures.map(([key]) => hex.encode(key.pubKey));
+    if (signed.some((key) => !pubs.includes(key))) throw new Error("Unexpected recovery key");
+    requireExactDefaultTapscriptSignatures(tx, 0, signed);
+  }
+  return { tx, coin, fee, requiredKeys };
+}
+async function prepareVaultSpendingRecovery(archive, destination, sign2, onchain = new EsploraProvider("/esplora")) {
+  validateVaultRecoveryArchive(archive);
+  scriptHexFromAddress(destination, archive.status.network);
+  registerVaultSpendingRecoveryHandler();
+  const local = vaultArchiveProviders(archive);
+  if (!local.coins.length) throw new Error("No saved Spending outputs to recover");
+  const pins = networkPins(archive.status.network);
+  const readonly = ReadonlySingleKey.fromPublicKey(hex.decode(archive.kit.descriptor.keys.phoneBip340));
+  const denied = () => {
+    throw new Error("Only the saved recovery sweeps may be signed");
+  };
+  const sweeps = [];
+  const identity2 = {
+    compressedPublicKey: () => readonly.compressedPublicKey(),
+    xOnlyPublicKey: () => readonly.xOnlyPublicKey(),
+    signMessage: denied,
+    signerSession: denied,
+    sign: async (tx) => {
+      const psbt = hex.encode(tx.toPSBT());
+      const facts2 = sweepFacts(archive, destination, psbt, false);
+      const signed = await sign2({ psbt, requiredKeys: facts2.requiredKeys });
+      const accepted = sweepFacts(archive, destination, signed, true);
+      if (accepted.fee !== facts2.fee || accepted.coin.txid !== facts2.coin.txid || accepted.coin.vout !== facts2.coin.vout)
+        throw new Error("Recovery signer changed the requested transaction");
+      sweeps.push(hex.encode(accepted.tx.toPSBT()));
+      return accepted.tx;
+    }
+  };
+  const onchainWallet = await OnchainWallet.create(identity2, pins.sdkNetwork, onchain);
+  const wallet = await Wallet2.create({
+    identity: identity2,
+    arkServerUrl: pins.operatorOrigin,
+    arkProvider: local.arkProvider,
+    indexerProvider: local.indexerProvider,
+    onchainProvider: onchain,
+    storage: {
+      walletRepository: new InMemoryWalletRepository(),
+      contractRepository: new InMemoryContractRepository(),
+      exitDataCapture: { mode: "full", sources: [local.source] }
+    },
+    walletMode: "static",
+    settlementConfig: { autoRenewVtxos: false, boardingUtxoSweep: false, deprecatedSignerMigration: false }
+  });
+  try {
+    const script = vaultPolicyV1ScriptFromStatus(archive.status);
+    await (await wallet.getContractManager()).createContract({
+      type: RECOVERY_TYPE,
+      label: "Spending recovery",
+      params: VaultPolicyV1ContractHandler.serializeParams(script.params),
+      script: hex.encode(script.pkScript),
+      address: new ArkAddress(script.params.arkdServerPub, script.tweakedPublicKey, pins.arkHrp).encode(),
+      state: "active"
+    });
+    const preparedPackage = await UnilateralExit.prepare({
+      wallet,
+      onchainWallet,
+      sweepAddress: destination,
+      vtxos: local.coins.map(({ txid, vout }) => ({ txid, vout })),
+      mode: "graph",
+      networkName: pins.sdkNetwork
+    });
+    const exitPackage = canonicalSpendingPackage(archive, preparedPackage, sweeps);
+    const result = {
+      name: "vaulted-spending-recovery",
+      version: 1,
+      archive,
+      exitPackage,
+      sweeps
+    };
+    validateSpendingRecoveryPackage(result);
+    return result;
+  } finally {
+    await wallet[Symbol.asyncDispose]();
+  }
+}
+function canonicalSpendingPackage(archive, pkg, sweeps) {
+  validateVaultRecoveryArchive(archive);
+  if (!Array.isArray(sweeps)) throw new Error("Recovery sweeps are missing");
+  const signed = sweeps.map((psbt) => {
+    const facts2 = sweepFacts(archive, pkg.sweepAddress, psbt, true);
+    facts2.tx.finalize();
+    return {
+      ...facts2,
+      delay: { type: "seconds", value: archive.status.vtxoExitDelay },
+      path: `${RECOVERY_TYPE}:unilateral`
+    };
+  });
+  return canonicalRecoveryGraph({
+    archive: archive.spending,
+    archiveBinding: vaultRecoveryBinding(archive.kit, archive.status),
+    phonePub: archive.kit.descriptor.keys.phoneBip340,
+    pkg,
+    sweeps: signed,
+    feeLimits: archive.kit.descriptor.policy
+  });
+}
+function validateSpendingRecoveryPackage(file) {
+  if (!file || file.name !== "vaulted-spending-recovery" || file.version !== 1)
+    throw new Error("Invalid Spending recovery package");
+  const expected = canonicalSpendingPackage(file.archive, file.exitPackage, file.sweeps);
+  if (JSON.stringify(file.exitPackage) !== JSON.stringify(expected))
+    throw new Error("Recovery graph, sweep or delay changed");
+  return file;
+}
+function executeVaultSpendingRecovery(file, onchain, feeWallet, signal) {
+  const snapshot = JSON.parse(JSON.stringify(file));
+  validateSpendingRecoveryPackage(snapshot);
+  return new UnilateralExit.Executor(snapshot.exitPackage, onchain, { feeWallet, signal });
+}
+
+// src/lib/vault/vtxo/boardingRecoveryFile.ts
+init_define_import_meta_env();
+init_btc_signer();
+init_base();
+function facts(archive) {
+  let descriptor;
+  let kit2;
+  if (archive.name === "vaulted-public-boarding-data") {
+    if (archive.version !== 1 || JSON.stringify(archive).length > 24e6 || !Array.isArray(archive.onchain) || archive.onchain.length > 1024)
+      throw new Error("Invalid public boarding data");
+    kit2 = parseRecoveryKit2(archive.kit);
+    descriptor = requireBoardingDescriptor(archive.descriptor, {
+      vaultId: kit2.descriptor.vaultId,
+      phonePub: kit2.descriptor.keys.phoneBip340,
+      boardingPub: archive.descriptor?.boardingPub,
+      network: kit2.descriptor.network
+    });
+    const seen = /* @__PURE__ */ new Set();
+    for (const coin of archive.onchain) {
+      const outpoint2 = `${coin.txid}:${coin.vout}`;
+      if (!/^[0-9a-f]{64}$/.test(coin.txid) || !Number.isSafeInteger(coin.vout) || coin.vout < 0 || coin.vout > 4294967295 || !Number.isSafeInteger(coin.value) || coin.value <= 0 || coin.value > 21e14 || coin.script !== descriptor.script || seen.has(outpoint2) || typeof coin.parentHex !== "string" || coin.parentHex.length > 8e6)
+        throw new Error("Invalid public boarding output");
+      seen.add(outpoint2);
+      const parent = Transaction2.fromRaw(hex.decode(coin.parentHex), {
+        allowUnknownInputs: true,
+        allowUnknownOutputs: true
+      });
+      const output = parent.getOutput(coin.vout);
+      if (parent.id !== coin.txid || output.amount !== BigInt(coin.value) || hex.encode(output.script) !== descriptor.script)
+        throw new Error("Boarding recovery parent changed");
+    }
+  } else {
+    validateVaultRecoveryArchive(archive);
+    kit2 = archive.kit;
+    const status2 = archive.status;
+    descriptor = requireBoardingStatus(status2, status2.vtxoBoardingDescriptor.boardingPub);
+  }
+  const program = {
+    name: BOARDING_PROGRAM,
+    boardingPubKey: hex.decode(descriptor.boardingPub).slice(1),
+    cosignerPubKey: hex.decode(descriptor.vaultBoardCosignerPub).slice(1),
+    recoveryPubKey: hex.decode(descriptor.recoveryPhonePub).slice(1)
+  };
+  const network2 = getNetwork(networkPins(descriptor.network).sdkNetwork);
+  const operatorPubKey = hex.decode(descriptor.operatorPub).slice(1);
+  const boardingTimelock = { type: "seconds", value: BigInt(descriptor.exitDelay) };
+  const script = createBoardingProgramScript(program, operatorPubKey, boardingTimelock);
+  const destination = p2tr(program.recoveryPubKey, void 0, network2).address;
+  return {
+    descriptor,
+    program,
+    operatorPubKey,
+    boardingTimelock,
+    script,
+    network: network2,
+    destination,
+    policy: kit2.descriptor.policy
+  };
+}
+function validateBoardingRecoveryFile(file) {
+  if (!file || file.name !== "vaulted-boarding-recovery" || file.version !== 1 || typeof file.psbt !== "string" || file.psbt.length > 1e7)
+    throw new Error("Invalid boarding recovery file");
+  const f = facts(file.archive);
+  const tx = Transaction2.fromPSBT(hex.decode(file.psbt));
+  if (tx.inputsLength !== 1 || tx.outputsLength !== 1) throw new Error("Boarding recovery must have one exact input");
+  const input = tx.getInput(0);
+  const coin = file.archive.onchain.find(
+    (coin2) => coin2.txid === hex.encode(input.txid) && coin2.vout === input.index && coin2.script === f.descriptor.script
+  );
+  if (!coin) throw new Error("Boarding parent is not in the saved archive");
+  const output = tx.getOutput(0);
+  const fee = coin.value - Number(output.amount);
+  const policy = f.policy;
+  if (!Number.isSafeInteger(fee) || fee < 0 || fee > policy.absoluteFeeCapSats || output.amount < 330n)
+    throw new Error("Boarding recovery fee is outside the vault limits");
+  const expected = new Transaction2();
+  expected.addInput({
+    txid: coin.txid,
+    index: coin.vout,
+    witnessUtxo: { amount: BigInt(coin.value), script: f.script.pkScript },
+    tapLeafScript: [f.script.exit()],
+    sequence: timelockToSequence(f.boardingTimelock)
+  });
+  expected.addOutputAddress(f.destination, output.amount, f.network);
+  expected.updateInput(0, { tapScriptSig: input.tapScriptSig });
+  if (hex.encode(tx.toPSBT()) !== hex.encode(expected.toPSBT()))
+    throw new Error("Boarding recovery destination or metadata changed");
+  requireExactDefaultTapscriptSignatures(tx, 0, [f.descriptor.recoveryPhonePub.slice(2)]);
+  tx.finalize();
+  if (fee > Math.ceil(tx.vsize * policy.feerateCapSatVb))
+    throw new Error("Boarding recovery fee rate exceeds the vault cap");
+  return { ...f, tx, coin, fee };
+}
+async function prepareBoardingRecoveryFile(archive, outpoint2, phone2, onchain) {
+  const saved = JSON.parse(JSON.stringify(archive));
+  const requested = { ...outpoint2 };
+  const material = Uint8Array.from(phone2);
+  let signedPsbt = "";
+  try {
+    const f = facts(saved);
+    const coin = saved.onchain.find(
+      (coin2) => coin2.txid === requested.txid && coin2.vout === requested.vout && coin2.script === f.descriptor.script
+    );
+    if (!coin) throw new Error("Boarding parent is not in the saved archive");
+    const status2 = await onchain.getTxStatus(coin.txid);
+    if (!status2.confirmed) throw new Error("Boarding parent has not confirmed");
+    const owner = SingleKey.fromPrivateKey(material);
+    const input = {
+      txid: coin.txid,
+      vout: coin.vout,
+      value: coin.value,
+      status: { confirmed: true, block_height: status2.blockHeight, block_time: status2.blockTime },
+      tapTree: f.script.encode(),
+      forfeitTapLeafScript: f.script.forfeit(),
+      intentTapLeafScript: f.script.forfeit()
+    };
+    const txid = await recoverBoardingProgram({
+      ...f,
+      inputs: [input],
+      recoveryIdentity: {
+        compressedPublicKey: () => owner.compressedPublicKey(),
+        xOnlyPublicKey: () => owner.xOnlyPublicKey(),
+        signerSession: () => {
+          throw new Error("Boarding recovery does not authorize a batch");
+        },
+        signMessage: async () => {
+          throw new Error("Boarding recovery does not authorize messages");
+        },
+        sign: async (tx) => {
+          const signed = await owner.sign(tx);
+          signedPsbt = hex.encode(signed.toPSBT());
+          return signed;
+        }
+      },
+      maxFeeRateSatVb: f.policy.feerateCapSatVb,
+      absoluteFeeCapSats: BigInt(f.policy.absoluteFeeCapSats),
+      onchainProvider: new Proxy(onchain, {
+        get(target, property) {
+          if (property === "broadcastTransaction")
+            return async (raw2) => {
+              const result = validateBoardingRecoveryFile({
+                name: "vaulted-boarding-recovery",
+                version: 1,
+                archive: saved,
+                psbt: signedPsbt
+              });
+              if (hex.encode(result.tx.extract()) !== raw2)
+                throw new Error("SDK boarding recovery changed before capture");
+              return result.tx.id;
+            };
+          const value2 = Reflect.get(target, property);
+          return typeof value2 === "function" ? value2.bind(target) : value2;
+        }
+      })
+    });
+    const file = {
+      name: "vaulted-boarding-recovery",
+      version: 1,
+      archive: saved,
+      psbt: signedPsbt
+    };
+    if (validateBoardingRecoveryFile(file).tx.id !== txid) throw new Error("Boarding recovery identity changed");
+    return file;
   } finally {
     material.fill(0);
   }
 }
+function executeBoardingRecoveryFile(file, onchain, signal) {
+  const view3 = validateBoardingRecoveryFile(file);
+  const outpoint2 = `${view3.coin.txid}:${view3.coin.vout}`;
+  const delay = { type: "seconds", value: view3.descriptor.exitDelay };
+  const pkg = {
+    version: 1,
+    mode: "graph",
+    network: networkPins(view3.descriptor.network).sdkNetwork,
+    createdAt: Math.floor(Date.now() / 1e3),
+    feeRate: view3.fee / view3.tx.vsize,
+    sweepAddress: view3.destination,
+    totals: { txCount: 1, totalFeeSats: view3.fee, fundingRequiredSats: 0, recoveredSats: view3.coin.value - view3.fee },
+    vtxos: [{ outpoint: outpoint2, value: view3.coin.value, sweepFee: view3.fee, delay }],
+    steps: [
+      {
+        kind: "sweep",
+        vtxo: outpoint2,
+        txid: view3.tx.id,
+        hex: hex.encode(view3.tx.extract()),
+        dependsOnTxid: view3.coin.txid,
+        delay
+      }
+    ]
+  };
+  return new UnilateralExit.Executor(pkg, onchain, { signal });
+}
+
+// src/lib/vault/program/connectorRecovery.ts
+init_define_import_meta_env();
+init_base();
+function validateConnectorRecoveryFile(file) {
+  if (!file || file.name !== "vaulted-connector-recovery" || file.version !== 1)
+    throw new Error("Invalid connector recovery file");
+  const header = validateRecoveryHeader(file.header);
+  if (header.binding.templateVersion !== CONNECTOR_TEMPLATE2)
+    throw new Error("Connector recovery needs its enrolled contract");
+  return validateConnectorRecoveryRecord(
+    { vaultId: header.binding.vaultId, enrollmentDigest: header.status.connectorEnrollment.enrollmentDigest },
+    file.record
+  );
+}
+function connectorRecoveryHandoff(file) {
+  const view3 = validateConnectorRecoveryFile(file);
+  if (!view3.record.savingsWitness)
+    throw new Error("This saved operation still needs its existing Guardian and Emulator approval");
+  return view3.prepared.forHardware(view3.record.savingsWitness.map((item) => hex.decode(item))).psbt();
+}
+function acceptConnectorRecoverySignature(file, psbt) {
+  const view3 = validateConnectorRecoveryFile(file);
+  if (!view3.record.savingsWitness) throw new Error("Missing Savings approval");
+  const signed = view3.prepared.forHardware(view3.record.savingsWitness.map((item) => hex.decode(item))).accept(psbt);
+  const result = {
+    ...file,
+    record: { ...file.record, signaturesMayHaveIssued: true, signedTxHex: signed.txHex, txid: signed.txid }
+  };
+  validateConnectorRecoveryFile(result);
+  return result;
+}
+async function executeConnectorRecovery(value2, chain3) {
+  const file = JSON.parse(JSON.stringify(value2));
+  const view3 = validateConnectorRecoveryFile(file);
+  if (!view3.record.signedTxHex || !view3.record.txid) throw new Error("The required connector signature is missing");
+  for (const coin of [view3.record.savings, view3.record.reserve]) {
+    const spent = await chain3.outspend(coin.txid, coin.vout);
+    if (spent.spent) {
+      if (spent.txid !== view3.record.txid)
+        throw new Error("A connector input is spent by another transaction; retain this file");
+      const status2 = await chain3.status(view3.record.txid);
+      return { txid: view3.record.txid, confirmed: status2.confirmed };
+    }
+  }
+  const txid = await chain3.broadcast(view3.record.signedTxHex);
+  if (txid !== view3.record.txid) throw new Error("Connector broadcast outcome is uncertain; retain this file");
+  return { txid, confirmed: false };
+}
+
+// src/lib/vault/recovery/lightningRecovery.ts
+init_define_import_meta_env();
+init_base();
+function sweepFacts2(entry, binding2, destination, psbt, limits, complete) {
+  const local = lightningArchiveProviders(entry, binding2);
+  const script = VHTLCV2ContractHandler.createScript(local.contract.params);
+  const tx = Transaction2.fromPSBT(hex.decode(psbt));
+  if (tx.inputsLength !== 1 || tx.outputsLength !== 1)
+    throw new Error("Lightning refund must have one input and one output");
+  const input = tx.getInput(0);
+  const coin = local.coins.find((coin2) => coin2.txid === hex.encode(input.txid) && coin2.vout === input.index);
+  if (!coin) throw new Error("Lightning refund input is not in the saved archive");
+  const output = tx.getOutput(0), fee = coin.value - Number(output.amount);
+  if (!Number.isSafeInteger(fee) || fee < 0 || fee > limits.absoluteFeeCapSats || Number(output.amount) < bitcoinDustSats(destination, binding2.network))
+    throw new Error("Lightning refund fee is outside the wallet limits");
+  const sequence = Number(entry.contract.params.refundNoReceiverDelay);
+  const timelock = sequenceToTimelock(sequence);
+  const expected = new Transaction2({ version: 2 });
+  expected.addInput({
+    txid: coin.txid,
+    index: coin.vout,
+    sequence,
+    tapLeafScript: [script.unilateralRefundWithoutReceiver()],
+    witnessUtxo: { amount: BigInt(coin.value), script: script.pkScript },
+    sighashType: 0
+  });
+  expected.addOutput({ amount: output.amount, script: hex.decode(scriptHexFromAddress(destination, binding2.network)) });
+  const signatures = input.tapScriptSig ?? [];
+  if (signatures.length) expected.updateInput(0, { tapScriptSig: signatures });
+  if (hex.encode(tx.toPSBT()) !== hex.encode(expected.toPSBT()))
+    throw new Error("Lightning refund transaction or metadata changed");
+  if (complete || signatures.length) requireExactDefaultTapscriptSignatures(tx, 0, [binding2.phonePub.slice(2)]);
+  return { tx, coin, fee, delay: { type: timelock.type, value: Number(timelock.value) }, path: "vhtlc-v2:unilateral" };
+}
+async function prepareLightningRecovery(entry, binding2, destination, sign2, feeLimits2, onchain = new EsploraProvider("/esplora")) {
+  const saved = JSON.parse(JSON.stringify(entry));
+  const enrolled = { ...binding2 };
+  const limits = { ...feeLimits2 };
+  const local = lightningArchiveProviders(saved, enrolled);
+  if (!local.coins.length) throw new Error("No saved Lightning outputs to recover");
+  scriptHexFromAddress(destination, enrolled.network);
+  const pins = networkPins(enrolled.network);
+  const readonly = ReadonlySingleKey.fromPublicKey(hex.decode(enrolled.phonePub));
+  const denied = () => {
+    throw new Error("Only the saved Lightning refunds may be signed");
+  };
+  const sweeps = [];
+  const identity2 = {
+    compressedPublicKey: () => readonly.compressedPublicKey(),
+    xOnlyPublicKey: () => readonly.xOnlyPublicKey(),
+    signMessage: denied,
+    signerSession: denied,
+    sign: async (tx) => {
+      const psbt = hex.encode(tx.toPSBT()), facts2 = sweepFacts2(saved, enrolled, destination, psbt, limits, false);
+      const result = await sign2({ psbt, publicKey: enrolled.phonePub });
+      const accepted = sweepFacts2(saved, enrolled, destination, result, limits, true);
+      if (accepted.fee !== facts2.fee || accepted.coin.txid !== facts2.coin.txid || accepted.coin.vout !== facts2.coin.vout)
+        throw new Error("Lightning signer changed the requested transaction");
+      sweeps.push(hex.encode(accepted.tx.toPSBT()));
+      return accepted.tx;
+    }
+  };
+  const readOnlyChain = new Proxy(onchain, {
+    get(target, name) {
+      if (name === "broadcastTransaction")
+        return () => {
+          throw new Error("Recovery preparation cannot broadcast");
+        };
+      const member = Reflect.get(target, name, target);
+      return typeof member === "function" ? member.bind(target) : member;
+    }
+  });
+  const onchainWallet = await OnchainWallet.create(identity2, pins.sdkNetwork, readOnlyChain);
+  const wallet = await Wallet2.create({
+    identity: identity2,
+    arkServerUrl: pins.operatorOrigin,
+    arkProvider: local.arkProvider,
+    indexerProvider: local.indexerProvider,
+    onchainProvider: readOnlyChain,
+    storage: {
+      walletRepository: new InMemoryWalletRepository(),
+      contractRepository: new InMemoryContractRepository(),
+      exitDataCapture: { mode: "full", sources: [local.source] }
+    },
+    walletMode: "static",
+    settlementConfig: { autoRenewVtxos: false, boardingUtxoSweep: false, deprecatedSignerMigration: false }
+  });
+  try {
+    await (await wallet.getContractManager()).createContract({ ...local.contract, state: "active" });
+    const prepared2 = await UnilateralExit.prepare({
+      wallet,
+      onchainWallet,
+      sweepAddress: destination,
+      vtxos: local.coins.map(({ txid, vout }) => ({ txid, vout })),
+      mode: "graph",
+      networkName: pins.sdkNetwork
+    });
+    const exitPackage = canonicalLightningPackage(saved, enrolled, prepared2, sweeps, limits);
+    return validateLightningRecoveryPackage(
+      { name: "vaulted-lightning-refund", version: 1, entry: saved, binding: enrolled, exitPackage, sweeps },
+      enrolled,
+      limits
+    );
+  } finally {
+    await wallet[Symbol.asyncDispose]();
+  }
+}
+function canonicalLightningPackage(entry, binding2, pkg, sweeps, limits) {
+  const local = lightningArchiveProviders(entry, binding2);
+  if (!Array.isArray(sweeps) || sweeps.length !== local.coins.length)
+    throw new Error("Lightning refund package is incomplete");
+  const signed = sweeps.map((psbt) => {
+    const result = sweepFacts2(entry, binding2, pkg.sweepAddress, psbt, limits, true);
+    result.tx.finalize();
+    return result;
+  });
+  return canonicalRecoveryGraph({
+    archive: entry.exit,
+    archiveBinding: local.binding,
+    phonePub: binding2.phonePub,
+    pkg,
+    sweeps: signed,
+    feeLimits: limits
+  });
+}
+function validateLightningRecoveryPackage(file, expectedBinding, feeLimits2) {
+  if (!file || file.name !== "vaulted-lightning-refund" || file.version !== 1 || !file.binding || Object.keys(expectedBinding).some(
+    (key) => file.binding[key] !== expectedBinding[key]
+  ) || JSON.stringify(file).length > 24e6)
+    throw new Error("Invalid Lightning refund package");
+  const expected = canonicalLightningPackage(file.entry, expectedBinding, file.exitPackage, file.sweeps, feeLimits2);
+  if (JSON.stringify(file.exitPackage) !== JSON.stringify(expected))
+    throw new Error("Lightning refund graph, sweep or delay changed");
+  return file;
+}
+function executeLightningRecovery(file, expectedBinding, feeLimits2, onchain, feeWallet, signal) {
+  const snapshot = JSON.parse(JSON.stringify(file));
+  validateLightningRecoveryPackage(snapshot, expectedBinding, feeLimits2);
+  return new UnilateralExit.Executor(snapshot.exitPackage, onchain, { feeWallet, signal });
+}
+
+// src/lib/vault/recovery/signatureImport.ts
+init_define_import_meta_env();
+init_base();
+init_secp256k1();
+function recoveryPsbtBytes(raw2) {
+  const value2 = raw2.trim();
+  if (value2.length > 1e7) throw new Error("Signing response is too large");
+  return /^[0-9a-f]+$/i.test(value2) ? hex.decode(value2) : base64.decode(value2);
+}
+function acceptRecoveryPsbtSignatures(request2, response, allowedKeys) {
+  const before = Transaction2.fromPSBT(recoveryPsbtBytes(request2), {
+    allowUnknownInputs: true,
+    allowUnknownOutputs: true
+  });
+  const after = Transaction2.fromPSBT(recoveryPsbtBytes(response), {
+    allowUnknownInputs: true,
+    allowUnknownOutputs: true
+  });
+  if (before.inputsLength !== after.inputsLength) throw new Error("Signing response changed the input count");
+  const scripts = Array.from({ length: before.inputsLength }, (_, i) => {
+    const coin = before.getInput(i).witnessUtxo;
+    if (!coin) throw new Error("Signing request is missing a prevout");
+    return coin.script;
+  });
+  const amounts = Array.from({ length: before.inputsLength }, (_, i) => before.getInput(i).witnessUtxo.amount);
+  const allowed = allowedKeys.map((pub) => pub.length === 66 ? pub.slice(2) : pub);
+  let added = false;
+  for (let i = 0; i < before.inputsLength; i++) {
+    const old = before.getInput(i), next = after.getInput(i);
+    if (next.sighashType !== void 0 && next.sighashType !== 0)
+      throw new Error("Recovery signing requires SIGHASH_DEFAULT");
+    if (next.tapScriptSig?.length) {
+      const pubs = next.tapScriptSig.map(([key]) => hex.encode(key.pubKey));
+      if (pubs.some((pub) => !allowed.includes(pub))) throw new Error("An unexpected key signed recovery");
+      requireExactDefaultTapscriptSignatures(after, i, pubs);
+      if (tapscriptSignatureRecords(before, i).some((record) => !tapscriptSignatureRecords(after, i).includes(record)))
+        throw new Error("A prior signature was removed");
+      added ||= next.tapScriptSig.length > (old.tapScriptSig?.length || 0);
+      before.updateInput(i, { tapScriptSig: next.tapScriptSig });
+    }
+    if (next.tapKeySig) {
+      if (old.tapLeafScript?.length || scripts[i].length !== 34 || scripts[i][0] !== 81 || next.tapKeySig.length !== 64 || !schnorr.verify(next.tapKeySig, after.preimageWitnessV1(i, scripts, 0, amounts), scripts[i].slice(2)))
+        throw new Error("Invalid fee funding signature");
+      if (old.tapKeySig && hex.encode(old.tapKeySig) !== hex.encode(next.tapKeySig))
+        throw new Error("A prior signature changed");
+      added ||= !old.tapKeySig;
+      before.updateInput(i, { tapKeySig: next.tapKeySig });
+    }
+  }
+  if (!added) throw new Error("The signing response added no signature");
+  if (hex.encode(before.toPSBT()) !== hex.encode(after.toPSBT()))
+    throw new Error("Signing response changed the recovery request");
+  return hex.encode(after.toPSBT());
+}
+function recoveryPsbtHasAllSignatures(psbt, requiredKeys) {
+  const tx = Transaction2.fromPSBT(recoveryPsbtBytes(psbt), { allowUnknownInputs: true, allowUnknownOutputs: true });
+  const keys2 = requiredKeys.map((pub) => pub.length === 66 ? pub.slice(2) : pub);
+  let signed = false;
+  for (let i = 0; i < tx.inputsLength; i++) {
+    const input = tx.getInput(i);
+    if (input.tapLeafScript?.length) {
+      const pubs = (input.tapScriptSig || []).map(([key]) => hex.encode(key.pubKey));
+      if (!keys2.every((key) => pubs.includes(key))) return false;
+      requireExactDefaultTapscriptSignatures(tx, i, keys2);
+      signed = true;
+    } else if (input.witnessUtxo?.script.length === 34 && input.witnessUtxo.script[0] === 81) {
+      if (!input.tapKeySig) return false;
+      signed = true;
+    }
+  }
+  return signed;
+}
+
+// tools/program-emergency/recover.ts
+var el = (id) => document.getElementById(id);
+var value = (id) => el(id).value.trim();
+var bitcoin = new EsploraProvider("/esplora");
+var source = {};
+var raw;
+var prepared;
+var draft;
+var coins = [];
+var controller;
+var request;
+var busy = false;
+function error(err2) {
+  el("error").textContent = err2 instanceof Error ? err2.message : String(err2);
+}
+async function run(work) {
+  if (busy) return;
+  busy = true;
+  el("error").textContent = "";
+  document.querySelectorAll("button:not(.sign-control):not(#stop)").forEach((b) => b.disabled = true);
+  try {
+    await work();
+  } catch (err2) {
+    error(err2);
+  } finally {
+    busy = false;
+    document.querySelectorAll("button").forEach((b) => b.disabled = false);
+  }
+}
+function save(name, data) {
+  const url = URL.createObjectURL(
+    new Blob([typeof data === "string" ? data : JSON.stringify(data, null, 2)], { type: "application/json" })
+  );
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1e3);
+}
+function status() {
+  return source.full?.header.status || (source.light ? lightRecoveryStatus(source.light.descriptor) : void 0);
+}
+function kit() {
+  const d = source.full?.header.kit.descriptor || source.publicKit?.descriptor;
+  if (!d) throw new Error("This path needs the saved Savings descriptor");
+  return buildRecoveryKit2(d);
+}
+function network() {
+  const n = status()?.network || source.publicKit?.descriptor.network;
+  if (!n) throw new Error("Open a recovery file first");
+  requireReleaseNetwork(n);
+  return n;
+}
+function keys() {
+  if (source.light) return [{ role: "phone", publicKey: `02${source.light.descriptor.ownerPub}` }];
+  const k = kit().descriptor.keys;
+  return [
+    { role: "phone", publicKey: k.phoneBip340 },
+    { role: "hardware", publicKey: k.hardware },
+    ...k.recovery ? [{ role: "recovery", publicKey: k.recovery }] : []
+  ];
+}
+function feeLimits() {
+  if (source.light) {
+    const p = source.light.descriptor.spendingPolicy;
+    return { absoluteFeeCapSats: p.absoluteFeeCapSats, feerateCapSatVb: p.feerateCapSatPerV };
+  }
+  return kit().descriptor.policy;
+}
+async function phone() {
+  if (source.full) return unlockPhoneBip340(source.full.header.enrollment, source.full.header.status);
+  if (source.light) return unlockLightWithPasskey(source.light);
+  const saved = source.publicKit;
+  if (!saved || !kitHasUnlock(saved) || !saved.unlock)
+    throw new Error("This public kit has no passkey envelope; use an encrypted archive or a version 4 kit");
+  if (location.origin !== saved.clientOrigin || location.hostname !== saved.rpId)
+    throw new Error(`Open this page at ${saved.clientOrigin} for the original passkey`);
+  const id = Uint8Array.from(hex.decode(saved.unlock.credId));
+  const credential = await navigator.credentials.get({
+    publicKey: passkeyGetOptions({
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      rpId: saved.rpId,
+      userVerification: "required",
+      allowCredentials: [allowPasskey(id)],
+      extensions: prfExtension(PRF_SALT3, id)
+    })
+  });
+  if (!credential) throw new Error("Passkey cancelled");
+  const prf = prfFrom(credential);
+  if (!prf) throw new Error("Original passkey PRF required");
+  try {
+    const key = await unwrapPhoneSecret(prf, saved.unlock.nonce, saved.unlock.ciphertext);
+    if (hex.encode(schnorr.getPublicKey(key)) !== saved.descriptor.keys.phoneBip340.slice(2)) {
+      key.fill(0);
+      throw new Error("Passkey key differs from the kit");
+    }
+    return key;
+  } finally {
+    prf.fill(0);
+  }
+}
+function select(id, options2) {
+  const node = el(id);
+  node.replaceChildren(
+    ...options2.map((o) => {
+      const x = document.createElement("option");
+      x.value = o.value;
+      x.textContent = o.label;
+      return x;
+    })
+  );
+}
 function review() {
-  if (!file) return;
-  requireReleaseNetwork(file.descriptor.network);
-  const snapshot = file.archive ? validateLightRecoveryArchive(file.archive, file.descriptor) : void 0;
-  if (!snapshot && !file.exitPackage)
-    throw new Error("This older file has no Bitcoin exit paths. Import a newer recovery file.");
-  el("review").hidden = Boolean(file.exitPackage);
-  el("snapshot").textContent = snapshot ? `${snapshot.coins.length} outputs, ${snapshot.coins.reduce((n, coin) => n + coin.value, 0)} sats. Saved ${new Date(snapshot.archive.capturedAt).toLocaleString()}.` : "";
-  el("exit").hidden = !file.exitPackage;
-  if (file.exitPackage) {
-    const pkg = file.exitPackage;
-    el("details").textContent = `${pkg.totals.recoveredSats} sats to recover. Estimated fees: ${pkg.totals.totalFeeSats} sats. Fee funding needed: ${pkg.totals.fundingRequiredSats} sats. Exit delay: ${lightExitDelayLabel(file.descriptor.exitDelaySeconds)}, plus Bitcoin confirmations.`;
-    el("funding").textContent = file.feeFundingAddress;
-    el("target").textContent = pkg.sweepAddress;
+  network();
+  el("review").hidden = false;
+  el("prepared").hidden = !prepared;
+  const k = source.full?.header.kit || source.publicKit;
+  el("facts").textContent = `${source.light ? "Light" : k?.protectionTier} \xB7 ${network()} \xB7 ${status()?.vaultId || k?.descriptor.vaultId}`;
+  el("coverage").textContent = source.full ? `Saved ${source.full.archive.spending.capturedAt}. Includes Spending, boarding, Savings states and saved payment journals.` : source.light ? `Saved ${source.light.createdAt}. The archive covers its saved Spending and Lightning lockup paths.` : `${source.originalKit?.name === "arkade-connector-enrollment" ? "Connector enrollment kit" : `Recovery Kit version ${source.originalKit?.version || k?.version}`}. Public transaction scripts are verified independently; offchain Spending needs a complete archive. ${k && kitHasUnlock(k) ? "This file can unlock the phone key with its original passkey." : ""}`;
+  const options2 = [];
+  if (source.full || source.light) options2.push({ value: "spending", label: "Spending \u2014 unilateral Bitcoin exit" });
+  if (source.full || source.publicKit?.boarding)
+    options2.push({ value: "boarding", label: "Boarding \u2014 phone recovery after its delay" });
+  if (k) {
+    if (k.descriptor.templateVersion !== CONNECTOR_TEMPLATE2)
+      options2.push({ value: "savings-admin", label: "Savings \u2014 phone and hardware" });
+    for (const claimant of ["phone", "hardware", "recovery"])
+      if (k.descriptor.pending[`savings-${claimant}`]) {
+        options2.push(
+          { value: `pending-claim:${claimant}`, label: `Pending ${claimant} recovery \u2014 claim after its delay` },
+          { value: `quarantine:${claimant}`, label: `Quarantine after ${claimant} recovery \u2014 remaining keys` }
+        );
+        if (familyFromDescriptor(k.descriptor).pending[`savings-${claimant}`].guardianExit)
+          options2.push({
+            value: `pending-cancel:${claimant}`,
+            label: `Pending ${claimant} recovery \u2014 remaining-key cancellation`
+          });
+      }
+  }
+  const journal = source.full?.lightningJournal || source.light?.lightningJournal;
+  for (const entry of journal?.entries || [])
+    options2.push({
+      value: `lightning:${entry.record.rfqId}`,
+      label: `Lightning refund \u2014 ${entry.record.rfqId.slice(0, 12)}`
+    });
+  if (source.full?.connectorJournal?.pending)
+    options2.push({ value: "connector", label: "Saved connector payment \u2014 resume exact approval" });
+  select("program", options2);
+  select(
+    "fee-key",
+    keys().map((k2) => ({ value: k2.role, label: k2.role === "phone" ? "Original passkey" : `${k2.role} signing device` }))
+  );
+  coins = source.full?.archive.onchain || [];
+  paintCoins();
+  el("fee-key").onchange = () => void funding();
+  el("program").onchange = programChanged;
+  programChanged();
+}
+function paintCoins() {
+  const program = value("program");
+  let script;
+  if (program === "boarding")
+    script = source.full?.header.status.vtxoBoardingDescriptor?.script || source.publicKit?.boarding?.script;
+  else if (program === "savings-admin") script = kit().descriptor.savings.script;
+  else if (program.startsWith("pending-") || program.startsWith("quarantine:")) {
+    const [path, role] = program.split(":");
+    const d = kit().descriptor;
+    script = (path === "quarantine" ? d.quarantine : d.pending)[`savings-${role}`]?.script;
+  }
+  select(
+    "coin",
+    coins.flatMap(
+      (c, i) => !script || c.script === script ? [{ value: String(i), label: `${c.value} sats \xB7 ${c.txid.slice(0, 12)}:${c.vout}` }] : []
+    )
+  );
+}
+function programChanged() {
+  const program = value("program");
+  el("fee-label").hidden = program === "spending" || program === "boarding" || program === "connector" || program.startsWith("lightning:");
+  el("coin-label").hidden = program === "spending" || program === "connector" || program.startsWith("lightning:");
+  el("scan").hidden = Boolean(source.light) || program === "spending" || program.startsWith("lightning:") || program === "connector";
+  el("destination").disabled = program === "boarding" || program === "connector";
+  if (program === "boarding")
+    el("destination").value = p2tr(
+      hex.decode(keys().find((k) => k.role === "phone").publicKey).slice(1),
+      void 0,
+      getNetwork(networkPins(network()).sdkNetwork)
+    ).address;
+  if (program === "spending" && source.full?.header.kit.protectionTier === "advanced")
+    el("fee-key").value = "hardware";
+  paintCoins();
+  void funding();
+}
+async function funding() {
+  const role = value("fee-key");
+  const key = keys().find((k) => k.role === role);
+  if (!key) return;
+  const address = p2tr(
+    hex.decode(key.publicKey).slice(1),
+    void 0,
+    getNetwork(networkPins(network()).sdkNetwork)
+  ).address;
+  el("funding").textContent = `Separate Bitcoin fee funding address: ${address}`;
+}
+var chain2 = {
+  status: async (id) => {
+    const s = await bitcoin.getTxStatus(id);
+    return { confirmed: s.confirmed, blockHeight: s.confirmed ? s.blockHeight : void 0 };
+  },
+  tipHeight: async () => Number(await readBounded(await fetch("/esplora/blocks/tip/height"), 64)),
+  outspend: async (id, vout) => {
+    const r = await fetch(`/esplora/tx/${id}/outspend/${vout}`);
+    if (!r.ok) throw new Error("Bitcoin spend status unavailable");
+    return JSON.parse(await readBounded(r, 1e4));
+  },
+  broadcast: (raw2) => bitcoin.broadcastTransaction(raw2)
+};
+async function requestSignature(psbt, required) {
+  const tx = Transaction2.fromPSBT(recoveryPsbtBytes(psbt), { allowUnknownInputs: true, allowUnknownOutputs: true });
+  const key = hex.encode(tx.unsignedTx);
+  const previous = draft?.signatures[key];
+  if (previous) {
+    psbt = acceptRecoveryPsbtSignatures(
+      psbt,
+      previous,
+      required.map((k) => k.publicKey)
+    );
+    if (recoveryPsbtHasAllSignatures(
+      psbt,
+      required.map((k) => k.publicKey)
+    ))
+      return psbt;
+  }
+  el("review").hidden = true;
+  el("prepared").hidden = true;
+  el("signature").hidden = false;
+  el("sign-error").textContent = "";
+  el("psbt").textContent = psbt;
+  el("psbt").value = psbt;
+  el("signers").textContent = `Required keys: ${required.map((k) => `${k.role} (${k.publicKey})`).join(", ")}`;
+  el("signing-summary").textContent = `Transaction ${tx.id}
+${tx.inputsLength} inputs; ${tx.outputsLength} outputs. Review the destination and amount on your signing device.`;
+  return new Promise((resolve) => {
+    request = { psbt, keys: required, resolve, key };
+  });
+}
+async function signatureAction(action) {
+  el("sign-error").textContent = "";
+  try {
+    await action();
+  } catch (err2) {
+    el("sign-error").textContent = err2 instanceof Error ? err2.message : String(err2);
+  }
+}
+el("accept-signature").onclick = () => void signatureAction(async () => {
+  if (!request) throw new Error("No signing request");
+  request.psbt = acceptRecoveryPsbtSignatures(
+    request.psbt,
+    value("signed"),
+    request.keys.map((k) => k.publicKey)
+  );
+  el("psbt").value = request.psbt;
+  el("signed").value = "";
+  if (draft) draft.signatures[request.key] = request.psbt;
+});
+el("sign-phone").onclick = () => void signatureAction(async () => {
+  if (!request || !request.keys.some((k) => k.role === "phone"))
+    throw new Error("This transaction does not request the phone key");
+  const key = await phone();
+  try {
+    const tx = Transaction2.fromPSBT(recoveryPsbtBytes(request.psbt), {
+      allowUnknownInputs: true,
+      allowUnknownOutputs: true
+    });
+    const signed = await SingleKey.fromPrivateKey(key).sign(tx);
+    request.psbt = acceptRecoveryPsbtSignatures(
+      request.psbt,
+      hex.encode(signed.toPSBT()),
+      request.keys.map((k) => k.publicKey)
+    );
+    el("psbt").value = request.psbt;
+    if (draft) draft.signatures[request.key] = request.psbt;
+  } finally {
+    key.fill(0);
+  }
+});
+el("finish-signing").onclick = () => {
+  if (!request) return;
+  if (!recoveryPsbtHasAllSignatures(
+    request.psbt,
+    request.keys.map((k) => k.publicKey)
+  )) {
+    el("sign-error").textContent = "Every required key must sign before continuing";
+    return;
+  }
+  const pending = request;
+  request = void 0;
+  el("signature").hidden = true;
+  pending.resolve(pending.psbt);
+};
+el("save-signing").onclick = () => {
+  if (draft) save("Vaulted recovery signing.json", draft);
+  if (request) save("Vaulted signing request.psbt", request.psbt);
+};
+async function prepare2() {
+  if (!draft)
+    draft = {
+      name: "vaulted-recovery-signing",
+      version: 1,
+      source,
+      program: value("program"),
+      destination: value("destination"),
+      feeSats: Number(value("fee")),
+      feeRate: await bitcoin.getFeeRate() || 1,
+      coin: coins[Number(value("coin"))],
+      signatures: {}
+    };
+  const d = draft;
+  const provider = new Proxy(bitcoin, {
+    get: (target, key) => key === "getFeeRate" ? async () => d.feeRate : typeof Reflect.get(target, key) === "function" ? Reflect.get(target, key).bind(target) : Reflect.get(target, key)
+  });
+  if (d.program === "spending") {
+    if (source.full)
+      prepared = await prepareVaultSpendingRecovery(
+        source.full.archive,
+        d.destination,
+        (r) => requestSignature(r.psbt, r.requiredKeys),
+        provider
+      );
+    else if (source.light) {
+      const key = await phone();
+      try {
+        prepared = await prepareLightRecoveryWithOwner(source.light, key, d.destination, source.light.archive, true);
+      } finally {
+        key.fill(0);
+      }
+    }
+  } else if (d.program === "boarding") {
+    if (!d.coin || !source.full && !source.publicKit?.boarding) throw new Error("Select a saved boarding output");
+    const archive = source.full?.archive || {
+      name: "vaulted-public-boarding-data",
+      version: 1,
+      kit: kit(),
+      descriptor: source.publicKit.boarding,
+      onchain: coins.filter((coin) => coin.script === source.publicKit.boarding.script)
+    };
+    const key = await phone();
+    try {
+      prepared = await prepareBoardingRecoveryFile(archive, d.coin, key, provider);
+    } finally {
+      key.fill(0);
+    }
+  } else if (d.program === "connector") {
+    if (!source.full?.connectorJournal?.pending) throw new Error("No saved connector operation");
+    let file = {
+      name: "vaulted-connector-recovery",
+      version: 1,
+      header: source.full.header,
+      record: source.full.connectorJournal.pending
+    };
+    if (!file.record.signedTxHex) {
+      const psbt = connectorRecoveryHandoff(file);
+      const signed = await requestSignature(
+        psbt,
+        keys().filter((k) => k.role === "hardware")
+      );
+      file = acceptConnectorRecoverySignature(file, signed);
+    }
+    prepared = file;
+  } else if (d.program.startsWith("lightning:")) {
+    const journal = source.full?.lightningJournal || source.light?.lightningJournal;
+    const entry = journal?.entries.find((e) => e.record.rfqId === d.program.slice(10));
+    if (!entry || !status()) throw new Error("Saved Lightning lockup is missing");
+    prepared = await prepareLightningRecovery(
+      entry,
+      recoveryLightningBinding(status()),
+      d.destination,
+      (r) => requestSignature(r.psbt, [{ role: "phone", publicKey: r.publicKey }]),
+      feeLimits(),
+      provider
+    );
+  } else {
+    if (!d.coin) throw new Error("Choose a Bitcoin output");
+    const [program, claimant] = d.program.split(":");
+    const path = claimant ? { program, claimant } : { program };
+    let file = prepareSavingsRecovery({
+      kit: kit(),
+      path,
+      parentHex: d.coin.parentHex,
+      vout: d.coin.vout,
+      destination: d.destination,
+      feeSats: d.feeSats
+    });
+    const facts2 = validateSavingsRecovery(file);
+    const signed = await requestSignature(
+      file.psbt,
+      facts2.signers.map((role) => keys().find((k) => k.role === role))
+    );
+    file = { ...file, psbt: signed };
+    if (!validateSavingsRecovery(file).complete) throw new Error("Every required recovery key must sign");
+    prepared = file;
+  }
+  if (!prepared) throw new Error("Recovery preparation did not produce a file");
+  paintPrepared();
+  el("status").textContent = "Recovery prepared. Save the file before starting.";
+}
+function paintPrepared() {
+  if (!prepared) return;
+  el("review").hidden = true;
+  el("signature").hidden = true;
+  el("prepared").hidden = false;
+  const p = prepared;
+  let details;
+  if ("exitPackage" in p && p.exitPackage) {
+    const totals = p.exitPackage.totals;
+    details = `Bitcoin destination: ${p.exitPackage.sweepAddress}
+Sweep value: ${totals.recoveredSats} sats
+Estimated recovery fee: ${totals.totalFeeSats} sats`;
+  } else if ("record" in p) {
+    details = `Bitcoin destination: ${p.record.recipient}
+Payment: ${p.record.amountSats} sats
+Transaction: ${p.record.txid}`;
+  } else if (p.name === "vaulted-savings-recovery") {
+    details = `Bitcoin destination: ${p.destination}
+Network fee: ${p.feeSats} sats
+Recovery path: ${p.path.program}${"claimant" in p.path ? ` (${p.path.claimant})` : ""}`;
+  } else if (p.name === "vaulted-boarding-recovery") {
+    const view3 = validateBoardingRecoveryFile(p);
+    details = `Bitcoin destination: ${view3.destination}
+Network fee: ${view3.fee} sats
+Required delay: ${view3.descriptor.exitDelay} seconds`;
+  } else details = "The saved transaction paths are validated and ready to resume.";
+  el("details").textContent = details;
+  const needsFeeWallet = p.name === "vaulted-spending-recovery" || p.name === "vaulted-lightning-refund";
+  el("fee-key-label").hidden = !needsFeeWallet;
+  el("funding").hidden = !needsFeeWallet;
+}
+el("change-path").onclick = () => {
+  prepared = void 0;
+  draft = void 0;
+  review();
+};
+el("prepare").onclick = () => void run(async () => {
+  draft = void 0;
+  await prepare2();
+});
+el("scan").onclick = () => void run(async () => {
+  const k = kit();
+  const trees = [
+    k.descriptor.savings,
+    ...Object.values(k.descriptor.pending),
+    ...Object.values(k.descriptor.quarantine),
+    ...source.full ? [source.full.header.status.vtxoBoardingDescriptor] : source.publicKit?.boarding ? [source.publicKit.boarding] : []
+  ];
+  const found = new Map(coins.map((c) => [`${c.txid}:${c.vout}`, c]));
+  for (const tree of trees)
+    for (const coin of await bitcoin.getCoins(tree.address)) {
+      const response = await fetch(`/esplora/tx/${coin.txid}/hex`);
+      if (!response.ok) throw new Error("Bitcoin parent unavailable");
+      const parentHex = await readBounded(response, 8e6);
+      const tx = Transaction2.fromRaw(hex.decode(parentHex.trim()), {
+        allowUnknownInputs: true,
+        allowUnknownOutputs: true
+      });
+      const output = tx.getOutput(coin.vout);
+      if (tx.id !== coin.txid || hex.encode(output.script) !== tree.script || Number(output.amount) !== coin.value)
+        throw new Error("Bitcoin parent changed");
+      found.set(`${coin.txid}:${coin.vout}`, { ...coin, script: tree.script, parentHex: parentHex.trim() });
+    }
+  coins = [...found.values()];
+  paintCoins();
+  el("status").textContent = `${coins.length} Bitcoin outputs retained. Previous outputs remain until their spend is checked.`;
+});
+el("save").onclick = () => {
+  if (prepared)
+    save("Vaulted prepared recovery.json", { name: "vaulted-recovery-action", version: 1, source, prepared });
+};
+el("export-psbt").onclick = () => {
+  if (!prepared) return;
+  if ("psbt" in prepared) save("Vaulted recovery.psbt", prepared.psbt);
+  else if ("sweeps" in prepared) prepared.sweeps.forEach((raw2, i) => save(`Vaulted sweep ${i + 1}.psbt`, raw2));
+  else if (prepared.name === "vaulted-connector-recovery")
+    save("Vaulted connector.psbt", connectorRecoveryHandoff(prepared));
+};
+async function load(data) {
+  const x = data;
+  prepared = void 0;
+  draft = void 0;
+  source = {};
+  raw = data;
+  el("signature").hidden = true;
+  el("open").hidden = true;
+  if (x.name === "vaulted-recovery-backup" || x.name === "vaulted-light-backup") {
+    const header = data.header;
+    const n = header.binding?.network || header.descriptor.network;
+    requireReleaseNetwork(n);
+    el("origin").textContent = `Use your original passkey at ${header.origin}`;
+    el("open").hidden = false;
+    el("review").hidden = true;
+    el("prepared").hidden = true;
+    return;
+  }
+  if (x.name === "vaulted-recovery-action") {
+    source = x.source;
+    prepared = x.prepared;
+    validateSource();
+    validatePrepared();
+    review();
+    paintPrepared();
+    return;
+  }
+  if (x.name === "vaulted-recovery-signing") {
+    draft = data;
+    source = draft.source;
+    validateSource();
+    review();
+    await prepare2();
+    return;
+  }
+  if (x.name === "vaulted-recovery") source.full = validateVaultRecoveryFile(data);
+  else if (x.name === "vaulted-light-recovery") source.light = validateLightRecoveryFile(data);
+  else {
+    source.publicKit = parseRecoveryKit(data);
+    source.originalKit = data;
+  }
+  review();
+}
+function validateSource() {
+  if ([source.full, source.light, source.publicKit].filter(Boolean).length !== 1)
+    throw new Error("Recovery source must identify one wallet");
+  if (source.full) validateVaultRecoveryFile(source.full);
+  if (source.light) validateLightRecoveryFile(source.light);
+  if (source.publicKit) source.publicKit = parseRecoveryKit(source.originalKit || source.publicKit);
+  network();
+}
+function validatePrepared() {
+  if (!prepared) throw new Error("Missing prepared transaction");
+  switch (prepared.name) {
+    case "vaulted-spending-recovery":
+      validateSpendingRecoveryPackage(prepared);
+      if (prepared.archive.kit.descriptorHash !== kit().descriptorHash) throw new Error("Prepared wallet changed");
+      break;
+    case "vaulted-boarding-recovery":
+      validateBoardingRecoveryFile(prepared);
+      if (prepared.archive.kit.descriptorHash !== kit().descriptorHash) throw new Error("Prepared wallet changed");
+      break;
+    case "vaulted-savings-recovery":
+      validateSavingsRecovery(prepared);
+      if (prepared.kit.descriptorHash !== kit().descriptorHash) throw new Error("Prepared wallet changed");
+      break;
+    case "vaulted-connector-recovery":
+      validateConnectorRecoveryFile(prepared);
+      if (prepared.header.binding.descriptorHash !== source.full?.header.binding.descriptorHash)
+        throw new Error("Prepared wallet changed");
+      break;
+    case "vaulted-lightning-refund":
+      validateLightningRecoveryPackage(prepared, recoveryLightningBinding(status()), feeLimits());
+      break;
+    case "vaulted-light-recovery":
+      validateLightRecoveryFile(prepared);
+      if (prepared.descriptor.vaultId !== source.light?.descriptor.vaultId) throw new Error("Prepared wallet changed");
+      break;
+    default:
+      throw new Error("Unknown recovery action");
   }
 }
 el("file").onchange = () => void run(async () => {
-  file = void 0;
-  raw = void 0;
-  legacy = false;
-  el("review").hidden = true;
-  el("exit").hidden = true;
-  const selected = el("file").files?.[0];
-  if (!selected || selected.size > 32e6) throw new Error("Choose a Light recovery file smaller than 32 MB");
-  raw = JSON.parse(await selected.text());
-  if (raw.name === "vaulted-light-backup") {
-    const encrypted = parseLightEncryptedBackup(raw);
-    requireReleaseNetwork(encrypted.header.descriptor.network);
-    el("origin").textContent = `The passkey for this backup belongs to ${encrypted.header.origin}. Open this recovery page at that origin.`;
-    el("legacy").hidden = true;
-  } else {
-    file = validateLightRecoveryFile(raw);
-    el("legacy").hidden = !file.recoveryBackup;
-    el("origin").textContent = "Use the original wallet website address for passkey recovery, or the saved code for an older file.";
-  }
+  const f = el("file").files?.[0];
+  if (!f || f.size > 32e6) throw new Error("Choose a recovery file smaller than 32 MB");
+  await load(JSON.parse(extractRecoveryKitJson(new Uint8Array(await f.arrayBuffer()))));
 });
-el("unlock").onclick = () => void run(async () => {
-  if (raw?.name === "vaulted-light-backup") file = (await openLocalLightBackup(raw)).file;
+el("open").onclick = () => void run(async () => {
+  const name = raw.name;
+  if (name === "vaulted-recovery-backup") source = { full: await openLocalRecoveryBackup(raw) };
   else {
-    if (!file) throw new Error("Choose a backup first");
-    const key = await unlockLightWithPasskey(file);
-    key.fill(0);
+    const parsed = parseLightEncryptedBackup(raw);
+    source = { light: (await openLocalLightBackup(parsed)).file };
   }
-  legacy = false;
+  el("open").hidden = true;
   review();
 });
-el("legacy-open").onclick = () => void run(async () => {
-  legacy = true;
-  const key = await owner();
-  key.fill(0);
-  review();
-});
-el("prepare").onclick = () => void run(async () => {
-  if (!file?.archive) throw new Error("Saved transaction paths are required");
-  const key = await owner();
-  try {
-    file = await prepareLightRecoveryWithOwner(
-      file,
-      key,
-      el("destination").value.trim(),
-      file.archive,
-      true
-    );
-  } finally {
-    key.fill(0);
-  }
-  if (!file.exitPackage) throw new Error("This backup has no unspent outputs");
-  review();
-});
-function saveExit(standard = false) {
-  if (!file?.exitPackage) return;
-  const url = URL.createObjectURL(
-    new Blob([standard ? serializeExitPackage(file.exitPackage) : JSON.stringify(file)], { type: "application/json" })
-  );
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `vaulted-light-exit-${file.descriptor.vaultId.slice(0, 8)}.json`;
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1e3);
-}
-el("save").onclick = () => saveExit();
-el("export-sdk").onclick = () => saveExit(true);
+el("stop").onclick = () => {
+  controller?.abort();
+  el("status").textContent = "Recovery paused. Keep the prepared file.";
+};
 el("execute").onclick = () => void run(async () => {
-  if (!file?.exitPackage) throw new Error("Prepare an exit first");
-  const key = await owner();
+  validateSource();
+  validatePrepared();
+  const file = prepared;
   controller = new AbortController();
   el("stop").hidden = false;
+  el("events").textContent = "";
+  save("Vaulted prepared recovery.json", { name: "vaulted-recovery-action", version: 1, source, prepared: file });
   try {
-    await executeLightRecoveryWithOwner(file, key, controller.signal, (event) => {
-      el("events").textContent += `${lightRecoveryProgress(event)}${event.txid ? ` ${event.txid}` : ""}
-`;
+    if (file.name === "vaulted-savings-recovery") {
+      el("status").textContent = JSON.stringify(await executeSavingsRecovery(file, chain2));
+      return;
+    }
+    if (file.name === "vaulted-connector-recovery") {
+      el("status").textContent = JSON.stringify(await executeConnectorRecovery(file, chain2));
+      return;
+    }
+    if (file.name === "vaulted-light-recovery") {
+      const key2 = await phone();
+      try {
+        await executeLightRecoveryWithOwner(file, key2, controller.signal, (event) => {
+          el("events").textContent += JSON.stringify(event) + "\n";
+        });
+      } finally {
+        key2.fill(0);
+      }
+      return;
+    }
+    const role = value("fee-key"), key = keys().find((k) => k.role === role);
+    const readonly = ReadonlySingleKey.fromPublicKey(hex.decode(key.publicKey));
+    const identity2 = {
+      compressedPublicKey: () => readonly.compressedPublicKey(),
+      xOnlyPublicKey: () => readonly.xOnlyPublicKey(),
+      signMessage: async () => {
+        throw new Error("Recovery cannot sign messages");
+      },
+      signerSession: () => {
+        throw new Error("Recovery cannot create signing sessions");
+      },
+      sign: async (tx) => Transaction2.fromPSBT(recoveryPsbtBytes(await requestSignature(hex.encode(tx.toPSBT()), [key])), {
+        allowUnknownInputs: true,
+        allowUnknownOutputs: true
+      })
+    };
+    const feeWallet = await OnchainWallet.create(identity2, networkPins(network()).sdkNetwork, bitcoin);
+    const executor = file.name === "vaulted-spending-recovery" ? executeVaultSpendingRecovery(file, bitcoin, feeWallet, controller.signal) : file.name === "vaulted-boarding-recovery" ? executeBoardingRecoveryFile(file, bitcoin, controller.signal) : executeLightningRecovery(
+      file,
+      recoveryLightningBinding(status()),
+      feeLimits(),
+      bitcoin,
+      feeWallet,
+      controller.signal
+    );
+    await requireConfirmedLightRecovery(executor.pkg, executor, (event) => {
+      el("events").textContent += JSON.stringify(event) + "\n";
     });
-    el("status").textContent = "Bitcoin recovery completed";
+    controller.signal.throwIfAborted();
+    el("status").textContent = "Recovery execution finished. Check the transaction confirmations above.";
   } finally {
-    key.fill(0);
-    controller = void 0;
     el("stop").hidden = true;
-    el("secret").value = "";
+    controller = void 0;
   }
 });
-el("stop").onclick = () => controller?.abort();
 /*! Bundled license information:
+
+@scure/base/index.js:
+@scure/base/lib/index.js:
+  (*! scure-base - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
 
 @noble/hashes/utils.js:
   (*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
@@ -51620,10 +55663,6 @@ el("stop").onclick = () => controller?.abort();
 @noble/curves/secp256k1.js:
 @noble/curves/nist.js:
   (*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
-
-@scure/base/index.js:
-@scure/base/lib/index.js:
-  (*! scure-base - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
 
 @scure/btc-signer/index.js:
   (*! scure-btc-signer - MIT License (c) 2022 Paul Miller (paulmillr.com) *)

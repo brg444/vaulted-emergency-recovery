@@ -1244,7 +1244,7 @@ function FpSqrt(P2) {
     return sqrt9mod16(P2);
   return tonelliShanks(P2);
 }
-function validateField(field) {
+function validateField(field2) {
   const initial = {
     ORDER: "bigint",
     BYTES: "number",
@@ -1254,8 +1254,8 @@ function validateField(field) {
     map[val] = "function";
     return map;
   }, initial);
-  validateObject(field, opts);
-  return field;
+  validateObject(field2, opts);
+  return field2;
 }
 function FpPow(Fp, num2, power) {
   if (power < _0n2)
@@ -1564,12 +1564,12 @@ function mulEndoUnsafe(Point5, point, k1, k2) {
   }
   return { p1, p2 };
 }
-function createField(order, field, isLE) {
-  if (field) {
-    if (field.ORDER !== order)
+function createField(order, field2, isLE) {
+  if (field2) {
+    if (field2.ORDER !== order)
       throw new Error("Field.ORDER must match order: Fp == p, Fn == n");
-    validateField(field);
-    return field;
+    validateField(field2);
+    return field2;
   } else {
     return Field(order, { isLE });
   }
@@ -1708,27 +1708,27 @@ var init_curve = __esm({
         assert0(n);
         return acc;
       }
-      getPrecomputes(W2, point, transform2) {
+      getPrecomputes(W2, point, transform) {
         let comp = pointPrecomputes.get(point);
         if (!comp) {
           comp = this.precomputeWindow(point, W2);
           if (W2 !== 1) {
-            if (typeof transform2 === "function")
-              comp = transform2(comp);
+            if (typeof transform === "function")
+              comp = transform(comp);
             pointPrecomputes.set(point, comp);
           }
         }
         return comp;
       }
-      cached(point, scalar2, transform2) {
+      cached(point, scalar2, transform) {
         const W2 = getW(point);
-        return this.wNAF(W2, this.getPrecomputes(W2, point, transform2), scalar2);
+        return this.wNAF(W2, this.getPrecomputes(W2, point, transform), scalar2);
       }
-      unsafe(point, scalar2, transform2, prev) {
+      unsafe(point, scalar2, transform, prev) {
         const W2 = getW(point);
         if (W2 === 1)
           return this._unsafeLadder(point, scalar2, prev);
-        return this.wNAFUnsafe(W2, this.getPrecomputes(W2, point, transform2), scalar2, prev);
+        return this.wNAFUnsafe(W2, this.getPrecomputes(W2, point, transform), scalar2, prev);
       }
       // We calculate precomputes for elliptic curve point multiplication
       // using windowed method. This specifies window size and
@@ -1841,13 +1841,13 @@ function hash_to_field(msg, count, options) {
   }
   return u;
 }
-function isogenyMap(field, map) {
+function isogenyMap(field2, map) {
   const coeff = map.map((i) => Array.from(i).reverse());
   return (x, y) => {
-    const [xn, xd, yn, yd] = coeff.map((val) => val.reduce((acc, i) => field.add(field.mul(acc, x), i)));
-    const [xd_inv, yd_inv] = FpInvertBatch(field, [xd, yd], true);
-    x = field.mul(xn, xd_inv);
-    y = field.mul(y, field.mul(yn, yd_inv));
+    const [xn, xd, yn, yd] = coeff.map((val) => val.reduce((acc, i) => field2.add(field2.mul(acc, x), i)));
+    const [xd_inv, yd_inv] = FpInvertBatch(field2, [xd, yd], true);
+    x = field2.mul(xn, xd_inv);
+    y = field2.mul(y, field2.mul(yn, yd_inv));
     return { x, y };
   };
 }
@@ -2132,13 +2132,13 @@ function weierstrass(params, extraOpts = {}) {
     return _splitEndoScalar(k, endo.basises, Fn4.ORDER);
   }
   const toAffineMemo = memoized((p, iz) => {
-    const { X, Y, Z } = p;
+    const { X: X2, Y, Z } = p;
     if (Fp.eql(Z, Fp.ONE))
-      return { x: X, y: Y };
+      return { x: X2, y: Y };
     const is0 = p.is0();
     if (iz == null)
       iz = is0 ? Fp.ONE : Fp.inv(Z);
-    const x = Fp.mul(X, iz);
+    const x = Fp.mul(X2, iz);
     const y = Fp.mul(Y, iz);
     const zz = Fp.mul(Z, iz);
     if (is0)
@@ -2182,8 +2182,8 @@ function weierstrass(params, extraOpts = {}) {
     Y;
     Z;
     /** Does NOT validate if the point is valid. Use `.assertValidity()`. */
-    constructor(X, Y, Z) {
-      this.X = acoord("x", X);
+    constructor(X2, Y, Z) {
+      this.X = acoord("x", X2);
       this.Y = acoord("y", Y, true);
       this.Z = acoord("z", Z);
       Object.freeze(this);
@@ -4601,8 +4601,8 @@ var init_micro_packed = __esm({
       pushObj: (stack, obj, objFn) => {
         const last = { obj };
         stack.push(last);
-        objFn((field, fieldFn) => {
-          last.field = field;
+        objFn((field2, fieldFn) => {
+          last.field = field2;
           fieldFn();
           last.field = void 0;
         });
@@ -9307,14 +9307,14 @@ var require_bitcoinjs_lib_internals = __commonJS({
     var uint8array_tools_1 = (init_browser2(), __toCommonJS(browser_exports2));
     var bitcoinLib_1 = require_bitcoinLib();
     var TAPROOT_LEAF_VERSION_TAPSCRIPT = 192;
-    var OP_1 = 81;
+    var OP_12 = 81;
     var PUSH_DATA_32 = 32;
     function serializeScript(script) {
       const { buffer: encodedLength } = (0, varuint_bitcoin_1.encode)(script.length);
       return (0, uint8array_tools_1.concat)([encodedLength, script]);
     }
     function isP2TRScript(script) {
-      return script instanceof Uint8Array && script.length === 34 && script[0] === OP_1 && script[1] === PUSH_DATA_32;
+      return script instanceof Uint8Array && script.length === 34 && script[0] === OP_12 && script[1] === PUSH_DATA_32;
     }
     function tapleafHash(leaf) {
       const version2 = leaf.version || TAPROOT_LEAF_VERSION_TAPSCRIPT;
@@ -10067,57 +10067,57 @@ var require_satisfactions = __commonJS({
           sats: filterSolutions([{ asm: `<hash160_preimage(${h})>` }]),
           dsats: filterSolutions([{ asm: `<random_preimage()>` }])
         }),
-        andor: (X, Y, Z) => ({
+        andor: (X2, Y, Z) => ({
           dsats: [
-            ...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X, Y, Z }),
-            ...combineFilteredSolutions(`dsat(Y) sat(X)`, { X, Y, Z })
+            ...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X2, Y, Z }),
+            ...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X2, Y, Z })
           ],
           sats: [
-            ...combineFilteredSolutions("sat(Y) sat(X)", { X, Y, Z }),
-            ...combineFilteredSolutions("sat(Z) dsat(X)", { X, Y, Z })
+            ...combineFilteredSolutions("sat(Y) sat(X)", { X: X2, Y, Z }),
+            ...combineFilteredSolutions("sat(Z) dsat(X)", { X: X2, Y, Z })
           ]
         }),
-        and_v: (X, Y) => ({
-          dsats: [...combineFilteredSolutions(`dsat(Y) sat(X)`, { X, Y })],
-          sats: [...combineFilteredSolutions(`sat(Y) sat(X)`, { X, Y })]
+        and_v: (X2, Y) => ({
+          dsats: [...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X2, Y })],
+          sats: [...combineFilteredSolutions(`sat(Y) sat(X)`, { X: X2, Y })]
         }),
-        and_b: (X, Y) => ({
+        and_b: (X2, Y) => ({
           dsats: [
-            ...combineFilteredSolutions(`dsat(Y) dsat(X)`, { X, Y }),
-            ...combineFilteredSolutions(`sat(Y) dsat(X)`, { X, Y }),
-            ...combineFilteredSolutions(`dsat(Y) sat(X)`, { X, Y })
+            ...combineFilteredSolutions(`dsat(Y) dsat(X)`, { X: X2, Y }),
+            ...combineFilteredSolutions(`sat(Y) dsat(X)`, { X: X2, Y }),
+            ...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X2, Y })
           ],
-          sats: [...combineFilteredSolutions(`sat(Y) sat(X)`, { Y, X })]
+          sats: [...combineFilteredSolutions(`sat(Y) sat(X)`, { Y, X: X2 })]
         }),
-        or_b: (X, Z) => ({
-          dsats: [...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X, Z })],
+        or_b: (X2, Z) => ({
+          dsats: [...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X2, Z })],
           sats: [
-            ...combineFilteredSolutions(`dsat(Z) sat(X)`, { X, Z }),
-            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X, Z }),
-            ...combineFilteredSolutions(`sat(Z) sat(X)`, { X, Z })
+            ...combineFilteredSolutions(`dsat(Z) sat(X)`, { X: X2, Z }),
+            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X2, Z }),
+            ...combineFilteredSolutions(`sat(Z) sat(X)`, { X: X2, Z })
           ]
         }),
-        or_c: (X, Z) => ({
+        or_c: (X2, Z) => ({
           sats: [
-            ...combineFilteredSolutions(`sat(X)`, { X, Z }),
-            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X, Z })
+            ...combineFilteredSolutions(`sat(X)`, { X: X2, Z }),
+            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X2, Z })
           ]
         }),
-        or_d: (X, Z) => ({
-          dsats: [...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X, Z })],
+        or_d: (X2, Z) => ({
+          dsats: [...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X2, Z })],
           sats: [
-            ...combineFilteredSolutions(`sat(X)`, { X, Z }),
-            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X, Z })
+            ...combineFilteredSolutions(`sat(X)`, { X: X2, Z }),
+            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X2, Z })
           ]
         }),
-        or_i: (X, Z) => ({
+        or_i: (X2, Z) => ({
           dsats: [
-            ...combineFilteredSolutions(`dsat(X) 1`, { X, Z }),
-            ...combineFilteredSolutions(`dsat(Z) 0`, { X, Z })
+            ...combineFilteredSolutions(`dsat(X) 1`, { X: X2, Z }),
+            ...combineFilteredSolutions(`dsat(Z) 0`, { X: X2, Z })
           ],
           sats: [
-            ...combineFilteredSolutions(`sat(X) 1`, { X, Z }),
-            ...combineFilteredSolutions(`sat(Z) 0`, { X, Z })
+            ...combineFilteredSolutions(`sat(X) 1`, { X: X2, Z }),
+            ...combineFilteredSolutions(`sat(Z) 0`, { X: X2, Z })
           ]
         }),
         /*
@@ -10206,24 +10206,24 @@ var require_satisfactions = __commonJS({
           });
           return { sats, dsats };
         },
-        a: (X) => ({
-          dsats: [...combineFilteredSolutions(`dsat(X)`, { X })],
-          sats: [...combineFilteredSolutions(`sat(X)`, { X })]
+        a: (X2) => ({
+          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X2 })],
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X2 })]
         }),
-        s: (X) => ({
-          dsats: [...combineFilteredSolutions(`dsat(X)`, { X })],
-          sats: [...combineFilteredSolutions(`sat(X)`, { X })]
+        s: (X2) => ({
+          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X2 })],
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X2 })]
         }),
-        c: (X) => ({
-          dsats: [...combineFilteredSolutions(`dsat(X)`, { X })],
-          sats: [...combineFilteredSolutions(`sat(X)`, { X })]
+        c: (X2) => ({
+          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X2 })],
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X2 })]
         }),
-        d: (X) => ({
+        d: (X2) => ({
           dsats: filterSolutions([{ asm: `0` }]),
-          sats: [...combineFilteredSolutions(`sat(X) 1`, { X })]
+          sats: [...combineFilteredSolutions(`sat(X) 1`, { X: X2 })]
         }),
-        v: (X) => ({
-          sats: [...combineFilteredSolutions(`sat(X)`, { X })]
+        v: (X2) => ({
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X2 })]
         }),
         /**
            * j:X corresponds to SIZE 0NOTEQUAL IF [X] ENDIF
@@ -10258,10 +10258,10 @@ var require_satisfactions = __commonJS({
         
            * DSAT(X) X is a good dsat
            */
-        j: (X) => {
+        j: (X2) => {
           const dsats = [];
           pushAllowedSolution(dsats, { asm: `0` }, isSolutionAllowed, solutionCounter);
-          const dsats_nzts = (X.dsats || []).filter(
+          const dsats_nzts = (X2.dsats || []).filter(
             //The top stack corresponds to the last element pushed to the stack,
             //that is, the last element in the produced witness
             (solution) => solution.asm.trim().split(" ").pop() !== "0"
@@ -10269,11 +10269,11 @@ var require_satisfactions = __commonJS({
           for (const solution of dsats_nzts) {
             pushAllowedSolution(dsats, solution, isSolutionAllowed, solutionCounter);
           }
-          return { dsats, sats: [...combineFilteredSolutions(`sat(X)`, { X })] };
+          return { dsats, sats: [...combineFilteredSolutions(`sat(X)`, { X: X2 })] };
         },
-        n: (X) => ({
-          dsats: [...combineFilteredSolutions(`dsat(X)`, { X })],
-          sats: [...combineFilteredSolutions(`sat(X)`, { X })]
+        n: (X2) => ({
+          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X2 })],
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X2 })]
         })
       };
       return satisfactionsMaker;
@@ -17061,6 +17061,749 @@ var require_dist3 = __commonJS({
   }
 });
 
+// node_modules/.pnpm/@scure+base@1.1.1/node_modules/@scure/base/lib/index.js
+var require_lib = __commonJS({
+  "node_modules/.pnpm/@scure+base@1.1.1/node_modules/@scure/base/lib/index.js"(exports) {
+    "use strict";
+    init_define_import_meta_env();
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.bytes = exports.stringToBytes = exports.str = exports.bytesToString = exports.hex = exports.utf8 = exports.bech32m = exports.bech32 = exports.base58check = exports.base58xmr = exports.base58xrp = exports.base58flickr = exports.base58 = exports.base64url = exports.base64 = exports.base32crockford = exports.base32hex = exports.base32 = exports.base16 = exports.utils = exports.assertNumber = void 0;
+    function assertNumber(n) {
+      if (!Number.isSafeInteger(n))
+        throw new Error(`Wrong integer: ${n}`);
+    }
+    exports.assertNumber = assertNumber;
+    function chain2(...args) {
+      const wrap3 = (a, b) => (c) => a(b(c));
+      const encode3 = Array.from(args).reverse().reduce((acc, i) => acc ? wrap3(acc, i.encode) : i.encode, void 0);
+      const decode3 = args.reduce((acc, i) => acc ? wrap3(acc, i.decode) : i.decode, void 0);
+      return { encode: encode3, decode: decode3 };
+    }
+    function alphabet2(alphabet3) {
+      return {
+        encode: (digits) => {
+          if (!Array.isArray(digits) || digits.length && typeof digits[0] !== "number")
+            throw new Error("alphabet.encode input should be an array of numbers");
+          return digits.map((i) => {
+            assertNumber(i);
+            if (i < 0 || i >= alphabet3.length)
+              throw new Error(`Digit index outside alphabet: ${i} (alphabet: ${alphabet3.length})`);
+            return alphabet3[i];
+          });
+        },
+        decode: (input) => {
+          if (!Array.isArray(input) || input.length && typeof input[0] !== "string")
+            throw new Error("alphabet.decode input should be array of strings");
+          return input.map((letter) => {
+            if (typeof letter !== "string")
+              throw new Error(`alphabet.decode: not string element=${letter}`);
+            const index = alphabet3.indexOf(letter);
+            if (index === -1)
+              throw new Error(`Unknown letter: "${letter}". Allowed: ${alphabet3}`);
+            return index;
+          });
+        }
+      };
+    }
+    function join2(separator = "") {
+      if (typeof separator !== "string")
+        throw new Error("join separator should be string");
+      return {
+        encode: (from) => {
+          if (!Array.isArray(from) || from.length && typeof from[0] !== "string")
+            throw new Error("join.encode input should be array of strings");
+          for (let i of from)
+            if (typeof i !== "string")
+              throw new Error(`join.encode: non-string input=${i}`);
+          return from.join(separator);
+        },
+        decode: (to) => {
+          if (typeof to !== "string")
+            throw new Error("join.decode input should be string");
+          return to.split(separator);
+        }
+      };
+    }
+    function padding2(bits, chr = "=") {
+      assertNumber(bits);
+      if (typeof chr !== "string")
+        throw new Error("padding chr should be string");
+      return {
+        encode(data) {
+          if (!Array.isArray(data) || data.length && typeof data[0] !== "string")
+            throw new Error("padding.encode input should be array of strings");
+          for (let i of data)
+            if (typeof i !== "string")
+              throw new Error(`padding.encode: non-string input=${i}`);
+          while (data.length * bits % 8)
+            data.push(chr);
+          return data;
+        },
+        decode(input) {
+          if (!Array.isArray(input) || input.length && typeof input[0] !== "string")
+            throw new Error("padding.encode input should be array of strings");
+          for (let i of input)
+            if (typeof i !== "string")
+              throw new Error(`padding.decode: non-string input=${i}`);
+          let end = input.length;
+          if (end * bits % 8)
+            throw new Error("Invalid padding: string should have whole number of bytes");
+          for (; end > 0 && input[end - 1] === chr; end--) {
+            if (!((end - 1) * bits % 8))
+              throw new Error("Invalid padding: string has too much padding");
+          }
+          return input.slice(0, end);
+        }
+      };
+    }
+    function normalize2(fn) {
+      if (typeof fn !== "function")
+        throw new Error("normalize fn should be function");
+      return { encode: (from) => from, decode: (to) => fn(to) };
+    }
+    function convertRadix3(data, from, to) {
+      if (from < 2)
+        throw new Error(`convertRadix: wrong from=${from}, base cannot be less than 2`);
+      if (to < 2)
+        throw new Error(`convertRadix: wrong to=${to}, base cannot be less than 2`);
+      if (!Array.isArray(data))
+        throw new Error("convertRadix: data should be array");
+      if (!data.length)
+        return [];
+      let pos = 0;
+      const res = [];
+      const digits = Array.from(data);
+      digits.forEach((d) => {
+        assertNumber(d);
+        if (d < 0 || d >= from)
+          throw new Error(`Wrong integer: ${d}`);
+      });
+      while (true) {
+        let carry = 0;
+        let done = true;
+        for (let i = pos; i < digits.length; i++) {
+          const digit = digits[i];
+          const digitBase = from * carry + digit;
+          if (!Number.isSafeInteger(digitBase) || from * carry / from !== carry || digitBase - digit !== from * carry) {
+            throw new Error("convertRadix: carry overflow");
+          }
+          carry = digitBase % to;
+          digits[i] = Math.floor(digitBase / to);
+          if (!Number.isSafeInteger(digits[i]) || digits[i] * to + carry !== digitBase)
+            throw new Error("convertRadix: carry overflow");
+          if (!done)
+            continue;
+          else if (!digits[i])
+            pos = i;
+          else
+            done = false;
+        }
+        res.push(carry);
+        if (done)
+          break;
+      }
+      for (let i = 0; i < data.length - 1 && data[i] === 0; i++)
+        res.push(0);
+      return res.reverse();
+    }
+    var gcd2 = (a, b) => !b ? a : gcd2(b, a % b);
+    var radix2carry2 = (from, to) => from + (to - gcd2(from, to));
+    function convertRadix22(data, from, to, padding3) {
+      if (!Array.isArray(data))
+        throw new Error("convertRadix2: data should be array");
+      if (from <= 0 || from > 32)
+        throw new Error(`convertRadix2: wrong from=${from}`);
+      if (to <= 0 || to > 32)
+        throw new Error(`convertRadix2: wrong to=${to}`);
+      if (radix2carry2(from, to) > 32) {
+        throw new Error(`convertRadix2: carry overflow from=${from} to=${to} carryBits=${radix2carry2(from, to)}`);
+      }
+      let carry = 0;
+      let pos = 0;
+      const mask = 2 ** to - 1;
+      const res = [];
+      for (const n of data) {
+        assertNumber(n);
+        if (n >= 2 ** from)
+          throw new Error(`convertRadix2: invalid data word=${n} from=${from}`);
+        carry = carry << from | n;
+        if (pos + from > 32)
+          throw new Error(`convertRadix2: carry overflow pos=${pos} from=${from}`);
+        pos += from;
+        for (; pos >= to; pos -= to)
+          res.push((carry >> pos - to & mask) >>> 0);
+        carry &= 2 ** pos - 1;
+      }
+      carry = carry << to - pos & mask;
+      if (!padding3 && pos >= from)
+        throw new Error("Excess padding");
+      if (!padding3 && carry)
+        throw new Error(`Non-zero padding: ${carry}`);
+      if (padding3 && pos > 0)
+        res.push(carry >>> 0);
+      return res;
+    }
+    function radix3(num2) {
+      assertNumber(num2);
+      return {
+        encode: (bytes2) => {
+          if (!(bytes2 instanceof Uint8Array))
+            throw new Error("radix.encode input should be Uint8Array");
+          return convertRadix3(Array.from(bytes2), 2 ** 8, num2);
+        },
+        decode: (digits) => {
+          if (!Array.isArray(digits) || digits.length && typeof digits[0] !== "number")
+            throw new Error("radix.decode input should be array of strings");
+          return Uint8Array.from(convertRadix3(digits, num2, 2 ** 8));
+        }
+      };
+    }
+    function radix22(bits, revPadding = false) {
+      assertNumber(bits);
+      if (bits <= 0 || bits > 32)
+        throw new Error("radix2: bits should be in (0..32]");
+      if (radix2carry2(8, bits) > 32 || radix2carry2(bits, 8) > 32)
+        throw new Error("radix2: carry overflow");
+      return {
+        encode: (bytes2) => {
+          if (!(bytes2 instanceof Uint8Array))
+            throw new Error("radix2.encode input should be Uint8Array");
+          return convertRadix22(Array.from(bytes2), 8, bits, !revPadding);
+        },
+        decode: (digits) => {
+          if (!Array.isArray(digits) || digits.length && typeof digits[0] !== "number")
+            throw new Error("radix2.decode input should be array of strings");
+          return Uint8Array.from(convertRadix22(digits, bits, 8, revPadding));
+        }
+      };
+    }
+    function unsafeWrapper2(fn) {
+      if (typeof fn !== "function")
+        throw new Error("unsafeWrapper fn should be function");
+      return function(...args) {
+        try {
+          return fn.apply(null, args);
+        } catch (e) {
+        }
+      };
+    }
+    function checksum2(len, fn) {
+      assertNumber(len);
+      if (typeof fn !== "function")
+        throw new Error("checksum fn should be function");
+      return {
+        encode(data) {
+          if (!(data instanceof Uint8Array))
+            throw new Error("checksum.encode: input should be Uint8Array");
+          const checksum3 = fn(data).slice(0, len);
+          const res = new Uint8Array(data.length + len);
+          res.set(data);
+          res.set(checksum3, data.length);
+          return res;
+        },
+        decode(data) {
+          if (!(data instanceof Uint8Array))
+            throw new Error("checksum.decode: input should be Uint8Array");
+          const payload = data.slice(0, -len);
+          const newChecksum = fn(payload).slice(0, len);
+          const oldChecksum = data.slice(-len);
+          for (let i = 0; i < len; i++)
+            if (newChecksum[i] !== oldChecksum[i])
+              throw new Error("Invalid checksum");
+          return payload;
+        }
+      };
+    }
+    exports.utils = { alphabet: alphabet2, chain: chain2, checksum: checksum2, radix: radix3, radix2: radix22, join: join2, padding: padding2 };
+    exports.base16 = chain2(radix22(4), alphabet2("0123456789ABCDEF"), join2(""));
+    exports.base32 = chain2(radix22(5), alphabet2("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"), padding2(5), join2(""));
+    exports.base32hex = chain2(radix22(5), alphabet2("0123456789ABCDEFGHIJKLMNOPQRSTUV"), padding2(5), join2(""));
+    exports.base32crockford = chain2(radix22(5), alphabet2("0123456789ABCDEFGHJKMNPQRSTVWXYZ"), join2(""), normalize2((s) => s.toUpperCase().replace(/O/g, "0").replace(/[IL]/g, "1")));
+    exports.base64 = chain2(radix22(6), alphabet2("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"), padding2(6), join2(""));
+    exports.base64url = chain2(radix22(6), alphabet2("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"), padding2(6), join2(""));
+    var genBase582 = (abc) => chain2(radix3(58), alphabet2(abc), join2(""));
+    exports.base58 = genBase582("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz");
+    exports.base58flickr = genBase582("123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ");
+    exports.base58xrp = genBase582("rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz");
+    var XMR_BLOCK_LEN2 = [0, 2, 3, 5, 6, 7, 9, 10, 11];
+    exports.base58xmr = {
+      encode(data) {
+        let res = "";
+        for (let i = 0; i < data.length; i += 8) {
+          const block = data.subarray(i, i + 8);
+          res += exports.base58.encode(block).padStart(XMR_BLOCK_LEN2[block.length], "1");
+        }
+        return res;
+      },
+      decode(str2) {
+        let res = [];
+        for (let i = 0; i < str2.length; i += 11) {
+          const slice = str2.slice(i, i + 11);
+          const blockLen = XMR_BLOCK_LEN2.indexOf(slice.length);
+          const block = exports.base58.decode(slice);
+          for (let j = 0; j < block.length - blockLen; j++) {
+            if (block[j] !== 0)
+              throw new Error("base58xmr: wrong padding");
+          }
+          res = res.concat(Array.from(block.slice(block.length - blockLen)));
+        }
+        return Uint8Array.from(res);
+      }
+    };
+    var base58check4 = (sha2562) => chain2(checksum2(4, (data) => sha2562(sha2562(data))), exports.base58);
+    exports.base58check = base58check4;
+    var BECH_ALPHABET2 = chain2(alphabet2("qpzry9x8gf2tvdw0s3jn54khce6mua7l"), join2(""));
+    var POLYMOD_GENERATORS2 = [996825010, 642813549, 513874426, 1027748829, 705979059];
+    function bech32Polymod2(pre) {
+      const b = pre >> 25;
+      let chk = (pre & 33554431) << 5;
+      for (let i = 0; i < POLYMOD_GENERATORS2.length; i++) {
+        if ((b >> i & 1) === 1)
+          chk ^= POLYMOD_GENERATORS2[i];
+      }
+      return chk;
+    }
+    function bechChecksum2(prefix2, words, encodingConst = 1) {
+      const len = prefix2.length;
+      let chk = 1;
+      for (let i = 0; i < len; i++) {
+        const c = prefix2.charCodeAt(i);
+        if (c < 33 || c > 126)
+          throw new Error(`Invalid prefix (${prefix2})`);
+        chk = bech32Polymod2(chk) ^ c >> 5;
+      }
+      chk = bech32Polymod2(chk);
+      for (let i = 0; i < len; i++)
+        chk = bech32Polymod2(chk) ^ prefix2.charCodeAt(i) & 31;
+      for (let v of words)
+        chk = bech32Polymod2(chk) ^ v;
+      for (let i = 0; i < 6; i++)
+        chk = bech32Polymod2(chk);
+      chk ^= encodingConst;
+      return BECH_ALPHABET2.encode(convertRadix22([chk % 2 ** 30], 30, 5, false));
+    }
+    function genBech322(encoding) {
+      const ENCODING_CONST = encoding === "bech32" ? 1 : 734539939;
+      const _words = radix22(5);
+      const fromWords = _words.decode;
+      const toWords = _words.encode;
+      const fromWordsUnsafe = unsafeWrapper2(fromWords);
+      function encode3(prefix2, words, limit = 90) {
+        if (typeof prefix2 !== "string")
+          throw new Error(`bech32.encode prefix should be string, not ${typeof prefix2}`);
+        if (!Array.isArray(words) || words.length && typeof words[0] !== "number")
+          throw new Error(`bech32.encode words should be array of numbers, not ${typeof words}`);
+        const actualLength = prefix2.length + 7 + words.length;
+        if (limit !== false && actualLength > limit)
+          throw new TypeError(`Length ${actualLength} exceeds limit ${limit}`);
+        prefix2 = prefix2.toLowerCase();
+        return `${prefix2}1${BECH_ALPHABET2.encode(words)}${bechChecksum2(prefix2, words, ENCODING_CONST)}`;
+      }
+      function decode3(str2, limit = 90) {
+        if (typeof str2 !== "string")
+          throw new Error(`bech32.decode input should be string, not ${typeof str2}`);
+        if (str2.length < 8 || limit !== false && str2.length > limit)
+          throw new TypeError(`Wrong string length: ${str2.length} (${str2}). Expected (8..${limit})`);
+        const lowered = str2.toLowerCase();
+        if (str2 !== lowered && str2 !== str2.toUpperCase())
+          throw new Error(`String must be lowercase or uppercase`);
+        str2 = lowered;
+        const sepIndex = str2.lastIndexOf("1");
+        if (sepIndex === 0 || sepIndex === -1)
+          throw new Error(`Letter "1" must be present between prefix and data only`);
+        const prefix2 = str2.slice(0, sepIndex);
+        const _words2 = str2.slice(sepIndex + 1);
+        if (_words2.length < 6)
+          throw new Error("Data must be at least 6 characters long");
+        const words = BECH_ALPHABET2.decode(_words2).slice(0, -6);
+        const sum = bechChecksum2(prefix2, words, ENCODING_CONST);
+        if (!_words2.endsWith(sum))
+          throw new Error(`Invalid checksum in ${str2}: expected "${sum}"`);
+        return { prefix: prefix2, words };
+      }
+      const decodeUnsafe = unsafeWrapper2(decode3);
+      function decodeToBytes(str2) {
+        const { prefix: prefix2, words } = decode3(str2, false);
+        return { prefix: prefix2, words, bytes: fromWords(words) };
+      }
+      return { encode: encode3, decode: decode3, decodeToBytes, decodeUnsafe, fromWords, fromWordsUnsafe, toWords };
+    }
+    exports.bech32 = genBech322("bech32");
+    exports.bech32m = genBech322("bech32m");
+    exports.utf8 = {
+      encode: (data) => new TextDecoder().decode(data),
+      decode: (str2) => new TextEncoder().encode(str2)
+    };
+    exports.hex = chain2(radix22(4), alphabet2("0123456789abcdef"), join2(""), normalize2((s) => {
+      if (typeof s !== "string" || s.length % 2)
+        throw new TypeError(`hex.decode: expected string, got ${typeof s} with length ${s.length}`);
+      return s.toLowerCase();
+    }));
+    var CODERS2 = {
+      utf8: exports.utf8,
+      hex: exports.hex,
+      base16: exports.base16,
+      base32: exports.base32,
+      base64: exports.base64,
+      base64url: exports.base64url,
+      base58: exports.base58,
+      base58xmr: exports.base58xmr
+    };
+    var coderTypeError2 = `Invalid encoding type. Available types: ${Object.keys(CODERS2).join(", ")}`;
+    var bytesToString2 = (type, bytes2) => {
+      if (typeof type !== "string" || !CODERS2.hasOwnProperty(type))
+        throw new TypeError(coderTypeError2);
+      if (!(bytes2 instanceof Uint8Array))
+        throw new TypeError("bytesToString() expects Uint8Array");
+      return CODERS2[type].encode(bytes2);
+    };
+    exports.bytesToString = bytesToString2;
+    exports.str = exports.bytesToString;
+    var stringToBytes2 = (type, str2) => {
+      if (!CODERS2.hasOwnProperty(type))
+        throw new TypeError(coderTypeError2);
+      if (typeof str2 !== "string")
+        throw new TypeError("stringToBytes() expects string");
+      return CODERS2[type].decode(str2);
+    };
+    exports.stringToBytes = stringToBytes2;
+    exports.bytes = exports.stringToBytes;
+  }
+});
+
+// node_modules/.pnpm/light-bolt11-decoder@3.2.0/node_modules/light-bolt11-decoder/bolt11.js
+var require_bolt11 = __commonJS({
+  "node_modules/.pnpm/light-bolt11-decoder@3.2.0/node_modules/light-bolt11-decoder/bolt11.js"(exports, module) {
+    init_define_import_meta_env();
+    var { bech32: bech322, hex: hex2, utf8: utf82 } = require_lib();
+    var DEFAULTNETWORK = {
+      // default network is bitcoin
+      bech32: "bc",
+      pubKeyHash: 0,
+      scriptHash: 5,
+      validWitnessVersions: [0]
+    };
+    var TESTNETWORK = {
+      bech32: "tb",
+      pubKeyHash: 111,
+      scriptHash: 196,
+      validWitnessVersions: [0]
+    };
+    var SIGNETNETWORK = {
+      bech32: "tbs",
+      pubKeyHash: 111,
+      scriptHash: 196,
+      validWitnessVersions: [0]
+    };
+    var REGTESTNETWORK = {
+      bech32: "bcrt",
+      pubKeyHash: 111,
+      scriptHash: 196,
+      validWitnessVersions: [0]
+    };
+    var SIMNETWORK = {
+      bech32: "sb",
+      pubKeyHash: 63,
+      scriptHash: 123,
+      validWitnessVersions: [0]
+    };
+    var FEATUREBIT_ORDER = [
+      "option_data_loss_protect",
+      "initial_routing_sync",
+      "option_upfront_shutdown_script",
+      "gossip_queries",
+      "var_onion_optin",
+      "gossip_queries_ex",
+      "option_static_remotekey",
+      "payment_secret",
+      "basic_mpp",
+      "option_support_large_channel"
+    ];
+    var DIVISORS = {
+      m: BigInt(1e3),
+      u: BigInt(1e6),
+      n: BigInt(1e9),
+      p: BigInt(1e12)
+    };
+    var MAX_MILLISATS = BigInt("2100000000000000000");
+    var MILLISATS_PER_BTC = BigInt(1e11);
+    var TAGCODES = {
+      payment_hash: 1,
+      payment_secret: 16,
+      description: 13,
+      payee: 19,
+      description_hash: 23,
+      // commit to longer descriptions (used by lnurl-pay)
+      expiry: 6,
+      // default: 3600 (1 hour)
+      min_final_cltv_expiry: 24,
+      // default: 9
+      fallback_address: 9,
+      route_hint: 3,
+      // for extra routing info (private etc.)
+      feature_bits: 5,
+      metadata: 27
+    };
+    var TAGNAMES = {};
+    for (let i = 0, keys = Object.keys(TAGCODES); i < keys.length; i++) {
+      const currentName = keys[i];
+      const currentCode = TAGCODES[keys[i]].toString();
+      TAGNAMES[currentCode] = currentName;
+    }
+    var TAGPARSERS = {
+      1: (words) => hex2.encode(bech322.fromWordsUnsafe(words)),
+      // 256 bits
+      16: (words) => hex2.encode(bech322.fromWordsUnsafe(words)),
+      // 256 bits
+      13: (words) => utf82.encode(bech322.fromWordsUnsafe(words)),
+      // string variable length
+      19: (words) => hex2.encode(bech322.fromWordsUnsafe(words)),
+      // 264 bits
+      23: (words) => hex2.encode(bech322.fromWordsUnsafe(words)),
+      // 256 bits
+      27: (words) => hex2.encode(bech322.fromWordsUnsafe(words)),
+      // variable
+      6: wordsToIntBE,
+      // default: 3600 (1 hour)
+      24: wordsToIntBE,
+      // default: 9
+      3: routingInfoParser,
+      // for extra routing info (private etc.)
+      5: featureBitsParser
+      // keep feature bits as array of 5 bit words
+    };
+    function getUnknownParser(tagCode) {
+      return (words) => ({
+        tagCode: parseInt(tagCode),
+        words: bech322.encode("unknown", words, Number.MAX_SAFE_INTEGER)
+      });
+    }
+    function wordsToIntBE(words) {
+      return words.reverse().reduce((total, item, index) => {
+        return total + item * Math.pow(32, index);
+      }, 0);
+    }
+    function routingInfoParser(words) {
+      const routes = [];
+      let pubkey, shortChannelId, feeBaseMSats, feeProportionalMillionths, cltvExpiryDelta;
+      let routesBuffer = bech322.fromWordsUnsafe(words);
+      while (routesBuffer.length > 0) {
+        pubkey = hex2.encode(routesBuffer.slice(0, 33));
+        shortChannelId = hex2.encode(routesBuffer.slice(33, 41));
+        feeBaseMSats = parseInt(hex2.encode(routesBuffer.slice(41, 45)), 16);
+        feeProportionalMillionths = parseInt(
+          hex2.encode(routesBuffer.slice(45, 49)),
+          16
+        );
+        cltvExpiryDelta = parseInt(hex2.encode(routesBuffer.slice(49, 51)), 16);
+        routesBuffer = routesBuffer.slice(51);
+        routes.push({
+          pubkey,
+          short_channel_id: shortChannelId,
+          fee_base_msat: feeBaseMSats,
+          fee_proportional_millionths: feeProportionalMillionths,
+          cltv_expiry_delta: cltvExpiryDelta
+        });
+      }
+      return routes;
+    }
+    function featureBitsParser(words) {
+      const bools = words.slice().reverse().map((word) => [
+        !!(word & 1),
+        !!(word & 2),
+        !!(word & 4),
+        !!(word & 8),
+        !!(word & 16)
+      ]).reduce((finalArr, itemArr) => finalArr.concat(itemArr), []);
+      while (bools.length < FEATUREBIT_ORDER.length * 2) {
+        bools.push(false);
+      }
+      const featureBits = {};
+      FEATUREBIT_ORDER.forEach((featureName, index) => {
+        let status;
+        if (bools[index * 2]) {
+          status = "required";
+        } else if (bools[index * 2 + 1]) {
+          status = "supported";
+        } else {
+          status = "unsupported";
+        }
+        featureBits[featureName] = status;
+      });
+      const extraBits = bools.slice(FEATUREBIT_ORDER.length * 2);
+      featureBits.extra_bits = {
+        start_bit: FEATUREBIT_ORDER.length * 2,
+        bits: extraBits,
+        has_required: extraBits.reduce(
+          (result, bit, index) => index % 2 !== 0 ? result || false : result || bit,
+          false
+        )
+      };
+      return featureBits;
+    }
+    function hrpToMillisat(hrpString, outputString) {
+      let divisor, value;
+      if (hrpString.slice(-1).match(/^[munp]$/)) {
+        divisor = hrpString.slice(-1);
+        value = hrpString.slice(0, -1);
+      } else if (hrpString.slice(-1).match(/^[^munp0-9]$/)) {
+        throw new Error("Not a valid multiplier for the amount");
+      } else {
+        value = hrpString;
+      }
+      if (!value.match(/^\d+$/))
+        throw new Error("Not a valid human readable amount");
+      const valueBN = BigInt(value);
+      const millisatoshisBN = divisor ? valueBN * MILLISATS_PER_BTC / DIVISORS[divisor] : valueBN * MILLISATS_PER_BTC;
+      if (divisor === "p" && !(valueBN % BigInt(10) === BigInt(0)) || millisatoshisBN > MAX_MILLISATS) {
+        throw new Error("Amount is outside of valid range");
+      }
+      return outputString ? millisatoshisBN.toString() : millisatoshisBN;
+    }
+    function decode3(paymentRequest, network) {
+      if (typeof paymentRequest !== "string")
+        throw new Error("Lightning Payment Request must be string");
+      if (paymentRequest.slice(0, 2).toLowerCase() !== "ln")
+        throw new Error("Not a proper lightning payment request");
+      const sections = [];
+      const decoded = bech322.decode(paymentRequest, Number.MAX_SAFE_INTEGER);
+      paymentRequest = paymentRequest.toLowerCase();
+      const prefix2 = decoded.prefix;
+      let words = decoded.words;
+      let letters = paymentRequest.slice(prefix2.length + 1);
+      let sigWords = words.slice(-104);
+      words = words.slice(0, -104);
+      let prefixMatches = prefix2.match(/^ln(\S+?)(\d*)([a-zA-Z]?)$/);
+      if (prefixMatches && !prefixMatches[2])
+        prefixMatches = prefix2.match(/^ln(\S+)$/);
+      if (!prefixMatches) {
+        throw new Error("Not a proper lightning payment request");
+      }
+      sections.push({
+        name: "lightning_network",
+        letters: "ln"
+      });
+      const bech32Prefix = prefixMatches[1];
+      let coinNetwork;
+      if (!network) {
+        switch (bech32Prefix) {
+          case DEFAULTNETWORK.bech32:
+            coinNetwork = DEFAULTNETWORK;
+            break;
+          case TESTNETWORK.bech32:
+            coinNetwork = TESTNETWORK;
+            break;
+          case SIGNETNETWORK.bech32:
+            coinNetwork = SIGNETNETWORK;
+            break;
+          case REGTESTNETWORK.bech32:
+            coinNetwork = REGTESTNETWORK;
+            break;
+          case SIMNETWORK.bech32:
+            coinNetwork = SIMNETWORK;
+            break;
+        }
+      } else {
+        if (network.bech32 === void 0 || network.pubKeyHash === void 0 || network.scriptHash === void 0 || !Array.isArray(network.validWitnessVersions))
+          throw new Error("Invalid network");
+        coinNetwork = network;
+      }
+      if (!coinNetwork || coinNetwork.bech32 !== bech32Prefix) {
+        throw new Error("Unknown coin bech32 prefix");
+      }
+      sections.push({
+        name: "coin_network",
+        letters: bech32Prefix,
+        value: coinNetwork
+      });
+      const value = prefixMatches[2];
+      let millisatoshis;
+      if (value) {
+        const divisor = prefixMatches[3];
+        millisatoshis = hrpToMillisat(value + divisor, true);
+        sections.push({
+          name: "amount",
+          letters: prefixMatches[2] + prefixMatches[3],
+          value: millisatoshis
+        });
+      } else {
+        millisatoshis = null;
+      }
+      sections.push({
+        name: "separator",
+        letters: "1"
+      });
+      const timestamp = wordsToIntBE(words.slice(0, 7));
+      words = words.slice(7);
+      sections.push({
+        name: "timestamp",
+        letters: letters.slice(0, 7),
+        value: timestamp
+      });
+      letters = letters.slice(7);
+      let tagName, parser, tagLength, tagWords;
+      while (words.length > 0) {
+        const tagCode = words[0].toString();
+        tagName = TAGNAMES[tagCode] || "unknown_tag";
+        parser = TAGPARSERS[tagCode] || getUnknownParser(tagCode);
+        words = words.slice(1);
+        tagLength = wordsToIntBE(words.slice(0, 2));
+        words = words.slice(2);
+        tagWords = words.slice(0, tagLength);
+        words = words.slice(tagLength);
+        sections.push({
+          name: tagName,
+          tag: letters[0],
+          letters: letters.slice(0, 1 + 2 + tagLength),
+          value: parser(tagWords)
+          // see: parsers for more comments
+        });
+        letters = letters.slice(1 + 2 + tagLength);
+      }
+      sections.push({
+        name: "signature",
+        letters: letters.slice(0, 104),
+        value: hex2.encode(bech322.fromWordsUnsafe(sigWords))
+      });
+      letters = letters.slice(104);
+      sections.push({
+        name: "checksum",
+        letters
+      });
+      let result = {
+        paymentRequest,
+        sections,
+        get expiry() {
+          let exp = sections.find((s) => s.name === "expiry");
+          if (exp) return getValue("timestamp") + exp.value;
+        },
+        get route_hints() {
+          return sections.filter((s) => s.name === "route_hint").map((s) => s.value);
+        }
+      };
+      for (let name in TAGCODES) {
+        if (name === "route_hint") {
+          continue;
+        }
+        Object.defineProperty(result, name, {
+          get() {
+            return getValue(name);
+          }
+        });
+      }
+      return result;
+      function getValue(name) {
+        let section = sections.find((s) => s.name === name);
+        return section ? section.value : void 0;
+      }
+    }
+    module.exports = {
+      decode: decode3,
+      hrpToMillisat
+    };
+  }
+});
+
 // tools/light-emergency/recover.ts
 init_define_import_meta_env();
 
@@ -20910,7 +21653,7 @@ var RestIndexerProvider = class {
       throw new Error(`Failed to fetch vtxo tree: ${res.statusText}`);
     }
     const data = await res.json();
-    if (!Response.isVtxoTreeResponse(data)) {
+    if (!Response2.isVtxoTreeResponse(data)) {
       throw new Error("Invalid vtxo tree data received");
     }
     data.vtxoTree.forEach((tx) => {
@@ -20936,7 +21679,7 @@ var RestIndexerProvider = class {
       throw new Error(`Failed to fetch vtxo tree leaves: ${res.statusText}`);
     }
     const data = await res.json();
-    if (!Response.isVtxoTreeLeavesResponse(data)) {
+    if (!Response2.isVtxoTreeLeavesResponse(data)) {
       throw new Error("Invalid vtxos tree leaves data received");
     }
     return data;
@@ -20948,7 +21691,7 @@ var RestIndexerProvider = class {
       throw new Error(`Failed to fetch batch sweep transactions: ${res.statusText}`);
     }
     const data = await res.json();
-    if (!Response.isBatchSweepTransactionsResponse(data)) {
+    if (!Response2.isBatchSweepTransactionsResponse(data)) {
       throw new Error("Invalid batch sweep transactions data received");
     }
     return data;
@@ -20960,7 +21703,7 @@ var RestIndexerProvider = class {
       throw new Error(`Failed to fetch commitment tx: ${res.statusText}`);
     }
     const data = await res.json();
-    if (!Response.isCommitmentTx(data)) {
+    if (!Response2.isCommitmentTx(data)) {
       throw new Error("Invalid commitment tx data received");
     }
     return data;
@@ -20981,7 +21724,7 @@ var RestIndexerProvider = class {
       throw new Error(`Failed to fetch commitment tx connectors: ${res.statusText}`);
     }
     const data = await res.json();
-    if (!Response.isConnectorsResponse(data)) {
+    if (!Response2.isConnectorsResponse(data)) {
       throw new Error("Invalid commitment tx connectors data received");
     }
     data.connectors.forEach((tx) => {
@@ -21007,7 +21750,7 @@ var RestIndexerProvider = class {
       throw new Error(`Failed to fetch commitment tx forfeitTxs: ${res.statusText}`);
     }
     const data = await res.json();
-    if (!Response.isForfeitTxsResponse(data)) {
+    if (!Response2.isForfeitTxsResponse(data)) {
       throw new Error("Invalid commitment tx forfeitTxs data received");
     }
     return data;
@@ -21094,7 +21837,7 @@ var RestIndexerProvider = class {
       throw new Error(`Failed to fetch virtual txs: ${res.statusText}`);
     }
     const data = await res.json();
-    if (!Response.isVirtualTxsResponse(data)) {
+    if (!Response2.isVirtualTxsResponse(data)) {
       throw new Error("Invalid virtual txs data received");
     }
     return data;
@@ -21115,7 +21858,7 @@ var RestIndexerProvider = class {
       throw new Error(`Failed to fetch vtxo chain: ${res.statusText}`);
     }
     const data = await res.json();
-    if (!Response.isVtxoChainResponse(data)) {
+    if (!Response2.isVtxoChainResponse(data)) {
       throw new Error("Invalid vtxo chain data received");
     }
     return data;
@@ -21205,7 +21948,7 @@ var RestIndexerProvider = class {
       throw new Error(`Failed to fetch vtxos: ${res.statusText}`);
     }
     const data = await res.json();
-    if (!Response.isVtxosResponse(data)) {
+    if (!Response2.isVtxosResponse(data)) {
       throw new Error("Invalid vtxos data received");
     }
     return {
@@ -21220,7 +21963,7 @@ var RestIndexerProvider = class {
       throw new Error(`Failed to fetch asset details: ${res.statusText}`);
     }
     const data = await res.json();
-    if (!Response.isGetAssetResponse(data)) {
+    if (!Response2.isGetAssetResponse(data)) {
       throw new Error("Invalid get asset response");
     }
     const metadata = data.metadata?.length ? parseAssetMetadata(data.metadata) : void 0;
@@ -21286,8 +22029,8 @@ function parseAssetMetadata(metadata) {
   }
   return out;
 }
-var Response;
-((Response2) => {
+var Response2;
+((Response22) => {
   function isBatchInfo(data) {
     return typeof data === "object" && typeof data.totalOutputAmount === "string" && typeof data.totalOutputVtxos === "number" && typeof data.expiresAt === "string" && typeof data.swept === "boolean";
   }
@@ -21297,36 +22040,36 @@ var Response;
   function isCommitmentTx(data) {
     return typeof data === "object" && typeof data.startedAt === "string" && typeof data.endedAt === "string" && typeof data.totalInputAmount === "string" && typeof data.totalInputVtxos === "number" && typeof data.totalOutputAmount === "string" && typeof data.totalOutputVtxos === "number" && typeof data.batches === "object" && Object.values(data.batches).every(isBatchInfo);
   }
-  Response2.isCommitmentTx = isCommitmentTx;
+  Response22.isCommitmentTx = isCommitmentTx;
   function isOutpoint(data) {
     return typeof data === "object" && typeof data.txid === "string" && typeof data.vout === "number";
   }
-  Response2.isOutpoint = isOutpoint;
+  Response22.isOutpoint = isOutpoint;
   function isOutpointArray(data) {
     return Array.isArray(data) && data.every(isOutpoint);
   }
-  Response2.isOutpointArray = isOutpointArray;
+  Response22.isOutpointArray = isOutpointArray;
   function isTx(data) {
     return typeof data === "object" && typeof data.txid === "string" && typeof data.children === "object" && Object.values(data.children).every(isTxid) && Object.keys(data.children).every((k) => Number.isInteger(Number(k)));
   }
   function isTxsArray(data) {
     return Array.isArray(data) && data.every(isTx);
   }
-  Response2.isTxsArray = isTxsArray;
+  Response22.isTxsArray = isTxsArray;
   function isTxHistoryRecord(data) {
     return typeof data === "object" && typeof data.amount === "string" && typeof data.createdAt === "string" && typeof data.isSettled === "boolean" && typeof data.settledBy === "string" && Object.values(IndexerTxType).includes(data.type) && (!data.commitmentTxid && typeof data.virtualTxid === "string" || typeof data.commitmentTxid === "string" && !data.virtualTxid);
   }
   function isTxHistoryRecordArray(data) {
     return Array.isArray(data) && data.every(isTxHistoryRecord);
   }
-  Response2.isTxHistoryRecordArray = isTxHistoryRecordArray;
+  Response22.isTxHistoryRecordArray = isTxHistoryRecordArray;
   function isTxid(data) {
     return typeof data === "string" && data.length === 64;
   }
   function isTxidArray(data) {
     return Array.isArray(data) && data.every(isTxid);
   }
-  Response2.isTxidArray = isTxidArray;
+  Response22.isTxidArray = isTxidArray;
   function isVtxoAsset(data) {
     return typeof data === "object" && data !== null && typeof data.assetId === "string" && typeof data.amount === "string";
   }
@@ -21339,44 +22082,44 @@ var Response;
   function isVtxoTreeResponse(data) {
     return typeof data === "object" && Array.isArray(data.vtxoTree) && data.vtxoTree.every(isTx) && (!data.page || isPageResponse(data.page));
   }
-  Response2.isVtxoTreeResponse = isVtxoTreeResponse;
+  Response22.isVtxoTreeResponse = isVtxoTreeResponse;
   function isVtxoTreeLeavesResponse(data) {
     return typeof data === "object" && Array.isArray(data.leaves) && data.leaves.every(isOutpoint) && (!data.page || isPageResponse(data.page));
   }
-  Response2.isVtxoTreeLeavesResponse = isVtxoTreeLeavesResponse;
+  Response22.isVtxoTreeLeavesResponse = isVtxoTreeLeavesResponse;
   function isConnectorsResponse(data) {
     return typeof data === "object" && Array.isArray(data.connectors) && data.connectors.every(isTx) && (!data.page || isPageResponse(data.page));
   }
-  Response2.isConnectorsResponse = isConnectorsResponse;
+  Response22.isConnectorsResponse = isConnectorsResponse;
   function isForfeitTxsResponse(data) {
     return typeof data === "object" && Array.isArray(data.txids) && data.txids.every(isTxid) && (!data.page || isPageResponse(data.page));
   }
-  Response2.isForfeitTxsResponse = isForfeitTxsResponse;
+  Response22.isForfeitTxsResponse = isForfeitTxsResponse;
   function isSweptCommitmentTxResponse(data) {
     return typeof data === "object" && Array.isArray(data.sweptBy) && data.sweptBy.every(isTxid);
   }
-  Response2.isSweptCommitmentTxResponse = isSweptCommitmentTxResponse;
+  Response22.isSweptCommitmentTxResponse = isSweptCommitmentTxResponse;
   function isBatchSweepTransactionsResponse(data) {
     return typeof data === "object" && Array.isArray(data.sweptBy) && data.sweptBy.every(isTxid);
   }
-  Response2.isBatchSweepTransactionsResponse = isBatchSweepTransactionsResponse;
+  Response22.isBatchSweepTransactionsResponse = isBatchSweepTransactionsResponse;
   function isVirtualTxsResponse(data) {
     return typeof data === "object" && Array.isArray(data.txs) && data.txs.every((tx) => typeof tx === "string") && (!data.page || isPageResponse(data.page));
   }
-  Response2.isVirtualTxsResponse = isVirtualTxsResponse;
+  Response22.isVirtualTxsResponse = isVirtualTxsResponse;
   function isVtxoChainResponse(data) {
     return typeof data === "object" && Array.isArray(data.chain) && data.chain.every(isChain) && (!data.page || isPageResponse(data.page));
   }
-  Response2.isVtxoChainResponse = isVtxoChainResponse;
+  Response22.isVtxoChainResponse = isVtxoChainResponse;
   function isVtxosResponse(data) {
     return typeof data === "object" && Array.isArray(data.vtxos) && data.vtxos.every(isVtxo) && (!data.page || isPageResponse(data.page));
   }
-  Response2.isVtxosResponse = isVtxosResponse;
+  Response22.isVtxosResponse = isVtxosResponse;
   function isGetAssetResponse(data) {
     return typeof data === "object" && data !== null && typeof data.assetId === "string" && typeof data.supply === "string" && (data.controlAsset === void 0 || typeof data.controlAsset === "string") && (data.metadata === void 0 || typeof data.metadata === "string");
   }
-  Response2.isGetAssetResponse = isGetAssetResponse;
-})(Response || (Response = {}));
+  Response22.isGetAssetResponse = isGetAssetResponse;
+})(Response2 || (Response2 = {}));
 
 // node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-ULWK4QGH.js
 init_define_import_meta_env();
@@ -22078,8 +22821,8 @@ var Path2 = {
   pushObj: (stack, obj, objFn) => {
     const last = { obj };
     stack.push(last);
-    objFn((field, fieldFn) => {
-      last.field = field;
+    objFn((field2, fieldFn) => {
+      last.field = field2;
       fieldFn();
       last.field = void 0;
     });
@@ -22799,9 +23542,9 @@ var VHTLC;
         server,
         preimageHash,
         refundLocktime,
-        unilateralClaimDelay,
-        unilateralRefundDelay,
-        unilateralRefundWithoutReceiverDelay
+        unilateralClaimDelay: unilateralClaimDelay2,
+        unilateralRefundDelay: unilateralRefundDelay2,
+        unilateralRefundWithoutReceiverDelay: unilateralRefundWithoutReceiverDelay2
       } = options;
       const conditionScript = preimageCondition(preimageHash);
       const claimScript = ConditionMultisigTapscript.encode({
@@ -22817,15 +23560,15 @@ var VHTLC;
       }).script;
       const unilateralClaimScript = ConditionCSVMultisigTapscript.encode({
         conditionScript,
-        timelock: unilateralClaimDelay,
+        timelock: unilateralClaimDelay2,
         pubkeys: [receiver]
       }).script;
       const unilateralRefundScript = CSVMultisigTapscript.encode({
-        timelock: unilateralRefundDelay,
+        timelock: unilateralRefundDelay2,
         pubkeys: [sender, receiver]
       }).script;
       const unilateralRefundWithoutReceiverScript = CSVMultisigTapscript.encode({
-        timelock: unilateralRefundWithoutReceiverDelay,
+        timelock: unilateralRefundWithoutReceiverDelay2,
         pubkeys: [sender]
       }).script;
       const scripts = [
@@ -23030,9 +23773,9 @@ var VHTLC;
       server,
       preimageHash,
       refundLocktime,
-      unilateralClaimDelay,
-      unilateralRefundDelay,
-      unilateralRefundWithoutReceiverDelay
+      unilateralClaimDelay: unilateralClaimDelay2,
+      unilateralRefundDelay: unilateralRefundDelay2,
+      unilateralRefundWithoutReceiverDelay: unilateralRefundWithoutReceiverDelay2
     } = options;
     if (!preimageHash || preimageHash.length !== 20) {
       throw new Error("preimage hash must be 20 bytes");
@@ -23091,31 +23834,31 @@ var VHTLC;
     if (typeof refundLocktime !== "bigint" || refundLocktime <= 0n) {
       throw new Error("refund locktime must be greater than 0");
     }
-    if (!unilateralClaimDelay || typeof unilateralClaimDelay.value !== "bigint" || unilateralClaimDelay.value <= 0n) {
+    if (!unilateralClaimDelay2 || typeof unilateralClaimDelay2.value !== "bigint" || unilateralClaimDelay2.value <= 0n) {
       throw new Error("unilateral claim delay must greater than 0");
     }
-    if (unilateralClaimDelay.type === "seconds" && unilateralClaimDelay.value % 512n !== 0n) {
+    if (unilateralClaimDelay2.type === "seconds" && unilateralClaimDelay2.value % 512n !== 0n) {
       throw new Error("seconds timelock must be multiple of 512");
     }
-    if (unilateralClaimDelay.type === "seconds" && unilateralClaimDelay.value < 512n) {
+    if (unilateralClaimDelay2.type === "seconds" && unilateralClaimDelay2.value < 512n) {
       throw new Error("seconds timelock must be greater or equal to 512");
     }
-    if (!unilateralRefundDelay || typeof unilateralRefundDelay.value !== "bigint" || unilateralRefundDelay.value <= 0n) {
+    if (!unilateralRefundDelay2 || typeof unilateralRefundDelay2.value !== "bigint" || unilateralRefundDelay2.value <= 0n) {
       throw new Error("unilateral refund delay must greater than 0");
     }
-    if (unilateralRefundDelay.type === "seconds" && unilateralRefundDelay.value % 512n !== 0n) {
+    if (unilateralRefundDelay2.type === "seconds" && unilateralRefundDelay2.value % 512n !== 0n) {
       throw new Error("seconds timelock must be multiple of 512");
     }
-    if (unilateralRefundDelay.type === "seconds" && unilateralRefundDelay.value < 512n) {
+    if (unilateralRefundDelay2.type === "seconds" && unilateralRefundDelay2.value < 512n) {
       throw new Error("seconds timelock must be greater or equal to 512");
     }
-    if (!unilateralRefundWithoutReceiverDelay || typeof unilateralRefundWithoutReceiverDelay.value !== "bigint" || unilateralRefundWithoutReceiverDelay.value <= 0n) {
+    if (!unilateralRefundWithoutReceiverDelay2 || typeof unilateralRefundWithoutReceiverDelay2.value !== "bigint" || unilateralRefundWithoutReceiverDelay2.value <= 0n) {
       throw new Error("unilateral refund without receiver delay must greater than 0");
     }
-    if (unilateralRefundWithoutReceiverDelay.type === "seconds" && unilateralRefundWithoutReceiverDelay.value % 512n !== 0n) {
+    if (unilateralRefundWithoutReceiverDelay2.type === "seconds" && unilateralRefundWithoutReceiverDelay2.value % 512n !== 0n) {
       throw new Error("seconds timelock must be multiple of 512");
     }
-    if (unilateralRefundWithoutReceiverDelay.type === "seconds" && unilateralRefundWithoutReceiverDelay.value < 512n) {
+    if (unilateralRefundWithoutReceiverDelay2.type === "seconds" && unilateralRefundWithoutReceiverDelay2.value < 512n) {
       throw new Error("seconds timelock must be greater or equal to 512");
     }
   }
@@ -24834,8 +25577,8 @@ var Point4 = class _Point {
   X;
   Y;
   Z;
-  constructor(X, Y, Z) {
-    this.X = FpIsValid(X);
+  constructor(X2, Y, Z) {
+    this.X = FpIsValid(X2);
     this.Y = FpIsValidNot0(Y);
     this.Z = FpIsValid(Z);
     Object.freeze(this);
@@ -26986,16 +27729,16 @@ var Registry = class _Registry {
   findBinaryOverload(op, left, right) {
     return this.operatorCandidates(op).findBinaryOverload(left, right);
   }
-  #toCelFieldType(field) {
-    if (typeof field === "string") return { type: field };
-    if (field.id) return protobufjsFieldToCelType(field);
-    return field;
+  #toCelFieldType(field2) {
+    if (typeof field2 === "string") return { type: field2 };
+    if (field2.id) return protobufjsFieldToCelType(field2);
+    return field2;
   }
   #toCelFieldDeclaration(typename, fields, k, requireKnownTypes = false) {
     try {
-      const field = this.#toCelFieldType(fields[k]);
-      if (typeof field?.type !== "string") throw new Error(`unsupported declaration`);
-      return this.#parseTypeString(field.type, requireKnownTypes);
+      const field2 = this.#toCelFieldType(fields[k]);
+      if (typeof field2?.type !== "string") throw new Error(`unsupported declaration`);
+      return this.#parseTypeString(field2.type, requireKnownTypes);
     } catch (e) {
       e.message = `Field '${k}' in type '${typename}' has unsupported declaration: ${JSON.stringify(fields[k])}`;
       throw e;
@@ -27027,12 +27770,12 @@ var Registry = class _Registry {
           if (this.size !== keys.length) for (const k of keys) this.get(k);
           return super[Symbol.iterator]();
         }
-        get(field) {
-          let v = super.get(field);
-          if (v !== void 0 || this.has(field)) return v;
-          const dec = conversions[field];
+        get(field2) {
+          let v = super.get(field2);
+          if (v !== void 0 || this.has(field2)) return v;
+          const dec = conversions[field2];
           if (dec === void 0) return;
-          v = this.#raw instanceof Map ? this.#raw.get(field) : this.#raw?.[field];
+          v = this.#raw instanceof Map ? this.#raw.get(field2) : this.#raw?.[field2];
           if (dec && v && typeof v === "object") {
             switch (v.constructor) {
               case void 0:
@@ -27041,7 +27784,7 @@ var Registry = class _Registry {
                 v = dec.convert(v);
             }
           }
-          return super.set(field, v), v;
+          return super.set(field2, v), v;
         }
       }
     }[name];
@@ -27366,16 +28109,16 @@ var OverlayContext = class _OverlayContext {
     return this.#parent.getVariable(name);
   }
 };
-function protobufjsFieldToCelType(field) {
+function protobufjsFieldToCelType(field2) {
   let fieldType;
-  if (field.map) {
-    const keyType = protobufjsTypeToCelType(field.keyType, field.resolvedKeyType);
-    const valueType = protobufjsTypeToCelType(field.type, field.resolvedType);
+  if (field2.map) {
+    const keyType = protobufjsTypeToCelType(field2.keyType, field2.resolvedKeyType);
+    const valueType = protobufjsTypeToCelType(field2.type, field2.resolvedType);
     fieldType = `map<${keyType}, ${valueType}>`;
   } else {
-    fieldType = protobufjsTypeToCelType(field.type, field.resolvedType);
+    fieldType = protobufjsTypeToCelType(field2.type, field2.resolvedType);
   }
-  return { type: field.repeated ? `list<${fieldType}>` : fieldType };
+  return { type: field2.repeated ? `list<${fieldType}>` : fieldType };
 }
 function protobufjsTypeToCelType(protoType, resolvedType) {
   switch (protoType) {
@@ -28124,8 +28867,8 @@ function createMapExpander(hasFilter) {
   const invalidMsg = `${functionDesc} invalid predicate iteration variable`;
   const label = `${functionDesc} filter predicate must return bool`;
   return ({ args, receiver, ast: callAst }) => {
-    const [iterVar, predicate, transform2] = hasFilter ? args : [args[0], null, args[1]];
-    let step = transform2.clone(OPERATORS.accuPush, transform2);
+    const [iterVar, predicate, transform] = hasFilter ? args : [args[0], null, args[1]];
+    let step = transform.clone(OPERATORS.accuPush, transform);
     if (predicate) {
       const accuValue = predicate.clone(OPERATORS.accuValue);
       step = predicate.clone(OPERATORS.ternary, [predicate.setMeta("label", label), step, accuValue]);
@@ -28169,17 +28912,17 @@ function createQuantifierExpander(opts) {
   const label = `${opts.name}(var, predicate) predicate must return bool`;
   return ({ args, receiver, ast: callAst }) => {
     const predicate = args[1].setMeta("label", label);
-    const transform2 = opts.transform({ args, ast: callAst, predicate, opts });
+    const transform = opts.transform({ args, ast: callAst, predicate, opts });
     return {
       callAst: callAst.clone(OPERATORS.comprehension, {
         kind: "quantifier",
         errorsAreFatal: opts.errorsAreFatal || false,
         iterable: receiver,
         iterVarName: assertIdentifier(args[0], invalidMsg),
-        init: transform2.init,
-        condition: transform2.condition,
-        step: transform2.step,
-        result: transform2.result || identity
+        init: transform.init,
+        condition: transform.condition,
+        step: transform.step,
+        result: transform.result || identity
       })
     };
   };
@@ -34629,7 +35372,7 @@ function parseStoredArkInfoSnapshot(raw2) {
     throw new MalformedArkInfoSnapshotError("arkInfo must be an object");
   }
   const a = snap.arkInfo;
-  for (const field of [
+  for (const field2 of [
     "network",
     "signerPubkey",
     "checkpointTapscript",
@@ -34638,9 +35381,9 @@ function parseStoredArkInfoSnapshot(raw2) {
     "digest",
     "version"
   ]) {
-    assertString(a[field], `arkInfo.${field}`);
+    assertString(a[field2], `arkInfo.${field2}`);
   }
-  for (const field of [
+  for (const field2 of [
     "unilateralExitDelay",
     "boardingExitDelay",
     "sessionDuration",
@@ -34650,11 +35393,11 @@ function parseStoredArkInfoSnapshot(raw2) {
     "utxoMinAmount",
     "utxoMaxAmount"
   ]) {
-    assertDecimalString(a[field], `arkInfo.${field}`);
+    assertDecimalString(a[field2], `arkInfo.${field2}`);
   }
-  for (const field of ["vtxoTreeExpiry", "maxTxWeight", "maxOpReturnOutputs"]) {
-    if (a[field] !== void 0) {
-      assertDecimalString(a[field], `arkInfo.${field}`);
+  for (const field2 of ["vtxoTreeExpiry", "maxTxWeight", "maxOpReturnOutputs"]) {
+    if (a[field2] !== void 0) {
+      assertDecimalString(a[field2], `arkInfo.${field2}`);
     }
   }
   assertFeeInfo(a.fees, "arkInfo.fees");
@@ -34676,8 +35419,8 @@ function parseStoredArkInfoSnapshot(raw2) {
       throw new MalformedArkInfoSnapshotError("arkInfo.scheduledSession must be an object");
     }
     const s = a.scheduledSession;
-    for (const field of ["duration", "nextEndTime", "nextStartTime", "period"]) {
-      assertDecimalString(s[field], `arkInfo.scheduledSession.${field}`);
+    for (const field2 of ["duration", "nextEndTime", "nextStartTime", "period"]) {
+      assertDecimalString(s[field2], `arkInfo.scheduledSession.${field2}`);
     }
     assertFeeInfo(s.fees, "arkInfo.scheduledSession.fees");
   }
@@ -46139,6 +46882,45 @@ init_base();
 
 // src/lib/vault/light/backupCodec.ts
 init_define_import_meta_env();
+
+// src/lib/vault/recovery/compression.ts
+init_define_import_meta_env();
+var MAX_RECOVERY_PLAIN_BYTES = 13e6;
+async function compressRecoveryData(bytes2, decompress) {
+  const input = new ReadableStream({
+    start(controller2) {
+      controller2.enqueue(Uint8Array.from(bytes2));
+      controller2.close();
+    }
+  });
+  const stream = input.pipeThrough(decompress ? new DecompressionStream("gzip") : new CompressionStream("gzip"));
+  const reader = stream.getReader();
+  const chunks = [];
+  let length = 0;
+  try {
+    for (; ; ) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      length += value.length;
+      if (length > MAX_RECOVERY_PLAIN_BYTES) {
+        await reader.cancel();
+        throw new Error("Recovery archive is too large");
+      }
+      chunks.push(value);
+    }
+    const result = new Uint8Array(length);
+    let offset = 0;
+    for (const chunk of chunks) {
+      result.set(chunk, offset);
+      offset += chunk.length;
+    }
+    return result;
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+// src/lib/vault/light/backupCodec.ts
 init_base();
 init_secp256k1();
 
@@ -46181,6 +46963,7 @@ var MAINNET_FEERATE_CEILING_SAT_PER_V = 25;
 var bakedReleaseNetwork = configuredReleaseNetwork(define_import_meta_env_default.VITE_VAULT_RELEASE_NETWORK, define_import_meta_env_default.PROD);
 var ABSOLUTE_FEE_CEILING_SATS = bakedReleaseNetwork === "mainnet" ? MAINNET_ABSOLUTE_FEE_CEILING_SATS : MUTINYNET_ABSOLUTE_FEE_CEILING_SATS;
 var FEERATE_CEILING_SAT_PER_V = bakedReleaseNetwork === "mainnet" ? MAINNET_FEERATE_CEILING_SAT_PER_V : MUTINYNET_FEERATE_CEILING_SAT_PER_V;
+var DUST_SATS = 330;
 
 // src/lib/vault/networkPins.ts
 init_define_import_meta_env();
@@ -46237,6 +47020,7 @@ function sdkNetworkName(network) {
 
 // src/lib/vault/spendingPolicy.ts
 init_define_import_meta_env();
+init_sha2();
 
 // src/lib/vault/hex.ts
 init_define_import_meta_env();
@@ -46354,6 +47138,12 @@ function validateSpendingPolicy(value, network) {
   }
   return policy;
 }
+function canonicalSpendingPolicy(policy, network) {
+  return JSON.stringify(validateSpendingPolicy(policy, network));
+}
+function spendingPolicyDigest(policy, network) {
+  return bytesToHex3(sha256(encodeUtf8(canonicalSpendingPolicy(policy, network))));
+}
 
 // src/lib/vault/light/contract.ts
 var LIGHT_PROFILE = "vaulted-light-v1";
@@ -46470,6 +47260,70 @@ init_define_import_meta_env();
 
 // src/lib/vault/light/status.ts
 init_define_import_meta_env();
+init_base();
+function requireLightStatus(status) {
+  const descriptor = validateLightDescriptor(status.lightDescriptor);
+  const pins = networkPins(descriptor.network);
+  if (!status.enrolled || status.vaultId !== descriptor.vaultId || status.network !== descriptor.network || status.templateVersion !== LIGHT_PROFILE || status.policyVersion !== LIGHT_POLICY_SCHEMA || status.protectionTier !== "light")
+    throw new Error("Light status identity mismatch");
+  if (status.lightDescriptorHash !== lightDescriptorDigest(descriptor))
+    throw new Error("Light descriptor digest mismatch");
+  const policy = validateLightPolicy(status.spendingPolicy, descriptor.network);
+  if (lightPolicyDigest(policy, descriptor.network) !== descriptor.spendingPolicyDigest || status.spendingPolicyDigest !== descriptor.spendingPolicyDigest)
+    throw new Error("Light policy mismatch");
+  if (policy.txRecipientCapSats !== status.txCap || policy.periodAllowanceSats !== status.periodAllowance || policy.absoluteFeeCapSats !== status.absoluteFeeCap || policy.feerateCapSatPerV !== status.feerateCapSatVb)
+    throw new Error("Light limit fields mismatch");
+  if (![status.periodSpent, status.periodRemaining].every((v) => Number.isSafeInteger(v) && v >= 0) || status.periodRemaining !== Math.max(0, status.periodAllowance - status.periodSpent))
+    throw new Error("Light allowance state invalid");
+  if (status.savingsAddress || status.savingsScript || status.externalOwnerWalletPub || status.recoveryKeyPub || "recoveryPub" in status && status.recoveryPub || status.arkadeCosignerBasePub || status.arkadeCosignerOrigin || status.arkadeCosignerVersion || status.vtxoDelegatePub || status.vtxoBoardingActive || status.vtxoBoardingAddress || status.vtxoBoardingScript || status.vtxoBoardingDescriptor)
+    throw new Error("Light status contains another profile");
+  if (status.phoneBip340Pub !== `02${descriptor.ownerPub}` || status.vtxoVaultCosignerPub !== `02${descriptor.cosignerPub}` || status.vaultCosignerBasePub !== status.vtxoVaultCosignerPub || status.vtxoExitDelay !== descriptor.exitDelaySeconds || status.vtxoExitDelayUnit !== "seconds")
+    throw new Error("Light signing keys or exit delay mismatch");
+  const address = ArkAddress.decode(String(status.spendingArkAddress || ""));
+  const script = new LightScript(descriptor);
+  if (address.hrp !== pins.arkHrp || hex.encode(address.serverPubKey) !== descriptor.operatorPub || hex.encode(address.pkScript) !== descriptor.scriptPubKey || hex.encode(script.pkScript) !== status.spendingArkScript)
+    throw new Error("Light receiving address mismatch");
+  return { ...status, savingsScript: "", lightDescriptor: descriptor };
+}
+function lightRecoveryStatus(value) {
+  const descriptor = validateLightDescriptor(value);
+  const p = descriptor.spendingPolicy;
+  return requireLightStatus({
+    enrolled: true,
+    network: descriptor.network,
+    clientOrigin: "",
+    rpId: "",
+    vaultId: descriptor.vaultId,
+    templateVersion: LIGHT_PROFILE,
+    policyVersion: LIGHT_POLICY_SCHEMA,
+    protectionTier: "light",
+    savingsAddress: "",
+    savingsScript: "",
+    arkadeCosignerOrigin: "",
+    arkadeCosignerVersion: "",
+    phoneBip340Pub: `02${descriptor.ownerPub}`,
+    vtxoVaultCosignerPub: `02${descriptor.cosignerPub}`,
+    vaultCosignerBasePub: `02${descriptor.cosignerPub}`,
+    spendingPolicy: p,
+    spendingPolicyDigest: descriptor.spendingPolicyDigest,
+    periodAllowance: p.periodAllowanceSats,
+    periodSpent: 0,
+    periodRemaining: p.periodAllowanceSats,
+    txCap: p.txRecipientCapSats,
+    absoluteFeeCap: p.absoluteFeeCapSats,
+    feerateCapSatVb: p.feerateCapSatPerV,
+    vtxoExitDelay: descriptor.exitDelaySeconds,
+    vtxoExitDelayUnit: "seconds",
+    spendingArkAddress: new ArkAddress(
+      hex.decode(descriptor.operatorPub),
+      new LightScript(descriptor).tweakedPublicKey,
+      networkPins(descriptor.network).arkHrp
+    ).encode(),
+    spendingArkScript: descriptor.scriptPubKey,
+    lightDescriptor: descriptor,
+    lightDescriptorHash: lightDescriptorDigest(descriptor)
+  });
+}
 
 // src/lib/vault/bounded.ts
 init_define_import_meta_env();
@@ -46489,9 +47343,24 @@ init_define_import_meta_env();
 
 // src/lib/vault/program/connector.ts
 init_define_import_meta_env();
+init_base();
+init_btc_signer();
+init_secp256k1();
+init_sha2();
 
 // src/lib/vault/protectionTier.ts
 init_define_import_meta_env();
+function requireProtectionTier(value) {
+  if (value !== "standard" && value !== "advanced") throw new Error("unsupported protection tier");
+  return value;
+}
+function requireProtectionTierMatchesRecovery(tier, recoveryPub) {
+  const selected = requireProtectionTier(tier);
+  const hasRecovery = typeof recoveryPub === "string" && recoveryPub.trim().length > 0;
+  if (selected === "standard" && hasRecovery) throw new Error("Standard protection must not include a recovery key");
+  if (selected === "advanced" && !hasRecovery) throw new Error("Advanced protection requires a recovery key");
+  return selected;
+}
 
 // src/lib/vault/addressNetwork.ts
 init_define_import_meta_env();
@@ -46505,34 +47374,445 @@ function vaultAddressNetwork(network) {
 // src/lib/vault/savingsTree.ts
 init_define_import_meta_env();
 var TAPROOT_NUMS_XONLY = "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0";
+var OP_CHECKSIG = 172;
+var OP_CHECKSIGVERIFY = 173;
+var OP_CSV = 178;
+var OP_DROP = 117;
+var OP_0 = 0;
+var OP_1 = 81;
 function xOnlyFromCompressed(pub) {
   const raw2 = hexToBytes3(pub);
   if (raw2.length === 32) return raw2;
   if (raw2.length === 33 && (raw2[0] === 2 || raw2[0] === 3)) return raw2.slice(1);
   throw new Error("expected a compressed or x-only secp256k1 key");
 }
+function encodeScriptInt(value) {
+  if (!Number.isInteger(value) || value < 0 || value > 2147483647) {
+    throw new Error("script integer out of range");
+  }
+  if (value === 0) return new Uint8Array([OP_0]);
+  if (value <= 16) return new Uint8Array([OP_1 + value - 1]);
+  const bytes2 = [];
+  let n = value;
+  while (n > 0) {
+    bytes2.push(n & 255);
+    n >>= 8;
+  }
+  if (bytes2[bytes2.length - 1] & 128) bytes2.push(0);
+  return new Uint8Array([bytes2.length, ...bytes2]);
+}
+function checksigScript(pubs) {
+  if (pubs.length === 0) throw new Error("at least one key");
+  const parts = [];
+  pubs.forEach((pub, i) => {
+    if (pub.length !== 32) throw new Error("x-only key required");
+    parts.push(32, ...pub);
+    parts.push(i === pubs.length - 1 ? OP_CHECKSIG : OP_CHECKSIGVERIFY);
+  });
+  return new Uint8Array(parts);
+}
+function csvChecksigScript(blocks, pub) {
+  const lock = encodeScriptInt(blocks);
+  const key = checksigScript([pub]);
+  return new Uint8Array([...lock, OP_CSV, OP_DROP, ...key]);
+}
 
 // src/lib/vault/program/context.ts
 init_define_import_meta_env();
+init_sha2();
+init_base();
+init_btc_signer();
 
 // src/lib/vault/program/constants.ts
 init_define_import_meta_env();
 var PROGRAM_SCHEMA = "arkade-vault/savings-v1";
 var SAVINGS_TEMPLATE = "phone-hww-recovery-savings-v1";
+function isSavingsTemplate(value) {
+  return value === SAVINGS_TEMPLATE;
+}
+var PROGRAM_INTERNAL_TAG = "arkade-vault/savings-v1/internal";
+var PROGRAM_CSV = {
+  hardware: 6,
+  phone: 144,
+  recovery: 288
+};
+var P2A_SCRIPT_HEX = "51024e73";
+var P2A_VALUE_SATS = 240;
+var P2A_OUTPUT_INDEX = 1;
+var PACKET_OUTPUT_INDEX = 2;
+var TRANSITION_OUTPUT_COUNT = 3;
+var TRANSITION_SEQUENCE = 4294967293;
+var WITNESS_BYTES_367 = 367;
+var WITNESS_BYTES_399 = 399;
+var WITNESS_BYTES_431 = 431;
+var CLAIMANTS = ["phone", "hardware", "recovery"];
 var TEMPLATE_REGISTRY = {
   [SAVINGS_TEMPLATE]: { schema: PROGRAM_SCHEMA, recovery: true, serverFreeClawback: true }
 };
+function familyClaimants(hasRecovery) {
+  return hasRecovery ? ["phone", "hardware", "recovery"] : ["phone", "hardware"];
+}
+function familyKeysFor(hasRecovery) {
+  return familyClaimants(hasRecovery).map((claimant) => `savings-${claimant}`);
+}
+
+// src/lib/vault/program/context.ts
+function taggedHash4(tag, ...messages) {
+  const tagH = sha256(encodeUtf8(tag));
+  const prefix2 = new Uint8Array(64);
+  prefix2.set(tagH, 0);
+  prefix2.set(tagH, 32);
+  const total = messages.reduce((n, m) => n + m.length, 64);
+  const out = new Uint8Array(total);
+  out.set(prefix2);
+  let offset = 64;
+  for (const msg of messages) {
+    out.set(msg, offset);
+    offset += msg.length;
+  }
+  return sha256(out);
+}
+function appendText(parts, value, name) {
+  if (!value || value !== value.trim() || value !== value.toLowerCase()) {
+    throw new Error(`${name} must be non-empty canonical lowercase`);
+  }
+  const bytes2 = encodeUtf8(value);
+  const len = new Uint8Array(4);
+  new DataView(len.buffer).setUint32(0, bytes2.length, false);
+  parts.push(len, bytes2);
+}
+function encodeTreeContext(input) {
+  const claimant = input.claimant || "";
+  if (claimant && !CLAIMANTS.includes(claimant)) throw new Error("unknown claimant");
+  const parts = [];
+  appendText(parts, input.vaultId, "vaultId");
+  appendText(parts, "savings", "kind");
+  appendText(parts, claimant === "" ? "-" : claimant, "claimant");
+  appendText(parts, input.templateVersion || SAVINGS_TEMPLATE, "templateVersion");
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+function contextInternalKey(input) {
+  const context = taggedHash4(PROGRAM_INTERNAL_TAG, encodeTreeContext(input));
+  const [tweaked] = utils3.taprootTweakPubkey(hex.decode(TAPROOT_NUMS_XONLY), context);
+  return tweaked;
+}
 
 // src/lib/vault/program/packet.ts
 init_define_import_meta_env();
 var ARK_MAGIC = Uint8Array.of(65, 82, 75);
+var EMULATOR_PACKET_TYPE = 1;
+function concat3(parts) {
+  const out = new Uint8Array(parts.reduce((sum, part) => sum + part.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+function writeCompactSize(value) {
+  if (!Number.isSafeInteger(value) || value < 0) throw new Error("compact size");
+  if (value < 253) return Uint8Array.of(value);
+  if (value <= 65535) return Uint8Array.of(253, value & 255, value >> 8 & 255);
+  if (value <= 4294967295) {
+    return Uint8Array.of(254, value & 255, value >> 8 & 255, value >> 16 & 255, value >> 24 & 255);
+  }
+  throw new Error("compact size too large");
+}
+function writeWitness(items) {
+  return concat3([writeCompactSize(items.length), ...items.flatMap((item) => [writeCompactSize(item.length), item])]);
+}
+function writeUvarint(value) {
+  if (!Number.isSafeInteger(value) || value < 0) throw new Error("uvarint");
+  const out = [];
+  let remaining = BigInt(value);
+  while (remaining >= 0x80n) {
+    out.push(Number(remaining & 0x7fn | 0x80n));
+    remaining >>= 7n;
+  }
+  out.push(Number(remaining));
+  return Uint8Array.from(out);
+}
+function pushBytes(bytes2) {
+  if (bytes2.length < 76) return concat3([Uint8Array.of(bytes2.length), bytes2]);
+  if (bytes2.length <= 255) return concat3([Uint8Array.of(76, bytes2.length), bytes2]);
+  if (bytes2.length <= 65535) {
+    return concat3([Uint8Array.of(77, bytes2.length & 255, bytes2.length >> 8 & 255), bytes2]);
+  }
+  throw new Error("push too large");
+}
+function encodeExtensionScript(packets) {
+  if (packets.length === 0) throw new Error("missing packets");
+  const seen = /* @__PURE__ */ new Set();
+  const body = [ARK_MAGIC];
+  for (const packet of packets) {
+    if (!Number.isSafeInteger(packet.type) || packet.type < 0 || packet.type > 255) throw new Error("packet type");
+    if (seen.has(packet.type)) throw new Error("duplicate packet type");
+    seen.add(packet.type);
+    body.push(Uint8Array.of(packet.type), writeUvarint(packet.data.length), packet.data);
+  }
+  return concat3([Uint8Array.of(106), pushBytes(concat3(body))]);
+}
+function encodeEmulatorPacket(entry) {
+  if (!Number.isSafeInteger(entry.vin) || entry.vin < 0 || entry.vin > 65535) throw new Error("emulator vin");
+  const witness = writeWitness(entry.witness);
+  return concat3([
+    writeCompactSize(1),
+    Uint8Array.of(entry.vin & 255, entry.vin >> 8 & 255),
+    writeCompactSize(entry.script.length),
+    entry.script,
+    writeCompactSize(witness.length),
+    witness
+  ]);
+}
+function exactPacketOutputPrefix(scriptLen, witnessItemLens) {
+  if (scriptLen <= 0) throw new Error("authorization script length required");
+  const content = encodeEmulatorPacket({
+    vin: 0,
+    script: new Uint8Array(scriptLen),
+    witness: witnessItemLens.map((len) => new Uint8Array(len))
+  });
+  const outputScript = encodeExtensionScript([{ type: EMULATOR_PACKET_TYPE, data: content }]);
+  if (outputScript.length <= content.length) throw new Error("canonical packet output envelope");
+  const prefix2 = outputScript.slice(0, outputScript.length - content.length);
+  for (let i = 0; i < content.length; i++) {
+    if (outputScript[prefix2.length + i] !== content[i]) throw new Error("canonical packet output envelope");
+  }
+  return prefix2;
+}
+function packetWitnessShape(phoneBound) {
+  return phoneBound ? [64] : [];
+}
 
 // src/lib/vault/program/script.ts
 init_define_import_meta_env();
+init_base();
+var OP2 = {
+  VERIFY: 105,
+  EQUAL: 135,
+  EQUALVERIFY: 136,
+  ADD: 147,
+  SUB: 148,
+  MUL: 149,
+  DIV: 150,
+  GREATERTHANOREQUAL: 162,
+  LESSTHANOREQUAL: 161,
+  DUP: 118,
+  DROP: 117,
+  SWAP: 124,
+  SHA256: 168,
+  CAT: 126,
+  INSPECTINPUTVALUE: 201,
+  INSPECTINPUTSEQUENCE: 203,
+  CHECKSIGFROMSTACK: 204,
+  INSPECTOUTPUTVALUE: 207,
+  INSPECTOUTPUTSCRIPTPUBKEY: 209,
+  INSPECTVERSION: 210,
+  INSPECTLOCKTIME: 211,
+  INSPECTNUMINPUTS: 212,
+  INSPECTNUMOUTPUTS: 213,
+  TXWEIGHT: 214,
+  INSPECTPACKET: 244,
+  SIGHASH: 246
+};
+var DIRECT_P256_CSFS_PREFIX = 17;
+var TRANSITION_WITNESS_BYTES = WITNESS_BYTES_399;
+function initiateWitnessBytes(claimant, hasRecovery = true) {
+  if (hasRecovery) {
+    return WITNESS_BYTES_399;
+  }
+  if (claimant === "hardware") return WITNESS_BYTES_367;
+  return WITNESS_BYTES_399;
+}
+function clawbackWitnessBytes(serverFree = false, hasRecovery = true) {
+  if (serverFree && hasRecovery) return WITNESS_BYTES_431;
+  return WITNESS_BYTES_399;
+}
+function collaborativeWitnessBytes(script, controlBlock) {
+  return 2 + 1 + 3 * (1 + 64) + compactSizeLen(script.length) + script.length + compactSizeLen(controlBlock.length) + controlBlock.length;
+}
+function compactSizeLen(n) {
+  if (n < 253) return 1;
+  if (n <= 65535) return 3;
+  if (n <= 4294967295) return 5;
+  return 9;
+}
+function scriptNum(value) {
+  if (value === 0n) return new Uint8Array();
+  const neg = value < 0n;
+  let abs = neg ? -value : value;
+  const bytes2 = [];
+  while (abs > 0n) {
+    bytes2.push(Number(abs & 0xffn));
+    abs >>= 8n;
+  }
+  if (bytes2[bytes2.length - 1] & 128) bytes2.push(neg ? 128 : 0);
+  else if (neg) bytes2[bytes2.length - 1] |= 128;
+  return new Uint8Array(bytes2);
+}
+function pushInt(value) {
+  const n = BigInt(value);
+  if (n === 0n) return new Uint8Array([0]);
+  if (n >= 1n && n <= 16n) return new Uint8Array([80 + Number(n)]);
+  if (n === -1n) return new Uint8Array([79]);
+  const raw2 = scriptNum(n);
+  return new Uint8Array([raw2.length, ...raw2]);
+}
+function pushData(data) {
+  if (data.length <= 75) return new Uint8Array([data.length, ...data]);
+  if (data.length <= 255) return new Uint8Array([76, data.length, ...data]);
+  throw new Error("push too large");
+}
+function concat4(...parts) {
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+function p2trProgram(scriptHex) {
+  const raw2 = hex.decode(scriptHex);
+  if (raw2.length !== 34 || raw2[0] !== 81 || raw2[1] !== 32) {
+    throw new Error("dest must be a 34-byte p2tr script");
+  }
+  return raw2.slice(2);
+}
+function p2aProgram() {
+  const raw2 = hex.decode(P2A_SCRIPT_HEX);
+  if (raw2[0] !== 81 || raw2[1] !== 2) throw new Error("P2A script");
+  return raw2.slice(2);
+}
+function requirePhoneDirect(pub) {
+  if (pub.length !== 33) throw new Error("PhoneDirectP256 must be 33 bytes");
+  if (pub[0] !== 2 && pub[0] !== 3) throw new Error("PhoneDirectP256 must be compressed");
+  if (!p256.utils.isValidPublicKey(pub, true)) throw new Error("PhoneDirectP256 is off-curve");
+  return pub;
+}
+function buildTransitionScript(input) {
+  const dest = p2trProgram(input.destScriptHex);
+  const feeCap = input.feeCap ?? ABSOLUTE_FEE_CEILING_SATS;
+  const feerateCap = input.feerateCap ?? FEERATE_CEILING_SAT_PER_V;
+  const witnessBytes = input.witnessBytes ?? TRANSITION_WITNESS_BYTES;
+  const phone = input.bindPhoneDirect ? requirePhoneDirect(input.bindPhoneDirect) : void 0;
+  const witnessShape = packetWitnessShape(!!phone);
+  let prefix2 = new Uint8Array();
+  for (let i = 0; i < 8; i++) {
+    const script = assembleTransitionScript({
+      dest,
+      prefix: prefix2,
+      phone,
+      witnessBytes,
+      feeCap,
+      feerateCap
+    });
+    const next = exactPacketOutputPrefix(script.length, witnessShape);
+    if (next.length === prefix2.length && next.every((b, j) => b === prefix2[j])) return script;
+    prefix2 = next;
+  }
+  throw new Error("authorization script packet envelope did not converge");
+}
+function assembleTransitionScript(input) {
+  const parts = [
+    new Uint8Array([OP2.INSPECTVERSION]),
+    pushInt(2),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    new Uint8Array([OP2.INSPECTLOCKTIME]),
+    pushInt(0),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    new Uint8Array([OP2.INSPECTNUMINPUTS]),
+    pushInt(1),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    pushInt(0),
+    new Uint8Array([OP2.INSPECTINPUTSEQUENCE]),
+    pushInt(TRANSITION_SEQUENCE),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    new Uint8Array([OP2.INSPECTNUMOUTPUTS]),
+    pushInt(TRANSITION_OUTPUT_COUNT),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    pushInt(0),
+    new Uint8Array([OP2.INSPECTOUTPUTSCRIPTPUBKEY]),
+    pushInt(1),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    pushData(input.dest),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    pushInt(0),
+    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
+    pushInt(DUST_SATS),
+    new Uint8Array([OP2.GREATERTHANOREQUAL, OP2.VERIFY]),
+    pushInt(P2A_OUTPUT_INDEX),
+    new Uint8Array([OP2.INSPECTOUTPUTSCRIPTPUBKEY]),
+    pushInt(1),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    pushData(p2aProgram()),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    pushInt(P2A_OUTPUT_INDEX),
+    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
+    pushInt(P2A_VALUE_SATS),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    pushInt(PACKET_OUTPUT_INDEX),
+    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
+    pushInt(0),
+    new Uint8Array([OP2.EQUALVERIFY]),
+    pushInt(EMULATOR_PACKET_TYPE),
+    new Uint8Array([OP2.INSPECTPACKET, OP2.VERIFY]),
+    pushData(input.prefix),
+    new Uint8Array([OP2.SWAP, OP2.CAT, OP2.SHA256]),
+    pushInt(PACKET_OUTPUT_INDEX),
+    new Uint8Array([OP2.INSPECTOUTPUTSCRIPTPUBKEY]),
+    pushInt(-1),
+    new Uint8Array([OP2.EQUALVERIFY, OP2.EQUALVERIFY]),
+    pushInt(0),
+    new Uint8Array([OP2.INSPECTINPUTVALUE]),
+    pushInt(0),
+    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
+    new Uint8Array([OP2.SUB]),
+    pushInt(P2A_OUTPUT_INDEX),
+    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
+    new Uint8Array([OP2.SUB]),
+    new Uint8Array([OP2.DUP]),
+    pushInt(0),
+    new Uint8Array([OP2.GREATERTHANOREQUAL, OP2.VERIFY]),
+    new Uint8Array([OP2.DUP]),
+    pushInt(input.feeCap),
+    new Uint8Array([OP2.LESSTHANOREQUAL, OP2.VERIFY]),
+    new Uint8Array([OP2.DUP]),
+    new Uint8Array([OP2.TXWEIGHT]),
+    pushInt(input.witnessBytes),
+    new Uint8Array([OP2.ADD]),
+    pushInt(3),
+    new Uint8Array([OP2.ADD]),
+    pushInt(4),
+    new Uint8Array([OP2.DIV]),
+    pushInt(input.feerateCap),
+    new Uint8Array([OP2.MUL]),
+    new Uint8Array([OP2.LESSTHANOREQUAL, OP2.VERIFY]),
+    new Uint8Array([OP2.DROP])
+  ];
+  if (input.phone) {
+    parts.push(
+      pushInt(0),
+      new Uint8Array([OP2.SIGHASH]),
+      pushData(new Uint8Array([DIRECT_P256_CSFS_PREFIX, ...input.phone])),
+      new Uint8Array([OP2.CHECKSIGFROMSTACK])
+    );
+  } else {
+    parts.push(pushInt(1));
+  }
+  return concat4(...parts);
+}
 
 // src/lib/vault/program/trees.ts
 init_define_import_meta_env();
 init_base();
+init_btc_signer();
 
 // src/lib/vault/setupPlan.ts
 init_define_import_meta_env();
@@ -46546,14 +47826,490 @@ var FORBIDDEN_PUBLIC_KEY_2G = "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca
 
 // src/lib/vault/program/tweak.ts
 init_define_import_meta_env();
+init_secp256k1();
+init_base();
+var ARK_SCRIPT_HASH_TAG = "ArkScriptHash";
+function arkadeScriptHash2(script) {
+  return schnorr.utils.taggedHash(ARK_SCRIPT_HASH_TAG, script);
+}
+function tweakByArkScript(basePub, script) {
+  const xonly = xOnlyFromCompressed(basePub);
+  const hash = arkadeScriptHash2(script);
+  const evenY = secp256k1.Point.fromBytes(new Uint8Array([2, ...xonly]));
+  const scalar2 = BigInt(`0x${hex.encode(hash)}`);
+  if (scalar2 === 0n) throw new Error("ArkScriptHash is zero");
+  const tweaked = evenY.add(secp256k1.Point.BASE.multiply(scalar2));
+  if (tweaked.equals(secp256k1.Point.ZERO)) throw new Error("Arkade tweak is degenerate");
+  return hex.encode(tweaked.toBytes(true));
+}
+function tweakPair(vaultBase, arkadeBase, script) {
+  return {
+    vault: tweakByArkScript(vaultBase, script),
+    arkade: tweakByArkScript(arkadeBase, script)
+  };
+}
 
 // src/lib/vault/program/trees.ts
 var UNSPENDABLE_PADDING = new Uint8Array([106]);
+function quarantineGuardians(claimant, hasRecovery = true) {
+  if (claimant === "phone") return hasRecovery ? ["hardware", "recovery"] : ["hardware"];
+  if (claimant === "hardware") return hasRecovery ? ["phone", "recovery"] : ["phone"];
+  return ["phone", "hardware"];
+}
+function pendingGuardians(claimant, hasRecovery = true) {
+  const roles = hasRecovery ? ["phone", "hardware", "recovery"] : ["phone", "hardware"];
+  return roles.filter((role) => role !== claimant);
+}
+function pendingDelay(claimant) {
+  if (claimant === "hardware") return PROGRAM_CSV.hardware;
+  if (claimant === "phone") return PROGRAM_CSV.phone;
+  return PROGRAM_CSV.recovery;
+}
+function tapTreeFromScripts(scripts) {
+  if (scripts.length === 0) throw new Error("no leaves");
+  if (scripts.length === 1) return { script: scripts[0] };
+  const leaves = scripts.map((script) => ({ script }));
+  const branches = [];
+  for (let i = 0; i < leaves.length; i += 2) {
+    if (i === leaves.length - 1) {
+      branches[branches.length - 1] = [branches[branches.length - 1], leaves[i]];
+      continue;
+    }
+    branches.push([leaves[i], leaves[i + 1]]);
+  }
+  while (branches.length > 1) {
+    const left = branches.shift();
+    const right = branches.shift();
+    branches.push([left, right]);
+  }
+  return branches[0];
+}
+function requireDistinct(keys, name) {
+  const seen = /* @__PURE__ */ new Set();
+  for (const key of keys) {
+    const hexKey = hex.encode(key);
+    if (seen.has(hexKey)) throw new Error(`${name} keys must be x-only distinct`);
+    seen.add(hexKey);
+  }
+}
 var FORBIDDEN_XONLY = /* @__PURE__ */ new Set([
   TAPROOT_NUMS_XONLY,
   hex.encode(xOnlyFromCompressed(FORBIDDEN_PUBLIC_KEY_G)),
   hex.encode(xOnlyFromCompressed(FORBIDDEN_PUBLIC_KEY_2G))
 ]);
+function assertRoleSet(pubs, name) {
+  const xonlys = pubs.map(xOnlyFromCompressed);
+  requireDistinct(xonlys, name);
+  for (const pub of xonlys) {
+    if (FORBIDDEN_XONLY.has(hex.encode(pub))) throw new Error("family key is a forbidden point");
+  }
+}
+function controlOf(payment, script) {
+  const leaf = payment.leaves?.find((item) => hex.encode(item.script) === hex.encode(script));
+  if (!leaf?.controlBlock) throw new Error("leaf control block required");
+  return leaf.controlBlock;
+}
+function buildQuarantine(input) {
+  const pubs = {
+    phone: xOnlyFromCompressed(input.phonePub),
+    hardware: xOnlyFromCompressed(input.hardwarePub)
+  };
+  if (input.recoveryPub) pubs.recovery = xOnlyFromCompressed(input.recoveryPub);
+  requireDistinct(Object.values(pubs), "user");
+  const names = quarantineGuardians(input.claimant, Boolean(input.recoveryPub));
+  const script = checksigScript(names.map((name) => pubs[name]));
+  const internal = contextInternalKey({
+    vaultId: input.vaultId,
+    claimant: input.claimant,
+    templateVersion: input.templateVersion
+  });
+  const payment = p2tr(internal, { script }, vaultAddressNetwork(input.network), true);
+  if (!payment.address) throw new Error("quarantine address required");
+  return {
+    role: "quarantine",
+    address: payment.address,
+    script: payment.script,
+    tapInternalKey: payment.tapInternalKey,
+    tapLeafScript: payment.tapLeafScript,
+    admin: script,
+    guardians: names
+  };
+}
+function buildPending(input) {
+  const pubs = {
+    phone: xOnlyFromCompressed(input.phonePub),
+    hardware: xOnlyFromCompressed(input.hardwarePub)
+  };
+  if (input.recoveryPub) pubs.recovery = xOnlyFromCompressed(input.recoveryPub);
+  const vault = xOnlyFromCompressed(input.vaultTweak);
+  const arkade = xOnlyFromCompressed(input.arkadeTweak);
+  requireDistinct([...Object.values(pubs), vault, arkade], "pending");
+  const claim = csvChecksigScript(pendingDelay(input.claimant), pubs[input.claimant]);
+  const clawbacks = pendingGuardians(input.claimant, Boolean(input.recoveryPub)).map(
+    (guardian) => checksigScript([pubs[guardian], vault, arkade])
+  );
+  const scripts = [claim, ...clawbacks];
+  if (input.serverFreeClawback) {
+    const guardians = pendingGuardians(input.claimant, Boolean(input.recoveryPub)).map((name) => pubs[name]);
+    scripts.push(checksigScript(guardians));
+  }
+  scripts.push(UNSPENDABLE_PADDING);
+  const internal = contextInternalKey({
+    vaultId: input.vaultId,
+    claimant: input.claimant,
+    templateVersion: input.templateVersion
+  });
+  const payment = p2tr(internal, tapTreeFromScripts(scripts), vaultAddressNetwork(input.network), true);
+  if (!payment.address) throw new Error("pending address required");
+  return {
+    role: "pending",
+    address: payment.address,
+    script: payment.script,
+    tapInternalKey: payment.tapInternalKey,
+    tapLeafScript: payment.tapLeafScript,
+    leaves: payment.leaves,
+    claim,
+    clawbacks,
+    guardianExit: input.serverFreeClawback ? checksigScript(pendingGuardians(input.claimant, Boolean(input.recoveryPub)).map((name) => pubs[name])) : void 0,
+    delay: pendingDelay(input.claimant)
+  };
+}
+function buildNormal(input) {
+  const phone = xOnlyFromCompressed(input.phonePub);
+  const hardware = xOnlyFromCompressed(input.hardwarePub);
+  const recovery = input.recoveryPub ? xOnlyFromCompressed(input.recoveryPub) : void 0;
+  const claimants = recovery ? ["phone", "hardware", "recovery"] : ["phone", "hardware"];
+  const tweaks = [];
+  for (const claimant of claimants) {
+    const pair = input.initiate[claimant];
+    if (!pair) throw new Error(`missing ${claimant} initiate tweaks`);
+    tweaks.push(xOnlyFromCompressed(pair.vault), xOnlyFromCompressed(pair.arkade));
+  }
+  requireDistinct([phone, hardware, ...recovery ? [recovery] : [], ...tweaks], "normal");
+  const admin = checksigScript([phone, hardware]);
+  const role = { phone, hardware, recovery };
+  const initiate = claimants.map((claimant) => {
+    const pair = input.initiate[claimant];
+    const pub = role[claimant];
+    if (!pub) throw new Error(`missing ${claimant}`);
+    return checksigScript([pub, xOnlyFromCompressed(pair.vault), xOnlyFromCompressed(pair.arkade)]);
+  });
+  const scripts = [admin, ...initiate];
+  const internal = contextInternalKey({
+    vaultId: input.vaultId,
+    claimant: "",
+    templateVersion: input.templateVersion
+  });
+  const payment = p2tr(internal, tapTreeFromScripts(scripts), vaultAddressNetwork(input.network), true);
+  if (!payment.address) throw new Error("normal address required");
+  return {
+    role: "normal",
+    address: payment.address,
+    script: payment.script,
+    tapInternalKey: payment.tapInternalKey,
+    tapLeafScript: payment.tapLeafScript,
+    leaves: payment.leaves,
+    admin,
+    initiate
+  };
+}
+function buildVaultProgramFamily(input) {
+  const phoneDirect = hexToBytes3(input.phoneDirectP256);
+  const bases = [input.phonePub, input.hardwarePub, input.vaultCosignerBase, input.arkadeCosignerBase];
+  if (input.recoveryPub) bases.splice(2, 0, input.recoveryPub);
+  assertRoleSet(bases, "family bases");
+  const claimants = input.recoveryPub ? ["phone", "hardware", "recovery"] : ["phone", "hardware"];
+  const hasRecovery = Boolean(input.recoveryPub);
+  const quarantine = {};
+  const pending = {};
+  const initiateAuth = {};
+  const clawbackAuth = {};
+  const pendingTweaks = {};
+  const templateVersion = input.templateVersion;
+  const serverFreeClawback = input.serverFreeClawback ?? templateVersion === SAVINGS_TEMPLATE;
+  const expectedClawbackWitness = clawbackWitnessBytes(serverFreeClawback, hasRecovery);
+  for (const claimant of claimants) {
+    const key = `savings-${claimant}`;
+    quarantine[key] = buildQuarantine({ ...input, claimant, templateVersion });
+    clawbackAuth[key] = buildTransitionScript({
+      destScriptHex: hex.encode(quarantine[key].script),
+      witnessBytes: expectedClawbackWitness,
+      feeCap: input.absoluteFeeCapSats,
+      feerateCap: input.feerateCapSatPerV
+    });
+    pendingTweaks[key] = tweakPair(input.vaultCosignerBase, input.arkadeCosignerBase, clawbackAuth[key]);
+    pending[key] = buildPending({
+      ...input,
+      templateVersion,
+      serverFreeClawback,
+      claimant,
+      vaultTweak: pendingTweaks[key].vault,
+      arkadeTweak: pendingTweaks[key].arkade
+    });
+    initiateAuth[key] = buildTransitionScript({
+      destScriptHex: hex.encode(pending[key].script),
+      bindPhoneDirect: claimant === "phone" ? phoneDirect : void 0,
+      witnessBytes: initiateWitnessBytes(claimant, hasRecovery),
+      feeCap: input.absoluteFeeCapSats,
+      feerateCap: input.feerateCapSatPerV
+    });
+  }
+  const savingsInitiate = {
+    phone: tweakPair(input.vaultCosignerBase, input.arkadeCosignerBase, initiateAuth["savings-phone"]),
+    hardware: tweakPair(input.vaultCosignerBase, input.arkadeCosignerBase, initiateAuth["savings-hardware"]),
+    ...hasRecovery ? { recovery: tweakPair(input.vaultCosignerBase, input.arkadeCosignerBase, initiateAuth["savings-recovery"]) } : {}
+  };
+  const savings = buildNormal({
+    ...input,
+    initiate: savingsInitiate
+  });
+  savings.initiate.forEach((script, i) => {
+    const claimant = claimants[i];
+    const got = collaborativeWitnessBytes(script, controlOf(savings, script));
+    const want = initiateWitnessBytes(claimant, hasRecovery);
+    if (got !== want) throw new Error(`savings ${claimant} initiate witness ${got} != ${want}`);
+  });
+  assertRoleSet(
+    [
+      input.phonePub,
+      input.hardwarePub,
+      ...input.recoveryPub ? [input.recoveryPub] : [],
+      input.vaultCosignerBase,
+      input.arkadeCosignerBase,
+      ...claimants.flatMap((claimant) => [savingsInitiate[claimant].vault, savingsInitiate[claimant].arkade]),
+      ...Object.values(pendingTweaks).flatMap((pair) => [pair.vault, pair.arkade])
+    ],
+    "family"
+  );
+  return {
+    savings,
+    quarantine,
+    pending,
+    initiateAuth,
+    clawbackAuth,
+    initiateTweaks: savingsInitiate,
+    pendingTweaks
+  };
+}
+
+// src/lib/vault/program/connector.ts
+var CONNECTOR_PROGRAM = "savings-connector-v1";
+var CONNECTOR_TEMPLATE = "phone-connector-recovery-savings-v1";
+var X = { inputScript: 202, toAlt: 107, fromAlt: 108, if: 99, endif: 104, boolOr: 155 };
+function buildConnectorProgram(r) {
+  if (!(r.connectorScript.length === 22 && r.connectorScript[0] === 0 && r.connectorScript[1] === 20) && (r.connectorScript.length !== 34 || r.connectorScript[0] !== 81 || r.connectorScript[1] !== 32 || !secp256k1.utils.isValidPublicKey(new Uint8Array([2, ...r.connectorScript.slice(2)]), true)))
+    throw new Error("connector native SegWit or Taproot script required");
+  if (!Number.isSafeInteger(r.witnessBytes) || r.witnessBytes < 1 || r.witnessBytes > 1e4 || !Number.isSafeInteger(r.absoluteFeeCapSats) || r.absoluteFeeCapSats < 0 || r.absoluteFeeCapSats > 1e5 || !Number.isSafeInteger(r.feerateCapSatPerV) || r.feerateCapSatPerV < 1 || r.feerateCapSatPerV > 100)
+    throw new Error("invalid connector fee policy");
+  let prefix2 = new Uint8Array();
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const chunks = [];
+    const op = (...values) => chunks.push(Uint8Array.from(values));
+    const num2 = (n) => chunks.push(pushInt(n));
+    const data = (b) => chunks.push(pushData(b));
+    const equal = (opcode, n) => {
+      op(opcode);
+      num2(n);
+      op(OP2.EQUALVERIFY);
+    };
+    const script = (opcode, index, b) => {
+      num2(index);
+      op(opcode);
+      num2(b[0] === 81 ? 1 : 0);
+      op(OP2.EQUALVERIFY);
+      data(b.slice(2));
+      op(OP2.EQUALVERIFY);
+    };
+    const withChange = () => {
+      op(OP2.INSPECTNUMOUTPUTS);
+      num2(5);
+      op(OP2.EQUAL, X.if);
+    };
+    data(new TextEncoder().encode(CONNECTOR_PROGRAM));
+    op(OP2.DROP);
+    equal(OP2.INSPECTVERSION, 2);
+    equal(OP2.INSPECTLOCKTIME, 0);
+    equal(OP2.INSPECTNUMINPUTS, 2);
+    op(OP2.INSPECTNUMOUTPUTS, OP2.DUP);
+    num2(4);
+    op(OP2.EQUAL, OP2.SWAP);
+    num2(5);
+    op(OP2.EQUAL, X.boolOr, OP2.VERIFY);
+    for (const i of [0, 1]) {
+      num2(i);
+      equal(OP2.INSPECTINPUTSEQUENCE, 4294967293);
+    }
+    script(X.inputScript, 1, r.connectorScript);
+    script(OP2.INSPECTOUTPUTSCRIPTPUBKEY, 1, r.connectorScript);
+    script(OP2.INSPECTOUTPUTSCRIPTPUBKEY, 2, hex.decode("51024e73"));
+    withChange();
+    num2(0);
+    op(X.inputScript, X.toAlt);
+    num2(4);
+    op(OP2.INSPECTOUTPUTSCRIPTPUBKEY, X.fromAlt, OP2.EQUALVERIFY, OP2.EQUALVERIFY);
+    num2(4);
+    op(OP2.INSPECTOUTPUTVALUE);
+    num2(330);
+    op(OP2.GREATERTHANOREQUAL, OP2.VERIFY, X.endif);
+    num2(1);
+    equal(OP2.INSPECTINPUTVALUE, 1e3);
+    num2(1);
+    equal(OP2.INSPECTOUTPUTVALUE, 1e3);
+    num2(2);
+    equal(OP2.INSPECTOUTPUTVALUE, 240);
+    num2(3);
+    equal(OP2.INSPECTOUTPUTVALUE, 0);
+    num2(0);
+    op(OP2.INSPECTOUTPUTVALUE);
+    num2(294);
+    op(OP2.GREATERTHANOREQUAL, OP2.VERIFY);
+    num2(1);
+    op(OP2.INSPECTPACKET, OP2.VERIFY);
+    data(prefix2);
+    op(OP2.SWAP, OP2.CAT, OP2.SHA256);
+    num2(3);
+    op(OP2.INSPECTOUTPUTSCRIPTPUBKEY);
+    num2(-1);
+    op(OP2.EQUALVERIFY, OP2.EQUALVERIFY);
+    num2(0);
+    op(OP2.INSPECTINPUTVALUE);
+    for (const i of [0, 2]) {
+      num2(i);
+      op(OP2.INSPECTOUTPUTVALUE, OP2.SUB);
+    }
+    withChange();
+    num2(4);
+    op(OP2.INSPECTOUTPUTVALUE, OP2.SUB, X.endif);
+    op(OP2.DUP);
+    num2(0);
+    op(OP2.GREATERTHANOREQUAL, OP2.VERIFY, OP2.DUP);
+    num2(r.absoluteFeeCapSats);
+    op(OP2.LESSTHANOREQUAL, OP2.VERIFY, OP2.TXWEIGHT);
+    num2(r.witnessBytes);
+    op(OP2.ADD);
+    num2(3);
+    op(OP2.ADD);
+    num2(4);
+    op(OP2.DIV);
+    num2(r.feerateCapSatPerV);
+    op(OP2.MUL, OP2.LESSTHANOREQUAL);
+    const result = concat4(...chunks);
+    const next = exactPacketOutputPrefix(result.length, []);
+    if (hex.encode(next) === hex.encode(prefix2)) return result;
+    prefix2 = next;
+  }
+  throw new Error("connector packet envelope did not converge");
+}
+function buildConnectorFamily(input) {
+  if (input.templateVersion && input.templateVersion !== CONNECTOR_TEMPLATE)
+    throw new Error("connector template mismatch");
+  if (input.network !== "mainnet" && input.network !== "mutinynet") throw new Error("unsupported connector network");
+  const selected = { ...input, templateVersion: CONNECTOR_TEMPLATE, serverFreeClawback: true };
+  const base = buildVaultProgramFamily(selected);
+  if (input.connectorType !== "p2tr" && input.connectorType !== "p2wpkh") throw new Error("unsupported connector type");
+  const connector = input.connectorType === "p2tr" ? p2tr(xOnlyFromCompressed(input.hardwarePub), void 0, vaultAddressNetwork(input.network)) : p2wpkh(hex.decode(input.hardwarePub), vaultAddressNetwork(input.network));
+  const connectorWitnessBytes = input.connectorType === "p2tr" ? 66 : 45;
+  const internal = contextInternalKey({ vaultId: input.vaultId, claimant: "", templateVersion: CONNECTOR_TEMPLATE });
+  const makeNormal = (normal) => {
+    const tree = p2tr(
+      internal,
+      tapTreeFromScripts([normal, ...base.savings.initiate]),
+      vaultAddressNetwork(input.network),
+      true
+    );
+    const leaves = tree.leaves;
+    const control = leaves?.find((leaf) => hex.encode(leaf.script) === hex.encode(normal))?.controlBlock;
+    if (!control) throw new Error("connector normal proof missing");
+    return { ...tree, normal, control };
+  };
+  const preliminary = makeNormal(
+    checksigScript([input.phonePub, input.vaultCosignerBase, input.arkadeCosignerBase].map(xOnlyFromCompressed))
+  );
+  const rules = {
+    connectorScript: connector.script,
+    witnessBytes: collaborativeWitnessBytes(preliminary.normal, preliminary.control) + connectorWitnessBytes,
+    absoluteFeeCapSats: input.absoluteFeeCapSats,
+    feerateCapSatPerV: input.feerateCapSatPerV
+  };
+  const program = buildConnectorProgram(rules);
+  const pair = tweakPair(input.vaultCosignerBase, input.arkadeCosignerBase, program);
+  const roles = [
+    input.phonePub,
+    input.hardwarePub,
+    input.vaultCosignerBase,
+    input.arkadeCosignerBase,
+    ...input.recoveryPub ? [input.recoveryPub] : [],
+    pair.vault,
+    pair.arkade,
+    ...Object.values(base.initiateTweaks).flatMap((p) => [p.vault, p.arkade]),
+    ...Object.values(base.pendingTweaks).flatMap((p) => [p.vault, p.arkade])
+  ].map((p) => hex.encode(xOnlyFromCompressed(p)));
+  if (new Set(roles).size !== roles.length) throw new Error("connector family roles must be distinct");
+  const savings = makeNormal(checksigScript([input.phonePub, pair.vault, pair.arkade].map(xOnlyFromCompressed)));
+  if (collaborativeWitnessBytes(savings.normal, savings.control) + connectorWitnessBytes !== rules.witnessBytes)
+    throw new Error("connector witness shape changed");
+  return {
+    ...base,
+    savings: { ...base.savings, ...savings, admin: savings.normal },
+    connector,
+    rules,
+    program,
+    normalTweaks: pair
+  };
+}
+function connectorEnrollmentDigest(input, origin) {
+  if (input.network !== "mainnet" && input.network !== "mutinynet") throw new Error("unsupported connector network");
+  requireProtectionTierMatchesRecovery(input.protectionTier, input.recoveryPub);
+  const policy = validateSpendingPolicy(input.spendingPolicy, input.network);
+  if (policy.absoluteFeeCapSats !== input.absoluteFeeCapSats || policy.feerateCapSatPerV !== input.feerateCapSatPerV)
+    throw new Error("connector fee policy mismatch");
+  const f = buildConnectorFamily(input);
+  if (hex.encode(origin.publicKey) !== hex.encode(hex.decode(input.hardwarePub)))
+    throw new Error("hardware origin mismatch");
+  const path = origin.path;
+  const coin = input.network === "mainnet" ? 2147483648 : 2147483649;
+  const standardPurpose = path[0] === 2147483732 || path[0] === 2147483734;
+  const standardPath = path.length === 5 && path[0] === (input.connectorType === "p2wpkh" ? 2147483732 : 2147483734) && path[1] === coin && path[2] >= 2147483648 && path[3] <= 1 && path[4] < 2147483648;
+  if (!Number.isInteger(origin.fingerprint) || origin.fingerprint < 0 || origin.fingerprint > 4294967295 || path.length < 1 || path.length > 255 || path.some((n) => !Number.isInteger(n) || n < 0 || n > 4294967295) || standardPurpose && !standardPath)
+    throw new Error("hardware origin network or path mismatch");
+  const canonical2 = (s) => hex.encode(hex.decode(s));
+  const fields = [
+    "arkade-vault/connector-enrollment-v1",
+    CONNECTOR_TEMPLATE,
+    input.vaultId,
+    input.network,
+    input.protectionTier,
+    canonical2(input.phonePub),
+    canonical2(input.hardwarePub),
+    input.recoveryPub ? canonical2(input.recoveryPub) : "",
+    canonical2(input.phoneDirectP256),
+    canonical2(input.vaultCosignerBase),
+    canonical2(input.arkadeCosignerBase),
+    spendingPolicyDigest(policy, input.network),
+    hex.encode(f.program),
+    hex.encode(f.savings.script),
+    hex.encode(f.connector.script),
+    origin.fingerprint.toString(16).padStart(8, "0"),
+    path.join("/")
+  ];
+  for (const role of input.recoveryPub ? ["phone", "hardware", "recovery"] : ["phone", "hardware"]) {
+    const key = `savings-${role}`;
+    fields.push(
+      role,
+      hex.encode(f.pending[key].script),
+      hex.encode(f.quarantine[key].script),
+      hex.encode(f.initiateAuth[key]),
+      hex.encode(f.clawbackAuth[key])
+    );
+  }
+  const chunks = fields.flatMap((field2) => {
+    const data = new TextEncoder().encode(field2);
+    const size = new Uint8Array(4);
+    new DataView(size.buffer).setUint32(0, data.length, false);
+    return [size, data];
+  });
+  return hex.encode(sha256(concat4(...chunks)));
+}
 
 // src/lib/vault/pin.ts
 init_define_import_meta_env();
@@ -46600,10 +48356,337 @@ init_define_import_meta_env();
 
 // src/lib/vault/program/descriptor.ts
 init_define_import_meta_env();
+init_secp256k1();
+init_sha2();
+init_base();
+var COMPRESSED = 33;
+function appendU32(parts, value, name) {
+  if (!Number.isInteger(value) || value < 0 || value > 4294967295) {
+    throw new Error(`${name} is not a uint32`);
+  }
+  const buf = new Uint8Array(4);
+  new DataView(buf.buffer).setUint32(0, value, false);
+  parts.push(buf);
+}
+function appendI64(parts, value, name) {
+  if (!Number.isInteger(value) || value < 0 || value > Number.MAX_SAFE_INTEGER) {
+    throw new Error(`${name} is not a safe non-negative integer`);
+  }
+  const buf = new Uint8Array(8);
+  new DataView(buf.buffer).setBigUint64(0, BigInt(value), false);
+  parts.push(buf);
+}
+function appendBytes(parts, bytes2) {
+  appendU32(parts, bytes2.length, "length");
+  parts.push(bytes2);
+}
+function appendHex(parts, value, name, exactBytes) {
+  appendBytes(parts, hexToBytes3(requireLowerHex(value, name, exactBytes)));
+}
+function appendText2(parts, value, name) {
+  if (!value || value !== value.trim() || value !== value.toLowerCase()) {
+    throw new Error(`${name} must be non-empty canonical lowercase`);
+  }
+  appendBytes(parts, encodeUtf8(value));
+}
+function appendRawText(parts, value, name) {
+  if (!value || value !== value.trim()) throw new Error(`${name} required`);
+  appendBytes(parts, encodeUtf8(value));
+}
+function concat5(parts) {
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+function requireSecp(pub, name) {
+  const hexKey = requireLowerHex(pub, name, COMPRESSED);
+  if (hexKey[1] !== "2" && hexKey[1] !== "3") throw new Error(`${name} must be compressed`);
+  if (!secp256k1.utils.isValidPublicKey(hexToBytes3(hexKey), true)) {
+    throw new Error(`${name} is not a valid secp256k1 public key`);
+  }
+  return hexKey;
+}
+function requireP256(pub, name) {
+  const hexKey = requireLowerHex(pub, name, COMPRESSED);
+  if (hexKey[0] !== "0" || hexKey[1] !== "2" && hexKey[1] !== "3") {
+    throw new Error(`${name} must be compressed`);
+  }
+  if (!p256.utils.isValidPublicKey(hexToBytes3(hexKey), true)) {
+    throw new Error(`${name} is not a valid P-256 public key`);
+  }
+  return hexKey;
+}
+function requirePair(pair, name) {
+  return {
+    vault: requireSecp(pair.vault, `${name}.vault`),
+    arkade: requireSecp(pair.arkade, `${name}.arkade`)
+  };
+}
+function treeRef(script, address) {
+  return { script: hex.encode(script), address };
+}
+function buildVaultProgramDescriptor(input) {
+  const keys = {
+    phoneBip340: requireSecp(input.phonePub, "phone"),
+    phoneDirectP256: requireP256(input.phoneDirectP256, "phoneDirectP256"),
+    hardware: requireSecp(input.hardwarePub, "hardware"),
+    ...input.recoveryPub ? { recovery: requireSecp(input.recoveryPub, "recovery") } : {},
+    vaultCosignerBase: requireSecp(input.vaultCosignerBase, "vaultCosignerBase"),
+    arkadeCosignerBase: requireSecp(input.arkadeCosignerBase, "arkadeCosignerBase")
+  };
+  if (!input.arkadeCosigner.origin.trim() || !input.arkadeCosigner.version.trim()) {
+    throw new Error("arkade cosigner origin and version required");
+  }
+  const selectedPolicy = validateSpendingPolicy(
+    input.spendingPolicy || defaultSpendingPolicy(input.network),
+    input.network
+  );
+  const protectionTier = requireProtectionTierMatchesRecovery(input.protectionTier, keys.recovery);
+  const family = buildDescriptorFamily({
+    vaultId: input.vaultId,
+    phonePub: keys.phoneBip340,
+    hardwarePub: keys.hardware,
+    recoveryPub: keys.recovery,
+    phoneDirectP256: keys.phoneDirectP256,
+    vaultCosignerBase: keys.vaultCosignerBase,
+    arkadeCosignerBase: keys.arkadeCosignerBase,
+    network: input.network,
+    templateVersion: input.templateVersion || SAVINGS_TEMPLATE,
+    ...input.connectorType ? { connectorType: input.connectorType } : {},
+    absoluteFeeCapSats: selectedPolicy.absoluteFeeCapSats,
+    feerateCapSatPerV: selectedPolicy.feerateCapSatPerV
+  });
+  const tweaks = {
+    initiate: family.initiateTweaks,
+    pending: family.pendingTweaks
+  };
+  const pending = {};
+  const quarantine = {};
+  for (const key of familyKeysFor(Boolean(keys.recovery))) {
+    pending[key] = {
+      ...treeRef(family.pending[key].script, family.pending[key].address),
+      delay: family.pending[key].delay
+    };
+    quarantine[key] = {
+      ...treeRef(family.quarantine[key].script, family.quarantine[key].address),
+      guardians: family.quarantine[key].guardians
+    };
+  }
+  return validateVaultProgramDescriptor({
+    schema: PROGRAM_SCHEMA,
+    network: input.network,
+    vaultId: input.vaultId,
+    templateVersion: input.templateVersion || SAVINGS_TEMPLATE,
+    ...input.connectorType ? { connectorType: input.connectorType } : {},
+    policyVersion: POLICY_VERSION,
+    protectionTier,
+    keys,
+    tweaks,
+    arkadeCosigner: {
+      origin: input.arkadeCosigner.origin.trim(),
+      version: input.arkadeCosigner.version.trim()
+    },
+    csv: { ...PROGRAM_CSV },
+    policy: {
+      program: selectedPolicy.program,
+      schema: selectedPolicy.schema,
+      period: selectedPolicy.period,
+      digest: spendingPolicyDigest(selectedPolicy, input.network),
+      recipientDustSats: DUST_SATS,
+      recipientCapSats: selectedPolicy.txRecipientCapSats,
+      periodAllowanceSats: selectedPolicy.periodAllowanceSats,
+      absoluteFeeCapSats: selectedPolicy.absoluteFeeCapSats,
+      feerateCapSatVb: selectedPolicy.feerateCapSatPerV
+    },
+    p2a: {
+      script: P2A_SCRIPT_HEX,
+      valueSats: P2A_VALUE_SATS,
+      outputIndex: P2A_OUTPUT_INDEX
+    },
+    transitionSequence: TRANSITION_SEQUENCE,
+    savings: treeRef(family.savings.script, family.savings.address),
+    pending,
+    quarantine
+  });
+}
+function validateVaultProgramDescriptor(d) {
+  if (d.schema !== PROGRAM_SCHEMA) throw new Error("unsupported vault schema");
+  if (!SUPPORTED_NETWORKS.includes(d.network)) throw new Error(`unsupported network ${d.network}`);
+  if (!d.vaultId || String(d.vaultId).trim() === "") throw new Error("vault id required");
+  if (!isSavingsTemplate(d.templateVersion) && d.templateVersion !== CONNECTOR_TEMPLATE)
+    throw new Error("template version is not this release");
+  if (d.policyVersion !== POLICY_VERSION) throw new Error("policy version is not this release");
+  requireProtectionTierMatchesRecovery(d.protectionTier, d.keys.recovery);
+  if (d.csv.hardware !== PROGRAM_CSV.hardware || d.csv.phone !== PROGRAM_CSV.phone || d.csv.recovery !== PROGRAM_CSV.recovery) {
+    throw new Error("csv delays do not match this release");
+  }
+  if (d.p2a.script !== P2A_SCRIPT_HEX || d.p2a.valueSats !== P2A_VALUE_SATS || d.p2a.outputIndex !== P2A_OUTPUT_INDEX) {
+    throw new Error("P2A lock does not match this release");
+  }
+  if (d.transitionSequence !== TRANSITION_SEQUENCE) throw new Error("transition sequence does not match this release");
+  if (d.policy.recipientDustSats !== DUST_SATS) throw new Error("dust does not match this release");
+  const selectedPolicy = validateSpendingPolicy(
+    {
+      program: d.policy.program,
+      schema: d.policy.schema,
+      period: d.policy.period,
+      periodAllowanceSats: d.policy.periodAllowanceSats,
+      txRecipientCapSats: d.policy.recipientCapSats,
+      absoluteFeeCapSats: d.policy.absoluteFeeCapSats,
+      feerateCapSatPerV: d.policy.feerateCapSatVb
+    },
+    d.network
+  );
+  if (spendingPolicyDigest(selectedPolicy, d.network) !== d.policy.digest)
+    throw new Error("spending policy digest does not match");
+  requireSecp(d.keys.phoneBip340, "phone");
+  requireP256(d.keys.phoneDirectP256, "phoneDirectP256");
+  requireSecp(d.keys.hardware, "hardware");
+  if (d.keys.recovery) requireSecp(d.keys.recovery, "recovery");
+  requireSecp(d.keys.vaultCosignerBase, "vaultCosignerBase");
+  requireSecp(d.keys.arkadeCosignerBase, "arkadeCosignerBase");
+  const hasRecovery = Boolean(d.keys.recovery);
+  const claimants = familyClaimants(hasRecovery);
+  const keys = familyKeysFor(hasRecovery);
+  for (const claimant of claimants) {
+    requirePair(d.tweaks.initiate[claimant], `initiate.${claimant}`);
+  }
+  for (const key of keys) {
+    requirePair(d.tweaks.pending[key], `pending.${key}`);
+  }
+  const rebuilt = buildDescriptorFamily({
+    vaultId: d.vaultId,
+    phonePub: d.keys.phoneBip340,
+    hardwarePub: d.keys.hardware,
+    recoveryPub: d.keys.recovery,
+    phoneDirectP256: d.keys.phoneDirectP256,
+    vaultCosignerBase: d.keys.vaultCosignerBase,
+    arkadeCosignerBase: d.keys.arkadeCosignerBase,
+    network: d.network,
+    templateVersion: d.templateVersion,
+    connectorType: d.connectorType,
+    absoluteFeeCapSats: selectedPolicy.absoluteFeeCapSats,
+    feerateCapSatPerV: selectedPolicy.feerateCapSatPerV
+  });
+  for (const claimant of claimants) {
+    if (d.tweaks.initiate[claimant].vault !== rebuilt.initiateTweaks[claimant].vault || d.tweaks.initiate[claimant].arkade !== rebuilt.initiateTweaks[claimant].arkade) {
+      throw new Error("initiate tweaks do not match derived authorization scripts");
+    }
+  }
+  for (const key of keys) {
+    if (d.tweaks.pending[key].vault !== rebuilt.pendingTweaks[key].vault || d.tweaks.pending[key].arkade !== rebuilt.pendingTweaks[key].arkade) {
+      throw new Error("pending tweaks do not match derived authorization scripts");
+    }
+  }
+  if (d.savings.address !== rebuilt.savings.address || d.savings.script !== hex.encode(rebuilt.savings.script)) {
+    throw new Error("savings tree does not match rebuilt descriptor");
+  }
+  for (const key of keys) {
+    if (!d.pending[key] || !d.quarantine[key]) throw new Error(`missing ${key} trees`);
+    if (d.pending[key].address !== rebuilt.pending[key].address)
+      throw new Error(`${key} pending does not match rebuilt descriptor`);
+    if (d.pending[key].script !== hex.encode(rebuilt.pending[key].script)) {
+      throw new Error(`${key} pending does not match rebuilt descriptor`);
+    }
+    if (d.pending[key].delay !== rebuilt.pending[key].delay) throw new Error(`${key} pending delay does not match`);
+    if (d.quarantine[key].address !== rebuilt.quarantine[key].address) {
+      throw new Error(`${key} quarantine does not match rebuilt descriptor`);
+    }
+    if (d.quarantine[key].script !== hex.encode(rebuilt.quarantine[key].script)) {
+      throw new Error(`${key} quarantine does not match rebuilt descriptor`);
+    }
+    const want = rebuilt.quarantine[key].guardians;
+    if (d.quarantine[key].guardians.length !== want.length || d.quarantine[key].guardians.some((g, i) => g !== want[i])) {
+      throw new Error(`${key} quarantine guardians do not match`);
+    }
+  }
+  return d;
+}
+function encodeVaultProgramDescriptor(input) {
+  return encodeRawVaultProgramDescriptor(validateVaultProgramDescriptor(input));
+}
+function encodeRawVaultProgramDescriptor(d) {
+  const parts = [];
+  appendText2(parts, d.schema, "schema");
+  appendText2(parts, d.network, "network");
+  appendText2(parts, d.vaultId, "vaultId");
+  appendBytes(parts, encodeUtf8(d.templateVersion));
+  appendBytes(parts, encodeUtf8(d.policyVersion));
+  appendText2(parts, requireProtectionTier(d.protectionTier), "protectionTier");
+  appendHex(parts, d.keys.phoneBip340, "phone", COMPRESSED);
+  appendHex(parts, d.keys.phoneDirectP256, "phoneDirectP256", COMPRESSED);
+  appendHex(parts, d.keys.hardware, "hardware", COMPRESSED);
+  if (d.keys.recovery) appendHex(parts, d.keys.recovery, "recovery", COMPRESSED);
+  appendHex(parts, d.keys.vaultCosignerBase, "vaultCosignerBase", COMPRESSED);
+  appendHex(parts, d.keys.arkadeCosignerBase, "arkadeCosignerBase", COMPRESSED);
+  const hasRecovery = Boolean(d.keys.recovery);
+  for (const claimant of familyClaimants(hasRecovery)) {
+    appendHex(parts, d.tweaks.initiate[claimant].vault, `initiate.${claimant}.vault`, COMPRESSED);
+    appendHex(parts, d.tweaks.initiate[claimant].arkade, `initiate.${claimant}.arkade`, COMPRESSED);
+  }
+  for (const key of familyKeysFor(hasRecovery)) {
+    appendHex(parts, d.tweaks.pending[key].vault, `pending.${key}.vault`, COMPRESSED);
+    appendHex(parts, d.tweaks.pending[key].arkade, `pending.${key}.arkade`, COMPRESSED);
+  }
+  appendRawText(parts, d.arkadeCosigner.origin, "arkade origin");
+  appendRawText(parts, d.arkadeCosigner.version, "arkade version");
+  appendU32(parts, d.csv.hardware, "csv.hardware");
+  appendU32(parts, d.csv.phone, "csv.phone");
+  appendU32(parts, d.csv.recovery, "csv.recovery");
+  appendBytes(parts, encodeUtf8(d.policy.program));
+  appendBytes(parts, encodeUtf8(d.policy.schema));
+  appendBytes(parts, encodeUtf8(d.policy.period));
+  appendHex(parts, d.policy.digest, "policy.digest", 32);
+  appendI64(parts, d.policy.recipientDustSats, "dust");
+  appendI64(parts, d.policy.recipientCapSats, "tx cap");
+  appendI64(parts, d.policy.periodAllowanceSats, "period");
+  appendI64(parts, d.policy.absoluteFeeCapSats, "fee cap");
+  appendI64(parts, d.policy.feerateCapSatVb, "feerate");
+  appendHex(parts, d.p2a.script, "p2a.script", d.p2a.script.length / 2);
+  appendI64(parts, d.p2a.valueSats, "p2a.value");
+  appendU32(parts, d.p2a.outputIndex, "p2a.index");
+  appendU32(parts, d.transitionSequence, "sequence");
+  appendHex(parts, d.savings.script, "savings.script", d.savings.script.length / 2);
+  appendText2(parts, d.savings.address, "savings.address");
+  for (const key of familyKeysFor(hasRecovery)) {
+    appendHex(parts, d.pending[key].script, `${key}.pending.script`, d.pending[key].script.length / 2);
+    appendText2(parts, d.pending[key].address, `${key}.pending.address`);
+    appendU32(parts, d.pending[key].delay, `${key}.pending.delay`);
+  }
+  for (const key of familyKeysFor(hasRecovery)) {
+    appendHex(parts, d.quarantine[key].script, `${key}.quarantine.script`, d.quarantine[key].script.length / 2);
+    appendText2(parts, d.quarantine[key].address, `${key}.quarantine.address`);
+    appendText2(parts, d.quarantine[key].guardians[0], `${key}.guardian0`);
+    if (d.quarantine[key].guardians[1]) {
+      appendText2(parts, d.quarantine[key].guardians[1], `${key}.guardian1`);
+    }
+  }
+  return concat5(parts);
+}
+function hashVaultProgramDescriptor(d) {
+  return bytesToHex3(sha256(encodeVaultProgramDescriptor(d)));
+}
+function buildDescriptorFamily(input) {
+  if (input.templateVersion !== CONNECTOR_TEMPLATE) {
+    if (input.connectorType !== void 0) throw new Error("connector type on a legacy descriptor");
+    return buildVaultProgramFamily(input);
+  }
+  if (input.connectorType !== "p2tr" && input.connectorType !== "p2wpkh") throw new Error("connector type required");
+  return buildConnectorFamily({ ...input, connectorType: input.connectorType });
+}
+
+// src/lib/vault/program/enroll.ts
+init_sha2();
 
 // src/lib/vault/vtxo/board.ts
 init_define_import_meta_env();
+init_secp256k1();
 init_sha2();
+init_base();
 
 // src/lib/vault/vtxo/walletWorkerNames.ts
 init_define_import_meta_env();
@@ -46634,18 +48717,467 @@ function boardingProgramDigestFor(network) {
   );
 }
 var BOARDING_PROGRAM_DIGEST = boardingProgramDigestFor("mutinynet");
+function requireCompressedKey(value, name) {
+  const key = requireLowerHex(value, name, 33);
+  const bytes2 = hexToBytes3(key);
+  if (bytes2[0] !== 2 && bytes2[0] !== 3 || !secp256k1.utils.isValidPublicKey(bytes2, true)) {
+    throw new Error(`${name} is not a compressed secp256k1 key`);
+  }
+  return key;
+}
+function requireBoardingDescriptor(raw2, expected) {
+  if (!raw2 || typeof raw2 !== "object") throw new Error("vault-board-v1 descriptor required");
+  const pins = networkPins(expected.network);
+  const descriptor = raw2;
+  if (descriptor.schema !== BOARDING_SCHEMA || descriptor.program !== BOARDING_PROGRAM || descriptor.template !== BOARDING_TEMPLATE || descriptor.network !== expected.network || descriptor.exitDelay !== pins.boardExitDelay || descriptor.exitDelayUnit !== BOARDING_EXIT_DELAY_UNIT) {
+    throw new Error("vault-board-v1 descriptor does not match this release");
+  }
+  const boardingPub = requireCompressedKey(descriptor.boardingPub, "boardingPub");
+  const recoveryPub = requireCompressedKey(descriptor.recoveryPhonePub, "recoveryPhonePub");
+  const cosignerPub = requireCompressedKey(descriptor.vaultBoardCosignerPub, "vaultBoardCosignerPub");
+  const operatorPub = requireCompressedKey(descriptor.operatorPub, "operatorPub");
+  if (operatorPub !== pins.operatorSignerPub) {
+    throw new Error("vault-board-v1 Operator does not match this release");
+  }
+  if (boardingPub !== expected.boardingPub || recoveryPub !== requireCompressedKey(expected.phonePub, "phoneBip340Pub")) {
+    throw new Error("vault-board-v1 descriptor keys do not match this wallet");
+  }
+  const xOnly3 = [boardingPub, recoveryPub, cosignerPub, operatorPub].map((key) => key.slice(2));
+  if (new Set(xOnly3).size !== xOnly3.length) throw new Error("vault-board-v1 roles must use distinct keys");
+  const program = createBoardingProgramScript(
+    {
+      name: BOARDING_PROGRAM,
+      boardingPubKey: hexToBytes3(boardingPub).slice(1),
+      cosignerPubKey: hexToBytes3(cosignerPub).slice(1),
+      recoveryPubKey: hexToBytes3(recoveryPub).slice(1)
+    },
+    hexToBytes3(pins.operatorSignerPub).slice(1),
+    { type: "seconds", value: BigInt(pins.boardExitDelay) }
+  );
+  const script = requireLowerHex(descriptor.script, "vault-board-v1 script", 34);
+  const address = program.onchainAddress(getNetwork(pins.sdkNetwork));
+  if (hex.encode(program.pkScript) !== script || descriptor.address !== address) {
+    throw new Error("vault-board-v1 script or address does not match its exact program");
+  }
+  return descriptor;
+}
+function requireBoardingStatus(status, expectedBoardingPub) {
+  if (status.vtxoBoardingProgram !== BOARDING_PROGRAM || !status.vtxoBoardingActive) {
+    throw new Error("vault is not enrolled for vault-board-v1");
+  }
+  const descriptor = requireBoardingDescriptor(status.vtxoBoardingDescriptor, {
+    vaultId: status.vaultId,
+    phonePub: String(status.phoneBip340Pub || ""),
+    boardingPub: expectedBoardingPub,
+    network: status.network
+  });
+  if (descriptor.script !== String(status.vtxoBoardingScript || "").toLowerCase() || descriptor.address !== status.vtxoBoardingAddress || descriptor.exitDelay !== status.vtxoBoardingExitDelay || descriptor.exitDelayUnit !== status.vtxoBoardingExitDelayUnit) {
+    throw new Error("vault-board-v1 status descriptor changed");
+  }
+  if (!status.vtxoBoardingDescriptorHash || !/^[0-9a-f]{64}$/.test(status.vtxoBoardingDescriptorHash)) {
+    throw new Error("vault-board-v1 descriptor hash required");
+  }
+  return descriptor;
+}
+
+// src/lib/vault/program/enroll.ts
+function appendLE32(parts, value) {
+  const bytes2 = new Uint8Array(4);
+  new DataView(bytes2.buffer).setUint32(0, value, true);
+  parts.push(bytes2);
+}
+function appendText3(parts, value) {
+  const bytes2 = encodeUtf8(value);
+  appendLE32(parts, bytes2.length);
+  parts.push(bytes2);
+}
+function hashBoardingEnrollmentDescriptor(descriptor) {
+  const savingsHash = hashVaultProgramDescriptor(descriptor.savings);
+  const fields = [
+    descriptor.schema,
+    descriptor.vaultId,
+    savingsHash,
+    descriptor.boarding.schema,
+    descriptor.boarding.program,
+    descriptor.boarding.template,
+    descriptor.boarding.network,
+    descriptor.boarding.boardingPub,
+    descriptor.boarding.recoveryPhonePub,
+    descriptor.boarding.vaultBoardCosignerPub,
+    descriptor.boarding.operatorPub,
+    descriptor.boarding.exitDelayUnit,
+    descriptor.boarding.script,
+    descriptor.boarding.address
+  ];
+  const parts = [];
+  for (const field2 of fields) appendText3(parts, field2);
+  appendLE32(parts, descriptor.boarding.exitDelay);
+  const payload = new Uint8Array(parts.reduce((length, part) => length + part.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    payload.set(part, offset);
+    offset += part.length;
+  }
+  const digest = bytesToHex3(sha256(payload));
+  payload.fill(0);
+  return digest;
+}
 
 // src/lib/vault/program/connectorEnroll.ts
 init_define_import_meta_env();
 
 // src/lib/vault/program/connectorEnrollmentCore.ts
 init_define_import_meta_env();
+init_base();
+init_sha2();
+var BOARDING_ENROLLMENT_SCHEMA = "arkade-vault/enrollment-with-board-v1";
+function fail(message) {
+  throw new Error(message);
+}
+function requireCompressedHex(value, name) {
+  const key = typeof value === "string" ? value.toLowerCase() : "";
+  if (!/^(02|03)[0-9a-f]{64}$/.test(key)) fail(`${name} must be a compressed public key`);
+  return key;
+}
+function requireUint32(value, name) {
+  if (!Number.isInteger(value) || value < 0 || value > 4294967295)
+    fail(`${name} must be a uint32`);
+  return value;
+}
+function appendLE322(parts, value) {
+  const bytes2 = new Uint8Array(4);
+  new DataView(bytes2.buffer).setUint32(0, value, true);
+  parts.push(bytes2);
+}
+function appendField(parts, value) {
+  const bytes2 = new TextEncoder().encode(value);
+  appendLE322(parts, bytes2.length);
+  parts.push(bytes2);
+}
+function concatParts(parts) {
+  const out = new Uint8Array(parts.reduce((size, part) => size + part.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+function hashConnectorBoarding(vaultId, savingsHash, boarding) {
+  if (!/^[0-9a-f]{64}$/.test(savingsHash)) fail("connector savings hash required");
+  const fields = [
+    BOARDING_ENROLLMENT_SCHEMA,
+    vaultId,
+    savingsHash,
+    boarding.schema,
+    boarding.program,
+    boarding.template,
+    boarding.network,
+    boarding.boardingPub,
+    boarding.recoveryPhonePub,
+    boarding.vaultBoardCosignerPub,
+    boarding.operatorPub,
+    boarding.exitDelayUnit,
+    boarding.script,
+    boarding.address
+  ];
+  const parts = [];
+  for (const field2 of fields) appendField(parts, field2);
+  appendLE322(parts, boarding.exitDelay);
+  return hex.encode(sha256(concatParts(parts)));
+}
+function hashConnectorBoardComposite(digestHex, boardingHashHex) {
+  if (!/^[0-9a-f]{64}$/.test(digestHex)) fail("connector enrollment digest required");
+  if (!/^[0-9a-f]{64}$/.test(boardingHashHex)) fail("connector boarding hash required");
+  const payload = new Uint8Array(65);
+  payload[0] = 1;
+  payload.set(hex.decode(digestHex), 1);
+  payload.set(hex.decode(boardingHashHex), 33);
+  const out = hex.encode(sha256(payload));
+  payload.fill(0);
+  return out;
+}
+function toOrigin(origin) {
+  return {
+    publicKey: hex.decode(requireCompressedHex(origin.connectorPub, "connectorPub")),
+    fingerprint: requireUint32(origin.connectorFingerprint, "connectorFingerprint"),
+    path: [...origin.connectorPath]
+  };
+}
+function buildConnectorEnrollmentPreview(input) {
+  const network = input.network === "mainnet" || input.network === "mutinynet" ? input.network : fail("unsupported network");
+  const protectionTier = requireProtectionTierMatchesRecovery(input.protectionTier, input.recoveryPub || "");
+  const policy = validateSpendingPolicy(input.spendingPolicy, network);
+  const origin = toOrigin(input.origin);
+  if (input.origin.connectorType !== "p2wpkh" && input.origin.connectorType !== "p2tr")
+    fail("connector type must be p2tr or p2wpkh");
+  const familyInput = {
+    connectorType: input.origin.connectorType,
+    vaultId: input.vaultId,
+    network,
+    phonePub: requireCompressedHex(input.phonePub, "phonePub"),
+    hardwarePub: requireCompressedHex(input.origin.connectorPub, "connectorPub"),
+    ...input.recoveryPub ? { recoveryPub: requireCompressedHex(input.recoveryPub, "recoveryPub") } : {},
+    phoneDirectP256: requireCompressedHex(input.phoneDirectP256, "phoneDirectP256"),
+    vaultCosignerBase: requireCompressedHex(input.vaultCosignerBase, "vaultCosignerBase"),
+    arkadeCosignerBase: requireCompressedHex(input.arkadeCosignerBase, "arkadeCosignerBase"),
+    absoluteFeeCapSats: policy.absoluteFeeCapSats,
+    feerateCapSatPerV: policy.feerateCapSatPerV
+  };
+  const family = buildConnectorFamily(familyInput);
+  const digest = connectorEnrollmentDigest({ ...familyInput, protectionTier, spendingPolicy: policy }, origin);
+  const hasRecovery = Boolean(input.recoveryPub);
+  const pending = {};
+  const quarantine = {};
+  for (const key of familyKeysFor(hasRecovery)) {
+    pending[key] = {
+      script: hex.encode(family.pending[key].script),
+      address: family.pending[key].address,
+      delay: family.pending[key].delay
+    };
+    quarantine[key] = {
+      script: hex.encode(family.quarantine[key].script),
+      address: family.quarantine[key].address,
+      guardians: [...family.quarantine[key].guardians]
+    };
+  }
+  const descriptor = {
+    connectorType: input.origin.connectorType,
+    schema: PROGRAM_SCHEMA,
+    network,
+    vaultId: input.vaultId,
+    templateVersion: CONNECTOR_TEMPLATE,
+    policyVersion: POLICY_VERSION,
+    protectionTier,
+    keys: {
+      phoneBip340: familyInput.phonePub,
+      phoneDirectP256: familyInput.phoneDirectP256,
+      hardware: familyInput.hardwarePub,
+      ...familyInput.recoveryPub ? { recovery: familyInput.recoveryPub } : {},
+      vaultCosignerBase: familyInput.vaultCosignerBase,
+      arkadeCosignerBase: familyInput.arkadeCosignerBase
+    },
+    tweaks: { initiate: family.initiateTweaks, pending: family.pendingTweaks },
+    arkadeCosigner: { origin: input.arkadeOrigin.trim(), version: input.arkadeVersion.trim() },
+    csv: { ...PROGRAM_CSV },
+    policy: {
+      program: policy.program,
+      schema: policy.schema,
+      period: policy.period,
+      digest: spendingPolicyDigest(policy, network),
+      recipientDustSats: DUST_SATS,
+      recipientCapSats: policy.txRecipientCapSats,
+      periodAllowanceSats: policy.periodAllowanceSats,
+      absoluteFeeCapSats: policy.absoluteFeeCapSats,
+      feerateCapSatVb: policy.feerateCapSatPerV
+    },
+    p2a: { script: P2A_SCRIPT_HEX, valueSats: P2A_VALUE_SATS, outputIndex: P2A_OUTPUT_INDEX },
+    transitionSequence: TRANSITION_SEQUENCE,
+    savings: { script: hex.encode(family.savings.script), address: family.savings.address },
+    pending,
+    quarantine
+  };
+  const savingsHash = hex.encode(sha256(encodeRawVaultProgramDescriptor(descriptor)));
+  const boardingHash = input.boarding ? hashConnectorBoarding(input.vaultId, savingsHash, input.boarding) : "";
+  const compositeHash = input.boarding ? hashConnectorBoardComposite(digest, boardingHash) : "";
+  return {
+    family,
+    origin,
+    digest,
+    savingsHash,
+    boardingHash,
+    compositeHash,
+    descriptor,
+    policy,
+    protectionTier
+  };
+}
+var CONNECTOR_KIT_NAME = "arkade-connector-enrollment";
+var CONNECTOR_KIT_VERSION = 1;
+function parseConnectorRecoveryKit(raw2) {
+  const kit = raw2;
+  if (!kit || kit.name !== CONNECTOR_KIT_NAME) fail("not a connector enrollment kit");
+  if (kit.version !== CONNECTOR_KIT_VERSION) fail("unsupported connector kit version");
+  const rebuilt = buildConnectorEnrollmentPreview({
+    vaultId: kit.vaultId,
+    network: kit.network,
+    protectionTier: kit.protectionTier,
+    phonePub: kit.phonePub,
+    phoneDirectP256: kit.phoneDirectP256,
+    ...kit.recoveryPub ? { recoveryPub: kit.recoveryPub } : {},
+    vaultCosignerBase: kit.vaultCosignerBase,
+    arkadeCosignerBase: kit.arkadeCosignerBase,
+    arkadeOrigin: kit.arkadeOrigin,
+    arkadeVersion: kit.arkadeVersion,
+    spendingPolicy: kit.spendingPolicy,
+    origin: kit.origin,
+    boarding: kit.boarding
+  });
+  if (rebuilt.digest !== kit.enrollmentDigest) fail("connector kit digest does not match rebuild");
+  if (rebuilt.savingsHash !== kit.savingsHash) fail("connector kit savings hash does not match rebuild");
+  if (rebuilt.boardingHash !== kit.boardingHash) fail("connector kit boarding hash does not match rebuild");
+  if (rebuilt.compositeHash !== kit.descriptorHash) fail("connector kit hash does not match rebuild");
+  if (rebuilt.descriptor.savings.script !== kit.savingsScript)
+    fail("connector kit Savings script does not match rebuild");
+  if (rebuilt.descriptor.savings.address !== kit.savingsAddress)
+    fail("connector kit Savings address does not match rebuild");
+  if (hex.encode(rebuilt.family.connector.script) !== kit.connectorScript)
+    fail("connector kit script does not match rebuild");
+  return kit;
+}
+function connectorRecoveryDescriptor(raw2) {
+  const kit = parseConnectorRecoveryKit(raw2);
+  return buildConnectorEnrollmentPreview({
+    vaultId: kit.vaultId,
+    network: kit.network,
+    protectionTier: kit.protectionTier,
+    origin: kit.origin,
+    phonePub: kit.phonePub,
+    phoneDirectP256: kit.phoneDirectP256,
+    vaultCosignerBase: kit.vaultCosignerBase,
+    arkadeCosignerBase: kit.arkadeCosignerBase,
+    arkadeOrigin: kit.arkadeOrigin,
+    arkadeVersion: kit.arkadeVersion,
+    recoveryPub: kit.recoveryPub,
+    spendingPolicy: kit.spendingPolicy,
+    boarding: kit.boarding
+  }).descriptor;
+}
+
+// src/lib/vault/program/connectorEnroll.ts
+function requirePinShape(pin) {
+  if (!pin || typeof pin !== "object") fail("connector enrollment pin required");
+  if (!pin.vaultId.trim() || pin.network !== "mainnet" && pin.network !== "mutinynet")
+    fail("connector enrollment pin required");
+  requireCompressedHex(pin.connectorPub, "connectorPub");
+  if (pin.connectorType !== "p2wpkh" && pin.connectorType !== "p2tr") fail("connector enrollment pin required");
+  requireUint32(pin.connectorFingerprint, "connectorFingerprint");
+  if (!Array.isArray(pin.connectorPath) || pin.connectorPath.length < 1 || pin.connectorPath.length > 255)
+    fail("connector enrollment pin required");
+  pin.connectorPath.forEach((step) => requireUint32(step, "connectorPath"));
+  if (!/^[0-9a-f]{64}$/.test(pin.enrollmentDigest) || !/^[0-9a-f]{64}$/.test(pin.descriptorHash))
+    fail("connector enrollment pin required");
+  if (!pin.savingsAddress.trim() || !/^[0-9a-f]+$/.test(pin.savingsScript)) fail("connector enrollment pin required");
+}
+function verifyConnectorStatus(status, pin, options) {
+  requirePinShape(pin);
+  if (!status?.enrolled) fail("vault is not enrolled");
+  if (status.vaultId !== pin.vaultId) fail("connector vault id does not match enrollment");
+  if (status.network !== pin.network) fail("connector network does not match enrollment");
+  if (status.templateVersion !== CONNECTOR_TEMPLATE) fail("vault is not a connector enrollment");
+  const identity2 = status.connectorEnrollment;
+  if (!identity2 || identity2.connectorPub !== pin.connectorPub || identity2.connectorType !== pin.connectorType || identity2.connectorFingerprint !== pin.connectorFingerprint || identity2.connectorPath.join("/") !== pin.connectorPath.join("/") || identity2.enrollmentDigest !== pin.enrollmentDigest || identity2.descriptorHash !== pin.descriptorHash)
+    fail("connector status origin does not match enrollment");
+  if (status.protectionTier !== pin.protectionTier) fail("connector protection tier changed");
+  if (String(status.externalOwnerWalletPub || "").toLowerCase() !== pin.connectorPub.toLowerCase())
+    fail("connector key does not match enrolled hardware");
+  if (status.savingsAddress !== pin.savingsAddress) fail("connector Savings address changed");
+  if (String(status.savingsScript || "").toLowerCase() !== pin.savingsScript.toLowerCase())
+    fail("connector Savings script changed");
+  const phonePub = String(status.phoneBip340Pub || "");
+  const phoneDirectP256 = String(status.phoneDirectP256 || "");
+  const vaultCosignerBase = String(status.vaultCosignerBasePub || "");
+  const arkadeCosignerBase = String(status.arkadeCosignerBasePub || "");
+  if (!phonePub || !phoneDirectP256 || !vaultCosignerBase || !arkadeCosignerBase)
+    fail("connector status is missing enrolled facts");
+  const policy = validateSpendingPolicy(status.spendingPolicy, pin.network);
+  if (status.spendingPolicyDigest && status.spendingPolicyDigest !== spendingPolicyDigest(policy, pin.network))
+    fail("connector spending policy changed");
+  const arkadeOrigin = String(options?.arkadeOrigin ?? status.arkadeCosignerOrigin ?? "").trim();
+  const arkadeVersion = String(options?.arkadeVersion ?? status.arkadeCosignerVersion ?? "").trim();
+  if (!arkadeOrigin || !arkadeVersion) fail("connector status is missing Arkade identity");
+  const recoveryPub = String(status.recoveryPub || status.recoveryKeyPub || "") || void 0;
+  let boarding;
+  if (status.vtxoBoardingDescriptor) {
+    boarding = requireBoardingDescriptor(status.vtxoBoardingDescriptor, {
+      vaultId: pin.vaultId,
+      phonePub,
+      boardingPub: options?.boardingPub ?? status.vtxoBoardingDescriptor.boardingPub,
+      network: pin.network
+    });
+  }
+  const preview = buildConnectorEnrollmentPreview({
+    vaultId: pin.vaultId,
+    network: pin.network,
+    protectionTier: pin.protectionTier,
+    phonePub,
+    phoneDirectP256,
+    ...recoveryPub ? { recoveryPub } : {},
+    vaultCosignerBase,
+    arkadeCosignerBase,
+    arkadeOrigin,
+    arkadeVersion,
+    spendingPolicy: policy,
+    origin: {
+      connectorPub: pin.connectorPub,
+      connectorType: pin.connectorType,
+      connectorFingerprint: pin.connectorFingerprint,
+      connectorPath: [...pin.connectorPath]
+    },
+    ...boarding ? { boarding } : {}
+  });
+  if (preview.digest !== pin.enrollmentDigest.toLowerCase())
+    fail("enrolled connector digest does not match this wallet");
+  if (boarding && preview.compositeHash !== identity2.descriptorHash) fail("connector composite hash changed");
+  if (!boarding) fail("connector boarding descriptor required");
+  if (boarding) {
+    if (!status.vtxoBoardingDescriptorHash) fail("vault-board-v1 descriptor hash required");
+    if (preview.boardingHash !== status.vtxoBoardingDescriptorHash.toLowerCase())
+      fail("enrolled boarding descriptor does not match this wallet");
+  }
+}
+function connectorPinFromVerifiedStatus(status) {
+  const identity2 = status.connectorEnrollment;
+  if (!identity2 || status.network !== "mainnet" && status.network !== "mutinynet" || status.protectionTier !== "standard" && status.protectionTier !== "advanced")
+    fail("connector enrollment identity required");
+  const pin = {
+    vaultId: status.vaultId,
+    network: status.network,
+    protectionTier: status.protectionTier,
+    ...identity2,
+    savingsAddress: status.savingsAddress,
+    savingsScript: status.savingsScript
+  };
+  verifyConnectorStatus(status, pin);
+  return pin;
+}
 
 // src/lib/vault/program/kitStore.ts
 init_define_import_meta_env();
 
 // src/lib/vault/program/kit.ts
 init_define_import_meta_env();
+var RECOVERY_KIT_NAME = "arkade-recovery-kit";
+var RECOVERY_KIT_VERSION = 3;
+function buildRecoveryKit(descriptor) {
+  const d = validateVaultProgramDescriptor(descriptor);
+  return {
+    name: RECOVERY_KIT_NAME,
+    version: RECOVERY_KIT_VERSION,
+    descriptor: d,
+    descriptorHash: hashVaultProgramDescriptor(d),
+    spendingPolicyDigest: d.policy.digest,
+    protectionTier: d.protectionTier
+  };
+}
+function parseRecoveryKit(raw2) {
+  if (raw2 && typeof raw2 === "object" && "name" in raw2 && raw2.name === CONNECTOR_KIT_NAME)
+    return buildRecoveryKit(connectorRecoveryDescriptor(raw2));
+  const kit = raw2;
+  if (!kit || kit.name !== RECOVERY_KIT_NAME) throw new Error("not a Recovery Kit");
+  if (kit.version !== RECOVERY_KIT_VERSION) throw new Error("unsupported Recovery Kit version");
+  const built = buildRecoveryKit(kit.descriptor);
+  if (kit.descriptorHash && kit.descriptorHash !== built.descriptorHash) {
+    throw new Error("Recovery Kit hash does not match the rebuilt descriptor");
+  }
+  if (kit.spendingPolicyDigest !== built.spendingPolicyDigest) {
+    throw new Error("Recovery Kit spending policy digest does not match the rebuilt descriptor");
+  }
+  if (kit.protectionTier !== built.protectionTier) {
+    throw new Error("Recovery Kit protection tier does not match the rebuilt descriptor");
+  }
+  return built;
+}
 
 // src/lib/vault/webauthn.ts
 init_define_import_meta_env();
@@ -46832,6 +49364,527 @@ function validateLightEnrollment(value) {
 // src/lib/vault/light/recovery.ts
 init_define_import_meta_env();
 
+// src/lib/vault/recovery/journals.ts
+init_define_import_meta_env();
+
+// node_modules/.pnpm/@arkade-os+swap@0.0.10_nostr-tools@2.17.2_typescript@5.9.3_/node_modules/@arkade-os/swap/dist/index.js
+init_define_import_meta_env();
+
+// node_modules/.pnpm/@arkade-os+swap@0.0.10_nostr-tools@2.17.2_typescript@5.9.3_/node_modules/@arkade-os/swap/dist/chunk-5NPYNQ5V.js
+init_define_import_meta_env();
+init_base();
+init_legacy();
+init_btc_signer();
+var ONCHAIN_ORDER_MARGIN_SECONDS = 2 * 60 * 60;
+var ONCHAIN_CLAIM_MARGIN_SECONDS = 90 * 60;
+var LOCKTIME_THRESHOLD = 5e8;
+var ONCHAIN_DUST_SATS = BigInt(330);
+var h160FromPaymentHash = (paymentHash) => ripemd160(hex.decode(paymentHash));
+var L1_NETWORKS = {
+  bitcoin: NETWORK,
+  testnet: TEST_NETWORK,
+  regtest: { ...TEST_NETWORK, bech32: "bcrt" }
+};
+function onchainHtlcScript(params, network) {
+  if (params.claimKey.length !== 32 || params.refundKey.length !== 32) {
+    throw new Error("claimKey and refundKey must be 32-byte x-only keys");
+  }
+  if (!Number.isInteger(params.refundLocktime) || params.refundLocktime <= 0) {
+    throw new Error(
+      `refundLocktime must be a positive unix timestamp, got ${params.refundLocktime}`
+    );
+  }
+  if (params.refundLocktime < LOCKTIME_THRESHOLD) {
+    throw new Error(
+      `refundLocktime ${params.refundLocktime} is below LOCKTIME_THRESHOLD (${LOCKTIME_THRESHOLD}) and would be interpreted as a block height`
+    );
+  }
+  if (!Object.hasOwn(L1_NETWORKS, network)) {
+    throw new Error(
+      `unknown L1 network '${String(network)}' \u2014 expected one of ${Object.keys(L1_NETWORKS).join(", ")}`
+    );
+  }
+  const h160 = h160FromPaymentHash(params.paymentHash);
+  const claim = Script.encode([
+    "SIZE",
+    32,
+    "EQUALVERIFY",
+    "HASH160",
+    h160,
+    "EQUALVERIFY",
+    params.claimKey,
+    "CHECKSIG"
+  ]);
+  const refund = Script.encode([
+    ScriptNum().encode(BigInt(params.refundLocktime)),
+    "CHECKLOCKTIMEVERIFY",
+    "DROP",
+    params.refundKey,
+    "CHECKSIG"
+  ]);
+  const payment = p2tr(
+    TAPROOT_UNSPENDABLE_KEY,
+    taprootListToTree([{ script: claim }, { script: refund }]),
+    L1_NETWORKS[network],
+    true
+  );
+  const controlBlockFor = (leaf) => {
+    for (const [block, script] of payment.tapLeafScript ?? []) {
+      if (script.length - 1 === leaf.length && hex.encode(script.subarray(0, leaf.length)) === hex.encode(leaf)) {
+        return TaprootControlBlock.encode(block);
+      }
+    }
+    throw new Error("leaf missing from compiled taproot tree");
+  };
+  return {
+    address: payment.address,
+    pkScript: payment.script,
+    leaves: { claim, refund },
+    controlBlocks: { claim: controlBlockFor(claim), refund: controlBlockFor(refund) },
+    paymentHash: params.paymentHash,
+    refundLocktime: params.refundLocktime
+  };
+}
+var HKDF_INFO2 = new TextEncoder().encode("covclaimd/preimage/v1");
+var ARKADE_BTC = "arkade:BTC";
+var LIGHTNING_BTC = "lightning:BTC";
+var ONCHAIN_BTC = "onchain:BTC";
+var rfqPair = (from, to) => `${from}->${to}`;
+var LIGHTNING_SEND_PAIR = rfqPair(ARKADE_BTC, LIGHTNING_BTC);
+var LIGHTNING_RECEIVE_PAIR = rfqPair(LIGHTNING_BTC, ARKADE_BTC);
+var ONCHAIN_SEND_PAIR = rfqPair(ARKADE_BTC, ONCHAIN_BTC);
+var ONCHAIN_RECEIVE_PAIR = rfqPair(ONCHAIN_BTC, ARKADE_BTC);
+var MIN_HEADROOM_SECONDS = 90 * 60;
+var SEQUENCE_GRANULARITY_SECONDS = 512;
+var SOLO_REFUND_HEADROOM_SECONDS = 8 * SEQUENCE_GRANULARITY_SECONDS;
+var MIN_CLAIM_WINDOW_SECONDS = 30 * 60;
+
+// node_modules/.pnpm/@arkade-os+swap@0.0.10_nostr-tools@2.17.2_typescript@5.9.3_/node_modules/@arkade-os/swap/dist/chunk-6ZUS47GA.js
+init_define_import_meta_env();
+
+// node_modules/.pnpm/@arkade-os+swap@0.0.10_nostr-tools@2.17.2_typescript@5.9.3_/node_modules/@arkade-os/swap/dist/index.js
+init_base();
+init_base();
+var swap_want_asset_program_default = {
+  version: 0,
+  name: "banco-btc-to-asset",
+  params: [
+    { name: "makerWP", type: "pubkey" },
+    { name: "wantAmount", type: "int" },
+    { name: "wantAssetTxid", type: "hash" },
+    { name: "wantAssetGroupIndex", type: "int" },
+    { name: "server", type: "pubkey" },
+    { name: "user", type: "pubkey" }
+  ],
+  functions: {
+    fulfill: {
+      tapscript: { signers: ["$server"] },
+      arkadeScript: {
+        asm: [
+          0,
+          "$wantAssetTxid",
+          "$wantAssetGroupIndex",
+          "INSPECTOUTASSETLOOKUP",
+          "VERIFY",
+          "$wantAmount",
+          "GREATERTHANOREQUAL",
+          "VERIFY",
+          0,
+          "INSPECTOUTPUTSCRIPTPUBKEY",
+          1,
+          "EQUALVERIFY",
+          "$makerWP",
+          "EQUAL"
+        ]
+      }
+    },
+    cancel: {
+      tapscript: { signers: ["$user", "$server"] }
+    }
+  }
+};
+var swap_want_btc_program_default = {
+  version: 0,
+  name: "banco-asset-to-btc",
+  params: [
+    { name: "makerWP", type: "pubkey" },
+    { name: "wantAmount", type: "int" },
+    { name: "server", type: "pubkey" },
+    { name: "user", type: "pubkey" }
+  ],
+  functions: {
+    fulfill: {
+      tapscript: { signers: ["$server"] },
+      arkadeScript: {
+        asm: [
+          0,
+          "INSPECTOUTPUTVALUE",
+          "$wantAmount",
+          "GREATERTHANOREQUAL",
+          "VERIFY",
+          0,
+          "INSPECTOUTPUTSCRIPTPUBKEY",
+          1,
+          "EQUALVERIFY",
+          "$makerWP",
+          "EQUAL"
+        ]
+      }
+    },
+    cancel: {
+      tapscript: { signers: ["$user", "$server"] }
+    }
+  }
+};
+var swapPrograms = {
+  wantAsset: arkade_exports.parseArtifact(swap_want_asset_program_default),
+  wantBtc: arkade_exports.parseArtifact(swap_want_btc_program_default)
+};
+var FIELDS = {
+  swapPkScript: { tag: 1, width: 34 },
+  wantAmount: { tag: 2, width: 8 },
+  wantAsset: { tag: 3, width: void 0 },
+  makerPkScript: { tag: 5, width: 34 },
+  makerPublicKey: { tag: 7, width: 32 },
+  emulatorPubkey: { tag: 8, width: 32 },
+  offerAsset: { tag: 11, width: void 0 }
+};
+var NAMES = Object.fromEntries(Object.entries(FIELDS).map(([k, f]) => [f.tag, k]));
+var MARKETS_CACHE_TTL_MS = 60 * 60 * 1e3;
+var RfqCorridorRegistry = class {
+  handlers = /* @__PURE__ */ new Map();
+  register(handler) {
+    if (this.handlers.has(handler.kind)) {
+      throw new Error(
+        `RFQ corridor handler for kind '${handler.kind}' is already registered`
+      );
+    }
+    this.handlers.set(handler.kind, handler);
+  }
+  /** Takes a bare `string`, deliberately, where {@link RfqCorridorHandler.kind}
+   * is the manager's union: a lookup key comes off a record a backend handed
+   * back, and that it typechecks as a `kind` is a claim about the type, not
+   * about what was stored. Narrowing this would read as a check already made. */
+  get(kind) {
+    return this.handlers.get(kind);
+  }
+  /**
+   * The handler for a kind, or a loud failure.
+   *
+   * A record whose corridor is not registered cannot be restored, and
+   * guessing would monitor a swap with no idea how to drive it. Names the
+   * registered kinds so a missing `register()` call is obvious.
+   */
+  getOrThrow(kind) {
+    const handler = this.get(kind);
+    if (!handler) {
+      throw new Error(
+        `no RFQ corridor handler registered for kind '${kind}'; registered: ${this.registeredKinds().join(", ") || "none"}`
+      );
+    }
+    return handler;
+  }
+  has(kind) {
+    return this.handlers.has(kind);
+  }
+  registeredKinds() {
+    return [...this.handlers.keys()];
+  }
+  /** Test seam, mirroring the contract registry's. */
+  unregister(kind) {
+    return this.handlers.delete(kind);
+  }
+};
+var rfqCorridorHandlers = new RfqCorridorRegistry();
+var parseHex32 = (value, field2) => {
+  if (typeof value !== "string" || !/^[0-9a-fA-F]{64}$/.test(value)) {
+    throw new Error(`${field2} must be 32 bytes of hex, got ${JSON.stringify(value)}`);
+  }
+  return value.toLowerCase();
+};
+var parseSigner = (value) => {
+  const signingDescriptor = value?.signingDescriptor;
+  if (typeof signingDescriptor !== "string" || signingDescriptor.length === 0) {
+    throw new Error(
+      `rfq profile.signer carries no signingDescriptor (got ${JSON.stringify(signingDescriptor)})`
+    );
+  }
+  return { signingDescriptor };
+};
+var parseHashlock = (value) => {
+  const raw2 = value ?? {};
+  const hashlock = {
+    paymentHash: parseHex32(raw2.paymentHash, "rfq profile.hashlock.paymentHash")
+  };
+  if (raw2.preimageHex !== void 0) {
+    hashlock.preimageHex = parseHex32(raw2.preimageHex, "rfq profile.hashlock.preimageHex");
+  }
+  if (raw2.preimageSaltHex !== void 0) {
+    hashlock.preimageSaltHex = parseHex32(
+      raw2.preimageSaltHex,
+      "rfq profile.hashlock.preimageSaltHex"
+    );
+  }
+  return hashlock;
+};
+var hydrateHashlock = (profile) => {
+  try {
+    return { paymentHash: parseHashlock(profile.hashlock).paymentHash };
+  } catch (cause) {
+    throw new Error(
+      `rfq record carries no usable hashlock; it cannot verify a preimage: ${String(cause)}`,
+      { cause }
+    );
+  }
+};
+var rfqSignerOf = (record) => {
+  const signer = record.profile.signer;
+  if (signer === void 0) return void 0;
+  return parseSigner(signer);
+};
+var LightningSendCorridor = {
+  kind: "lightning_send",
+  project: () => ({}),
+  hydrate: (profile) => hydrateHashlock(profile)
+  // No `claimSecret`, deliberately: `provisionRefundKey` mints no preimage at
+  // all, and deriving one off the refund descriptor would fail the payment
+  // hash check — a `hash-mismatch` on a swap that was never broken.
+};
+var LightningReceiveCorridor = {
+  kind: "lightning_receive",
+  // What the manager holds: the amount gate, and its own claim once it lands.
+  // `payoutAddress` comes from the request result and never changes, so the
+  // caller writes it once and this leaves it alone.
+  project: (swap) => {
+    const receive = swap;
+    return {
+      expectedAmount: receive.expectedAmount,
+      ...receive.claimArkTxid ? { claimArkTxid: receive.claimArkTxid } : {}
+    };
+  },
+  hydrate(profile) {
+    if (typeof profile.expectedAmount !== "number" || !Number.isFinite(profile.expectedAmount)) {
+      throw new Error("lightning_receive record carries no expectedAmount; it cannot claim");
+    }
+    return {
+      ...hydrateHashlock(profile),
+      expectedAmount: profile.expectedAmount,
+      ...profile.claimArkTxid ? { claimArkTxid: profile.claimArkTxid } : {}
+    };
+  },
+  // We are the claimant here, so the preimage material on the hashlock is
+  // ours to use.
+  claimSecret: (profile) => ({ ...profile.signer, ...profile.hashlock }),
+  activityTxids: (profile) => profile.claimArkTxid ? [profile.claimArkTxid] : []
+};
+var OnchainSendCorridor = {
+  kind: "onchain_send",
+  // The L1 keys and the network are only in the request result — nothing on
+  // `OnchainSendSwap` carries them — so the caller writes them once. What the
+  // manager learns as it drives the swap is the fill and our own claim.
+  project: (swap) => {
+    const send = swap;
+    return {
+      ...send.funding ? { funding: send.funding } : {},
+      ...send.claimTxid ? { claimTxid: send.claimTxid } : {}
+    };
+  },
+  hydrate(profile) {
+    const { paymentHash } = hydrateHashlock(profile);
+    if (!profile.claimKey || !profile.refundKey) {
+      throw new Error(
+        "onchain_send record carries no L1 keys; its HTLC cannot be rebuilt and its refund window would pass unwatched"
+      );
+    }
+    if (!Number.isInteger(profile.minConfirmations) || profile.minConfirmations < 1) {
+      throw new Error(
+        `onchain_send record carries no usable minConfirmations (${String(profile.minConfirmations)}); the confirmation gate cannot be checked \u2014 refusing to restore a swap that would claim an unconfirmed fill`
+      );
+    }
+    const htlc = onchainHtlcScript(
+      {
+        // From the profile, not the covenant: the lockup commits to
+        // `hash160(P)`, and the HTLC needs `sha256(P)`. One P
+        // unlocks both legs, but only one of the two hashes of it
+        // is recoverable here.
+        paymentHash,
+        claimKey: hex.decode(profile.claimKey),
+        refundKey: hex.decode(profile.refundKey),
+        refundLocktime: profile.htlcLocktime
+      },
+      profile.network
+    );
+    if (htlc.address !== profile.htlcAddress) {
+      throw new Error(
+        `onchain_send record's L1 inputs derive ${htlc.address}, but the fill was expected at ${String(profile.htlcAddress)} \u2014 these are not this swap's`
+      );
+    }
+    return {
+      paymentHash,
+      htlc,
+      minConfirmations: profile.minConfirmations,
+      ...profile.funding ? { funding: profile.funding } : {},
+      ...profile.claimTxid ? { claimTxid: profile.claimTxid } : {}
+    };
+  },
+  // The trader claims the L1 HTLC with P, so this leg's preimage material is
+  // ours.
+  claimSecret: (profile) => ({ ...profile.signer, ...profile.hashlock }),
+  // Our own L1 claim only. `funding` is the SOLVER's fill into the HTLC —
+  // not a transaction of ours, so grouping it would claim a row this wallet
+  // never made.
+  activityTxids: (profile) => profile.claimTxid ? [profile.claimTxid] : []
+};
+rfqCorridorHandlers.register(LightningSendCorridor);
+rfqCorridorHandlers.register(LightningReceiveCorridor);
+rfqCorridorHandlers.register(OnchainSendCorridor);
+var RFQ_SWAP_RETENTION_SECONDS = 30 * 24 * 60 * 60;
+function lockupScript(params, lockupAddress) {
+  const script = VHTLCV2ContractHandler.createScript(params);
+  const funded = ArkAddress.decode(lockupAddress).pkScript;
+  if (hex.encode(funded) !== hex.encode(script.pkScript)) {
+    throw new Error(
+      `rfq swap covenant params derive ${hex.encode(script.pkScript)}, but the record's lockup address holds ${hex.encode(funded)} \u2014 these params are not this swap's`
+    );
+  }
+  return script;
+}
+function rebuildRfqSwap(record, params) {
+  const script = lockupScript(params, record.lockupAddress);
+  const common = {
+    rfqId: record.rfqId,
+    state: record.state,
+    lockupPkScript: script.pkScript,
+    lockup: { script, address: record.lockupAddress },
+    // From the covenant, which binds it: the record's own copy would be a
+    // second source for the deadline the refund is gated on.
+    refundLocktime: Number(script.options.refundLocktime),
+    createdAt: record.createdAt,
+    updatedAt: record.updatedAt,
+    ...record.refundArkTxid ? { refundArkTxid: record.refundArkTxid } : {},
+    ...record.lockupSpendArkTxids?.length ? { lockupSpendArkTxids: [...record.lockupSpendArkTxids] } : {},
+    ...record.failure ? { failure: record.failure } : {},
+    ...record.blockedReason ? { blockedReason: record.blockedReason } : {}
+  };
+  const handler = rfqCorridorHandlers.getOrThrow(record.kind);
+  return {
+    ...common,
+    kind: record.kind,
+    ...handler.hydrate(record.profile, { lockup: script })
+  };
+}
+var REFUND_MTP_LAG_SECONDS = 2 * 60 * 60;
+
+// src/lib/vault/light/exitRepository.ts
+init_define_import_meta_env();
+function lightExitRepository(descriptor) {
+  const valid = validateLightDescriptor(descriptor);
+  return new IndexedDBVirtualTxRepository(`vaulted-light:${valid.vaultId}:exit-paths`);
+}
+
+// src/lib/vault/vtxo/exitRepository.ts
+init_define_import_meta_env();
+
+// src/lib/vault/lightningLifecycle.ts
+init_define_import_meta_env();
+
+// src/lib/logs.ts
+init_define_import_meta_env();
+
+// src/lib/error.ts
+init_define_import_meta_env();
+
+// src/lib/vault/lightningInvoice.ts
+init_define_import_meta_env();
+var import_light_bolt11_decoder = __toESM(require_bolt11());
+var NETWORK_PREFIX = {
+  bitcoin: "bc",
+  testnet: "tb",
+  signet: "tbs",
+  mutinynet: "tbs",
+  regtest: "bcrt"
+};
+var LightningInvoiceRejected = class extends Error {
+  constructor(reason, message) {
+    super(message);
+    this.reason = reason;
+    this.name = "LightningInvoiceRejected";
+  }
+};
+function wholeSatsFromMillisats(amountMillisats) {
+  if (!Number.isSafeInteger(amountMillisats) || amountMillisats <= 0) {
+    throw new LightningInvoiceRejected("zero_amount", "Enter a Lightning invoice with an amount.");
+  }
+  if (amountMillisats % 1e3 !== 0) {
+    throw new LightningInvoiceRejected("fractional_amount", "This invoice amount is smaller than one whole satoshi.");
+  }
+  const amountSats = amountMillisats / 1e3;
+  if (!Number.isSafeInteger(amountSats)) {
+    throw new LightningInvoiceRejected("unparseable", "This Lightning invoice amount is too large.");
+  }
+  return amountSats;
+}
+function decodeVaultLightningInvoice(rawInvoice, network, nowSeconds2 = Math.floor(Date.now() / 1e3)) {
+  const invoice = rawInvoice.trim().replace(/^lightning:/i, "");
+  let decoded;
+  try {
+    decoded = import_light_bolt11_decoder.default.decode(invoice);
+  } catch {
+    throw new LightningInvoiceRejected("unparseable", "Enter a valid Lightning invoice.");
+  }
+  const amountMillisats = Number(decoded.sections.find((section) => section.name === "amount")?.value ?? "0");
+  const timestamp = Number(decoded.sections.find((section) => section.name === "timestamp")?.value ?? 0);
+  const paymentHash = String(decoded.sections.find((section) => section.name === "payment_hash")?.value ?? "");
+  const coinNetwork = decoded.sections.find((section) => section.name === "coin_network");
+  const prefix2 = coinNetwork && "value" in coinNetwork ? String(coinNetwork.value?.bech32 ?? "") : "";
+  const expiresAt = timestamp + (decoded.expiry ?? 3600);
+  if (prefix2 !== NETWORK_PREFIX[network]) {
+    throw new LightningInvoiceRejected("wrong_network", `This invoice is not for ${network}.`);
+  }
+  if (!timestamp || nowSeconds2 >= expiresAt) {
+    throw new LightningInvoiceRejected("expired", "This Lightning invoice has expired.");
+  }
+  const amountSats = wholeSatsFromMillisats(amountMillisats);
+  if (!/^[0-9a-f]{64}$/.test(paymentHash)) {
+    throw new LightningInvoiceRejected("no_payment_hash", "This Lightning invoice has no payment hash.");
+  }
+  return { raw: invoice, paymentHash, amountSats, expiresAt };
+}
+
+// src/lib/vault/lightningLifecycle.ts
+var VAULT_LIGHTNING_PROFILE = "vaultLightning";
+var VAULT_LIGHTNING_PROFILE_VERSION = 2;
+function validFundingProof(value) {
+  const proof = value;
+  return Boolean(
+    proof && /^[0-9a-f-]{16,}$/i.test(String(proof.operationId || "")) && /^[0-9a-f]{64}$/.test(String(proof.bundleDigest || "")) && typeof proof.address === "string" && proof.address.length > 0 && Number.isSafeInteger(proof.amountSats) && proof.amountSats > 0 && (proof.fundingFeeSats === void 0 || Number.isSafeInteger(proof.fundingFeeSats) && proof.fundingFeeSats >= 0) && /^[0-9a-f]{64}$/.test(String(proof.rfqId || ""))
+  );
+}
+function storedLightningProfile(record) {
+  const value = record.profile[VAULT_LIGHTNING_PROFILE];
+  const quote = value?.quote;
+  if (record.kind !== "lightning_send" || !value || value.version !== VAULT_LIGHTNING_PROFILE_VERSION || typeof value.invoice !== "string" || !quote || quote.rfq_id !== record.rfqId || !Number.isSafeInteger(quote.to_amount) || !Number.isSafeInteger(quote.from_amount) || !Number.isSafeInteger(quote.valid_until) || !Number.isSafeInteger(quote.refund_locktime) || !Number.isSafeInteger(record.amount) || quote.from_amount !== record.amount || !["quoted", "funding", "cancel_requested"].includes(String(value.fundingState)) || value.fundingState === "funding" && !validFundingProof(value.fundingProof)) {
+    throw new Error(`Stored Lightning quote ${record.rfqId} is incomplete`);
+  }
+  if (!["bitcoin", "testnet", "signet", "mutinynet", "regtest"].includes(String(value.network))) {
+    throw new Error(`Stored Lightning quote ${record.rfqId} has no network`);
+  }
+  const invoice = decodeVaultLightningInvoice(value.invoice, value.network, 0);
+  if (quote.to_amount !== invoice.amountSats) {
+    throw new Error(`Stored Lightning quote ${record.rfqId} does not match its invoice`);
+  }
+  return value;
+}
+
+// src/lib/vault/vtxo/spend.ts
+init_define_import_meta_env();
+init_btc_signer();
+init_payment();
+init_base();
+
+// src/lib/vault/savingsSpend.ts
+init_define_import_meta_env();
+
 // src/lib/vault/bitcoin.ts
 init_define_import_meta_env();
 init_btc_signer();
@@ -46846,6 +49899,1117 @@ function isVaultBitcoinAddress(value, network) {
   } catch {
     return false;
   }
+}
+
+// src/lib/vault/program/liveKit.ts
+init_define_import_meta_env();
+
+// src/lib/vault/taprootSignatures.ts
+init_define_import_meta_env();
+
+// src/lib/vault/savingsSpend.ts
+var PRF_SALT3 = new TextEncoder().encode("arkade-2fa-vault/prf/v1");
+var HKDF_INFO3 = new TextEncoder().encode("arkade-2fa-vault/kek/v1");
+
+// src/lib/vault/vtxo/feePolicy.ts
+init_define_import_meta_env();
+var encoder = new TextEncoder();
+
+// src/lib/vault/vtxo/lock.ts
+init_define_import_meta_env();
+
+// src/lib/vault/vtxo/reserveAuth.ts
+init_define_import_meta_env();
+init_secp256k1();
+init_base();
+var encoder2 = new TextEncoder();
+var VTXO_RESERVE_TAG = "arkade-vault/vtxo-reserve/v1";
+var VTXO_RESERVE_VERSION = 1;
+var VTXO_RESERVE_PURPOSE = "spend";
+function concat6(...parts) {
+  const out = new Uint8Array(parts.reduce((length, part) => length + part.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+function uint32LE(value) {
+  if (!Number.isSafeInteger(value) || value < 0 || value > 4294967295) throw new Error("uint32 out of range");
+  const out = new Uint8Array(4);
+  new DataView(out.buffer).setUint32(0, value, true);
+  return out;
+}
+function uint64LE(value) {
+  if (!Number.isSafeInteger(value) || value < 0) throw new Error("amount is not a safe uint64");
+  const out = new Uint8Array(8);
+  new DataView(out.buffer).setBigUint64(0, BigInt(value), true);
+  return out;
+}
+function field(value) {
+  return concat6(uint32LE(value.length), value);
+}
+function operationBytes(operationId) {
+  if (!/^[0-9a-f]{32}$/.test(operationId)) throw new Error("invalid VTXO operation id");
+  return hex.decode(operationId);
+}
+function vtxoReserveDigest(input) {
+  const vaultId = encoder2.encode(input.vaultId);
+  if (vaultId.length === 0) throw new Error("vault id required");
+  if (input.destScript.length === 0) throw new Error("destination script required");
+  const payload = concat6(
+    uint32LE(VTXO_RESERVE_VERSION),
+    field(operationBytes(input.operationId)),
+    field(vaultId),
+    field(encoder2.encode(VTXO_RESERVE_PURPOSE)),
+    field(input.destScript),
+    uint64LE(input.amountSats)
+  );
+  return schnorr.utils.taggedHash(VTXO_RESERVE_TAG, payload);
+}
+function verifyVtxoReserveSignature(input, phoneSignature, phonePub) {
+  if (!/^[0-9a-f]{128}$/.test(phoneSignature) || phonePub.length !== 32) return false;
+  return schnorr.verify(hex.decode(phoneSignature), vtxoReserveDigest(input), phonePub);
+}
+
+// src/lib/vault/vtxo/sdkOperationAdapter.ts
+init_define_import_meta_env();
+
+// src/lib/vault/vtxo/script.ts
+init_define_import_meta_env();
+init_base();
+var VAULT_POLICY_V1_EXIT_DELAY_UNIT = "seconds";
+var VAULT_POLICY_V1_BIP68_SECONDS_MOD = 512n;
+function requireXOnly(value, name) {
+  if (!(value instanceof Uint8Array) || value.length !== 32) {
+    throw new Error(`${name} must be a 32-byte x-only pubkey`);
+  }
+  return value;
+}
+function policyPins(params) {
+  if (params.network) return networkPins(params.network);
+  const matches = SUPPORTED_NETWORKS.filter(
+    (network) => BigInt(networkPins(network).policyExitDelay) === params.exitDelay
+  );
+  if (matches.length === 1) return networkPins(matches[0]);
+  throw new Error(
+    `vault-policy-v1 exit delay is frozen at ${networkPins("mutinynet").policyExitDelay} or ${networkPins("mainnet").policyExitDelay} seconds`
+  );
+}
+function assertVaultPolicyV1Params(params) {
+  const userPub = requireXOnly(params.userPub, "userPub");
+  const vtxoVaultCosignerPub = requireXOnly(params.vtxoVaultCosignerPub, "vtxoVaultCosignerPub");
+  const arkdServerPub = requireXOnly(params.arkdServerPub, "arkdServerPub");
+  const delegatePub = requireXOnly(params.delegatePub, "delegatePub");
+  const exitDevicePub = requireXOnly(params.exitDevicePub, "exitDevicePub");
+  const exitHardwarePub = requireXOnly(params.exitHardwarePub, "exitHardwarePub");
+  const exitRecoveryPub = params.exitRecoveryPub ? requireXOnly(params.exitRecoveryPub, "exitRecoveryPub") : void 0;
+  if (params.exitDelayUnit !== VAULT_POLICY_V1_EXIT_DELAY_UNIT) {
+    throw new Error("vault-policy-v1 exit delay unit must be seconds");
+  }
+  if (params.exitDelay % VAULT_POLICY_V1_BIP68_SECONDS_MOD !== 0n) {
+    throw new Error("vault-policy-v1 exit delay must be a BIP68 seconds multiple of 512");
+  }
+  const pins = policyPins(params);
+  if (params.exitDelay < BigInt(pins.arkdMinExitDelay)) {
+    throw new Error("vault-policy-v1 exit delay is below the arkd minimum");
+  }
+  if (params.exitDelay !== BigInt(pins.policyExitDelay)) {
+    throw new Error(`vault-policy-v1 exit delay is frozen at ${pins.policyExitDelay} seconds`);
+  }
+  const pinned = hex.decode(pins.delegatePub.slice(2));
+  if (delegatePub.length !== pinned.length || !delegatePub.every((b, i) => b === pinned[i])) {
+    throw new Error("delegatePub must be the pinned public delegate");
+  }
+  return {
+    userPub,
+    vtxoVaultCosignerPub,
+    arkdServerPub,
+    delegatePub,
+    network: pins.network,
+    exitDelay: BigInt(pins.policyExitDelay),
+    exitDelayUnit: VAULT_POLICY_V1_EXIT_DELAY_UNIT,
+    exitDevicePub,
+    exitHardwarePub,
+    ...exitRecoveryPub ? { exitRecoveryPub } : {}
+  };
+}
+var VaultPolicyV1Script = class extends VtxoScript {
+  params;
+  forfeitScript;
+  exitScript;
+  delegateScript;
+  constructor(params) {
+    const typed = assertVaultPolicyV1Params(params);
+    const forfeit = MultisigTapscript.encode({
+      pubkeys: [typed.userPub, typed.vtxoVaultCosignerPub, typed.arkdServerPub]
+    });
+    const exit = CSVMultisigTapscript.encode({
+      timelock: { type: typed.exitDelayUnit, value: typed.exitDelay },
+      pubkeys: typed.exitRecoveryPub ? [typed.exitHardwarePub, typed.exitRecoveryPub] : [typed.exitDevicePub, typed.exitHardwarePub]
+    });
+    const delegate2 = MultisigTapscript.encode({
+      pubkeys: [typed.userPub, typed.vtxoVaultCosignerPub, typed.delegatePub, typed.arkdServerPub]
+    });
+    super([forfeit.script, exit.script, delegate2.script]);
+    this.params = typed;
+    this.forfeitScript = hex.encode(forfeit.script);
+    this.exitScript = hex.encode(exit.script);
+    this.delegateScript = hex.encode(delegate2.script);
+  }
+  /** Collaborative spend/intent leaf. SDK-native name matches DefaultVtxo.forfeit(). */
+  forfeit() {
+    return this.findLeaf(this.forfeitScript);
+  }
+  exit() {
+    return this.findLeaf(this.exitScript);
+  }
+  delegate() {
+    return this.findLeaf(this.delegateScript);
+  }
+};
+
+// src/lib/vault/vtxo/spend.ts
+var VTXO_DUST_SATS = 330;
+var MAX_VTXO_INPUTS = 50;
+var VtxoSpendInFlightError = class extends Error {
+  txid;
+  operationId;
+  constructor(txid, operationId) {
+    super("VTXO spend is still with the operator");
+    this.name = "VtxoSpendInFlightError";
+    this.txid = txid;
+    this.operationId = operationId;
+  }
+};
+var MAX_VTXO_SPEND_JOURNAL = 32;
+function persistedReservationFactsAreValid(record) {
+  if (record.stage === "pre-reserve") return true;
+  const reviewFactsAreValid = Boolean(
+    /^[0-9a-f]{64}$/.test(String(record.feePolicyDigest || "")) && typeof record.feeSats === "number" && Number.isSafeInteger(record.feeSats) && record.feeSats >= 0 && typeof record.changeSats === "number" && Number.isSafeInteger(record.changeSats) && record.changeSats >= 0 && (record.changeSats === 0 ? record.changeVout === void 0 : record.changeVout === 1)
+  );
+  if (!reviewFactsAreValid || record.sdkBundleVersion === void 0) return reviewFactsAreValid;
+  if (record.sdkBundleVersion !== 1) return false;
+  const inputs = record.reservedInputs;
+  const outputs = record.reservedOutputs;
+  if (!inputs || inputs.length < 1 || inputs.length > MAX_VTXO_INPUTS || !outputs) return false;
+  if (outputs.length !== (record.changeSats === 0 ? 1 : 2)) return false;
+  if (outputs[0]?.amountSats !== record.amountSats || !/^[0-9a-f]{68}$/.test(String(outputs[0]?.scriptHex || "")) || record.changeSats !== 0 && (outputs[1]?.amountSats !== record.changeSats || !/^[0-9a-f]{68}$/.test(String(outputs[1]?.scriptHex || "")))) {
+    return false;
+  }
+  let previousOutpoint = "";
+  let inputTotal = 0;
+  for (const input of inputs) {
+    if (!/^[0-9a-f]{64}$/.test(input.txid) || !Number.isSafeInteger(input.vout) || input.vout < 0 || input.vout > 4294967295 || !Number.isSafeInteger(input.valueSats) || input.valueSats <= 0 || !/^[0-9a-f]{68}$/.test(input.scriptHex)) {
+      return false;
+    }
+    const outpoint2 = `${input.txid}:${input.vout.toString(16).padStart(8, "0")}`;
+    if (previousOutpoint && outpoint2 <= previousOutpoint) return false;
+    previousOutpoint = outpoint2;
+    inputTotal += input.valueSats;
+    if (!Number.isSafeInteger(inputTotal)) return false;
+  }
+  return inputTotal === record.amountSats + record.feeSats + record.changeSats;
+}
+function parsePersistedVtxoSpend(vaultId, parsed) {
+  if (parsed && parsed.vaultId === vaultId && isVtxoOperationId(parsed.operationId) && parsed.stage && parsed.destAddress && typeof parsed.amountSats === "number" && (parsed.reservePhoneSignature === void 0 || /^[0-9a-f]{128}$/.test(parsed.reservePhoneSignature)) && persistedReservationFactsAreValid(parsed) && (parsed.stage === "pre-reserve" || parsed.bundleDigest && (parsed.stage === "reserved" || parsed.arkTxid))) {
+    return parsed;
+  }
+  return void 0;
+}
+function validateSpendingRecoveryJournal(status, raw2) {
+  if (!raw2 || JSON.stringify(raw2).length > 8e6) throw new Error("Invalid Spending recovery journal");
+  const journal = JSON.parse(JSON.stringify(raw2));
+  if (journal.version !== 1 || journal.vaultId !== status.vaultId || !Array.isArray(journal.operations) || journal.operations.length > MAX_VTXO_SPEND_JOURNAL)
+    throw new Error("Invalid Spending recovery journal");
+  if (journal.resolved !== void 0 && (!Array.isArray(journal.resolved) || journal.resolved.length > 1e4))
+    throw new Error("Invalid resolved Spending history");
+  const resolvedIds = /* @__PURE__ */ new Set();
+  for (const record of journal.resolved || []) {
+    if (!isVtxoOperationId(record.operationId) || resolvedIds.has(record.operationId) || !Number.isSafeInteger(record.amountSats) || record.amountSats < VTXO_DUST_SATS || record.arkTxid !== "" && !/^[0-9a-f]{64}$/.test(record.arkTxid))
+      throw new Error("Invalid resolved Spending operation");
+    vtxoDestinationScript(status, record.destAddress);
+    resolvedIds.add(record.operationId);
+  }
+  const ids = /* @__PURE__ */ new Set();
+  for (const record of journal.operations) {
+    if (!parsePersistedVtxoSpend(status.vaultId, record) || !(record.stage in VTXO_SPEND_STAGE_RANK) || ids.has(record.operationId) || !Number.isSafeInteger(record.amountSats) || record.amountSats < VTXO_DUST_SATS)
+      throw new Error("Invalid pending Spending operation");
+    ids.add(record.operationId);
+    vtxoDestinationScript(status, record.destAddress);
+    if (record.reservePhoneSignature && !reserveSignatureMatches(record, status))
+      throw new Error("Spending reservation signature changed");
+    if (record.operatorSubmitAttempted !== void 0 && typeof record.operatorSubmitAttempted !== "boolean")
+      throw new Error("Invalid submission ambiguity flag");
+    if (record.stage === "pre-reserve") {
+      if (record.bundleDigest || record.arkTxid || record.authorizedPsbt || record.operatorArkPsbt || record.operatorSubmitAttempted)
+        throw new Error("Pre-reservation contains later transaction evidence");
+      continue;
+    }
+    if (!/^[0-9a-f]{64}$/.test(record.bundleDigest) || !record.unsignedArkPsbt || !record.unsignedCheckpointPsbts?.length || record.checkpointTapscript !== networkPins(status.network).checkpointTapscript)
+      throw new Error("Spending operation is missing its exact transaction bundle");
+    const unsigned = Transaction2.fromPSBT(base64.decode(record.unsignedArkPsbt));
+    const rebuildRecord = record.sdkBundleVersion === 1 ? record : {
+      ...record,
+      sdkBundleVersion: 1,
+      reservedInputs: Array.from({ length: unsigned.inputsLength }, (_, index) => {
+        const input = unsigned.getInput(index);
+        if (!input.txid || input.index === void 0 || !input.witnessUtxo)
+          throw new Error("Spending input prevout is missing");
+        return {
+          txid: hex.encode(input.txid),
+          vout: input.index,
+          valueSats: Number(input.witnessUtxo.amount),
+          scriptHex: hex.encode(input.witnessUtxo.script)
+        };
+      }),
+      reservedOutputs: Array.from({ length: unsigned.outputsLength }, (_, index) => {
+        const output = unsigned.getOutput(index);
+        if (!output.script || output.amount === void 0) throw new Error("Spending output is missing");
+        return { scriptHex: hex.encode(output.script), amountSats: Number(output.amount) };
+      })
+    };
+    const { rebuilt } = buildPersistedVtxoSdkBundle(status, rebuildRecord);
+    const validation = createVaultSdkOperationValidation(
+      status,
+      rebuilt.arkTx,
+      xOnly2(networkPins(status.network).operatorSignerPub, "Operator")
+    );
+    validation.assertArkTransaction(unsigned, "unsigned");
+    for (const { original, candidate } of checkpointPairsInCanonicalOrder(
+      rebuilt.checkpoints.map((tx) => base64.encode(tx.toPSBT())),
+      record.unsignedCheckpointPsbts,
+      "Recovery"
+    ))
+      validation.assertCheckpointTransaction(candidate, original, "unsigned");
+    if (record.authorizedPsbt)
+      validation.assertArkTransaction(Transaction2.fromPSBT(base64.decode(record.authorizedPsbt)), "vault-authorized");
+    if (record.operatorArkPsbt)
+      validation.assertArkTransaction(Transaction2.fromPSBT(base64.decode(record.operatorArkPsbt)), "operator-signed");
+    if (record.authorizedPendingProof)
+      requireAuthorizedPendingProof(record.unsignedCheckpointPsbts, record.authorizedPendingProof, status);
+    if (record.operatorCheckpointPsbts)
+      matchOperatorSignedCheckpoints(
+        record.unsignedCheckpointPsbts,
+        record.operatorCheckpointPsbts,
+        xOnly2(networkPins(status.network).operatorSignerPub, "Operator")
+      );
+    if (record.checkpointPsbts)
+      requireFullyAuthorizedCheckpoints(
+        record,
+        status,
+        xOnly2(networkPins(status.network).operatorSignerPub, "Operator")
+      );
+    if (VTXO_SPEND_STAGE_RANK[record.stage] >= 1 && (!record.authorizedPsbt || !record.authorizedPendingProof))
+      throw new Error("Authorized Spending operation has incomplete recovery evidence");
+    if (VTXO_SPEND_STAGE_RANK[record.stage] >= 2 && (!record.operatorArkPsbt || !record.operatorCheckpointPsbts))
+      throw new Error("Operator result is missing");
+    if (VTXO_SPEND_STAGE_RANK[record.stage] >= 3 && !record.checkpointPsbts)
+      throw new Error("Authorized checkpoints are missing");
+  }
+  return journal;
+}
+function isVtxoOperationId(value) {
+  return typeof value === "string" && /^[0-9a-f]{32}$/.test(value);
+}
+function requireHex(value, bytes2, name) {
+  let decoded;
+  try {
+    decoded = hex.decode(String(value || "").toLowerCase());
+  } catch {
+    throw new Error(`${name} is not hex`);
+  }
+  if (decoded.length !== bytes2) throw new Error(`${name} must be ${bytes2} bytes`);
+  return decoded;
+}
+function xOnly2(value, name) {
+  const raw2 = String(value || "").toLowerCase();
+  if (/^(02|03)[0-9a-f]{64}$/.test(raw2)) return hex.decode(raw2.slice(2));
+  return requireHex(raw2, 32, name);
+}
+function sameBytes(a, b) {
+  return a.length === b.length && a.every((value, index) => value === b[index]);
+}
+function requireEnrolledSpendingStatus(status) {
+  const pins = networkPins(status.network);
+  if (!status.enrolled) throw new Error("regular VTXO spending requires an enrolled vault");
+  if (!status.vaultId) throw new Error("vault id required");
+  if (status.vtxoExitDelay !== pins.policyExitDelay) throw new Error("VTXO exit delay does not match");
+  if (status.vtxoExitDelayUnit !== VAULT_POLICY_V1_EXIT_DELAY_UNIT)
+    throw new Error("VTXO exit delay unit does not match");
+  return pins;
+}
+function spendingScriptFromStatus(status) {
+  if (status.templateVersion === LIGHT_PROFILE) {
+    const valid = requireLightStatus(status);
+    return new LightScript(valid.lightDescriptor);
+  }
+  return vaultPolicyV1ScriptFromStatus(status);
+}
+function vaultPolicyV1ScriptFromStatus(status) {
+  if (status.templateVersion === LIGHT_PROFILE) throw new Error("Light requires its own Spending script");
+  const pins = requireEnrolledSpendingStatus(status);
+  const address = ArkAddress.decode(String(status.spendingArkAddress || ""));
+  if (address.hrp !== pins.arkHrp) throw new Error("spending Ark address does not match this network");
+  const params = {
+    userPub: xOnly2(status.phoneBip340Pub, "phone pubkey"),
+    vtxoVaultCosignerPub: xOnly2(status.vtxoVaultCosignerPub, "VTXO VaultCosigner pubkey"),
+    arkdServerPub: address.serverPubKey,
+    delegatePub: xOnly2(status.vtxoDelegatePub, "delegate pubkey"),
+    exitDelay: BigInt(pins.policyExitDelay),
+    exitDelayUnit: VAULT_POLICY_V1_EXIT_DELAY_UNIT,
+    network: pins.network,
+    exitDevicePub: xOnly2(status.phoneBip340Pub, "phone pubkey"),
+    exitHardwarePub: xOnly2(status.externalOwnerWalletPub, "hardware pubkey"),
+    ...status.recoveryKeyPub || status.recoveryPub ? { exitRecoveryPub: xOnly2(status.recoveryKeyPub || status.recoveryPub, "recovery pubkey") } : {}
+  };
+  const script = new VaultPolicyV1Script(params);
+  const advertised = requireHex(status.spendingArkScript, 34, "spending Ark script");
+  if (!sameBytes(script.pkScript, advertised) || !sameBytes(address.pkScript, advertised)) {
+    throw new Error("spending Ark address does not match vault-policy-v1");
+  }
+  return script;
+}
+function vtxoDestinationScript(status, destAddress) {
+  const spendingAddress = ArkAddress.decode(String(status.spendingArkAddress || ""));
+  let destination;
+  try {
+    destination = ArkAddress.decode(destAddress.trim());
+  } catch {
+    throw new Error("regular VTXO destination must be an Arkade address");
+  }
+  if (destination.hrp !== networkPins(status.network).arkHrp) {
+    throw new Error("destination Arkade address does not match this network");
+  }
+  if (!sameBytes(destination.serverPubKey, spendingAddress.serverPubKey)) {
+    throw new Error("destination belongs to another Arkade Operator");
+  }
+  return destination.pkScript;
+}
+function reserveDigestInput(pending, status) {
+  if (pending.vaultId !== status.vaultId) throw new Error("VTXO reservation vault does not match status");
+  return {
+    operationId: pending.operationId,
+    vaultId: pending.vaultId,
+    destScript: vtxoDestinationScript(status, pending.destAddress),
+    amountSats: pending.amountSats
+  };
+}
+function reserveSignatureMatches(pending, status) {
+  if (!pending.reservePhoneSignature) return false;
+  return verifyVtxoReserveSignature(
+    reserveDigestInput(pending, status),
+    pending.reservePhoneSignature,
+    xOnly2(status.phoneBip340Pub, "phone pubkey")
+  );
+}
+function buildPersistedVtxoSdkBundle(status, pending) {
+  if (pending.sdkBundleVersion !== 1 || !pending.reservedInputs || !pending.reservedOutputs || !pending.checkpointTapscript || !persistedReservationFactsAreValid(pending)) {
+    throw new Error("fresh SDK spend is missing its validated reservation bundle");
+  }
+  const script = spendingScriptFromStatus(status);
+  const policyScriptHex = hex.encode(script.pkScript);
+  for (const input of pending.reservedInputs) {
+    if (input.scriptHex !== policyScriptHex) throw new Error("persisted SDK input is not current vault-policy-v1");
+  }
+  const destinationScript = hex.encode(vtxoDestinationScript(status, pending.destAddress));
+  if (pending.reservedOutputs[0].scriptHex !== destinationScript || pending.reservedOutputs[0].amountSats !== pending.amountSats) {
+    throw new Error("persisted SDK destination changed from the reviewed reservation");
+  }
+  if (pending.changeSats === 0) {
+    if (pending.reservedOutputs.length !== 1) throw new Error("zero-change SDK bundle has another output");
+  } else if (pending.reservedOutputs.length !== 2 || pending.reservedOutputs[1].scriptHex !== policyScriptHex || pending.reservedOutputs[1].amountSats !== pending.changeSats) {
+    throw new Error("persisted SDK change is not current vault-policy-v1");
+  }
+  const inputs = pending.reservedInputs.map((input) => ({
+    txid: input.txid,
+    vout: input.vout,
+    value: input.valueSats,
+    tapLeafScript: script.forfeit(),
+    tapTree: script.encode()
+  }));
+  const outputs = pending.reservedOutputs.map((output) => ({
+    script: requireHex(output.scriptHex, 34, "persisted SDK output script"),
+    amount: BigInt(output.amountSats)
+  }));
+  const serverUnrollScript = CSVMultisigTapscript.decode(
+    requireHex(pending.checkpointTapscript, pending.checkpointTapscript.length / 2, "persisted checkpoint tapscript")
+  );
+  const rebuilt = buildOffchainTx(inputs, outputs, serverUnrollScript);
+  if (rebuilt.arkTx.id !== pending.arkTxid) throw new Error("persisted SDK bundle changed the reserved Ark transaction");
+  if (!pending.unsignedCheckpointPsbts?.length) throw new Error("persisted SDK bundle is missing checkpoints");
+  checkpointPairsInCanonicalOrder(
+    pending.unsignedCheckpointPsbts,
+    rebuilt.checkpoints.map((tx) => base64.encode(tx.toPSBT())),
+    "SDK rebuild"
+  );
+  return { inputs, outputs, serverUnrollScript, rebuilt };
+}
+var VTXO_GET_PENDING_MESSAGE = {
+  type: "get-pending-tx",
+  expire_at: 0
+};
+function sameOptionalBytes(a, b) {
+  return a === void 0 ? b === void 0 : b !== void 0 && sameBytes(a, b);
+}
+function sameTapLeafScripts(a, b) {
+  if (a === void 0 || b === void 0) return a === b;
+  return a.length === b.length && a.every(([leftControl, leftScript], index) => {
+    const right = b[index];
+    return Boolean(
+      right && leftControl.version === right[0].version && sameBytes(leftControl.internalKey, right[0].internalKey) && leftControl.merklePath.length === right[0].merklePath.length && leftControl.merklePath.every((node, nodeIndex) => sameBytes(node, right[0].merklePath[nodeIndex])) && sameBytes(leftScript, right[1])
+    );
+  });
+}
+function requireInputShapeMatches(expected, candidate, context) {
+  if (!sameOptionalBytes(expected.txid, candidate.txid) || expected.index !== candidate.index || expected.sequence !== candidate.sequence || expected.sighashType !== candidate.sighashType || !sameOptionalBytes(expected.tapInternalKey, candidate.tapInternalKey) || !sameOptionalBytes(expected.tapMerkleRoot, candidate.tapMerkleRoot)) {
+    throw new Error(`${context} changed an input`);
+  }
+  if (expected.witnessUtxo === void 0 || candidate.witnessUtxo === void 0) {
+    if (expected.witnessUtxo !== candidate.witnessUtxo) throw new Error(`${context} changed an input prevout`);
+  } else if (expected.witnessUtxo.amount !== candidate.witnessUtxo.amount || !sameBytes(expected.witnessUtxo.script, candidate.witnessUtxo.script)) {
+    throw new Error(`${context} changed an input prevout`);
+  }
+  if (!sameTapLeafScripts(expected.tapLeafScript, candidate.tapLeafScript)) {
+    throw new Error(`${context} changed an input tapleaf`);
+  }
+}
+function pendingProofFromCheckpoints(unsignedCheckpointPsbts) {
+  if (unsignedCheckpointPsbts.length < 1 || unsignedCheckpointPsbts.length > MAX_VTXO_INPUTS) {
+    throw new Error("pending proof requires the exact reserved checkpoints");
+  }
+  const inputs = unsignedCheckpointPsbts.map((raw2) => {
+    const checkpoint = Transaction2.fromPSBT(base64.decode(raw2));
+    if (checkpoint.inputsLength !== 1) throw new Error("pending proof checkpoint must have one input");
+    return checkpoint.getInput(0);
+  });
+  return Intent.create(VTXO_GET_PENDING_MESSAGE, inputs, []);
+}
+function transactionWithoutTapscriptSignatures(tx) {
+  const unsigned = tx.clone();
+  const inputs = unsigned.inputs;
+  for (const input of inputs) {
+    Reflect.deleteProperty(input, "tapScriptSig");
+    if (input.unknown) {
+      input.unknown = input.unknown.filter(([key]) => !(key.type === 222 && hex.encode(key.key) === "74617074726565"));
+    }
+  }
+  return unsigned.toPSBT();
+}
+function pendingProofWithoutTapscriptSignatures(proof) {
+  return transactionWithoutTapscriptSignatures(proof);
+}
+function requireExactTapscriptSigners(proof, inputIndex, expectedPubkeys, allowedSighashTypes, expectedLeafHash) {
+  const signatures = proof.getInput(inputIndex).tapScriptSig || [];
+  const actual = signatures.map(([data]) => hex.encode(data.pubKey)).sort();
+  const expected = expectedPubkeys.map(hex.encode).sort();
+  if (actual.length !== expected.length || actual.some((pubkey, index) => pubkey !== expected[index])) {
+    throw new Error("pending proof has the wrong signer set");
+  }
+  verifyTapscriptSignatures(proof, inputIndex, expected, void 0, allowedSighashTypes, expectedLeafHash);
+}
+function inputSpendLeafHash(tx, inputIndex) {
+  const leaves = tx.getInput(inputIndex).tapLeafScript;
+  if (leaves?.length !== 1) throw new Error(`input ${inputIndex} must carry exactly one spend leaf`);
+  const scriptWithVersion = leaves[0][1];
+  const version2 = scriptWithVersion[scriptWithVersion.length - 1];
+  return tapLeafHash(scriptFromTapLeafScript(leaves[0]), version2);
+}
+function requireAuthorizedPendingProof(unsignedCheckpointPsbts, authorizedPendingProof, status) {
+  const expected = pendingProofFromCheckpoints(unsignedCheckpointPsbts);
+  const candidate = Transaction2.fromPSBT(base64.decode(authorizedPendingProof));
+  if (candidate.id !== expected.id || candidate.inputsLength !== expected.inputsLength || candidate.outputsLength !== expected.outputsLength) {
+    throw new Error("Vault authorization changed the pending proof");
+  }
+  for (let index = 0; index < expected.inputsLength; index++) {
+    requireInputShapeMatches(expected.getInput(index), candidate.getInput(index), "Vault authorization");
+  }
+  if (!sameBytes(pendingProofWithoutTapscriptSignatures(expected), pendingProofWithoutTapscriptSignatures(candidate))) {
+    throw new Error("Vault authorization changed the pending proof PSBT");
+  }
+  const phonePub = xOnly2(status.phoneBip340Pub, "phone pubkey");
+  const vaultPub = xOnly2(status.vtxoVaultCosignerPub, "VTXO VaultCosigner pubkey");
+  for (let index = 0; index < candidate.inputsLength; index++) {
+    requireExactTapscriptSigners(
+      candidate,
+      index,
+      [phonePub, vaultPub],
+      [SigHash.ALL],
+      inputSpendLeafHash(expected, index)
+    );
+  }
+  return base64.encode(candidate.toPSBT());
+}
+function requireCheckpointShapeMatches(original, candidate, context = "Operator") {
+  if (original.id !== candidate.id || original.inputsLength !== 1 || candidate.inputsLength !== 1) {
+    throw new Error(`${context} changed the checkpoint transaction`);
+  }
+  const expected = original.getInput(0);
+  const submitted = candidate.getInput(0);
+  if (!expected.witnessUtxo || !submitted.witnessUtxo || expected.witnessUtxo.amount !== submitted.witnessUtxo.amount || !sameBytes(expected.witnessUtxo.script, submitted.witnessUtxo.script)) {
+    throw new Error(`${context} changed the checkpoint prevout`);
+  }
+  if (expected.tapLeafScript?.length !== 1 || submitted.tapLeafScript?.length !== 1 || !sameBytes(expected.tapLeafScript[0][1], submitted.tapLeafScript[0][1])) {
+    throw new Error(`${context} changed the checkpoint tapleaf`);
+  }
+  if (!sameBytes(transactionWithoutTapscriptSignatures(original), transactionWithoutTapscriptSignatures(candidate))) {
+    throw new Error(`${context} changed the checkpoint PSBT`);
+  }
+}
+function requireOperatorSignedCheckpoint(original, candidate, operatorPub) {
+  requireCheckpointShapeMatches(original, candidate);
+  const submitted = candidate.getInput(0);
+  const signatures = submitted.tapScriptSig;
+  if (signatures?.length !== 1 || !sameBytes(signatures[0][0].pubKey, operatorPub)) {
+    throw new Error("checkpoint requires exactly the Operator signature");
+  }
+  verifyTapscriptSignatures(
+    candidate,
+    0,
+    [hex.encode(operatorPub)],
+    void 0,
+    void 0,
+    inputSpendLeafHash(original, 0)
+  );
+}
+function requireArkShapeMatches(original, candidate, context) {
+  if (original.id !== candidate.id || original.inputsLength !== candidate.inputsLength || original.outputsLength !== candidate.outputsLength) {
+    throw new Error(`${context} changed the Ark transaction`);
+  }
+  for (let index = 0; index < original.inputsLength; index++) {
+    requireInputShapeMatches(original.getInput(index), candidate.getInput(index), context);
+  }
+  if (!sameBytes(transactionWithoutTapscriptSignatures(original), transactionWithoutTapscriptSignatures(candidate))) {
+    throw new Error(`${context} changed the Ark PSBT`);
+  }
+}
+function requireNoTapscriptSignatures(tx, context) {
+  for (let index = 0; index < tx.inputsLength; index++) {
+    if (tx.getInput(index).tapScriptSig?.length) throw new Error(`${context} is already signed`);
+  }
+}
+function createVaultSdkOperationValidation(status, unsignedArk, operatorPub) {
+  const phonePub = xOnly2(status.phoneBip340Pub, "phone pubkey");
+  const vaultPub = xOnly2(status.vtxoVaultCosignerPub, "VTXO VaultCosigner pubkey");
+  return {
+    assertArkTransaction(candidate, stage) {
+      requireArkShapeMatches(unsignedArk, candidate, `${stage} SDK validation`);
+      if (stage === "unsigned") requireNoTapscriptSignatures(candidate, "unsigned Ark transaction");
+      else {
+        const signers = stage === "vault-authorized" ? [phonePub, vaultPub] : [phonePub, vaultPub, operatorPub];
+        for (let index = 0; index < candidate.inputsLength; index++) {
+          requireExactTapscriptSigners(candidate, index, signers, void 0, inputSpendLeafHash(unsignedArk, index));
+        }
+      }
+    },
+    assertCheckpointTransaction(candidate, expectedUnsigned, stage) {
+      requireCheckpointShapeMatches(expectedUnsigned, candidate, stage);
+      if (stage === "unsigned") requireNoTapscriptSignatures(candidate, "unsigned checkpoint");
+      else if (stage === "operator-signed") requireOperatorSignedCheckpoint(expectedUnsigned, candidate, operatorPub);
+      else {
+        requireExactTapscriptSigners(
+          candidate,
+          0,
+          [operatorPub, phonePub, vaultPub],
+          void 0,
+          inputSpendLeafHash(expectedUnsigned, 0)
+        );
+      }
+    }
+  };
+}
+function checkpointPairsInCanonicalOrder(expectedCheckpointPsbts, candidateCheckpointPsbts, context) {
+  if (candidateCheckpointPsbts.length !== expectedCheckpointPsbts.length) {
+    throw new Error(`${context} returned the wrong checkpoint count`);
+  }
+  const candidates = /* @__PURE__ */ new Map();
+  for (const raw2 of candidateCheckpointPsbts) {
+    const candidate = Transaction2.fromPSBT(base64.decode(raw2));
+    if (candidates.has(candidate.id)) throw new Error(`${context} returned a duplicate checkpoint`);
+    candidates.set(candidate.id, candidate);
+  }
+  const expectedIds = /* @__PURE__ */ new Set();
+  const ordered = expectedCheckpointPsbts.map((raw2) => {
+    const original = Transaction2.fromPSBT(base64.decode(raw2));
+    if (expectedIds.has(original.id)) throw new Error("local checkpoint identity is duplicated");
+    expectedIds.add(original.id);
+    const candidate = candidates.get(original.id);
+    if (!candidate) throw new Error(`${context} returned an unknown or missing checkpoint`);
+    requireCheckpointShapeMatches(original, candidate, context);
+    candidates.delete(original.id);
+    return { original, candidate };
+  });
+  if (candidates.size !== 0) throw new Error(`${context} returned an unknown checkpoint`);
+  return ordered;
+}
+function matchOperatorSignedCheckpoints(expectedCheckpointPsbts, candidateCheckpointPsbts, operatorPub) {
+  return checkpointPairsInCanonicalOrder(expectedCheckpointPsbts, candidateCheckpointPsbts, "Operator").map(
+    ({ original, candidate }) => {
+      requireOperatorSignedCheckpoint(original, candidate, operatorPub);
+      return base64.encode(candidate.toPSBT());
+    }
+  );
+}
+function requireFullyAuthorizedCheckpoints(pending, status, operatorPub, checkpointPsbts = pending.checkpointPsbts) {
+  if (!pending.unsignedCheckpointPsbts?.length || !checkpointPsbts?.length) {
+    throw new VtxoSpendInFlightError(pending.arkTxid, pending.operationId);
+  }
+  const phonePub = xOnly2(status.phoneBip340Pub, "phone pubkey");
+  const vaultPub = xOnly2(status.vtxoVaultCosignerPub, "VTXO VaultCosigner pubkey");
+  return checkpointPairsInCanonicalOrder(pending.unsignedCheckpointPsbts, checkpointPsbts, "Vault authorization").map(
+    ({ original, candidate }) => {
+      requireExactTapscriptSigners(
+        candidate,
+        0,
+        [operatorPub, phonePub, vaultPub],
+        void 0,
+        inputSpendLeafHash(original, 0)
+      );
+      return base64.encode(candidate.toPSBT());
+    }
+  );
+}
+var VTXO_SPEND_STAGE_RANK = {
+  "pre-reserve": -1,
+  reserved: 0,
+  authorized: 1,
+  "operator-submitted": 2,
+  "checkpoints-authorized": 3,
+  "operator-finalized": 4
+};
+
+// src/lib/vault/vtxo/recoveryArchive.ts
+init_define_import_meta_env();
+init_sha2();
+init_base();
+
+// src/lib/vault/program/kitBackup.ts
+init_define_import_meta_env();
+
+// src/lib/vault/signIn.ts
+init_define_import_meta_env();
+
+// src/lib/vault/passkeyBinding.ts
+init_define_import_meta_env();
+var encoder3 = new TextEncoder();
+var BINDING_DOMAIN = encoder3.encode("arkade-vault/recovery-binding/v4");
+var CONNECTOR_BINDING_DOMAIN = encoder3.encode("arkade-vault/recovery-binding/v5");
+var PROOF_DOMAIN = encoder3.encode("arkade-2fa-vault/passkey-proof/v1");
+var ZERO2 = Uint8Array.of(0);
+
+// src/lib/vault/signIn.ts
+var PRF_SALT4 = new TextEncoder().encode("arkade-2fa-vault/prf/v1");
+var HKDF_INFO4 = new TextEncoder().encode("arkade-2fa-vault/kek/v1");
+
+// src/lib/vault/program/kitBackup.ts
+function kitFromFacts(input) {
+  const recoveryPub = input.recoveryPub || input.status?.recoveryPub || "";
+  const hardwarePub = input.hardwarePub || input.status?.externalOwnerWalletPub || "";
+  const phonePub = input.enrollment?.phoneBip340Pub || input.status?.phoneBip340Pub || "";
+  const phoneDirectP256 = input.enrollment?.phoneDirectP256 || input.status?.phoneDirectP256 || "";
+  if (!hardwarePub) return null;
+  const vaultId = input.status?.vaultId || input.enrollment?.vaultId || "";
+  const liveBases = Boolean(input.status?.vaultCosignerBasePub && input.status?.arkadeCosignerBasePub);
+  const liveTemplate = String(input.status?.templateVersion || "");
+  const signerOrigin = String(input.status?.arkadeCosignerOrigin || "").trim();
+  const signerVersion = String(input.status?.arkadeCosignerVersion || "").trim();
+  const spendingPolicy = input.status?.spendingPolicy;
+  const statusSpendingPolicyDigest = String(input.status?.spendingPolicyDigest || "").trim();
+  const protectionTier = input.status?.protectionTier;
+  if (liveBases && phonePub && phoneDirectP256 && vaultId && signerOrigin && signerVersion && spendingPolicy && spendingPolicy.program === "vault-policy-v1" && statusSpendingPolicyDigest && protectionTier && protectionTier !== "light" && isSupportedVaultNetwork(input.status?.network) && (liveTemplate === SAVINGS_TEMPLATE || liveTemplate === CONNECTOR_TEMPLATE)) {
+    try {
+      const descriptor = buildVaultProgramDescriptor({
+        vaultId,
+        network: input.status.network,
+        phonePub,
+        hardwarePub,
+        recoveryPub,
+        phoneDirectP256,
+        vaultCosignerBase: input.status.vaultCosignerBasePub,
+        arkadeCosignerBase: input.status.arkadeCosignerBasePub,
+        arkadeCosigner: {
+          origin: signerOrigin,
+          version: signerVersion
+        },
+        templateVersion: liveTemplate,
+        connectorType: input.status?.connectorEnrollment?.connectorType,
+        protectionTier,
+        spendingPolicy
+      });
+      if (descriptor.policy.digest !== statusSpendingPolicyDigest) {
+        throw new Error("rebuilt map spending policy does not match this vault");
+      }
+      if (input.status?.savingsAddress && descriptor.savings.address !== input.status.savingsAddress) {
+        throw new Error("rebuilt map does not match this vault");
+      }
+      if (input.status?.savingsScript && descriptor.savings.script !== input.status.savingsScript) {
+        throw new Error("rebuilt map does not match this vault");
+      }
+      return buildRecoveryKit(descriptor);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+// src/lib/vault/recovery/exitArchive.ts
+init_define_import_meta_env();
+init_base();
+var maxArchiveBytes = 12e6;
+var outpoint = (v) => `${v.txid}:${v.vout}`;
+var canonicalId = (id) => /^[0-9a-f]{64}$/.test(id);
+function normalizeRecoveryChain(chain2) {
+  if (chain2.length > 4096) throw new Error("Recovery path limit exceeded");
+  const unique = /* @__PURE__ */ new Map();
+  for (const node of chain2) {
+    const spends = node.spends.map((reference) => {
+      if (canonicalId(reference)) return reference;
+      const match2 = /^([0-9a-f]{64}):(0|[1-9][0-9]{0,9})$/.exec(reference);
+      if (!match2 || Number(match2[2]) > 4294967295) throw new Error("Invalid recovery ancestry reference");
+      return match2[1];
+    });
+    const normalized = {
+      txid: node.txid,
+      type: node.type,
+      expiresAt: node.expiresAt,
+      spends: [...new Set(spends)].sort()
+    };
+    const existing = unique.get(node.txid);
+    if (existing && JSON.stringify(existing) !== JSON.stringify(normalized))
+      throw new Error("Recovery ancestry disagrees about a transaction");
+    unique.set(node.txid, normalized);
+  }
+  return [...unique.values()];
+}
+function packExitArchive(value) {
+  return JSON.stringify(value, (_, v) => typeof v === "bigint" ? { lightBigInt: String(v) } : v);
+}
+function unpack(raw2) {
+  return JSON.parse(raw2, (_, v) => {
+    if (v && typeof v === "object" && Object.keys(v).length === 1 && "lightBigInt" in v) {
+      if (typeof v.lightBigInt !== "string" || !/^-?[0-9]{1,20}$/.test(v.lightBigInt))
+        throw new Error("Invalid saved recovery number");
+      return BigInt(v.lightBigInt);
+    }
+    return v;
+  });
+}
+function requireExitArchiveInfo(info, d) {
+  const pins = networkPins(d.network);
+  if (info.network !== pins.operatorGetInfoNetwork || info.signerPubkey !== pins.operatorSignerPub || info.checkpointTapscript !== pins.checkpointTapscript || info.forfeitPubkey !== pins.checkpointForfeitPub)
+    throw new Error("Recovery data does not match this release");
+}
+function validateExitArchive(value, d) {
+  if (!value || JSON.stringify(value).length > maxArchiveBytes || value.version !== 1 || value.descriptorHash !== d.descriptorHash || !Number.isFinite(Date.parse(value.capturedAt)))
+    throw new Error("Recovery data does not match this wallet");
+  const info = unpack(value.info);
+  requireExitArchiveInfo(info, d);
+  const rawCoins = unpack(value.coins);
+  if (!Array.isArray(rawCoins) || rawCoins.length > 512) throw new Error("Recovery output limit exceeded");
+  const coins = rawCoins.map((coin) => ({
+    ...coin,
+    createdAt: new Date(coin.createdAt),
+    ...coin.expiresAt ? { expiresAt: new Date(coin.expiresAt) } : {}
+  }));
+  const seen = /* @__PURE__ */ new Set();
+  const transactions = /* @__PURE__ */ new Map();
+  if (!value.transactions || Object.keys(value.transactions).length > 4096)
+    throw new Error("Recovery transaction limit exceeded");
+  for (const [id, psbt] of Object.entries(value.transactions)) {
+    if (!canonicalId(id) || typeof psbt !== "string" || psbt.length > 1e6)
+      throw new Error("Invalid saved recovery transaction");
+    const tx = Transaction2.fromPSBT(base64.decode(psbt));
+    if (tx.id !== id) throw new Error("Recovery transaction changed");
+    transactions.set(id, tx);
+  }
+  for (const coin of coins) {
+    const key = outpoint(coin);
+    if (!canonicalId(coin.txid) || !Number.isSafeInteger(coin.vout) || coin.vout < 0 || coin.vout > 4294967295 || !Number.isSafeInteger(coin.value) || coin.value <= 0 || coin.value > 21e14 || coin.script !== d.scriptPubKey || coin.isSpent || coin.spentBy || seen.has(key))
+      throw new Error("Saved recovery output changed");
+    seen.add(key);
+    const chain2 = value.branches?.[key];
+    if (!Array.isArray(chain2) || !chain2.length || chain2.length > 4096 || new Set(chain2.map((node) => node.txid)).size !== chain2.length || !chain2.some((node) => node.txid === coin.txid))
+      throw new Error("Recovery path is incomplete");
+    for (const node of chain2) {
+      if (!canonicalId(node.txid) || !Array.isArray(node.spends) || node.spends.some((id) => !canonicalId(id)) || !Object.values(ChainTxType).includes(node.type) || node.type === ChainTxType.UNSPECIFIED || node.type !== ChainTxType.COMMITMENT && !transactions.has(node.txid))
+        throw new Error("Recovery path is incomplete");
+    }
+    const nodes = new Map(chain2.map((node) => [node.txid, node]));
+    if (!chain2.some((node) => node.type === ChainTxType.COMMITMENT))
+      throw new Error("Recovery path has no Bitcoin commitment");
+    for (const node of chain2) {
+      if (node.type === ChainTxType.COMMITMENT) continue;
+      const tx = transactions.get(node.txid);
+      const physical = /* @__PURE__ */ new Set();
+      for (let i = 0; i < tx.inputsLength; i++) {
+        const id = tx.getInput(i).txid;
+        if (!id) throw new Error("Recovery transaction input is incomplete");
+        physical.add(hex.encode(id));
+      }
+      if (!physical.size || [...physical].some((id) => !nodes.has(id)) || [...physical].sort().join("|") !== [...new Set(node.spends)].sort().join("|"))
+        throw new Error("Recovery ancestry does not match its transaction inputs");
+    }
+    const visiting = /* @__PURE__ */ new Set();
+    const visited = /* @__PURE__ */ new Set();
+    const visit = (id) => {
+      if (visited.has(id)) return;
+      if (visiting.has(id)) throw new Error("Recovery ancestry contains a cycle");
+      visiting.add(id);
+      const node = nodes.get(id);
+      if (!node) throw new Error("Recovery ancestry is incomplete");
+      if (node.type !== ChainTxType.COMMITMENT) node.spends.forEach(visit);
+      visiting.delete(id);
+      visited.add(id);
+    };
+    visit(coin.txid);
+    const output = transactions.get(coin.txid)?.getOutput(coin.vout);
+    if (!output || output.amount !== BigInt(coin.value) || hex.encode(output.script) !== d.scriptPubKey)
+      throw new Error("Recovery output does not match its transaction");
+  }
+  return { archive: value, info, coins };
+}
+function exitArchiveProviders(archive, d) {
+  const { info, coins } = validateExitArchive(archive, d);
+  const source = {
+    name: "vaulted-device-archive",
+    getVtxoChain: async (coin) => archive.branches[outpoint(coin)] ?? null,
+    getVirtualTxs: async (ids) => new Map(ids.flatMap((id) => archive.transactions[id] ? [[id, archive.transactions[id]]] : []))
+  };
+  function localOnly(methods) {
+    return new Proxy(methods, {
+      get(target, key) {
+        if (key === "then") return void 0;
+        if (key in target) return Reflect.get(target, key);
+        return () => {
+          throw new Error(`Saved recovery data cannot supply ${String(key)}`);
+        };
+      }
+    });
+  }
+  const arkProvider = localOnly({
+    getInfo: async () => info,
+    // This immutable snapshot cannot announce a live signer rotation.
+    onServerInfoChanged: () => () => {
+    }
+  });
+  const indexerProvider = localOnly({
+    subscribeForScripts: async () => "saved-vault-recovery",
+    unsubscribeForScripts: async () => {
+    },
+    getSubscription: async function* (_id, signal) {
+      if (!signal.aborted)
+        await new Promise((resolve) => signal.addEventListener("abort", () => resolve(), { once: true }));
+    },
+    getVtxos: async (options) => ({
+      vtxos: coins.filter(
+        (coin) => options?.outpoints?.some((v) => outpoint(v) === outpoint(coin)) || options?.scripts?.includes(coin.script)
+      )
+    }),
+    getVtxoChain: async (coin) => ({ chain: archive.branches[outpoint(coin)] ?? [] }),
+    getVirtualTxs: async (ids) => ({
+      txs: ids.flatMap((id) => archive.transactions[id] ? [archive.transactions[id]] : [])
+    })
+  });
+  return { arkProvider, indexerProvider, source, coins };
+}
+async function captureExitArchive(d, repository, previous) {
+  const url = networkPins(d.network).operatorOrigin;
+  const indexer = new RestIndexerProvider(url);
+  const info = await new RestArkProvider(url).getInfo();
+  requireExitArchiveInfo(info, d);
+  const getCoins = async () => (await indexer.getVtxos({ scripts: [d.scriptPubKey] })).vtxos.filter((v) => !v.isSpent);
+  const coins = await getCoins();
+  if (coins.length > 512) throw new Error("Recovery output limit exceeded");
+  const previousCoins = previous ? validateExitArchive(previous, d).coins : [];
+  const removed = previousCoins.filter((old) => !coins.some((coin) => outpoint(coin) === outpoint(old)));
+  if (removed.length) {
+    const resolved = (await indexer.getVtxos({ outpoints: removed })).vtxos;
+    if (removed.some((old) => !resolved.some((coin) => outpoint(coin) === outpoint(old) && coin.isSpent)))
+      throw new Error("An earlier output is missing. Previous recovery data has been retained.");
+  }
+  const resolver = createExitChainResolver({ indexer, repository });
+  const branches = {};
+  const wanted = /* @__PURE__ */ new Set();
+  for (const coin of coins) {
+    const prior = previousCoins.find((old) => outpoint(old) === outpoint(coin) && old.value === coin.value);
+    const chain2 = prior ? previous.branches[outpoint(coin)] : normalizeRecoveryChain(await resolver.getVtxoChain(coin));
+    branches[outpoint(coin)] = chain2;
+    for (const node of chain2) if (node.type !== ChainTxType.COMMITMENT) wanted.add(node.txid);
+    if (wanted.size > 4096) throw new Error("Recovery transaction limit exceeded");
+  }
+  const transactions = {};
+  for (const id of wanted) if (previous?.transactions[id]) transactions[id] = previous.transactions[id];
+  const ids = [...wanted].filter((id) => !transactions[id]);
+  for (let i = 0; i < ids.length; i += 100) {
+    for (const psbt of await resolver.getVirtualTxs(ids.slice(i, i + 100))) {
+      if (psbt.length > 1e6) throw new Error("Recovery transaction limit exceeded");
+      transactions[Transaction2.fromPSBT(base64.decode(psbt)).id] = psbt;
+    }
+  }
+  const fingerprint2 = (values) => values.map((v) => `${outpoint(v)}:${v.value}:${v.script}`).sort().join("|");
+  if (fingerprint2(coins) !== fingerprint2(await getCoins()))
+    throw new Error("Your balance changed while saving recovery data");
+  const archive = {
+    version: 1,
+    descriptorHash: d.descriptorHash,
+    capturedAt: (/* @__PURE__ */ new Date()).toISOString(),
+    info: packExitArchive(info),
+    coins: packExitArchive(coins),
+    branches,
+    transactions
+  };
+  validateExitArchive(archive, d);
+  return archive;
+}
+
+// src/lib/vault/vtxo/recoveryArchive.ts
+function vaultRecoveryBinding(kit, status) {
+  const valid = parseRecoveryKit(kit);
+  const rebuilt = kitFromFacts({ status });
+  if (!rebuilt || rebuilt.descriptorHash !== valid.descriptorHash || status.vaultId !== valid.descriptor.vaultId)
+    throw new Error("Recovery status does not match the saved vault descriptor");
+  const script = vaultPolicyV1ScriptFromStatus(status);
+  if (hex.encode(script.params.arkdServerPub) !== networkPins(status.network).operatorSignerPub.slice(2))
+    throw new Error("Recovery Operator does not match this release");
+  const boarding = requireBoardingStatus(status, String(status.vtxoBoardingDescriptor?.boardingPub || ""));
+  if (status.templateVersion === CONNECTOR_TEMPLATE) connectorPinFromVerifiedStatus(status);
+  else if (hashBoardingEnrollmentDescriptor({
+    schema: "arkade-vault/enrollment-with-board-v1",
+    vaultId: status.vaultId,
+    savings: valid.descriptor,
+    boarding
+  }) !== status.vtxoBoardingDescriptorHash)
+    throw new Error("Recovery enrollment composite changed");
+  const descriptorHash = hex.encode(
+    sha256(
+      new TextEncoder().encode(
+        JSON.stringify({
+          name: "vaulted-program-recovery-data",
+          version: 1,
+          kitHash: valid.descriptorHash,
+          spendingScript: hex.encode(script.pkScript),
+          boarding
+        })
+      )
+    )
+  );
+  return { descriptorHash, scriptPubKey: hex.encode(script.pkScript), network: valid.descriptor.network };
+}
+
+// src/lib/vault/recovery/journals.ts
+init_base();
+
+// src/lib/vault/recovery/lightningArchive.ts
+init_define_import_meta_env();
+init_sha2();
+init_legacy();
+init_base();
+
+// src/lib/vault/lightningLock.ts
+init_define_import_meta_env();
+
+// src/lib/vault/recovery/lightningArchive.ts
+var MAX_ENTRIES = 256;
+var MAX_JOURNAL_BYTES = 12e6;
+var encoder4 = new TextEncoder();
+var isHex32 = (value) => typeof value === "string" && /^[0-9a-f]{64}$/.test(value);
+function canonical(value) {
+  return JSON.stringify(
+    value,
+    (_, item) => item && typeof item === "object" && !Array.isArray(item) ? Object.fromEntries(
+      Object.keys(item).sort().map((key) => [key, item[key]])
+    ) : item
+  );
+}
+function requireBinding(binding2) {
+  if (!binding2 || typeof binding2.vaultId !== "string" || !binding2.vaultId || binding2.vaultId.length > 128 || !["mainnet", "mutinynet"].includes(binding2.network) || !isHex32(binding2.descriptorHash) || !/^5120[0-9a-f]{64}$/.test(binding2.spendingScript) || !/^(02|03)[0-9a-f]{64}$/.test(binding2.phonePub))
+    throw new Error("Invalid Lightning archive enrollment");
+  return networkPins(binding2.network);
+}
+function contractIdentity(contract) {
+  return canonical({ type: contract.type, params: contract.params, script: contract.script, address: contract.address });
+}
+function validateRecord(record, contract, binding2) {
+  const pins = requireBinding(binding2);
+  if (!record || !isHex32(record.rfqId) || !["pending", "needs_counterparty", "settled", "refunded", "failed"].includes(record.state) || !Number.isSafeInteger(record.createdAt) || record.createdAt < 0 || !Number.isSafeInteger(record.updatedAt) || record.updatedAt < record.createdAt || encoder4.encode(JSON.stringify(record)).length > 96 * 1024)
+    throw new Error("Invalid Lightning recovery record");
+  for (const txid of [record.fundingArkTxid, record.refundArkTxid, ...record.lockupSpendArkTxids ?? []])
+    if (txid !== void 0 && !isHex32(txid)) throw new Error("Invalid Lightning transaction reference");
+  const profile = storedLightningProfile(record);
+  const invoice = decodeVaultLightningInvoice(profile.invoice, profile.network, 0);
+  if (profile.network !== pins.sdkNetwork || rfqSignerOf(record)?.signingDescriptor !== `tr(${binding2.phonePub.slice(2)})`)
+    throw new Error("Lightning refund signer belongs to another wallet");
+  if (!contract || contract.type !== "vhtlc-v2" || !["active", "inactive"].includes(contract.state) || !Number.isSafeInteger(contract.createdAt) || contract.createdAt < 0 || contract.watch !== void 0 && !["watched", "awaiting-funds", "retained"].includes(contract.watch) || contract.metadata?.genericallySpendable !== false || encoder4.encode(JSON.stringify(contract)).length > 32 * 1024)
+    throw new Error("Invalid Lightning recovery contract");
+  const script = VHTLCV2ContractHandler.createScript(contract.params);
+  const address = ArkAddress.decode(record.lockupAddress);
+  if (canonical(VHTLCV2ContractHandler.serializeParams(script.options)) !== canonical(contract.params) || contract.address !== record.lockupAddress || hex.encode(script.pkScript) !== contract.script || hex.encode(address.pkScript) !== contract.script || address.hrp !== pins.arkHrp || hex.encode(address.serverPubKey) !== pins.operatorSignerPub.slice(2) || hex.encode(script.options.server) !== pins.operatorSignerPub.slice(2) || hex.encode(script.options.sender) !== binding2.phonePub.slice(2) || hex.encode(script.options.receiver) !== profile.quote.solver_pubkey || hex.encode(script.options.preimageHash) !== hex.encode(ripemd160(hex.decode(invoice.paymentHash))) || profile.quote.profile?.lockup_address !== contract.address || profile.quote.profile?.receiver_pk_script !== hex.encode(script.options.nonInteractiveClaim?.receiverPkScript ?? new Uint8Array()) || !script.options.nonInteractiveRefund || hex.encode(script.options.nonInteractiveRefund.senderPkScript) !== binding2.spendingScript || script.options.refundLocktime !== BigInt(profile.quote.refund_locktime))
+    throw new Error("Lightning contract does not match its funded quote");
+  if (profile.fundingProof && (!/^[0-9a-f-]{16,}$/i.test(profile.fundingProof.operationId) || !isHex32(profile.fundingProof.bundleDigest) || profile.fundingProof.fundingFeeSats !== void 0 && (!Number.isSafeInteger(profile.fundingProof.fundingFeeSats) || profile.fundingProof.fundingFeeSats < 0)))
+    throw new Error("Invalid Lightning funding proof");
+  const rebuilt = rebuildRfqSwap(record, contract.params);
+  if (rebuilt.kind !== "lightning_send" || rebuilt.paymentHash !== invoice.paymentHash)
+    throw new Error("Lightning hashlock changed");
+  if (profile.fundingProof && (profile.fundingProof.rfqId !== record.rfqId || profile.fundingProof.address !== record.lockupAddress || profile.fundingProof.amountSats !== record.amount))
+    throw new Error("Lightning funding proof changed");
+  return script;
+}
+function lightningExitBinding(entry, binding2) {
+  validateRecord(entry.record, entry.contract, binding2);
+  return {
+    network: binding2.network,
+    scriptPubKey: entry.contract.script,
+    descriptorHash: hex.encode(
+      sha256(
+        encoder4.encode(
+          canonical({
+            name: "vaulted-lightning-recovery",
+            version: 1,
+            binding: binding2,
+            rfqId: entry.record.rfqId,
+            contract: contractIdentity(entry.contract),
+            signer: rfqSignerOf(entry.record)
+          })
+        )
+      )
+    )
+  };
+}
+function validateLightningRecoveryJournal(journal, binding2) {
+  requireBinding(binding2);
+  if (!journal || journal.name !== "vaulted-lightning-recovery" || journal.version !== 1 || canonical(journal.binding) !== canonical(binding2) || !Array.isArray(journal.entries) || journal.entries.length > MAX_ENTRIES || encoder4.encode(JSON.stringify(journal)).length > MAX_JOURNAL_BYTES)
+    throw new Error("Invalid Lightning recovery journal");
+  const ids = /* @__PURE__ */ new Set(), scripts = /* @__PURE__ */ new Set();
+  for (const entry of journal.entries) {
+    const exitBinding = lightningExitBinding(entry, binding2);
+    if (ids.has(entry.record.rfqId) || scripts.has(entry.contract.script))
+      throw new Error("Duplicate Lightning recovery entry");
+    ids.add(entry.record.rfqId);
+    scripts.add(entry.contract.script);
+    validateExitArchive(entry.exit, exitBinding);
+  }
+  return journal;
+}
+
+// src/lib/vault/recovery/journals.ts
+function recoveryLightningBinding(status) {
+  const light = status.templateVersion === LIGHT_PROFILE ? requireLightStatus(status) : null;
+  const kit = light ? null : kitFromFacts({ status });
+  if (!light && !kit) throw new Error("Missing recovery descriptor");
+  return {
+    vaultId: status.vaultId,
+    network: status.network,
+    phonePub: String(status.phoneBip340Pub || ""),
+    spendingScript: hex.encode(spendingScriptFromStatus(status).pkScript),
+    descriptorHash: light ? lightDescriptorDigest(light.lightDescriptor) : vaultRecoveryBinding(kit, status).descriptorHash
+  };
+}
+function validateRecoveryJournals(status, data) {
+  validateSpendingRecoveryJournal(status, data.spendingJournal);
+  validateLightningRecoveryJournal(data.lightningJournal, recoveryLightningBinding(status));
+  return data;
 }
 
 // src/lib/vault/light/recovery.ts
@@ -46939,129 +51103,12 @@ init_base();
 
 // src/lib/vault/light/recoveryArchive.ts
 init_define_import_meta_env();
-
-// src/lib/vault/light/exitRepository.ts
-init_define_import_meta_env();
-function lightExitRepository(descriptor) {
-  const valid = validateLightDescriptor(descriptor);
-  return new IndexedDBVirtualTxRepository(`vaulted-light:${valid.vaultId}:exit-paths`);
-}
-
-// src/lib/vault/light/recoveryArchive.ts
-init_base();
-var maxArchiveBytes = 12e6;
-var outpoint = (v) => `${v.txid}:${v.vout}`;
-var canonicalId = (id) => /^[0-9a-f]{64}$/.test(id);
-function normalizeLightRecoveryChain(chain2) {
-  if (chain2.length > 4096) throw new Error("Recovery path limit exceeded");
-  const unique = /* @__PURE__ */ new Map();
-  for (const node of chain2) {
-    const spends = node.spends.map((reference) => {
-      if (canonicalId(reference)) return reference;
-      const match2 = /^([0-9a-f]{64}):(0|[1-9][0-9]{0,9})$/.exec(reference);
-      if (!match2 || Number(match2[2]) > 4294967295) throw new Error("Invalid recovery ancestry reference");
-      return match2[1];
-    });
-    const normalized = {
-      txid: node.txid,
-      type: node.type,
-      expiresAt: node.expiresAt,
-      spends: [...new Set(spends)].sort()
-    };
-    const existing = unique.get(node.txid);
-    if (existing && JSON.stringify(existing) !== JSON.stringify(normalized))
-      throw new Error("Recovery ancestry disagrees about a transaction");
-    unique.set(node.txid, normalized);
-  }
-  return [...unique.values()];
-}
-function pack(value) {
-  return JSON.stringify(value, (_, v) => typeof v === "bigint" ? { lightBigInt: String(v) } : v);
-}
-function unpack(raw2) {
-  return JSON.parse(raw2, (_, v) => {
-    if (v && typeof v === "object" && Object.keys(v).length === 1 && "lightBigInt" in v) {
-      if (typeof v.lightBigInt !== "string" || !/^-?[0-9]{1,20}$/.test(v.lightBigInt))
-        throw new Error("Invalid saved recovery number");
-      return BigInt(v.lightBigInt);
-    }
-    return v;
-  });
-}
-function requireInfo(info, d) {
-  const pins = networkPins(d.network);
-  if (info.network !== pins.operatorGetInfoNetwork || info.signerPubkey !== pins.operatorSignerPub || info.checkpointTapscript !== pins.checkpointTapscript || info.forfeitPubkey !== pins.checkpointForfeitPub)
-    throw new Error("Recovery data does not match this release");
-}
-function validateLightRecoveryArchive(value, descriptor) {
+function binding(descriptor) {
   const d = validateLightDescriptor(descriptor);
-  if (!value || JSON.stringify(value).length > maxArchiveBytes || value.version !== 1 || value.descriptorHash !== lightDescriptorDigest(d) || !Number.isFinite(Date.parse(value.capturedAt)))
-    throw new Error("Recovery data does not match this wallet");
-  const info = unpack(value.info);
-  requireInfo(info, d);
-  const rawCoins = unpack(value.coins);
-  if (!Array.isArray(rawCoins) || rawCoins.length > 512) throw new Error("Recovery output limit exceeded");
-  const coins = rawCoins.map((coin) => ({
-    ...coin,
-    createdAt: new Date(coin.createdAt),
-    ...coin.expiresAt ? { expiresAt: new Date(coin.expiresAt) } : {}
-  }));
-  const seen = /* @__PURE__ */ new Set();
-  const transactions = /* @__PURE__ */ new Map();
-  if (!value.transactions || Object.keys(value.transactions).length > 4096)
-    throw new Error("Recovery transaction limit exceeded");
-  for (const [id, psbt] of Object.entries(value.transactions)) {
-    if (!canonicalId(id) || typeof psbt !== "string" || psbt.length > 1e6)
-      throw new Error("Invalid saved recovery transaction");
-    const tx = Transaction2.fromPSBT(base64.decode(psbt));
-    if (tx.id !== id) throw new Error("Recovery transaction changed");
-    transactions.set(id, tx);
-  }
-  for (const coin of coins) {
-    const key = outpoint(coin);
-    if (!canonicalId(coin.txid) || !Number.isSafeInteger(coin.vout) || coin.vout < 0 || coin.vout > 4294967295 || !Number.isSafeInteger(coin.value) || coin.value <= 0 || coin.value > 21e14 || coin.script !== d.scriptPubKey || coin.isSpent || coin.spentBy || seen.has(key))
-      throw new Error("Saved recovery output changed");
-    seen.add(key);
-    const chain2 = value.branches?.[key];
-    if (!Array.isArray(chain2) || !chain2.length || chain2.length > 4096 || new Set(chain2.map((node) => node.txid)).size !== chain2.length || !chain2.some((node) => node.txid === coin.txid))
-      throw new Error("Recovery path is incomplete");
-    for (const node of chain2) {
-      if (!canonicalId(node.txid) || !Array.isArray(node.spends) || node.spends.some((id) => !canonicalId(id)) || !Object.values(ChainTxType).includes(node.type) || node.type === ChainTxType.UNSPECIFIED || node.type !== ChainTxType.COMMITMENT && !transactions.has(node.txid))
-        throw new Error("Recovery path is incomplete");
-    }
-    const nodes = new Map(chain2.map((node) => [node.txid, node]));
-    if (!chain2.some((node) => node.type === ChainTxType.COMMITMENT))
-      throw new Error("Recovery path has no Bitcoin commitment");
-    for (const node of chain2) {
-      if (node.type === ChainTxType.COMMITMENT) continue;
-      const tx = transactions.get(node.txid);
-      const physical = /* @__PURE__ */ new Set();
-      for (let i = 0; i < tx.inputsLength; i++) {
-        const id = tx.getInput(i).txid;
-        if (!id) throw new Error("Recovery transaction input is incomplete");
-        physical.add(hex.encode(id));
-      }
-      if (!physical.size || [...physical].some((id) => !nodes.has(id)) || [...physical].sort().join("|") !== [...new Set(node.spends)].sort().join("|"))
-        throw new Error("Recovery ancestry does not match its transaction inputs");
-    }
-    const visiting = /* @__PURE__ */ new Set();
-    const visited = /* @__PURE__ */ new Set();
-    const visit = (id) => {
-      if (visited.has(id)) return;
-      if (visiting.has(id)) throw new Error("Recovery ancestry contains a cycle");
-      visiting.add(id);
-      const node = nodes.get(id);
-      if (!node) throw new Error("Recovery ancestry is incomplete");
-      if (node.type !== ChainTxType.COMMITMENT) node.spends.forEach(visit);
-      visiting.delete(id);
-      visited.add(id);
-    };
-    visit(coin.txid);
-    const output = transactions.get(coin.txid)?.getOutput(coin.vout);
-    if (!output || output.amount !== BigInt(coin.value) || hex.encode(output.script) !== d.scriptPubKey)
-      throw new Error("Recovery output does not match its transaction");
-  }
-  return { archive: value, info, coins };
+  return { ...d, descriptorHash: lightDescriptorDigest(d) };
+}
+function validateLightRecoveryArchive(value, d) {
+  return validateExitArchive(value, binding(d));
 }
 function database(d) {
   validateLightDescriptor(d);
@@ -47124,54 +51171,13 @@ function captureLightRecoveryArchive(d, expected) {
   return pending;
 }
 async function capture(d, expected) {
-  const url = networkPins(d.network).operatorOrigin;
-  const indexer = new RestIndexerProvider(url);
-  const info = await new RestArkProvider(url).getInfo();
-  requireInfo(info, d);
-  const getCoins = async () => (await indexer.getVtxos({ scripts: [d.scriptPubKey] })).vtxos.filter((v) => !v.isSpent);
-  const coins = await getCoins();
-  if (coins.length > 512) throw new Error("Recovery output limit exceeded");
-  const previous = await loadLightRecoveryArchive(d).catch(() => null);
-  const previousCoins = previous ? validateLightRecoveryArchive(previous, d).coins : [];
-  const removed = previousCoins.filter((old) => !coins.some((coin) => outpoint(coin) === outpoint(old)));
-  if (removed.length) {
-    const resolved = (await indexer.getVtxos({ outpoints: removed })).vtxos;
-    if (removed.some((old) => !resolved.some((coin) => outpoint(coin) === outpoint(old) && coin.isSpent)))
-      throw new Error("An earlier output is missing. Previous recovery data has been retained.");
-  }
   const repository = lightExitRepository(d);
   try {
-    const resolver = createExitChainResolver({ indexer, repository });
-    const branches = {};
-    const wanted = /* @__PURE__ */ new Set();
-    for (const coin of coins) {
-      const prior = previousCoins.find((old) => outpoint(old) === outpoint(coin) && old.value === coin.value);
-      const chain2 = prior ? previous.branches[outpoint(coin)] : normalizeLightRecoveryChain(await resolver.getVtxoChain(coin));
-      branches[outpoint(coin)] = chain2;
-      for (const node of chain2) if (node.type !== ChainTxType.COMMITMENT) wanted.add(node.txid);
-      if (wanted.size > 4096) throw new Error("Recovery transaction limit exceeded");
-    }
-    const transactions = {};
-    for (const id of wanted) if (previous?.transactions[id]) transactions[id] = previous.transactions[id];
-    const ids = [...wanted].filter((id) => !transactions[id]);
-    for (let i = 0; i < ids.length; i += 100) {
-      for (const psbt of await resolver.getVirtualTxs(ids.slice(i, i + 100))) {
-        if (psbt.length > 1e6) throw new Error("Recovery transaction limit exceeded");
-        transactions[Transaction2.fromPSBT(base64.decode(psbt)).id] = psbt;
-      }
-    }
-    const fingerprint2 = (values) => values.map((v) => `${outpoint(v)}:${v.value}:${v.script}`).sort().join("|");
-    if (fingerprint2(coins) !== fingerprint2(await getCoins()))
-      throw new Error("Your balance changed while saving recovery data");
-    const archive = {
-      version: 1,
-      descriptorHash: lightDescriptorDigest(d),
-      capturedAt: (/* @__PURE__ */ new Date()).toISOString(),
-      info: pack(info),
-      coins: pack(coins),
-      branches,
-      transactions
-    };
+    const archive = await captureExitArchive(
+      binding(d),
+      repository,
+      await loadLightRecoveryArchive(d).catch(() => null)
+    );
     assertLightArchiveMatchesVtxos(archive, d, expected);
     await storeLightRecoveryArchive(archive, d);
     return archive;
@@ -47180,48 +51186,7 @@ async function capture(d, expected) {
   }
 }
 function lightArchiveProviders(archive, d) {
-  const { info, coins } = validateLightRecoveryArchive(archive, d);
-  const source = {
-    name: "vaulted-light-device-archive",
-    getVtxoChain: async (coin) => archive.branches[outpoint(coin)] ?? null,
-    getVirtualTxs: async (ids) => new Map(ids.flatMap((id) => archive.transactions[id] ? [[id, archive.transactions[id]]] : []))
-  };
-  function localOnly(methods) {
-    return new Proxy(methods, {
-      get(target, key) {
-        if (key === "then") return void 0;
-        if (key in target) return Reflect.get(target, key);
-        return () => {
-          throw new Error(`Saved recovery data cannot supply ${String(key)}`);
-        };
-      }
-    });
-  }
-  const arkProvider = localOnly({
-    getInfo: async () => info,
-    // This immutable snapshot cannot announce a live signer rotation.
-    onServerInfoChanged: () => () => {
-    }
-  });
-  const indexerProvider = localOnly({
-    subscribeForScripts: async () => "saved-light-recovery",
-    unsubscribeForScripts: async () => {
-    },
-    getSubscription: async function* (_id, signal) {
-      if (!signal.aborted)
-        await new Promise((resolve) => signal.addEventListener("abort", () => resolve(), { once: true }));
-    },
-    getVtxos: async (options) => ({
-      vtxos: coins.filter(
-        (coin) => options?.outpoints?.some((v) => outpoint(v) === outpoint(coin)) || options?.scripts?.includes(coin.script)
-      )
-    }),
-    getVtxoChain: async (coin) => ({ chain: archive.branches[outpoint(coin)] ?? [] }),
-    getVirtualTxs: async (ids) => ({
-      txs: ids.flatMap((id) => archive.transactions[id] ? [archive.transactions[id]] : [])
-    })
-  });
-  return { arkProvider, indexerProvider, source, coins };
+  return exitArchiveProviders(archive, binding(d));
 }
 function assertLightArchiveMatchesVtxos(archive, d, expected) {
   if (!expected) return;
@@ -47325,14 +51290,20 @@ function validateLightRecoveryFile(value) {
   if (supplied.name !== "vaulted-light-recovery" || supplied.version !== 1)
     throw new Error("Unsupported Light recovery file");
   const archive = supplied.archive ? validateLightRecoveryArchive(supplied.archive, valid.descriptor).archive : void 0;
+  const journals = supplied.spendingJournal !== void 0 || supplied.lightningJournal !== void 0 ? validateRecoveryJournals(
+    lightRecoveryStatus(valid.descriptor),
+    supplied
+  ) : void 0;
+  const savedJournals = journals ? { spendingJournal: journals.spendingJournal, lightningJournal: journals.lightningJournal } : {};
   if (!supplied.exitPackage)
-    return { ...valid, name: supplied.name, version: 1, createdAt: supplied.createdAt || "", archive };
+    return { ...valid, name: supplied.name, version: 1, createdAt: supplied.createdAt || "", archive, ...savedJournals };
   const pkg = deserializeExitPackage(serializeExitPackage(supplied.exitPackage));
   const file2 = {
     ...valid,
     name: supplied.name,
     version: 1,
     createdAt: supplied.createdAt,
+    ...savedJournals,
     exitPackage: pkg,
     exitPackageSignature: supplied.exitPackageSignature,
     feeFundingAddress: supplied.feeFundingAddress,
@@ -47382,8 +51353,7 @@ async function executeLightRecoveryWithOwner(file2, owner2, signal, onEvent) {
 
 // src/lib/vault/light/backupCodec.ts
 var MAX_LIGHT_BACKUP_BYTES = 3e6;
-var MAX_PLAIN_BYTES = 13e6;
-var encoder = new TextEncoder();
+var encoder5 = new TextEncoder();
 async function lightBackupKey(owner2, record) {
   const valid = validateLightEnrollment(record);
   if (owner2.length !== 32 || hex.encode(schnorr.getPublicKey(owner2)) !== valid.descriptor.ownerPub)
@@ -47394,7 +51364,7 @@ async function lightBackupKey(owner2, record) {
       name: "HKDF",
       hash: "SHA-256",
       salt: Uint8Array.from(hex.decode(lightDescriptorDigest(valid.descriptor))),
-      info: encoder.encode("vaulted-light/full-recovery-backup/v2")
+      info: encoder5.encode("vaulted-light/full-recovery-backup/v2")
     },
     material,
     { name: "AES-GCM", length: 256 },
@@ -47403,7 +51373,7 @@ async function lightBackupKey(owner2, record) {
   );
 }
 function aad(header) {
-  return encoder.encode(
+  return encoder5.encode(
     JSON.stringify({
       name: "vaulted-light-backup",
       version: 2,
@@ -47423,39 +51393,6 @@ function parseLightEncryptedBackup(value) {
   const header = { ...record, origin, rpId };
   return { name: file2.name, version: file2.version, header, nonce: file2.nonce, ciphertext: file2.ciphertext };
 }
-async function transform(bytes2, decompress) {
-  const input = new ReadableStream({
-    start(controller2) {
-      controller2.enqueue(Uint8Array.from(bytes2));
-      controller2.close();
-    }
-  });
-  const stream = input.pipeThrough(decompress ? new DecompressionStream("gzip") : new CompressionStream("gzip"));
-  const reader = stream.getReader();
-  const chunks = [];
-  let length = 0;
-  try {
-    for (; ; ) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      length += value.length;
-      if (length > MAX_PLAIN_BYTES) {
-        await reader.cancel();
-        throw new Error("Recovery archive is too large");
-      }
-      chunks.push(value);
-    }
-    const result = new Uint8Array(length);
-    let offset = 0;
-    for (const chunk of chunks) {
-      result.set(chunk, offset);
-      offset += chunk.length;
-    }
-    return result;
-  } finally {
-    reader.releaseLock();
-  }
-}
 async function decryptLightBackup(value, key) {
   const file2 = parseLightEncryptedBackup(value);
   const compressed2 = new Uint8Array(
@@ -47467,7 +51404,7 @@ async function decryptLightBackup(value, key) {
   );
   let plain;
   try {
-    plain = await transform(compressed2, true);
+    plain = await compressRecoveryData(compressed2, true);
     const decoded = validateLightRecoveryFile(JSON.parse(new TextDecoder().decode(plain)));
     if (!decoded.archive || JSON.stringify(validateLightEnrollment(decoded)) !== JSON.stringify(validateLightEnrollment(file2.header)))
       throw new Error("Recovery backup identity or transaction data changed");
@@ -47685,6 +51622,7 @@ el("stop").onclick = () => controller?.abort();
   (*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
 
 @scure/base/index.js:
+@scure/base/lib/index.js:
   (*! scure-base - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
 
 @scure/btc-signer/index.js:
