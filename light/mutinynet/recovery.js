@@ -40,7 +40,7 @@ var init_define_import_meta_env = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/utils.js
+// node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/utils.js
 function isBytes(a) {
   return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
 }
@@ -167,7 +167,7 @@ function randomBytes(bytesLength = 32) {
 }
 var hasHexBuiltin, hexes, asciis, oidNist;
 var init_utils = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/utils.js"() {
+  "node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/utils.js"() {
     init_define_import_meta_env();
     hasHexBuiltin = /* @__PURE__ */ (() => (
       // @ts-ignore
@@ -181,7 +181,7 @@ var init_utils = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/_md.js
+// node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/_md.js
 function Chi(a, b, c) {
   return a & b ^ ~a & c;
 }
@@ -190,7 +190,7 @@ function Maj(a, b, c) {
 }
 var HashMD, SHA256_IV, SHA224_IV, SHA384_IV, SHA512_IV;
 var init_md = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/_md.js"() {
+  "node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/_md.js"() {
     init_define_import_meta_env();
     init_utils();
     HashMD = class {
@@ -347,7 +347,7 @@ var init_md = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/_u64.js
+// node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/_u64.js
 function fromBig(n, le = false) {
   if (le)
     return { h: Number(n & U32_MASK64), l: Number(n >> _32n & U32_MASK64) };
@@ -369,7 +369,7 @@ function add(Ah, Al, Bh, Bl) {
 }
 var U32_MASK64, _32n, shrSH, shrSL, rotrSH, rotrSL, rotrBH, rotrBL, add3L, add3H, add4L, add4H, add5L, add5H;
 var init_u64 = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/_u64.js"() {
+  "node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/_u64.js"() {
     init_define_import_meta_env();
     U32_MASK64 = /* @__PURE__ */ BigInt(2 ** 32 - 1);
     _32n = /* @__PURE__ */ BigInt(32);
@@ -388,7 +388,7 @@ var init_u64 = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/sha2.js
+// node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/sha2.js
 var sha2_exports = {};
 __export(sha2_exports, {
   _SHA224: () => _SHA224,
@@ -406,7 +406,7 @@ __export(sha2_exports, {
 });
 var SHA256_K, SHA256_W, SHA2_32B, _SHA256, _SHA224, K512, SHA512_Kh, SHA512_Kl, SHA512_W_H, SHA512_W_L, SHA2_64B, _SHA512, _SHA384, T224_IV, T256_IV, _SHA512_224, _SHA512_256, sha256, sha224, sha512, sha384, sha512_256, sha512_224;
 var init_sha2 = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/sha2.js"() {
+  "node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/sha2.js"() {
     init_define_import_meta_env();
     init_md();
     init_u64();
@@ -896,7 +896,7 @@ var init_sha2 = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/utils.js
+// node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/utils.js
 var utils_exports = {};
 __export(utils_exports, {
   aInRange: () => aInRange,
@@ -1097,7 +1097,7 @@ function memoized(fn) {
 }
 var _0n, _1n, isPosBig, bitMask, notImplemented;
 var init_utils2 = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/utils.js"() {
+  "node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/utils.js"() {
     init_define_import_meta_env();
     init_utils();
     init_utils();
@@ -1111,7 +1111,7 @@ var init_utils2 = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/abstract/modular.js
+// node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/abstract/modular.js
 function mod(a, b) {
   const result = a % b;
   return result >= _0n2 ? result : b + result;
@@ -1334,7 +1334,7 @@ function mapHashToField(key, fieldOrder, isLE = false) {
 }
 var _0n2, _1n2, _2n, _3n, _4n, _5n, _7n, _8n, _9n, _16n, FIELD_FIELDS, _Field;
 var init_modular = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/abstract/modular.js"() {
+  "node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/abstract/modular.js"() {
     init_define_import_meta_env();
     init_utils2();
     _0n2 = /* @__PURE__ */ BigInt(0);
@@ -1504,7 +1504,7 @@ var init_modular = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/abstract/curve.js
+// node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/abstract/curve.js
 function negateCt(condition, item) {
   const neg = item.negate();
   return condition ? neg : item;
@@ -1603,7 +1603,7 @@ function createKeygen(randomSecretKey2, getPublicKey2) {
 }
 var _0n3, _1n3, pointPrecomputes, pointWindowSizes, wNAF;
 var init_curve = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/abstract/curve.js"() {
+  "node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/abstract/curve.js"() {
     init_define_import_meta_env();
     init_utils2();
     init_modular();
@@ -1745,7 +1745,7 @@ var init_curve = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/abstract/hash-to-curve.js
+// node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/abstract/hash-to-curve.js
 function i2osp(value, length) {
   asafenumber(value);
   asafenumber(length);
@@ -1906,7 +1906,7 @@ function createHasher2(Point5, mapToCurve, defaults) {
 }
 var os2ip, _DST_scalar;
 var init_hash_to_curve = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/abstract/hash-to-curve.js"() {
+  "node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/abstract/hash-to-curve.js"() {
     init_define_import_meta_env();
     init_utils2();
     init_modular();
@@ -1915,10 +1915,10 @@ var init_hash_to_curve = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/hmac.js
+// node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/hmac.js
 var _HMAC, hmac;
 var init_hmac = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/hmac.js"() {
+  "node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/hmac.js"() {
     init_define_import_meta_env();
     init_utils();
     _HMAC = class {
@@ -1993,7 +1993,7 @@ var init_hmac = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/abstract/weierstrass.js
+// node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/abstract/weierstrass.js
 function _splitEndoScalar(k, basis, n) {
   const [[a1, b1], [a2, b2]] = basis;
   const c1 = divNearest(b2 * k, n);
@@ -2856,7 +2856,7 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
 }
 var divNearest, DERErr, DER, _0n4, _1n4, _2n2, _3n2, _4n2;
 var init_weierstrass = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/abstract/weierstrass.js"() {
+  "node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/abstract/weierstrass.js"() {
     init_define_import_meta_env();
     init_hmac();
     init_utils();
@@ -2977,7 +2977,7 @@ var init_weierstrass = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/secp256k1.js
+// node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/secp256k1.js
 var secp256k1_exports = {};
 __export(secp256k1_exports, {
   schnorr: () => schnorr,
@@ -3082,7 +3082,7 @@ function schnorrVerify(signature, message, publicKey) {
 }
 var secp256k1_CURVE, secp256k1_ENDO, _0n5, _2n3, Fpk1, Pointk1, secp256k1, TAGGED_HASH_PREFIXES, pointToBytes, hasEven, num, schnorr, isoMap, mapSWU, secp256k1_hasher;
 var init_secp256k1 = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/secp256k1.js"() {
+  "node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/secp256k1.js"() {
     init_define_import_meta_env();
     init_sha2();
     init_utils();
@@ -3197,7 +3197,7 @@ var init_secp256k1 = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/legacy.js
+// node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/legacy.js
 var legacy_exports = {};
 __export(legacy_exports, {
   _MD5: () => _MD5,
@@ -3220,7 +3220,7 @@ function ripemd_f(group, x, y, z) {
 }
 var SHA1_IV, SHA1_W, _SHA1, sha1, p32, K, MD5_IV, MD5_W, _MD5, md5, Rho160, Id160, Pi160, idxLR, idxL, idxR, shifts160, shiftsL160, shiftsR160, Kl160, Kr160, BUF_160, _RIPEMD160, ripemd160;
 var init_legacy = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/legacy.js"() {
+  "node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/legacy.js"() {
     init_define_import_meta_env();
     init_md();
     init_utils();
@@ -3470,7 +3470,7 @@ var init_legacy = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+base@2.0.0/node_modules/@scure/base/index.js
+// node_modules/.pnpm/@scure+base@2.0.0/node_modules/@scure/base/index.js
 var base_exports = {};
 __export(base_exports, {
   base16: () => base16,
@@ -3871,7 +3871,7 @@ function genBech32(encoding) {
 }
 var gcd, radix2carry, powers, utils, base16, base32, base32nopad, base32hex, base32hexnopad, base32crockford, hasBase64Builtin, decodeBase64Builtin, base64, base64nopad, base64url, base64urlnopad, genBase58, base58, base58flickr, base58xrp, XMR_BLOCK_LEN, base58xmr, createBase58check, base58check, BECH_ALPHABET, POLYMOD_GENERATORS, bech32, bech32m, utf8, hasHexBuiltin2, hexBuiltin, hex, CODERS, coderTypeError, bytesToString, str, stringToBytes, bytes;
 var init_base = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+base@2.0.0/node_modules/@scure/base/index.js"() {
+  "node_modules/.pnpm/@scure+base@2.0.0/node_modules/@scure/base/index.js"() {
     init_define_import_meta_env();
     gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
     radix2carry = /* @__NO_SIDE_EFFECTS__ */ (from, to) => from + (to - gcd(from, to));
@@ -4012,7 +4012,7 @@ var init_base = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/micro-packed@0.8.0/node_modules/micro-packed/index.js
+// node_modules/.pnpm/micro-packed@0.8.0/node_modules/micro-packed/index.js
 function equalBytes2(a, b) {
   if (a.length !== b.length)
     return false;
@@ -4451,7 +4451,7 @@ function array(len, inner) {
 }
 var EMPTY, NULL, createView2, utils2, lengthCoder, Bitset, Path, _Reader, _Writer, swapEndianness, wrap, isBaseCoder, numberBigint, reverse, coders, bigint, U256BE, U64LE, I64LE, view, intView, U32LE, U32BE, I32LE, U16LE, U8, createBytes, string, createHex, flag;
 var init_micro_packed = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/micro-packed@0.8.0/node_modules/micro-packed/index.js"() {
+  "node_modules/.pnpm/micro-packed@0.8.0/node_modules/micro-packed/index.js"() {
     init_define_import_meta_env();
     init_base();
     EMPTY = /* @__PURE__ */ Uint8Array.of();
@@ -5117,7 +5117,7 @@ var init_micro_packed = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/utils.js
+// node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/utils.js
 function signECDSA(hash, privateKey, lowR = false) {
   let sig = secp256k1.Signature.fromBytes(secp256k1.sign(hash, privateKey, { prehash: false }));
   if (lowR && !hasLowR(sig)) {
@@ -5193,7 +5193,7 @@ function reverseObject(obj) {
 }
 var Point, Fn, CURVE_ORDER, hasEven2, isBytes4, concatBytes3, equalBytes3, hash160, sha256x2, randomPrivateKeyBytes, pubSchnorr, pubECDSA, hasLowR, signSchnorr, tagSchnorr, PubT, TAPROOT_UNSPENDABLE_KEY, NETWORK, TEST_NETWORK;
 var init_utils3 = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/utils.js"() {
+  "node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/utils.js"() {
     init_define_import_meta_env();
     init_secp256k1();
     init_utils2();
@@ -5235,7 +5235,7 @@ var init_utils3 = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/script.js
+// node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/script.js
 var script_exports = {};
 __export(script_exports, {
   BTCArray: () => BTCArray,
@@ -5319,7 +5319,7 @@ function validateRawTx(tx) {
 }
 var MAX_SCRIPT_BYTE_LENGTH, OP, OPNames, Script, CSLimits, CompactSize, CompactSizeLen, VarBytes, RawWitness, BTCArray, RawInput, RawOutput, _RawTx, RawTx, RawOldTx;
 var init_script = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/script.js"() {
+  "node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/script.js"() {
     init_define_import_meta_env();
     init_micro_packed();
     init_utils3();
@@ -5587,7 +5587,7 @@ var init_script = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/psbt.js
+// node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/psbt.js
 function PSBTKeyInfo(info) {
   const [type, kc, vc, reqInc, allowInc, silentIgnore] = info;
   return { type, kc, vc, reqInc, allowInc, silentIgnore };
@@ -5784,7 +5784,7 @@ function mergeKeyMap(psbtEnum, val, cur, allowedFields, allowUnknown) {
 }
 var PubKeyECDSA, PubKeySchnorr, SignatureSchnorr, BIP32Der, TaprootBIP32Der, GlobalXPUB, tapScriptSigKey, _TaprootControlBlock, TaprootControlBlock, tapTree, BytesInf, Bytes20, Bytes32, PSBTGlobal, PSBTInput, PSBTInputFinalKeys, PSBTInputUnsignedKeys, PSBTOutput, PSBTOutputUnsignedKeys, PSBTKeyPair, PSBTUnknownKey, PSBTInputCoder, PSBTOutputCoder, PSBTGlobalCoder, _RawPSBTV0, _RawPSBTV2, _DebugPSBT, RawPSBTV0, RawPSBTV2;
 var init_psbt = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/psbt.js"() {
+  "node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/psbt.js"() {
     init_define_import_meta_env();
     init_base();
     init_micro_packed();
@@ -5965,7 +5965,7 @@ var init_psbt = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/payment.js
+// node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/payment.js
 function isValidPubkey(pub, type) {
   try {
     validatePubkey(pub, type);
@@ -6307,7 +6307,7 @@ function Address(network = NETWORK) {
 }
 var OutP2A, OutPK, OutPKH, OutSH, OutWSH, OutWPKH, OutMS, OutTR, OutTRNS, OutTRMS, OutUnknown, OutScripts, _OutScript, OutScript, p2pk, p2pkh, p2sh, p2wsh, p2wpkh, p2ms, TAP_LEAF_VERSION, tapLeafHash, p2tr_ns, p2tr_pk, _sortPubkeys, base58check2;
 var init_payment = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/payment.js"() {
+  "node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/payment.js"() {
     init_define_import_meta_env();
     init_base();
     init_micro_packed();
@@ -6609,7 +6609,7 @@ var init_payment = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/transaction.js
+// node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/transaction.js
 function cloneDeep(obj) {
   if (Array.isArray(obj))
     return obj.map((i) => cloneDeep(i));
@@ -6869,7 +6869,7 @@ function bip32Path(path) {
 }
 var EMPTY32, EMPTY_OUTPUT, toVsize, PRECISION, DEFAULT_VERSION, DEFAULT_LOCKTIME, DEFAULT_SEQUENCE, Decimal, def, SignatureHash, SigHash, SigHashNames, TxHashIdx, Transaction, HARDENED_OFFSET;
 var init_transaction = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/transaction.js"() {
+  "node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/transaction.js"() {
     init_define_import_meta_env();
     init_base();
     init_micro_packed();
@@ -7661,7 +7661,7 @@ var init_transaction = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/utxo.js
+// node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/utxo.js
 function iterLeafs(tapLeafScript, sigSize, customScripts) {
   if (!tapLeafScript || !tapLeafScript.length)
     throw new Error("no leafs");
@@ -7803,7 +7803,7 @@ function selectUTXO(inputs, outputs, strategy, opts) {
 }
 var encodeTapBlock, _cmpBig, _Estimator;
 var init_utxo = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/utxo.js"() {
+  "node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/utxo.js"() {
     init_define_import_meta_env();
     init_base();
     init_micro_packed();
@@ -8076,7 +8076,7 @@ var init_utxo = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/index.js
+// node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/index.js
 var btc_signer_exports = {};
 __export(btc_signer_exports, {
   Address: () => Address,
@@ -8124,7 +8124,7 @@ __export(btc_signer_exports, {
 });
 var utils3;
 var init_btc_signer = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/index.js"() {
+  "node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/index.js"() {
     init_define_import_meta_env();
     init_utils3();
     init_payment();
@@ -8147,9 +8147,9 @@ var init_btc_signer = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/bip68@1.0.4/node_modules/bip68/index.js
+// node_modules/.pnpm/bip68@1.0.4/node_modules/bip68/index.js
 var require_bip68 = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/bip68@1.0.4/node_modules/bip68/index.js"(exports, module) {
+  "node_modules/.pnpm/bip68@1.0.4/node_modules/bip68/index.js"(exports, module) {
     init_define_import_meta_env();
     var SEQUENCE_FINAL = 4294967295;
     var SEQUENCE_LOCKTIME_DISABLE_FLAG = 1 << 31;
@@ -8187,9 +8187,9 @@ var require_bip68 = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/networks.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/networks.js
 var require_networks = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/networks.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/networks.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -8223,9 +8223,9 @@ var require_networks = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/lodash.memoize@4.1.2/node_modules/lodash.memoize/index.js
+// node_modules/.pnpm/lodash.memoize@4.1.2/node_modules/lodash.memoize/index.js
 var require_lodash = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/lodash.memoize@4.1.2/node_modules/lodash.memoize/index.js"(exports, module) {
+  "node_modules/.pnpm/lodash.memoize@4.1.2/node_modules/lodash.memoize/index.js"(exports, module) {
     init_define_import_meta_env();
     var FUNC_ERROR_TEXT = "Expected a function";
     var HASH_UNDEFINED = "__lodash_hash_undefined__";
@@ -8456,9 +8456,9 @@ var require_lodash = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinLib.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinLib.js
 var require_bitcoinLib = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinLib.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinLib.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -8522,7 +8522,7 @@ DescriptorsFactory/create*Lib now work as a process-wide singleton in descriptor
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/uint8array-tools@0.0.8/node_modules/uint8array-tools/src/mjs/browser.js
+// node_modules/.pnpm/uint8array-tools@0.0.8/node_modules/uint8array-tools/src/mjs/browser.js
 var browser_exports = {};
 __export(browser_exports, {
   compare: () => compare,
@@ -8760,7 +8760,7 @@ function readUInt64(buffer, offset, littleEndian) {
 }
 var HEX_STRINGS, HEX_CODES, HEX_CODEPOINTS, ENCODER, DECODER;
 var init_browser = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/uint8array-tools@0.0.8/node_modules/uint8array-tools/src/mjs/browser.js"() {
+  "node_modules/.pnpm/uint8array-tools@0.0.8/node_modules/uint8array-tools/src/mjs/browser.js"() {
     init_define_import_meta_env();
     HEX_STRINGS = "0123456789abcdefABCDEF";
     HEX_CODES = HEX_STRINGS.split("").map((c) => c.codePointAt(0));
@@ -8774,9 +8774,9 @@ var init_browser = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/varuint-bitcoin@2.0.0/node_modules/varuint-bitcoin/src/cjs/index.cjs
+// node_modules/.pnpm/varuint-bitcoin@2.0.0/node_modules/varuint-bitcoin/src/cjs/index.cjs
 var require_cjs = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/varuint-bitcoin@2.0.0/node_modules/varuint-bitcoin/src/cjs/index.cjs"(exports) {
+  "node_modules/.pnpm/varuint-bitcoin@2.0.0/node_modules/varuint-bitcoin/src/cjs/index.cjs"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -8886,7 +8886,7 @@ var require_cjs = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/uint8array-tools@0.0.9/node_modules/uint8array-tools/src/mjs/browser.js
+// node_modules/.pnpm/uint8array-tools@0.0.9/node_modules/uint8array-tools/src/mjs/browser.js
 var browser_exports2 = {};
 __export(browser_exports2, {
   compare: () => compare2,
@@ -9279,7 +9279,7 @@ function readInt64(buffer, offset, littleEndian) {
 }
 var HEX_STRINGS2, HEX_CODES2, HEX_CODEPOINTS2, ENCODER2, DECODER2;
 var init_browser2 = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/uint8array-tools@0.0.9/node_modules/uint8array-tools/src/mjs/browser.js"() {
+  "node_modules/.pnpm/uint8array-tools@0.0.9/node_modules/uint8array-tools/src/mjs/browser.js"() {
     init_define_import_meta_env();
     HEX_STRINGS2 = "0123456789abcdefABCDEF";
     HEX_CODES2 = HEX_STRINGS2.split("").map((c) => c.codePointAt(0));
@@ -9293,9 +9293,9 @@ var init_browser2 = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinjs-lib-internals.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinjs-lib-internals.js
 var require_bitcoinjs_lib_internals = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinjs-lib-internals.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinjs-lib-internals.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -9346,9 +9346,9 @@ var require_bitcoinjs_lib_internals = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/psbt.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/psbt.js
 var require_psbt = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/psbt.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/psbt.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -9529,9 +9529,9 @@ var require_psbt = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/checksum.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/checksum.js
 var require_checksum = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/checksum.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/checksum.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -9587,9 +9587,9 @@ var require_checksum = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/re.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/re.js
 var require_re = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/re.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/re.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -9651,9 +9651,9 @@ var require_re = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/keyExpressions.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/keyExpressions.js
 var require_keyExpressions = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/keyExpressions.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/keyExpressions.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -9849,9 +9849,9 @@ var require_keyExpressions = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/satisfier/maxLock.js
+// node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/satisfier/maxLock.js
 var require_maxLock = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/satisfier/maxLock.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/satisfier/maxLock.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __importDefault = exports && exports.__importDefault || function(mod2) {
@@ -9921,9 +9921,9 @@ var require_maxLock = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/satisfier/satisfactions.js
+// node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/satisfier/satisfactions.js
 var require_satisfactions = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/satisfier/satisfactions.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/satisfier/satisfactions.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -10282,9 +10282,9 @@ var require_satisfactions = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/parse.js
+// node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/parse.js
 var require_parse = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/parse.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/parse.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -10486,9 +10486,9 @@ var require_parse = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/compile.js
+// node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/compile.js
 var require_compile = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/compile.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/compile.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -10731,9 +10731,9 @@ var require_compile = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/correctness.js
+// node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/correctness.js
 var require_correctness = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/correctness.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/correctness.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -11188,9 +11188,9 @@ var require_correctness = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/malleability.js
+// node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/malleability.js
 var require_malleability = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/malleability.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/malleability.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -11330,9 +11330,9 @@ var require_malleability = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/analyze.js
+// node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/analyze.js
 var require_analyze = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/analyze.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/analyze.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __importDefault = exports && exports.__importDefault || function(mod2) {
@@ -11904,9 +11904,9 @@ var require_analyze = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/index.js
+// node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/index.js
 var require_compiler = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/index.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/compiler/index.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -11933,9 +11933,9 @@ var require_compiler = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/satisfier/index.js
+// node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/satisfier/index.js
 var require_satisfier = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/satisfier/index.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/satisfier/index.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -12164,9 +12164,9 @@ var require_satisfier = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/index.js
+// node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/index.js
 var require_dist = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/index.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+miniscript@2.0.0/node_modules/@bitcoinerlab/miniscript/dist/index.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -12185,9 +12185,9 @@ var require_dist = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/miniscript.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/miniscript.js
 var require_miniscript = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/miniscript.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/miniscript.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -12363,9 +12363,9 @@ var require_miniscript = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/parseUtils.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/parseUtils.js
 var require_parseUtils = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/parseUtils.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/parseUtils.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -12411,9 +12411,9 @@ var require_parseUtils = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/tapTree.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/tapTree.js
 var require_tapTree = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/tapTree.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/tapTree.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -12517,9 +12517,9 @@ var require_tapTree = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/resourceLimits.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/resourceLimits.js
 var require_resourceLimits = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/resourceLimits.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/resourceLimits.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -12588,9 +12588,9 @@ var require_resourceLimits = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/tapMiniscript.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/tapMiniscript.js
 var require_tapMiniscript = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/tapMiniscript.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/tapMiniscript.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -12928,9 +12928,9 @@ var require_tapMiniscript = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/multipath.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/multipath.js
 var require_multipath = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/multipath.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/multipath.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -12991,9 +12991,9 @@ var require_multipath = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/descriptors.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/descriptors.js
 var require_descriptors = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/descriptors.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/descriptors.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -14547,9 +14547,9 @@ var require_descriptors = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bip174.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bip174.js
 var require_bip174 = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bip174.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bip174.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -14563,9 +14563,9 @@ var require_bip174 = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinjsHdPatch.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinjsHdPatch.js
 var require_bitcoinjsHdPatch = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinjsHdPatch.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinjsHdPatch.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -14705,9 +14705,9 @@ var require_bitcoinjsHdPatch = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/signers.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/signers.js
 var require_signers = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/signers.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/signers.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -14797,9 +14797,9 @@ var require_signers = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/networkUtils.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/networkUtils.js
 var require_networkUtils = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/networkUtils.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/networkUtils.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -14815,9 +14815,9 @@ var require_networkUtils = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/scriptExpressions.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/scriptExpressions.js
 var require_scriptExpressions = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/scriptExpressions.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/scriptExpressions.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -14856,9 +14856,9 @@ var require_scriptExpressions = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/index.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/index.js
 var require_dist2 = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/index.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/index.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -14932,9 +14932,9 @@ Learn more: https://github.com/bitcoinerlab/descriptors/blob/main/src/index.ts#L
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/common.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/common.js
 var require_common = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/common.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/common.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -14972,9 +14972,9 @@ var require_common = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/script.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/script.js
 var require_script = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/script.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/script.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -15135,9 +15135,9 @@ var require_script = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/payments.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/payments.js
 var require_payments = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/payments.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/payments.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -15353,9 +15353,9 @@ var require_payments = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/transaction.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/transaction.js
 var require_transaction = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/transaction.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/transaction.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -15390,9 +15390,9 @@ var require_transaction = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/address.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/address.js
 var require_address = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/address.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/address.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -15449,7 +15449,7 @@ var require_address = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+bip32@2.0.1/node_modules/@scure/bip32/index.js
+// node_modules/.pnpm/@scure+bip32@2.0.1/node_modules/@scure/bip32/index.js
 var bip32_exports = {};
 __export(bip32_exports, {
   HARDENED_OFFSET: () => HARDENED_OFFSET2,
@@ -15457,7 +15457,7 @@ __export(bip32_exports, {
 });
 var Point2, Fn2, base58check3, MASTER_SECRET, BITCOIN_VERSIONS, HARDENED_OFFSET2, hash1602, fromU32, toU32, HDKey;
 var init_bip32 = __esm({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+bip32@2.0.1/node_modules/@scure/bip32/index.js"() {
+  "node_modules/.pnpm/@scure+bip32@2.0.1/node_modules/@scure/bip32/index.js"() {
     init_define_import_meta_env();
     init_secp256k1();
     init_hmac();
@@ -15699,9 +15699,9 @@ var init_bip32 = __esm({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scureKeys.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scureKeys.js
 var require_scureKeys = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scureKeys.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scureKeys.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -15835,9 +15835,9 @@ var require_scureKeys = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/ecpair.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/ecpair.js
 var require_ecpair = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/ecpair.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/ecpair.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -15896,9 +15896,9 @@ var require_ecpair = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/bip32.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/bip32.js
 var require_bip32 = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/bip32.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/bip32.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -15917,9 +15917,9 @@ var require_bip32 = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/crypto.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/crypto.js
 var require_crypto = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/crypto.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/crypto.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -16542,9 +16542,9 @@ var require_crypto = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/psbt.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/psbt.js
 var require_psbt2 = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/psbt.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/psbt.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -16920,9 +16920,9 @@ var require_psbt2 = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure.js
 var require_scure = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -16970,9 +16970,9 @@ var require_scure = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/scure.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/scure.js
 var require_scure2 = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/scure.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/scure.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -16984,9 +16984,9 @@ var require_scure2 = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-scure@3.1.7/node_modules/@bitcoinerlab/descriptors-scure/dist/index.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-scure@3.1.7/node_modules/@bitcoinerlab/descriptors-scure/dist/index.js
 var require_dist3 = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@bitcoinerlab+descriptors-scure@3.1.7/node_modules/@bitcoinerlab/descriptors-scure/dist/index.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-scure@3.1.7/node_modules/@bitcoinerlab/descriptors-scure/dist/index.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -17061,9 +17061,9 @@ var require_dist3 = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+base@1.1.1/node_modules/@scure/base/lib/index.js
+// node_modules/.pnpm/@scure+base@1.1.1/node_modules/@scure/base/lib/index.js
 var require_lib = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+base@1.1.1/node_modules/@scure/base/lib/index.js"(exports) {
+  "node_modules/.pnpm/@scure+base@1.1.1/node_modules/@scure/base/lib/index.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -17471,9 +17471,9 @@ var require_lib = __commonJS({
   }
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/light-bolt11-decoder@3.2.0/node_modules/light-bolt11-decoder/bolt11.js
+// node_modules/.pnpm/light-bolt11-decoder@3.2.0/node_modules/light-bolt11-decoder/bolt11.js
 var require_bolt11 = __commonJS({
-  "../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/light-bolt11-decoder@3.2.0/node_modules/light-bolt11-decoder/bolt11.js"(exports, module) {
+  "node_modules/.pnpm/light-bolt11-decoder@3.2.0/node_modules/light-bolt11-decoder/bolt11.js"(exports, module) {
     init_define_import_meta_env();
     var { bech32: bech322, hex: hex2, utf8: utf82 } = require_lib();
     var DEFAULTNETWORK = {
@@ -17807,16 +17807,16 @@ var require_bolt11 = __commonJS({
 // tools/light-emergency/recover.ts
 init_define_import_meta_env();
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/index.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/index.js
 init_define_import_meta_env();
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-XQJT2ACL.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-NWYR47TA.js
 init_define_import_meta_env();
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-GOKJNT7E.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-GOKJNT7E.js
 init_define_import_meta_env();
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-XNQCPSBL.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-XNQCPSBL.js
 init_define_import_meta_env();
 init_btc_signer();
 var bip68 = __toESM(require_bip68(), 1);
@@ -20173,7 +20173,7 @@ function isRecoverable(vtxo) {
   return n.isSwept && !hasTerminalSpend(n);
 }
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-NSBPE2FW.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-NSBPE2FW.js
 init_define_import_meta_env();
 var __defProp2 = Object.defineProperty;
 var __export2 = (target, all) => {
@@ -20181,7 +20181,7 @@ var __export2 = (target, all) => {
     __defProp2(target, name, { get: all[name], enumerable: true });
 };
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-GOKJNT7E.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-GOKJNT7E.js
 init_base();
 init_secp256k1();
 init_utils3();
@@ -22121,7 +22121,7 @@ var Response2;
   Response22.isGetAssetResponse = isGetAssetResponse;
 })(Response2 || (Response2 = {}));
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-ULWK4QGH.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-ULWK4QGH.js
 init_define_import_meta_env();
 init_base();
 var import_descriptors_scure = __toESM(require_dist3(), 1);
@@ -25106,12 +25106,12 @@ contractHandlers.register(VHTLCV2ContractHandler);
 contractHandlers.register(BoardingContractHandler);
 contractHandlers.register(ArkadeContractHandler);
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-XQJT2ACL.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-NWYR47TA.js
 init_utils3();
 init_btc_signer();
 init_base();
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/musig2.js
+// node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/musig2.js
 init_define_import_meta_env();
 init_secp256k1();
 init_utils2();
@@ -25435,10 +25435,10 @@ var Session = class {
   }
 };
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-XQJT2ACL.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-NWYR47TA.js
 init_utils2();
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+secp256k1@3.0.0/node_modules/@noble/secp256k1/index.js
+// node_modules/.pnpm/@noble+secp256k1@3.0.0/node_modules/@noble/secp256k1/index.js
 init_define_import_meta_env();
 var secp256k1_CURVE2 = {
   p: 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2fn,
@@ -26126,17 +26126,17 @@ var wNAF2 = (n) => {
   return { p, f };
 };
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-XQJT2ACL.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-NWYR47TA.js
 init_secp256k1();
 init_script();
 init_transaction();
 var import_descriptors_scure2 = __toESM(require_dist3(), 1);
 init_payment();
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/index.js
+// node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/index.js
 init_define_import_meta_env();
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/errors.js
+// node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/errors.js
 init_define_import_meta_env();
 var CelError = class extends Error {
   #node;
@@ -26251,16 +26251,16 @@ function attachErrorAst(error, node) {
   return error;
 }
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/evaluator.js
+// node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/evaluator.js
 init_define_import_meta_env();
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/registry.js
+// node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/registry.js
 init_define_import_meta_env();
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/functions.js
+// node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/functions.js
 init_define_import_meta_env();
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/optional.js
+// node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/optional.js
 init_define_import_meta_env();
 var Optional = class _Optional {
   #value;
@@ -26406,7 +26406,7 @@ function register(registry) {
   );
 }
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/globals.js
+// node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/globals.js
 init_define_import_meta_env();
 var hasOwn = Object.hasOwn;
 var objKeys = Object.keys;
@@ -26444,7 +26444,7 @@ var RESERVED = /* @__PURE__ */ new Set([
   "prototype"
 ]);
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/functions.js
+// node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/functions.js
 var UnsignedInt = class {
   #value;
   constructor(value) {
@@ -26897,7 +26897,7 @@ function stringSize(str2) {
   return count;
 }
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/registry.js
+// node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/registry.js
 var Type = class {
   #name;
   constructor(name) {
@@ -28154,10 +28154,10 @@ function protobufjsTypeToCelType(protoType, resolvedType) {
   }
 }
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/macros.js
+// node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/macros.js
 init_define_import_meta_env();
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/operators.js
+// node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/operators.js
 init_define_import_meta_env();
 var dynType2 = celTypes.dyn;
 var Base = class {
@@ -28856,7 +28856,7 @@ for (const op of objKeys(OPERATORS)) {
   if (obj.alias) OPERATORS[obj.alias] = obj;
 }
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/macros.js
+// node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/macros.js
 var identity = (x) => x;
 function assertIdentifier(node, message) {
   if (node.op === "id") return node.args;
@@ -29061,7 +29061,7 @@ function registerMacros(registry) {
   });
 }
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/overloads.js
+// node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/overloads.js
 init_define_import_meta_env();
 function registerOverloads(registry) {
   const unaryOverload = (op, t, h, ret) => registry.unaryOverload(op, t, h, ret, false);
@@ -29248,7 +29248,7 @@ function isEqual(a, b, ast, ev) {
   throw evaluationError("invalid_comparison_type", `Cannot compare values of type ${typeof a}`, ast);
 }
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/type-checker.js
+// node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/type-checker.js
 init_define_import_meta_env();
 var toDynTypeBinding = (/* @__PURE__ */ new Map()).set("A", "dyn").set("T", "dyn").set("K", "dyn").set("V", "dyn");
 var TypeChecker = class extends Base {
@@ -29310,7 +29310,7 @@ var TypeChecker = class extends Base {
   }
 };
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/parser.js
+// node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/parser.js
 init_define_import_meta_env();
 var TOKEN = {
   EOF: 0,
@@ -30161,7 +30161,7 @@ var Parser = class {
   }
 };
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/options.js
+// node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/options.js
 init_define_import_meta_env();
 var DEFAULT_LIMITS = objFreeze({
   maxAstNodes: 1e5,
@@ -30204,7 +30204,7 @@ function createOptions(opts, base = DEFAULT_OPTIONS) {
   });
 }
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/evaluator.js
+// node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/evaluator.js
 var globalRegistry = createRegistry({ enableOptionalTypes: false });
 registerFunctions(globalRegistry);
 registerOverloads(globalRegistry);
@@ -30342,10 +30342,10 @@ var globalEnvironment = new Environment({
   unlistedVariablesAreDyn: true
 });
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/serialize.js
+// node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/serialize.js
 init_define_import_meta_env();
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-XQJT2ACL.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-NWYR47TA.js
 function generateNonces(publicKey) {
   const nonces = nonceGen(publicKey);
   return { secNonce: nonces.secret, pubNonce: nonces.public };
@@ -43392,12 +43392,35 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
         await this.arkProvider.submitTreeSignatures(event.id, pubkey, signatures);
         return { fullySigned: true };
       },
-      onBatchFinalization: async (event, _, connectorTree) => {
+      onBatchFinalization: async (event, vtxoTree, connectorTree) => {
         if (!this.forfeitOutputScript) {
           throw new Error("Forfeit output script not set");
         }
         if (connectorTree) {
           validateConnectorsTxGraph(event.commitmentTx, connectorTree);
+        }
+        if (boardingRegistration) {
+          if (!validatedBoardingBatch || !vtxoTree || event.id !== validatedBoardingBatch.batchId) {
+            throw new Error("named boarding finalization lacks its signed batch tree");
+          }
+          const signedTree = snapshotTxTree(vtxoTree);
+          const captured = new Map(
+            validatedBoardingBatch.vtxoTree.map((node) => [node.txid, node])
+          );
+          if (!signedTree.length || signedTree.length !== captured.size) {
+            throw new Error("named boarding final tree changed");
+          }
+          for (const node of signedTree) {
+            const prior = captured.get(node.txid);
+            if (!prior || JSON.stringify(node.children) !== JSON.stringify(prior.children)) {
+              throw new Error("named boarding final tree changed");
+            }
+            const tx = Transaction.fromPSBT(base64.decode(node.tx));
+            if (tx.inputsLength !== 1 || tx.getInput(0).tapKeySig?.length !== 64) {
+              throw new Error("named boarding final tree is not signed");
+            }
+          }
+          validatedBoardingBatch = { ...validatedBoardingBatch, vtxoTree: signedTree };
         }
         await this.handleSettlementFinalizationEvent(
           event,
@@ -46964,6 +46987,7 @@ var bakedReleaseNetwork = configuredReleaseNetwork(define_import_meta_env_defaul
 var ABSOLUTE_FEE_CEILING_SATS = bakedReleaseNetwork === "mainnet" ? MAINNET_ABSOLUTE_FEE_CEILING_SATS : MUTINYNET_ABSOLUTE_FEE_CEILING_SATS;
 var FEERATE_CEILING_SAT_PER_V = bakedReleaseNetwork === "mainnet" ? MAINNET_FEERATE_CEILING_SAT_PER_V : MUTINYNET_FEERATE_CEILING_SAT_PER_V;
 var DUST_SATS = 330;
+var RECENT_HISTORY_LIMIT = 100;
 
 // src/lib/vault/networkPins.ts
 init_define_import_meta_env();
@@ -47239,7 +47263,7 @@ function lightDescriptorDigest(value) {
 // src/lib/vault/light/enrollment.ts
 init_define_import_meta_env();
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/nist.js
+// node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/nist.js
 init_define_import_meta_env();
 init_sha2();
 init_weierstrass();
@@ -47328,6 +47352,37 @@ function lightRecoveryStatus(value) {
 // src/lib/vault/bounded.ts
 init_define_import_meta_env();
 var MAX_API_RESPONSE_BYTES = 1024 * 1024;
+async function readBounded(res, maxBytes = MAX_API_RESPONSE_BYTES) {
+  const declared = Number(res.headers.get("Content-Length"));
+  if (Number.isFinite(declared) && declared > maxBytes) {
+    throw new Error("API response too large");
+  }
+  if (!res.body?.getReader) {
+    const text = await res.text();
+    if (new TextEncoder().encode(text).byteLength > maxBytes) throw new Error("API response too large");
+    return text;
+  }
+  const reader = res.body.getReader();
+  const chunks = [];
+  let total = 0;
+  for (; ; ) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > maxBytes) {
+      await reader.cancel();
+      throw new Error("API response too large");
+    }
+    chunks.push(value);
+  }
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    out.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder().decode(out);
+}
 
 // src/lib/vault/releaseNetwork.ts
 init_define_import_meta_env();
@@ -49364,13 +49419,310 @@ function validateLightEnrollment(value) {
 // src/lib/vault/light/recovery.ts
 init_define_import_meta_env();
 
+// src/lib/vault/recovery/archivePrevouts.ts
+init_define_import_meta_env();
+init_btc_signer();
+init_base();
+
+// src/lib/vault/esplora.ts
+init_define_import_meta_env();
+function esploraBase() {
+  return "/esplora";
+}
+var ESPLORA_TX_PAGE_SIZE = 25;
+var MAX_ESPLORA_TX_PAGES = Math.ceil(RECENT_HISTORY_LIMIT / ESPLORA_TX_PAGE_SIZE);
+async function fetchTxHex(txid) {
+  const res = await fetch(`${esploraBase()}/tx/${txid}/hex`);
+  const text = await readBounded(res);
+  if (!res.ok) throw new Error("Could not load the previous transaction");
+  return text.trim();
+}
+
+// src/lib/vault/recovery/exitArchive.ts
+init_define_import_meta_env();
+init_base();
+var maxArchiveBytes = 12e6;
+var outpoint = (v) => `${v.txid}:${v.vout}`;
+var canonicalId = (id) => /^[0-9a-f]{64}$/.test(id);
+function normalizeRecoveryChain(chain2) {
+  if (chain2.length > 4096) throw new Error("Recovery path limit exceeded");
+  const unique = /* @__PURE__ */ new Map();
+  for (const node of chain2) {
+    const spends = node.spends.map((reference) => {
+      if (canonicalId(reference)) return reference;
+      const match2 = /^([0-9a-f]{64}):(0|[1-9][0-9]{0,9})$/.exec(reference);
+      if (!match2 || Number(match2[2]) > 4294967295) throw new Error("Invalid recovery ancestry reference");
+      return match2[1];
+    });
+    const normalized = {
+      txid: node.txid,
+      type: node.type,
+      expiresAt: node.expiresAt,
+      spends: [...new Set(spends)].sort()
+    };
+    const existing = unique.get(node.txid);
+    if (existing && JSON.stringify(existing) !== JSON.stringify(normalized))
+      throw new Error("Recovery ancestry disagrees about a transaction");
+    unique.set(node.txid, normalized);
+  }
+  return [...unique.values()];
+}
+function packExitArchive(value) {
+  return JSON.stringify(value, (_, v) => typeof v === "bigint" ? { lightBigInt: String(v) } : v);
+}
+function unpack(raw2) {
+  return JSON.parse(raw2, (_, v) => {
+    if (v && typeof v === "object" && Object.keys(v).length === 1 && "lightBigInt" in v) {
+      if (typeof v.lightBigInt !== "string" || !/^-?[0-9]{1,20}$/.test(v.lightBigInt))
+        throw new Error("Invalid saved recovery number");
+      return BigInt(v.lightBigInt);
+    }
+    return v;
+  });
+}
+function requireExitArchiveInfo(info, d) {
+  const pins = networkPins(d.network);
+  if (info.network !== pins.operatorGetInfoNetwork || info.signerPubkey !== pins.operatorSignerPub || info.checkpointTapscript !== pins.checkpointTapscript || info.forfeitPubkey !== pins.checkpointForfeitPub)
+    throw new Error("Recovery data does not match this release");
+}
+function validateExitArchive(value, d) {
+  if (!value || JSON.stringify(value).length > maxArchiveBytes || value.version !== 1 || value.descriptorHash !== d.descriptorHash || !Number.isFinite(Date.parse(value.capturedAt)))
+    throw new Error("Recovery data does not match this wallet");
+  const info = unpack(value.info);
+  requireExitArchiveInfo(info, d);
+  const rawCoins = unpack(value.coins);
+  if (!Array.isArray(rawCoins) || rawCoins.length > 512) throw new Error("Recovery output limit exceeded");
+  const coins = rawCoins.map((coin) => ({
+    ...coin,
+    createdAt: new Date(coin.createdAt),
+    ...coin.expiresAt ? { expiresAt: new Date(coin.expiresAt) } : {}
+  }));
+  const seen = /* @__PURE__ */ new Set();
+  const transactions = /* @__PURE__ */ new Map();
+  if (!value.transactions || Object.keys(value.transactions).length > 4096)
+    throw new Error("Recovery transaction limit exceeded");
+  for (const [id, psbt] of Object.entries(value.transactions)) {
+    if (!canonicalId(id) || typeof psbt !== "string" || psbt.length > 1e6)
+      throw new Error("Invalid saved recovery transaction");
+    const tx = Transaction2.fromPSBT(base64.decode(psbt));
+    if (tx.id !== id) throw new Error("Recovery transaction changed");
+    transactions.set(id, tx);
+  }
+  for (const coin of coins) {
+    const key = outpoint(coin);
+    if (!canonicalId(coin.txid) || !Number.isSafeInteger(coin.vout) || coin.vout < 0 || coin.vout > 4294967295 || !Number.isSafeInteger(coin.value) || coin.value <= 0 || coin.value > 21e14 || coin.script !== d.scriptPubKey || coin.isSpent || coin.spentBy || seen.has(key))
+      throw new Error("Saved recovery output changed");
+    seen.add(key);
+    const chain2 = value.branches?.[key];
+    if (!Array.isArray(chain2) || !chain2.length || chain2.length > 4096 || new Set(chain2.map((node) => node.txid)).size !== chain2.length || !chain2.some((node) => node.txid === coin.txid))
+      throw new Error("Recovery path is incomplete");
+    for (const node of chain2) {
+      if (!canonicalId(node.txid) || !Array.isArray(node.spends) || node.spends.some((id) => !canonicalId(id)) || !Object.values(ChainTxType).includes(node.type) || node.type === ChainTxType.UNSPECIFIED || node.type !== ChainTxType.COMMITMENT && !transactions.has(node.txid))
+        throw new Error("Recovery path is incomplete");
+    }
+    const nodes = new Map(chain2.map((node) => [node.txid, node]));
+    if (!chain2.some((node) => node.type === ChainTxType.COMMITMENT))
+      throw new Error("Recovery path has no Bitcoin commitment");
+    for (const node of chain2) {
+      if (node.type === ChainTxType.COMMITMENT) continue;
+      const tx = transactions.get(node.txid);
+      const physical = /* @__PURE__ */ new Set();
+      for (let i = 0; i < tx.inputsLength; i++) {
+        const id = tx.getInput(i).txid;
+        if (!id) throw new Error("Recovery transaction input is incomplete");
+        physical.add(hex.encode(id));
+      }
+      if (!physical.size || [...physical].some((id) => !nodes.has(id)) || [...physical].sort().join("|") !== [...new Set(node.spends)].sort().join("|"))
+        throw new Error("Recovery ancestry does not match its transaction inputs");
+    }
+    const visiting = /* @__PURE__ */ new Set();
+    const visited = /* @__PURE__ */ new Set();
+    const visit = (id) => {
+      if (visited.has(id)) return;
+      if (visiting.has(id)) throw new Error("Recovery ancestry contains a cycle");
+      visiting.add(id);
+      const node = nodes.get(id);
+      if (!node) throw new Error("Recovery ancestry is incomplete");
+      if (node.type !== ChainTxType.COMMITMENT) node.spends.forEach(visit);
+      visiting.delete(id);
+      visited.add(id);
+    };
+    visit(coin.txid);
+    const output = transactions.get(coin.txid)?.getOutput(coin.vout);
+    if (!output || output.amount !== BigInt(coin.value) || hex.encode(output.script) !== d.scriptPubKey)
+      throw new Error("Recovery output does not match its transaction");
+  }
+  return { archive: value, info, coins };
+}
+function exitArchiveProviders(archive, d) {
+  const { info, coins } = validateExitArchive(archive, d);
+  const source = {
+    name: "vaulted-device-archive",
+    getVtxoChain: async (coin) => archive.branches[outpoint(coin)] ?? null,
+    getVirtualTxs: async (ids) => new Map(ids.flatMap((id) => archive.transactions[id] ? [[id, archive.transactions[id]]] : []))
+  };
+  function localOnly(methods) {
+    return new Proxy(methods, {
+      get(target, key) {
+        if (key === "then") return void 0;
+        if (key in target) return Reflect.get(target, key);
+        return () => {
+          throw new Error(`Saved recovery data cannot supply ${String(key)}`);
+        };
+      }
+    });
+  }
+  const arkProvider = localOnly({
+    getInfo: async () => info,
+    // This immutable snapshot cannot announce a live signer rotation.
+    onServerInfoChanged: () => () => {
+    }
+  });
+  const indexerProvider = localOnly({
+    subscribeForScripts: async () => "saved-vault-recovery",
+    unsubscribeForScripts: async () => {
+    },
+    getSubscription: async function* (_id, signal) {
+      if (!signal.aborted)
+        await new Promise((resolve) => signal.addEventListener("abort", () => resolve(), { once: true }));
+    },
+    getVtxos: async (options) => ({
+      vtxos: coins.filter(
+        (coin) => options?.outpoints?.some((v) => outpoint(v) === outpoint(coin)) || options?.scripts?.includes(coin.script)
+      )
+    }),
+    getVtxoChain: async (coin) => ({ chain: archive.branches[outpoint(coin)] ?? [] }),
+    getVirtualTxs: async (ids) => ({
+      txs: ids.flatMap((id) => archive.transactions[id] ? [archive.transactions[id]] : [])
+    })
+  });
+  return { arkProvider, indexerProvider, source, coins };
+}
+async function captureExitArchive(d, repository, previous) {
+  const url = networkPins(d.network).operatorOrigin;
+  const indexer = new RestIndexerProvider(url);
+  const info = await new RestArkProvider(url).getInfo();
+  requireExitArchiveInfo(info, d);
+  const getCoins = async () => (await indexer.getVtxos({ scripts: [d.scriptPubKey] })).vtxos.filter((v) => !v.isSpent);
+  const coins = await getCoins();
+  if (coins.length > 512) throw new Error("Recovery output limit exceeded");
+  const previousCoins = previous ? validateExitArchive(previous, d).coins : [];
+  const removed = previousCoins.filter((old) => !coins.some((coin) => outpoint(coin) === outpoint(old)));
+  if (removed.length) {
+    const resolved = (await indexer.getVtxos({ outpoints: removed })).vtxos;
+    if (removed.some((old) => !resolved.some((coin) => outpoint(coin) === outpoint(old) && coin.isSpent)))
+      throw new Error("An earlier output is missing. Previous recovery data has been retained.");
+  }
+  const resolver = createExitChainResolver({ indexer, repository });
+  const branches = {};
+  const wanted = /* @__PURE__ */ new Set();
+  for (const coin of coins) {
+    const prior = previousCoins.find((old) => outpoint(old) === outpoint(coin) && old.value === coin.value);
+    const chain2 = prior ? previous.branches[outpoint(coin)] : normalizeRecoveryChain(await resolver.getVtxoChain(coin));
+    branches[outpoint(coin)] = chain2;
+    for (const node of chain2) if (node.type !== ChainTxType.COMMITMENT) wanted.add(node.txid);
+    if (wanted.size > 4096) throw new Error("Recovery transaction limit exceeded");
+  }
+  const transactions = {};
+  for (const id of wanted) if (previous?.transactions[id]) transactions[id] = previous.transactions[id];
+  const ids = [...wanted].filter((id) => !transactions[id]);
+  for (let i = 0; i < ids.length; i += 100) {
+    for (const psbt of await resolver.getVirtualTxs(ids.slice(i, i + 100))) {
+      if (psbt.length > 1e6) throw new Error("Recovery transaction limit exceeded");
+      transactions[Transaction2.fromPSBT(base64.decode(psbt)).id] = psbt;
+    }
+  }
+  const fingerprint2 = (values) => values.map((v) => `${outpoint(v)}:${v.value}:${v.script}`).sort().join("|");
+  if (fingerprint2(coins) !== fingerprint2(await getCoins()))
+    throw new Error("Your balance changed while saving recovery data");
+  const archive = {
+    version: 1,
+    descriptorHash: d.descriptorHash,
+    capturedAt: (/* @__PURE__ */ new Date()).toISOString(),
+    info: packExitArchive(info),
+    coins: packExitArchive(coins),
+    branches,
+    transactions
+  };
+  validateExitArchive(archive, d);
+  return archive;
+}
+
+// src/lib/vault/recovery/archivePrevouts.ts
+function hydrateArchivedPrevouts(tx, transactions) {
+  let changed = false;
+  for (let i = 0; i < tx.inputsLength; i++) {
+    const input = tx.getInput(i);
+    const parentId = hex.encode(input.txid);
+    const parentPsbt = transactions[parentId];
+    if (!parentPsbt) {
+      if (!input.witnessUtxo && !input.nonWitnessUtxo) throw new Error("Recovery parent output is missing");
+      continue;
+    }
+    const parent = Transaction2.fromPSBT(base64.decode(parentPsbt));
+    if (parent.id !== parentId || input.index === void 0 || input.index >= parent.outputsLength)
+      throw new Error("Recovery parent output changed");
+    const previous = parent.getOutput(input.index);
+    if (input.nonWitnessUtxo && Transaction2.fromRaw(RawTx.encode(input.nonWitnessUtxo)).id !== parentId)
+      throw new Error("Recovery parent transaction changed");
+    for (const claimed of [input.witnessUtxo, input.nonWitnessUtxo?.outputs[input.index]]) {
+      if (claimed && (claimed.amount !== previous.amount || hex.encode(claimed.script) !== hex.encode(previous.script)))
+        throw new Error("Recovery parent output metadata changed");
+    }
+    if (!input.witnessUtxo && !input.nonWitnessUtxo) {
+      tx.updateInput(i, { witnessUtxo: { amount: previous.amount, script: previous.script } });
+      changed = true;
+    }
+  }
+  return changed;
+}
+async function prepareExitArchivePrevouts(archive, binding2, readCommitment = fetchTxHex) {
+  validateExitArchive(archive, binding2);
+  const result = { ...archive, transactions: { ...archive.transactions } };
+  const commitments = /* @__PURE__ */ new Set();
+  const needed = /* @__PURE__ */ new Set();
+  for (const branch of Object.values(archive.branches)) {
+    for (const node of branch) if (node.type === ChainTxType.COMMITMENT) commitments.add(node.txid);
+  }
+  for (const branch of Object.values(archive.branches)) {
+    for (const node of branch) {
+      if (node.type === ChainTxType.COMMITMENT) continue;
+      const tx = Transaction2.fromPSBT(base64.decode(archive.transactions[node.txid]));
+      for (let i = 0; i < tx.inputsLength; i++) {
+        const input = tx.getInput(i), parentId = hex.encode(input.txid);
+        if (!input.witnessUtxo && !input.nonWitnessUtxo && !result.transactions[parentId]) {
+          if (!commitments.has(parentId)) throw new Error("Recovery parent transaction is missing");
+          needed.add(parentId);
+        }
+      }
+    }
+  }
+  for (const id of needed) {
+    const raw2 = await readCommitment(id);
+    if (raw2.length > 2e6 || raw2.length % 2 !== 0 || !/^[0-9a-f]+$/.test(raw2))
+      throw new Error("Invalid Bitcoin commitment transaction");
+    const tx = Transaction2.fromRaw(hex.decode(raw2));
+    if (tx.id !== id) throw new Error("Bitcoin commitment transaction changed");
+    result.transactions[id] = base64.encode(tx.toPSBT());
+  }
+  for (const branch of Object.values(archive.branches)) {
+    for (const node of branch) {
+      if (node.type === ChainTxType.COMMITMENT) continue;
+      const tx = Transaction2.fromPSBT(base64.decode(result.transactions[node.txid]));
+      if (hydrateArchivedPrevouts(tx, result.transactions)) result.transactions[node.txid] = base64.encode(tx.toPSBT());
+    }
+  }
+  validateExitArchive(result, binding2);
+  return result;
+}
+
 // src/lib/vault/recovery/journals.ts
 init_define_import_meta_env();
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@arkade-os+swap@0.0.10_nostr-tools@2.17.2_typescript@5.9.3_/node_modules/@arkade-os/swap/dist/index.js
+// node_modules/.pnpm/@arkade-os+swap@0.0.10_nostr-tools@2.17.2_typescript@5.9.3_/node_modules/@arkade-os/swap/dist/index.js
 init_define_import_meta_env();
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@arkade-os+swap@0.0.10_nostr-tools@2.17.2_typescript@5.9.3_/node_modules/@arkade-os/swap/dist/chunk-5NPYNQ5V.js
+// node_modules/.pnpm/@arkade-os+swap@0.0.10_nostr-tools@2.17.2_typescript@5.9.3_/node_modules/@arkade-os/swap/dist/chunk-5NPYNQ5V.js
 init_define_import_meta_env();
 init_base();
 init_legacy();
@@ -49459,10 +49811,10 @@ var SEQUENCE_GRANULARITY_SECONDS = 512;
 var SOLO_REFUND_HEADROOM_SECONDS = 8 * SEQUENCE_GRANULARITY_SECONDS;
 var MIN_CLAIM_WINDOW_SECONDS = 30 * 60;
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@arkade-os+swap@0.0.10_nostr-tools@2.17.2_typescript@5.9.3_/node_modules/@arkade-os/swap/dist/chunk-6ZUS47GA.js
+// node_modules/.pnpm/@arkade-os+swap@0.0.10_nostr-tools@2.17.2_typescript@5.9.3_/node_modules/@arkade-os/swap/dist/chunk-6ZUS47GA.js
 init_define_import_meta_env();
 
-// ../../vaulted-joint-integration-20260906/wallet/node_modules/.pnpm/@arkade-os+swap@0.0.10_nostr-tools@2.17.2_typescript@5.9.3_/node_modules/@arkade-os/swap/dist/index.js
+// node_modules/.pnpm/@arkade-os+swap@0.0.10_nostr-tools@2.17.2_typescript@5.9.3_/node_modules/@arkade-os/swap/dist/index.js
 init_base();
 init_base();
 var swap_want_asset_program_default = {
@@ -50654,216 +51006,6 @@ function kitFromFacts(input) {
   return null;
 }
 
-// src/lib/vault/recovery/exitArchive.ts
-init_define_import_meta_env();
-init_base();
-var maxArchiveBytes = 12e6;
-var outpoint = (v) => `${v.txid}:${v.vout}`;
-var canonicalId = (id) => /^[0-9a-f]{64}$/.test(id);
-function normalizeRecoveryChain(chain2) {
-  if (chain2.length > 4096) throw new Error("Recovery path limit exceeded");
-  const unique = /* @__PURE__ */ new Map();
-  for (const node of chain2) {
-    const spends = node.spends.map((reference) => {
-      if (canonicalId(reference)) return reference;
-      const match2 = /^([0-9a-f]{64}):(0|[1-9][0-9]{0,9})$/.exec(reference);
-      if (!match2 || Number(match2[2]) > 4294967295) throw new Error("Invalid recovery ancestry reference");
-      return match2[1];
-    });
-    const normalized = {
-      txid: node.txid,
-      type: node.type,
-      expiresAt: node.expiresAt,
-      spends: [...new Set(spends)].sort()
-    };
-    const existing = unique.get(node.txid);
-    if (existing && JSON.stringify(existing) !== JSON.stringify(normalized))
-      throw new Error("Recovery ancestry disagrees about a transaction");
-    unique.set(node.txid, normalized);
-  }
-  return [...unique.values()];
-}
-function packExitArchive(value) {
-  return JSON.stringify(value, (_, v) => typeof v === "bigint" ? { lightBigInt: String(v) } : v);
-}
-function unpack(raw2) {
-  return JSON.parse(raw2, (_, v) => {
-    if (v && typeof v === "object" && Object.keys(v).length === 1 && "lightBigInt" in v) {
-      if (typeof v.lightBigInt !== "string" || !/^-?[0-9]{1,20}$/.test(v.lightBigInt))
-        throw new Error("Invalid saved recovery number");
-      return BigInt(v.lightBigInt);
-    }
-    return v;
-  });
-}
-function requireExitArchiveInfo(info, d) {
-  const pins = networkPins(d.network);
-  if (info.network !== pins.operatorGetInfoNetwork || info.signerPubkey !== pins.operatorSignerPub || info.checkpointTapscript !== pins.checkpointTapscript || info.forfeitPubkey !== pins.checkpointForfeitPub)
-    throw new Error("Recovery data does not match this release");
-}
-function validateExitArchive(value, d) {
-  if (!value || JSON.stringify(value).length > maxArchiveBytes || value.version !== 1 || value.descriptorHash !== d.descriptorHash || !Number.isFinite(Date.parse(value.capturedAt)))
-    throw new Error("Recovery data does not match this wallet");
-  const info = unpack(value.info);
-  requireExitArchiveInfo(info, d);
-  const rawCoins = unpack(value.coins);
-  if (!Array.isArray(rawCoins) || rawCoins.length > 512) throw new Error("Recovery output limit exceeded");
-  const coins = rawCoins.map((coin) => ({
-    ...coin,
-    createdAt: new Date(coin.createdAt),
-    ...coin.expiresAt ? { expiresAt: new Date(coin.expiresAt) } : {}
-  }));
-  const seen = /* @__PURE__ */ new Set();
-  const transactions = /* @__PURE__ */ new Map();
-  if (!value.transactions || Object.keys(value.transactions).length > 4096)
-    throw new Error("Recovery transaction limit exceeded");
-  for (const [id, psbt] of Object.entries(value.transactions)) {
-    if (!canonicalId(id) || typeof psbt !== "string" || psbt.length > 1e6)
-      throw new Error("Invalid saved recovery transaction");
-    const tx = Transaction2.fromPSBT(base64.decode(psbt));
-    if (tx.id !== id) throw new Error("Recovery transaction changed");
-    transactions.set(id, tx);
-  }
-  for (const coin of coins) {
-    const key = outpoint(coin);
-    if (!canonicalId(coin.txid) || !Number.isSafeInteger(coin.vout) || coin.vout < 0 || coin.vout > 4294967295 || !Number.isSafeInteger(coin.value) || coin.value <= 0 || coin.value > 21e14 || coin.script !== d.scriptPubKey || coin.isSpent || coin.spentBy || seen.has(key))
-      throw new Error("Saved recovery output changed");
-    seen.add(key);
-    const chain2 = value.branches?.[key];
-    if (!Array.isArray(chain2) || !chain2.length || chain2.length > 4096 || new Set(chain2.map((node) => node.txid)).size !== chain2.length || !chain2.some((node) => node.txid === coin.txid))
-      throw new Error("Recovery path is incomplete");
-    for (const node of chain2) {
-      if (!canonicalId(node.txid) || !Array.isArray(node.spends) || node.spends.some((id) => !canonicalId(id)) || !Object.values(ChainTxType).includes(node.type) || node.type === ChainTxType.UNSPECIFIED || node.type !== ChainTxType.COMMITMENT && !transactions.has(node.txid))
-        throw new Error("Recovery path is incomplete");
-    }
-    const nodes = new Map(chain2.map((node) => [node.txid, node]));
-    if (!chain2.some((node) => node.type === ChainTxType.COMMITMENT))
-      throw new Error("Recovery path has no Bitcoin commitment");
-    for (const node of chain2) {
-      if (node.type === ChainTxType.COMMITMENT) continue;
-      const tx = transactions.get(node.txid);
-      const physical = /* @__PURE__ */ new Set();
-      for (let i = 0; i < tx.inputsLength; i++) {
-        const id = tx.getInput(i).txid;
-        if (!id) throw new Error("Recovery transaction input is incomplete");
-        physical.add(hex.encode(id));
-      }
-      if (!physical.size || [...physical].some((id) => !nodes.has(id)) || [...physical].sort().join("|") !== [...new Set(node.spends)].sort().join("|"))
-        throw new Error("Recovery ancestry does not match its transaction inputs");
-    }
-    const visiting = /* @__PURE__ */ new Set();
-    const visited = /* @__PURE__ */ new Set();
-    const visit = (id) => {
-      if (visited.has(id)) return;
-      if (visiting.has(id)) throw new Error("Recovery ancestry contains a cycle");
-      visiting.add(id);
-      const node = nodes.get(id);
-      if (!node) throw new Error("Recovery ancestry is incomplete");
-      if (node.type !== ChainTxType.COMMITMENT) node.spends.forEach(visit);
-      visiting.delete(id);
-      visited.add(id);
-    };
-    visit(coin.txid);
-    const output = transactions.get(coin.txid)?.getOutput(coin.vout);
-    if (!output || output.amount !== BigInt(coin.value) || hex.encode(output.script) !== d.scriptPubKey)
-      throw new Error("Recovery output does not match its transaction");
-  }
-  return { archive: value, info, coins };
-}
-function exitArchiveProviders(archive, d) {
-  const { info, coins } = validateExitArchive(archive, d);
-  const source = {
-    name: "vaulted-device-archive",
-    getVtxoChain: async (coin) => archive.branches[outpoint(coin)] ?? null,
-    getVirtualTxs: async (ids) => new Map(ids.flatMap((id) => archive.transactions[id] ? [[id, archive.transactions[id]]] : []))
-  };
-  function localOnly(methods) {
-    return new Proxy(methods, {
-      get(target, key) {
-        if (key === "then") return void 0;
-        if (key in target) return Reflect.get(target, key);
-        return () => {
-          throw new Error(`Saved recovery data cannot supply ${String(key)}`);
-        };
-      }
-    });
-  }
-  const arkProvider = localOnly({
-    getInfo: async () => info,
-    // This immutable snapshot cannot announce a live signer rotation.
-    onServerInfoChanged: () => () => {
-    }
-  });
-  const indexerProvider = localOnly({
-    subscribeForScripts: async () => "saved-vault-recovery",
-    unsubscribeForScripts: async () => {
-    },
-    getSubscription: async function* (_id, signal) {
-      if (!signal.aborted)
-        await new Promise((resolve) => signal.addEventListener("abort", () => resolve(), { once: true }));
-    },
-    getVtxos: async (options) => ({
-      vtxos: coins.filter(
-        (coin) => options?.outpoints?.some((v) => outpoint(v) === outpoint(coin)) || options?.scripts?.includes(coin.script)
-      )
-    }),
-    getVtxoChain: async (coin) => ({ chain: archive.branches[outpoint(coin)] ?? [] }),
-    getVirtualTxs: async (ids) => ({
-      txs: ids.flatMap((id) => archive.transactions[id] ? [archive.transactions[id]] : [])
-    })
-  });
-  return { arkProvider, indexerProvider, source, coins };
-}
-async function captureExitArchive(d, repository, previous) {
-  const url = networkPins(d.network).operatorOrigin;
-  const indexer = new RestIndexerProvider(url);
-  const info = await new RestArkProvider(url).getInfo();
-  requireExitArchiveInfo(info, d);
-  const getCoins = async () => (await indexer.getVtxos({ scripts: [d.scriptPubKey] })).vtxos.filter((v) => !v.isSpent);
-  const coins = await getCoins();
-  if (coins.length > 512) throw new Error("Recovery output limit exceeded");
-  const previousCoins = previous ? validateExitArchive(previous, d).coins : [];
-  const removed = previousCoins.filter((old) => !coins.some((coin) => outpoint(coin) === outpoint(old)));
-  if (removed.length) {
-    const resolved = (await indexer.getVtxos({ outpoints: removed })).vtxos;
-    if (removed.some((old) => !resolved.some((coin) => outpoint(coin) === outpoint(old) && coin.isSpent)))
-      throw new Error("An earlier output is missing. Previous recovery data has been retained.");
-  }
-  const resolver = createExitChainResolver({ indexer, repository });
-  const branches = {};
-  const wanted = /* @__PURE__ */ new Set();
-  for (const coin of coins) {
-    const prior = previousCoins.find((old) => outpoint(old) === outpoint(coin) && old.value === coin.value);
-    const chain2 = prior ? previous.branches[outpoint(coin)] : normalizeRecoveryChain(await resolver.getVtxoChain(coin));
-    branches[outpoint(coin)] = chain2;
-    for (const node of chain2) if (node.type !== ChainTxType.COMMITMENT) wanted.add(node.txid);
-    if (wanted.size > 4096) throw new Error("Recovery transaction limit exceeded");
-  }
-  const transactions = {};
-  for (const id of wanted) if (previous?.transactions[id]) transactions[id] = previous.transactions[id];
-  const ids = [...wanted].filter((id) => !transactions[id]);
-  for (let i = 0; i < ids.length; i += 100) {
-    for (const psbt of await resolver.getVirtualTxs(ids.slice(i, i + 100))) {
-      if (psbt.length > 1e6) throw new Error("Recovery transaction limit exceeded");
-      transactions[Transaction2.fromPSBT(base64.decode(psbt)).id] = psbt;
-    }
-  }
-  const fingerprint2 = (values) => values.map((v) => `${outpoint(v)}:${v.value}:${v.script}`).sort().join("|");
-  if (fingerprint2(coins) !== fingerprint2(await getCoins()))
-    throw new Error("Your balance changed while saving recovery data");
-  const archive = {
-    version: 1,
-    descriptorHash: d.descriptorHash,
-    capturedAt: (/* @__PURE__ */ new Date()).toISOString(),
-    info: packExitArchive(info),
-    coins: packExitArchive(coins),
-    branches,
-    transactions
-  };
-  validateExitArchive(archive, d);
-  return archive;
-}
-
 // src/lib/vault/vtxo/recoveryArchive.ts
 function vaultRecoveryBinding(kit, status) {
   const valid = parseRecoveryKit(kit);
@@ -51220,7 +51362,12 @@ async function prepareLightRecoveryWithOwner(record, owner2, recoveryAddress, su
       throw new Error("No recovery data is saved here. Reconnect to the Operator or import a current recovery file.");
     return candidates[0];
   };
-  const archive = useSavedData ? await savedArchive() : await captureLightRecoveryArchive(record.descriptor);
+  const originalArchive = useSavedData ? await savedArchive() : await captureLightRecoveryArchive(record.descriptor);
+  const archive = await prepareExitArchivePrevouts(originalArchive, {
+    network: record.descriptor.network,
+    descriptorHash: lightDescriptorDigest(record.descriptor),
+    scriptPubKey: record.descriptor.scriptPubKey
+  });
   const local = lightArchiveProviders(archive, record.descriptor);
   const coins = local.coins;
   const file2 = {
@@ -51636,7 +51783,7 @@ el("stop").onclick = () => controller?.abort();
 @noble/secp256k1/index.js:
   (*! noble-secp256k1 - MIT License (c) 2019 Paul Miller (paulmillr.com) *)
 
-@arkade-os/sdk/dist/chunk-XQJT2ACL.js:
+@arkade-os/sdk/dist/chunk-NWYR47TA.js:
   (*! Bundled license information:
   
   @noble/hashes/utils.js:
