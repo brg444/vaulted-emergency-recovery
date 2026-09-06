@@ -88,3 +88,76 @@ describe("Light recovery network isolation", () => {
     expect(upstream).toHaveBeenCalledTimes(1);
   });
 });
+
+it("rejects malformed, oversized and wrongly routed package requests before the upstream", async () => {
+  const upstream = mock(async () => new Response("unexpected"));
+  const handle = lightRecoveryHandler(
+    "mainnet",
+    upstream as unknown as typeof fetch,
+  );
+  const url = "http://localhost/esplora/txs/package";
+  for (const body of [
+    "not json",
+    "{}",
+    "[]",
+    JSON.stringify(["ab"]),
+    JSON.stringify(["ab", "cd", "ef"]),
+    JSON.stringify(["abc", "cd"]),
+    JSON.stringify(["zz", "cd"]),
+    JSON.stringify([1, "cd"]),
+    JSON.stringify(["ab".repeat(400001), "cd"]),
+    JSON.stringify(["ab", "cd".repeat(400001)]),
+  ]) {
+    expect(
+      (
+        await handle(
+          new Request(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body,
+          }),
+        )
+      ).status,
+    ).toBe(400);
+  }
+  expect(
+    (
+      await handle(
+        new Request(url, {
+          method: "POST",
+          body: JSON.stringify(["ab", "cd"]),
+        }),
+      )
+    ).status,
+  ).toBe(400);
+  expect((await handle(new Request(url))).status).toBe(404);
+  expect(
+    (
+      await handle(
+        new Request("http://localhost/esplora/blocks", {
+          method: "POST",
+          body: "ab",
+        }),
+      )
+    ).status,
+  ).toBe(404);
+  const stream = new ReadableStream({
+    start(c) {
+      c.enqueue(new TextEncoder().encode(" ".repeat(1_600_008)));
+      c.close();
+    },
+  });
+  expect(
+    (
+      await handle(
+        new Request(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: stream,
+          duplex: "half",
+        } as RequestInit),
+      )
+    ).status,
+  ).toBe(400);
+  expect(upstream).not.toHaveBeenCalled();
+});

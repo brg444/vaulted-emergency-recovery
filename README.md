@@ -100,6 +100,17 @@ WALLET_ROOT=/path/to/vaulted-bitcoin-wallet bun scripts/sync-light-from-wallet.t
 bun test
 ```
 
+Release validation also runs the SDK against the local server with a mocked
+Bitcoin upstream:
+
+```sh
+WALLET_ROOT=/path/to/vaulted-bitcoin-wallet bun test sdk-transport.test.ts
+```
+
+These three tests must pass without skips to qualify SDK transport. A
+standalone checkout without the reviewed wallet SDK reports them as skipped
+while running the remaining companion tests.
+
 The public-kit parser retains versions 3 and 4 and the connector format.
 Preserve support for all three formats when refreshing copied libraries. The retired map-only interface has been replaced by executable
 recovery and signing handoffs.

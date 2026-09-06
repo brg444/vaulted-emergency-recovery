@@ -2,7 +2,7 @@
   "network": "mutinynet",
   "sha256": "4806594df340b98379b498ab99c6818038a2a33d529e248be5a71f71beea26b5",
   "wallet": "brg444/vaulted-bitcoin-wallet",
-  "walletRevision": "6585b408dab03451eeeb1a88e3d892e7a77d8abc",
+  "walletRevision": "a0c6bfcdbb70e95585f71f8da2964b8faa34aff4",
   "workingTreeDirty": false,
   "entry": "tools/light-emergency/recover.ts",
   "inputs": {

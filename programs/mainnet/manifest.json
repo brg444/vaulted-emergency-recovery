@@ -1,8 +1,8 @@
 {
   "network": "mainnet",
-  "sha256": "f04565390d3f315530d2c46d2ae95e299e63487670931a9b1752b52366b58fbe",
+  "sha256": "ba42add08bb1ad25605a98b1f649bedf27f4ecd6569263f4578fe7e655bde150",
   "wallet": "brg444/vaulted-bitcoin-wallet",
-  "walletRevision": "6585b408dab03451eeeb1a88e3d892e7a77d8abc",
+  "walletRevision": "a0c6bfcdbb70e95585f71f8da2964b8faa34aff4",
   "workingTreeDirty": false,
   "entry": "tools/program-emergency/recover.ts",
   "inputs": {
@@ -225,7 +225,7 @@
     "tools/offline-recovery/src/lib/vault/savingsTree.ts": "4a640b9518795c244ab92691770091ec67d0191272efd3d3f7a1328b2b75b14b",
     "tools/offline-recovery/src/lib/vault/setupPlan.ts": "b124b6e4d4ecca260eb3a5f7edd52d2a1f8aab1087e6606a1bb826dc9ce89bea",
     "tools/offline-recovery/src/lib/vault/spendingPolicy.ts": "cd2b22dba2cad5f313d203d6aa26387fe7e8589bba394d7131990431f9c02f3a",
-    "tools/program-emergency/recover.ts": "d43b65e8ab1ec14fcf282b1dd4f4554b0ca8e7f16088526316487ff9088eeee1"
+    "tools/program-emergency/recover.ts": "c41b7a1f50606f310d87cdcfed09622eccd887d80874689e07df79f347215ff0"
   },
   "defines": {
     "import.meta.env": {
@@ -236,6 +236,6 @@
   },
   "buildScriptSha256": "16548a7d2dc86a91b55fc4fe215f780e74df0b2da78e846321c8e9cb76f71394",
   "buildHelperSha256": "217c1db336b4a880b0398537fbc4306fb8e051bb61953b793041c13763dd41da",
-  "htmlSha256": "cb7555074e8af27788c4529e2b3adf27ae84c33c65202490a88e54523670870a",
-  "sourceMapSha256": "07cbc3843e91986f34e9666c53f38a0abfa03c6f195c0af4b4f667b7b9f044ad"
+  "htmlSha256": "c406b07e71d0234250a82cd0e2d38e5a4d1c4c13c9a44e11829a8d49d7092cbf",
+  "sourceMapSha256": "0802524875a6dd49f425471c53a13e9730fcb477ba01593990bc3fa8f3757439"
 }
