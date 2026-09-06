@@ -280,9 +280,11 @@ export function inspectRecoveryKit(kit: RecoveryKit): RecoveryKitReport {
       kitHasUnlock(parsed)
         ? 'This file can unlock the phone key on the enrolled website name without Vaulted.'
         : 'This file is a public map only. It cannot unlock the phone key if Vaulted is gone.',
-      'Recovery cannot exit a Normal UTXO if both cosigners are gone.',
-      'Starting recovery still needs both cosigners. Waiting does not open a Normal UTXO.',
-      'A pending recovery cannot be cancelled if both cosigners are gone, unless this vault has a hardware-only cancel path.',
+      d.templateVersion === CONNECTOR_TEMPLATE
+        ? 'A new connector Savings payment needs its existing service approvals and hardware signature.'
+        : 'Normal Savings can be recovered with the phone and hardware keys without either service.',
+      'Starting a one-key delayed recovery still requires both recovery services.',
+      'Pending cancellation requires the exact remaining keys or service approvals in the saved script.',
       'A mature Pending recovery claim can pay any destination.',
       `Delays are ${PROGRAM_CSV.hardware}, ${PROGRAM_CSV.phone}, and ${PROGRAM_CSV.recovery} blocks. Mutinynet is much faster than a 10-minute chain.`,
     ],
