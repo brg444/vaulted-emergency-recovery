@@ -2,7 +2,7 @@
   "network": "mutinynet",
   "sha256": "3ddb0b8f009393656ecf0d7355b726e019212cd2eb62372eee3c1b0d5f9d5751",
   "wallet": "brg444/vaulted-bitcoin-wallet",
-  "walletRevision": "4d9c4bfa29c523022f15efc2838f2e596d9ecd29",
+  "walletRevision": "7779c955818fc2f7bc1a302f386f8e4e943bf6a6",
   "workingTreeDirty": false,
   "entry": "tools/program-emergency/recover.ts",
   "inputs": {
@@ -186,7 +186,7 @@
     "src/lib/vault/savingsSpend.ts": "51b8293bbbaddee90bd62e41fe47b234e9731e224187ac4c51bdf61f2263d945",
     "src/lib/vault/savingsTree.ts": "4a640b9518795c244ab92691770091ec67d0191272efd3d3f7a1328b2b75b14b",
     "src/lib/vault/setupPlan.ts": "442e430e87e6acdb10de71f3ee73a4e322bccdeec5b7a2176902fdc6baa588a7",
-    "src/lib/vault/signIn.ts": "c8803598f08d6bd24167b7e76d31b068efc8b33486c7c9138ef4ef73eebbe24e",
+    "src/lib/vault/signIn.ts": "d937af3e753fad8c7b7089fd2eea8eb4b32eaad4304d69a1d9893b5bb5e9c716",
     "src/lib/vault/spendingPolicy.ts": "cd2b22dba2cad5f313d203d6aa26387fe7e8589bba394d7131990431f9c02f3a",
     "src/lib/vault/status.ts": "d466f71f898d629817c779e4ff2ec7c801801f76c1ba4cadad2232b9fa13c58c",
     "src/lib/vault/taprootSignatures.ts": "e0cee3f47447c5b6be0b60fe6098ff729306b0fd9a5d995a04613e4f8b21a183",
@@ -237,5 +237,5 @@
   "buildScriptSha256": "16548a7d2dc86a91b55fc4fe215f780e74df0b2da78e846321c8e9cb76f71394",
   "buildHelperSha256": "217c1db336b4a880b0398537fbc4306fb8e051bb61953b793041c13763dd41da",
   "htmlSha256": "c406b07e71d0234250a82cd0e2d38e5a4d1c4c13c9a44e11829a8d49d7092cbf",
-  "sourceMapSha256": "4855aecd8e6d13a58a9932df3a7c6fb90731d68735bd613985452832e1195180"
+  "sourceMapSha256": "b7e20b4ff2c4aa192ac9561f49d1366c3ad16cd65b2627e6b8f22c8eccaeefe4"
 }
