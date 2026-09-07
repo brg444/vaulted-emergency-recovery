@@ -1,8 +1,8 @@
 {
   "network": "mutinynet",
-  "sha256": "3a24b5c2fcb76047e7f8b18f563b3d68a3fd07eee62828c3b0f303d05914534d",
+  "sha256": "d9ac4456c8c9108b4f1069de072ee1b1d4aec79c969d17448abdca7e85a08485",
   "wallet": "brg444/vaulted-bitcoin-wallet",
-  "walletRevision": "f2b414e21b5c26fcda084849e59510ed0f1891eb",
+  "walletRevision": "66867461cd452f1621d34964fc69dbc594e74a5b",
   "workingTreeDirty": false,
   "entry": "tools/program-emergency/recover.ts",
   "inputs": {
@@ -159,7 +159,7 @@
     "src/lib/vault/program/connectorEnroll.ts": "151f17a49ce498a5c32a48408b914ac8d4b2f37182421d7d0b5344b62c0236b1",
     "src/lib/vault/program/connectorEnrollmentCore.ts": "9ef9537dc933351dce914846b6c87fb99f4bb3affeb4e150699603f4289442c6",
     "src/lib/vault/program/connectorOrigin.ts": "de3fb31ebd95ddf2dd4d8269688d07a8d0ba002f1041bfd0fae6fbbf21c7ff18",
-    "src/lib/vault/program/connectorPayment.ts": "b472c57e677f4c0c1ac376fa245f0e0875d320a803f43bc8f8ef1b871e0b027b",
+    "src/lib/vault/program/connectorPayment.ts": "950243d7dabd412f40c707485d1d057869ca7ce35cfeb4133e5a6894e20b3eba",
     "src/lib/vault/program/connectorRecovery.ts": "e9bb0b830c297e385279b24bec9b8951ac58375138e0dcc4248d38c3c71c3933",
     "src/lib/vault/program/connectorStore.ts": "fa49ab88ac134519db95ace238a918aa46ed3baf9d19b2b51f895401d5e6f660",
     "src/lib/vault/program/constants.ts": "6b1f5448105262986b53c2203627482db4141e28667338f9e978d29a3d80b395",
@@ -245,5 +245,5 @@
   "buildScriptSha256": "16548a7d2dc86a91b55fc4fe215f780e74df0b2da78e846321c8e9cb76f71394",
   "buildHelperSha256": "217c1db336b4a880b0398537fbc4306fb8e051bb61953b793041c13763dd41da",
   "htmlSha256": "64225bcf8914b8e81e23b2116b9f7ddbaeb6b812e98d0c0e63399779aa53ff37",
-  "sourceMapSha256": "867db8ec0a818e8713f8d9ff5d8c786c8201c02b96d01e87f04d3c0dd6a9fcda"
+  "sourceMapSha256": "58a4a2ba7bcf390d311b8e8ae015dc955ddd478cbe416655e397a4089bfefc92"
 }

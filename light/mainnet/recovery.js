@@ -1164,13 +1164,13 @@ function sqrt5mod8(Fp, n) {
   assertIsSquare(Fp, root, n);
   return root;
 }
-function sqrt9mod16(P2) {
-  const Fp_ = Field(P2);
-  const tn = tonelliShanks(P2);
+function sqrt9mod16(P3) {
+  const Fp_ = Field(P3);
+  const tn = tonelliShanks(P3);
   const c1 = tn(Fp_, Fp_.neg(Fp_.ONE));
   const c2 = tn(Fp_, c1);
   const c3 = tn(Fp_, Fp_.neg(c1));
-  const c4 = (P2 + _7n) / _16n;
+  const c4 = (P3 + _7n) / _16n;
   return (Fp, n) => {
     let tv1 = Fp.pow(n, c4);
     let tv2 = Fp.mul(tv1, c1);
@@ -1186,17 +1186,17 @@ function sqrt9mod16(P2) {
     return root;
   };
 }
-function tonelliShanks(P2) {
-  if (P2 < _3n)
+function tonelliShanks(P3) {
+  if (P3 < _3n)
     throw new Error("sqrt is not defined for small field");
-  let Q = P2 - _1n2;
+  let Q = P3 - _1n2;
   let S = 0;
   while (Q % _2n === _0n2) {
     Q /= _2n;
     S++;
   }
   let Z = _2n;
-  const _Fp = Field(P2);
+  const _Fp = Field(P3);
   while (FpLegendre(_Fp, Z) === 1) {
     if (Z++ > 1e3)
       throw new Error("Cannot find square root: probably non-prime P");
@@ -1235,14 +1235,14 @@ function tonelliShanks(P2) {
     return R;
   };
 }
-function FpSqrt(P2) {
-  if (P2 % _4n === _3n)
+function FpSqrt(P3) {
+  if (P3 % _4n === _3n)
     return sqrt3mod4;
-  if (P2 % _8n === _5n)
+  if (P3 % _8n === _5n)
     return sqrt5mod8;
-  if (P2 % _16n === _9n)
-    return sqrt9mod16(P2);
-  return tonelliShanks(P2);
+  if (P3 % _16n === _9n)
+    return sqrt9mod16(P3);
+  return tonelliShanks(P3);
 }
 function validateField(field2) {
   const initial = {
@@ -1542,15 +1542,15 @@ function calcOffsets(n, window2, wOpts) {
   const offsetF = offsetStart;
   return { nextN, offset, isZero: isZero2, isNeg, isNegF, offsetF };
 }
-function getW(P2) {
-  return pointWindowSizes.get(P2) || 1;
+function getW(P3) {
+  return pointWindowSizes.get(P3) || 1;
 }
 function assert0(n) {
   if (n !== _0n3)
     throw new Error("invalid wNAF");
 }
-function mulEndoUnsafe(Point5, point, k1, k2) {
-  let acc = point;
+function mulEndoUnsafe(Point5, point2, k1, k2) {
+  let acc = point2;
   let p1 = Point5.ZERO;
   let p2 = Point5.ZERO;
   while (k1 > _0n3 || k2 > _0n3) {
@@ -1646,10 +1646,10 @@ var init_curve = __esm({
        * @param W window size
        * @returns precomputed point tables flattened to a single array
        */
-      precomputeWindow(point, W2) {
+      precomputeWindow(point2, W2) {
         const { windows, windowSize } = calcWOpts(W2, this.bits);
         const points = [];
-        let p = point;
+        let p = point2;
         let base = p;
         for (let window2 = 0; window2 < windows; window2++) {
           base = p;
@@ -1708,35 +1708,35 @@ var init_curve = __esm({
         assert0(n);
         return acc;
       }
-      getPrecomputes(W2, point, transform) {
-        let comp = pointPrecomputes.get(point);
+      getPrecomputes(W2, point2, transform) {
+        let comp = pointPrecomputes.get(point2);
         if (!comp) {
-          comp = this.precomputeWindow(point, W2);
+          comp = this.precomputeWindow(point2, W2);
           if (W2 !== 1) {
             if (typeof transform === "function")
               comp = transform(comp);
-            pointPrecomputes.set(point, comp);
+            pointPrecomputes.set(point2, comp);
           }
         }
         return comp;
       }
-      cached(point, scalar2, transform) {
-        const W2 = getW(point);
-        return this.wNAF(W2, this.getPrecomputes(W2, point, transform), scalar2);
+      cached(point2, scalar2, transform) {
+        const W2 = getW(point2);
+        return this.wNAF(W2, this.getPrecomputes(W2, point2, transform), scalar2);
       }
-      unsafe(point, scalar2, transform, prev) {
-        const W2 = getW(point);
+      unsafe(point2, scalar2, transform, prev) {
+        const W2 = getW(point2);
         if (W2 === 1)
-          return this._unsafeLadder(point, scalar2, prev);
-        return this.wNAFUnsafe(W2, this.getPrecomputes(W2, point, transform), scalar2, prev);
+          return this._unsafeLadder(point2, scalar2, prev);
+        return this.wNAFUnsafe(W2, this.getPrecomputes(W2, point2, transform), scalar2, prev);
       }
       // We calculate precomputes for elliptic curve point multiplication
       // using windowed method. This specifies window size and
       // stores precomputed values. Usually only base point would be precomputed.
-      createCache(P2, W2) {
+      createCache(P3, W2) {
         validateW(W2, this.bits);
-        pointWindowSizes.set(P2, W2);
-        pointPrecomputes.delete(P2);
+        pointWindowSizes.set(P3, W2);
+        pointPrecomputes.delete(P3);
       }
       hasCache(elm) {
         return getW(elm) !== 1;
@@ -1858,11 +1858,11 @@ function createHasher2(Point5, mapToCurve, defaults) {
     return Point5.fromAffine(mapToCurve(num2));
   }
   function clear(initial) {
-    const P2 = initial.clearCofactor();
-    if (P2.equals(Point5.ZERO))
+    const P3 = initial.clearCofactor();
+    if (P3.equals(Point5.ZERO))
       return Point5.ZERO;
-    P2.assertValidity();
-    return P2;
+    P3.assertValidity();
+    return P3;
   }
   return {
     defaults: Object.freeze(defaults),
@@ -2052,8 +2052,8 @@ function weierstrass(params, extraOpts = {}) {
     if (!Fp.isOdd)
       throw new Error("compression is not supported: Field does not have .isOdd()");
   }
-  function pointToBytes3(_c, point, isCompressed) {
-    const { x, y } = point.toAffine();
+  function pointToBytes3(_c, point2, isCompressed) {
+    const { x, y } = point2.toAffine();
     const bx = Fp.toBytes(x);
     abool(isCompressed, "isCompressed");
     if (isCompressed) {
@@ -2132,13 +2132,13 @@ function weierstrass(params, extraOpts = {}) {
     return _splitEndoScalar(k, endo.basises, Fn4.ORDER);
   }
   const toAffineMemo = memoized((p, iz) => {
-    const { X: X2, Y, Z } = p;
+    const { X: X3, Y, Z } = p;
     if (Fp.eql(Z, Fp.ONE))
-      return { x: X2, y: Y };
+      return { x: X3, y: Y };
     const is0 = p.is0();
     if (iz == null)
       iz = is0 ? Fp.ONE : Fp.inv(Z);
-    const x = Fp.mul(X2, iz);
+    const x = Fp.mul(X3, iz);
     const y = Fp.mul(Y, iz);
     const zz = Fp.mul(Z, iz);
     if (is0)
@@ -2182,8 +2182,8 @@ function weierstrass(params, extraOpts = {}) {
     Y;
     Z;
     /** Does NOT validate if the point is valid. Use `.assertValidity()`. */
-    constructor(X2, Y, Z) {
-      this.X = acoord("x", X2);
+    constructor(X3, Y, Z) {
+      this.X = acoord("x", X3);
       this.Y = acoord("y", Y, true);
       this.Z = acoord("z", Z);
       Object.freeze(this);
@@ -2203,9 +2203,9 @@ function weierstrass(params, extraOpts = {}) {
       return new Point5(x, y, Fp.ONE);
     }
     static fromBytes(bytes2) {
-      const P2 = Point5.fromAffine(decodePoint(abytes(bytes2, void 0, "point")));
-      P2.assertValidity();
-      return P2;
+      const P3 = Point5.fromAffine(decodePoint(abytes(bytes2, void 0, "point")));
+      P3.assertValidity();
+      return P3;
     }
     static fromHex(hex2) {
       return Point5.fromBytes(hexToBytes(hex2));
@@ -2243,8 +2243,8 @@ function weierstrass(params, extraOpts = {}) {
     equals(other) {
       aprjpoint(other);
       const { X: X1, Y: Y1, Z: Z1 } = this;
-      const { X: X2, Y: Y2, Z: Z2 } = other;
-      const U1 = Fp.eql(Fp.mul(X1, Z2), Fp.mul(X2, Z1));
+      const { X: X22, Y: Y2, Z: Z2 } = other;
+      const U1 = Fp.eql(Fp.mul(X1, Z2), Fp.mul(X22, Z1));
       const U2 = Fp.eql(Fp.mul(Y1, Z2), Fp.mul(Y2, Z1));
       return U1 && U2;
     }
@@ -2301,20 +2301,20 @@ function weierstrass(params, extraOpts = {}) {
     add(other) {
       aprjpoint(other);
       const { X: X1, Y: Y1, Z: Z1 } = this;
-      const { X: X2, Y: Y2, Z: Z2 } = other;
+      const { X: X22, Y: Y2, Z: Z2 } = other;
       let X3 = Fp.ZERO, Y3 = Fp.ZERO, Z3 = Fp.ZERO;
       const a = CURVE.a;
       const b3 = Fp.mul(CURVE.b, _3n2);
-      let t0 = Fp.mul(X1, X2);
+      let t0 = Fp.mul(X1, X22);
       let t1 = Fp.mul(Y1, Y2);
       let t2 = Fp.mul(Z1, Z2);
       let t3 = Fp.add(X1, Y1);
-      let t4 = Fp.add(X2, Y2);
+      let t4 = Fp.add(X22, Y2);
       t3 = Fp.mul(t3, t4);
       t4 = Fp.add(t0, t1);
       t3 = Fp.sub(t3, t4);
       t4 = Fp.add(X1, Z1);
-      let t5 = Fp.add(X2, Z2);
+      let t5 = Fp.add(X22, Z2);
       t4 = Fp.mul(t4, t5);
       t5 = Fp.add(t0, t2);
       t4 = Fp.sub(t4, t5);
@@ -2366,20 +2366,20 @@ function weierstrass(params, extraOpts = {}) {
       const { endo: endo2 } = extraOpts;
       if (!Fn4.isValidNot0(scalar2))
         throw new Error("invalid scalar: out of range");
-      let point, fake;
+      let point2, fake;
       const mul = (n) => wnaf.cached(this, n, (p) => normalizeZ(Point5, p));
       if (endo2) {
         const { k1neg, k1, k2neg, k2 } = splitEndoScalarN(scalar2);
         const { p: k1p, f: k1f } = mul(k1);
         const { p: k2p, f: k2f } = mul(k2);
         fake = k1f.add(k2f);
-        point = finishEndo(endo2.beta, k1p, k2p, k1neg, k2neg);
+        point2 = finishEndo(endo2.beta, k1p, k2p, k1neg, k2neg);
       } else {
         const { p, f } = mul(scalar2);
-        point = p;
+        point2 = p;
         fake = f;
       }
-      return normalizeZ(Point5, [point, fake])[0];
+      return normalizeZ(Point5, [point2, fake])[0];
     }
     /**
      * Non-constant-time multiplication. Uses double-and-add algorithm.
@@ -2818,7 +2818,7 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
     validateSigLength(signature, format);
     try {
       const sig = Signature2.fromBytes(signature, format);
-      const P2 = Point5.fromBytes(publicKey);
+      const P3 = Point5.fromBytes(publicKey);
       if (lowS && sig.hasHighS())
         return false;
       const { r, s } = sig;
@@ -2826,7 +2826,7 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
       const is = Fn4.inv(s);
       const u1 = Fn4.create(h * is);
       const u2 = Fn4.create(r * is);
-      const R = Point5.BASE.multiplyUnsafe(u1).add(P2.multiplyUnsafe(u2));
+      const R = Point5.BASE.multiplyUnsafe(u1).add(P3.multiplyUnsafe(u2));
       if (R.is0())
         return false;
       const v = Fn4.create(R.x);
@@ -2874,9 +2874,9 @@ var init_weierstrass = __esm({
       Err: DERErr,
       // Basic building block is TLV (Tag-Length-Value)
       _tlv: {
-        encode: (tag, data) => {
+        encode: (tag2, data) => {
           const { Err: E } = DER;
-          if (tag < 0 || tag > 256)
+          if (tag2 < 0 || tag2 > 256)
             throw new E("tlv.encode: wrong tag");
           if (data.length & 1)
             throw new E("tlv.encode: unpadded data");
@@ -2885,16 +2885,16 @@ var init_weierstrass = __esm({
           if (len.length / 2 & 128)
             throw new E("tlv.encode: long form length too big");
           const lenLen = dataLen > 127 ? numberToHexUnpadded(len.length / 2 | 128) : "";
-          const t = numberToHexUnpadded(tag);
+          const t = numberToHexUnpadded(tag2);
           return t + lenLen + len + data;
         },
         // v - value, l - left bytes (unparsed)
-        decode(tag, data) {
+        decode(tag2, data) {
           const { Err: E } = DER;
           let pos = 0;
-          if (tag < 0 || tag > 256)
+          if (tag2 < 0 || tag2 > 256)
             throw new E("tlv.encode: wrong tag");
-          if (data.length < 2 || data[pos++] !== tag)
+          if (data.length < 2 || data[pos++] !== tag2)
             throw new E("tlv.decode: wrong tlv");
           const first = data[pos++];
           const isLong = !!(first & 128);
@@ -2985,33 +2985,33 @@ __export(secp256k1_exports, {
   secp256k1_hasher: () => secp256k1_hasher
 });
 function sqrtMod(y) {
-  const P2 = secp256k1_CURVE.p;
+  const P3 = secp256k1_CURVE.p;
   const _3n3 = BigInt(3), _6n = BigInt(6), _11n = BigInt(11), _22n = BigInt(22);
   const _23n = BigInt(23), _44n = BigInt(44), _88n = BigInt(88);
-  const b2 = y * y * y % P2;
-  const b3 = b2 * b2 * y % P2;
-  const b6 = pow2(b3, _3n3, P2) * b3 % P2;
-  const b9 = pow2(b6, _3n3, P2) * b3 % P2;
-  const b11 = pow2(b9, _2n3, P2) * b2 % P2;
-  const b22 = pow2(b11, _11n, P2) * b11 % P2;
-  const b44 = pow2(b22, _22n, P2) * b22 % P2;
-  const b88 = pow2(b44, _44n, P2) * b44 % P2;
-  const b176 = pow2(b88, _88n, P2) * b88 % P2;
-  const b220 = pow2(b176, _44n, P2) * b44 % P2;
-  const b223 = pow2(b220, _3n3, P2) * b3 % P2;
-  const t1 = pow2(b223, _23n, P2) * b22 % P2;
-  const t2 = pow2(t1, _6n, P2) * b2 % P2;
-  const root = pow2(t2, _2n3, P2);
+  const b2 = y * y * y % P3;
+  const b3 = b2 * b2 * y % P3;
+  const b6 = pow2(b3, _3n3, P3) * b3 % P3;
+  const b9 = pow2(b6, _3n3, P3) * b3 % P3;
+  const b11 = pow2(b9, _2n3, P3) * b2 % P3;
+  const b22 = pow2(b11, _11n, P3) * b11 % P3;
+  const b44 = pow2(b22, _22n, P3) * b22 % P3;
+  const b88 = pow2(b44, _44n, P3) * b44 % P3;
+  const b176 = pow2(b88, _88n, P3) * b88 % P3;
+  const b220 = pow2(b176, _44n, P3) * b44 % P3;
+  const b223 = pow2(b220, _3n3, P3) * b3 % P3;
+  const t1 = pow2(b223, _23n, P3) * b22 % P3;
+  const t2 = pow2(t1, _6n, P3) * b2 % P3;
+  const root = pow2(t2, _2n3, P3);
   if (!Fpk1.eql(Fpk1.sqr(root), y))
     throw new Error("Cannot find square root");
   return root;
 }
-function taggedHash(tag, ...messages) {
-  let tagP = TAGGED_HASH_PREFIXES[tag];
+function taggedHash(tag2, ...messages) {
+  let tagP = TAGGED_HASH_PREFIXES[tag2];
   if (tagP === void 0) {
-    const tagH = sha256(asciiToBytes(tag));
+    const tagH = sha256(asciiToBytes(tag2));
     tagP = concatBytes(tagH, tagH);
-    TAGGED_HASH_PREFIXES[tag] = tagP;
+    TAGGED_HASH_PREFIXES[tag2] = tagP;
   }
   return sha256(concatBytes(tagP, ...messages));
 }
@@ -3063,15 +3063,15 @@ function schnorrVerify(signature, message, publicKey) {
   const m = abytes(message, void 0, "message");
   const pub = abytes(publicKey, 32, "publicKey");
   try {
-    const P2 = lift_x(num(pub));
+    const P3 = lift_x(num(pub));
     const r = num(sig.subarray(0, 32));
     if (!Fp.isValidNot0(r))
       return false;
     const s = num(sig.subarray(32, 64));
     if (!Fn4.isValidNot0(s))
       return false;
-    const e = challenge(Fn4.toBytes(r), pointToBytes(P2), m);
-    const R = BASE.multiplyUnsafe(s).add(P2.multiplyUnsafe(Fn4.neg(e)));
+    const e = challenge(Fn4.toBytes(r), pointToBytes(P3), m);
+    const R = BASE.multiplyUnsafe(s).add(P3.multiplyUnsafe(Fn4.neg(e)));
     const { x, y } = R.toAffine();
     if (R.is0() || !hasEven(y) || x !== r)
       return false;
@@ -3116,7 +3116,7 @@ var init_secp256k1 = __esm({
     });
     secp256k1 = /* @__PURE__ */ ecdsa(Pointk1, sha256);
     TAGGED_HASH_PREFIXES = {};
-    pointToBytes = (point) => point.toBytes(true).slice(1);
+    pointToBytes = (point2) => point2.toBytes(true).slice(1);
     hasEven = (y) => y % _2n3 === _0n5;
     num = bytesToNumberBE;
     schnorr = /* @__PURE__ */ (() => {
@@ -5159,17 +5159,17 @@ function tapTweak(a, b) {
 function taprootTweakPrivKey(privKey, merkleRoot = Uint8Array.of()) {
   const u = schnorr.utils;
   const seckey0 = bytesToNumberBE(privKey);
-  const P2 = Point.BASE.multiply(seckey0);
-  const seckey = hasEven2(P2.y) ? seckey0 : Fn.neg(seckey0);
-  const xP = u.pointToBytes(P2);
+  const P3 = Point.BASE.multiply(seckey0);
+  const seckey = hasEven2(P3.y) ? seckey0 : Fn.neg(seckey0);
+  const xP = u.pointToBytes(P3);
   const t = tapTweak(xP, merkleRoot);
   return numberToBytesBE(Fn.add(seckey, t), 32);
 }
 function taprootTweakPubkey(pubKey, h) {
   const u = schnorr.utils;
   const t = tapTweak(pubKey, h);
-  const P2 = u.lift_x(bytesToNumberBE(pubKey));
-  const Q = P2.add(Point.BASE.multiply(t));
+  const P3 = u.lift_x(bytesToNumberBE(pubKey));
+  const Q = P3.add(Point.BASE.multiply(t));
   const parity = hasEven2(Q.y) ? 0 : 1;
   return [u.pointToBytes(Q), parity];
 }
@@ -6019,8 +6019,8 @@ function checkTaprootScript(script, internalPubKey, allowUnknownOutputs = false,
   const out = OutScript.decode(script);
   if (out.type === "unknown") {
     if (customScripts) {
-      const cs = apply(Script, coders.match(customScripts));
-      const c = cs.decode(script);
+      const cs2 = apply(Script, coders.match(customScripts));
+      const c = cs2.decode(script);
       if (c !== void 0) {
         if (typeof c.type !== "string" || !c.type.startsWith("tr_"))
           throw new Error(`P2TR: invalid custom type=${c.type}`);
@@ -6532,16 +6532,16 @@ var init_payment = __esm({
       };
     };
     p2sh = (child, network = NETWORK) => {
-      const cs = child.script;
-      if (!isBytes4(cs))
+      const cs2 = child.script;
+      if (!isBytes4(cs2))
         throw new Error(`Wrong script: ${typeof child.script}, expected Uint8Array`);
-      const hash = hash160(cs);
+      const hash = hash160(cs2);
       const script = OutScript.encode({ type: "sh", hash });
-      checkScript(script, cs, child.witnessScript);
+      checkScript(script, cs2, child.witnessScript);
       if (child.witnessScript) {
         return {
           type: "sh",
-          redeemScript: cs,
+          redeemScript: cs2,
           script: OutScript.encode({ type: "sh", hash }),
           address: Address(network).encode({ type: "sh", hash }),
           hash,
@@ -6550,7 +6550,7 @@ var init_payment = __esm({
       } else {
         return {
           type: "sh",
-          redeemScript: cs,
+          redeemScript: cs2,
           script: OutScript.encode({ type: "sh", hash }),
           address: Address(network).encode({ type: "sh", hash }),
           hash
@@ -6558,15 +6558,15 @@ var init_payment = __esm({
       }
     };
     p2wsh = (child, network = NETWORK) => {
-      const cs = child.script;
-      if (!isBytes4(cs))
-        throw new Error(`Wrong script: ${typeof cs}, expected Uint8Array`);
-      const hash = sha256(cs);
+      const cs2 = child.script;
+      if (!isBytes4(cs2))
+        throw new Error(`Wrong script: ${typeof cs2}, expected Uint8Array`);
+      const hash = sha256(cs2);
       const script = OutScript.encode({ type: "wsh", hash });
-      checkScript(script, void 0, cs);
+      checkScript(script, void 0, cs2);
       return {
         type: "wsh",
-        witnessScript: cs,
+        witnessScript: cs2,
         script: OutScript.encode({ type: "wsh", hash }),
         address: Address(network).encode({ type: "wsh", hash }),
         hash
@@ -6703,11 +6703,11 @@ function validateOpts(opts) {
   if (_opts.allowUnknownVersion ? typeof _opts.version === "number" : ![-1, 0, 1, 2, 3].includes(_opts.version))
     throw new Error(`Unknown version: ${_opts.version}`);
   if (_opts.customScripts !== void 0) {
-    const cs = _opts.customScripts;
-    if (!Array.isArray(cs)) {
-      throw new Error(`wrong custom scripts type (expected array): customScripts=${cs} (${typeof cs})`);
+    const cs2 = _opts.customScripts;
+    if (!Array.isArray(cs2)) {
+      throw new Error(`wrong custom scripts type (expected array): customScripts=${cs2} (${typeof cs2})`);
     }
-    for (const s of cs) {
+    for (const s of cs2) {
       if (typeof s.encode !== "function" || typeof s.decode !== "function")
         throw new Error(`wrong script=${s} (${typeof s})`);
       if (s.finalizeTaproot !== void 0 && typeof s.finalizeTaproot !== "function")
@@ -8445,8 +8445,8 @@ var require_lodash = __commonJS({
       return value === other || value !== value && other !== other;
     }
     function isFunction(value) {
-      var tag = isObject(value) ? objectToString.call(value) : "";
-      return tag == funcTag || tag == genTag;
+      var tag2 = isObject(value) ? objectToString.call(value) : "";
+      return tag2 == funcTag || tag2 == genTag;
     }
     function isObject(value) {
       var type = typeof value;
@@ -10067,57 +10067,57 @@ var require_satisfactions = __commonJS({
           sats: filterSolutions([{ asm: `<hash160_preimage(${h})>` }]),
           dsats: filterSolutions([{ asm: `<random_preimage()>` }])
         }),
-        andor: (X2, Y, Z) => ({
+        andor: (X3, Y, Z) => ({
           dsats: [
-            ...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X2, Y, Z }),
-            ...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X2, Y, Z })
+            ...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X3, Y, Z }),
+            ...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X3, Y, Z })
           ],
           sats: [
-            ...combineFilteredSolutions("sat(Y) sat(X)", { X: X2, Y, Z }),
-            ...combineFilteredSolutions("sat(Z) dsat(X)", { X: X2, Y, Z })
+            ...combineFilteredSolutions("sat(Y) sat(X)", { X: X3, Y, Z }),
+            ...combineFilteredSolutions("sat(Z) dsat(X)", { X: X3, Y, Z })
           ]
         }),
-        and_v: (X2, Y) => ({
-          dsats: [...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X2, Y })],
-          sats: [...combineFilteredSolutions(`sat(Y) sat(X)`, { X: X2, Y })]
+        and_v: (X3, Y) => ({
+          dsats: [...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X3, Y })],
+          sats: [...combineFilteredSolutions(`sat(Y) sat(X)`, { X: X3, Y })]
         }),
-        and_b: (X2, Y) => ({
+        and_b: (X3, Y) => ({
           dsats: [
-            ...combineFilteredSolutions(`dsat(Y) dsat(X)`, { X: X2, Y }),
-            ...combineFilteredSolutions(`sat(Y) dsat(X)`, { X: X2, Y }),
-            ...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X2, Y })
+            ...combineFilteredSolutions(`dsat(Y) dsat(X)`, { X: X3, Y }),
+            ...combineFilteredSolutions(`sat(Y) dsat(X)`, { X: X3, Y }),
+            ...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X3, Y })
           ],
-          sats: [...combineFilteredSolutions(`sat(Y) sat(X)`, { Y, X: X2 })]
+          sats: [...combineFilteredSolutions(`sat(Y) sat(X)`, { Y, X: X3 })]
         }),
-        or_b: (X2, Z) => ({
-          dsats: [...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X2, Z })],
+        or_b: (X3, Z) => ({
+          dsats: [...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X3, Z })],
           sats: [
-            ...combineFilteredSolutions(`dsat(Z) sat(X)`, { X: X2, Z }),
-            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X2, Z }),
-            ...combineFilteredSolutions(`sat(Z) sat(X)`, { X: X2, Z })
+            ...combineFilteredSolutions(`dsat(Z) sat(X)`, { X: X3, Z }),
+            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X3, Z }),
+            ...combineFilteredSolutions(`sat(Z) sat(X)`, { X: X3, Z })
           ]
         }),
-        or_c: (X2, Z) => ({
+        or_c: (X3, Z) => ({
           sats: [
-            ...combineFilteredSolutions(`sat(X)`, { X: X2, Z }),
-            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X2, Z })
+            ...combineFilteredSolutions(`sat(X)`, { X: X3, Z }),
+            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X3, Z })
           ]
         }),
-        or_d: (X2, Z) => ({
-          dsats: [...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X2, Z })],
+        or_d: (X3, Z) => ({
+          dsats: [...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X3, Z })],
           sats: [
-            ...combineFilteredSolutions(`sat(X)`, { X: X2, Z }),
-            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X2, Z })
+            ...combineFilteredSolutions(`sat(X)`, { X: X3, Z }),
+            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X3, Z })
           ]
         }),
-        or_i: (X2, Z) => ({
+        or_i: (X3, Z) => ({
           dsats: [
-            ...combineFilteredSolutions(`dsat(X) 1`, { X: X2, Z }),
-            ...combineFilteredSolutions(`dsat(Z) 0`, { X: X2, Z })
+            ...combineFilteredSolutions(`dsat(X) 1`, { X: X3, Z }),
+            ...combineFilteredSolutions(`dsat(Z) 0`, { X: X3, Z })
           ],
           sats: [
-            ...combineFilteredSolutions(`sat(X) 1`, { X: X2, Z }),
-            ...combineFilteredSolutions(`sat(Z) 0`, { X: X2, Z })
+            ...combineFilteredSolutions(`sat(X) 1`, { X: X3, Z }),
+            ...combineFilteredSolutions(`sat(Z) 0`, { X: X3, Z })
           ]
         }),
         /*
@@ -10206,24 +10206,24 @@ var require_satisfactions = __commonJS({
           });
           return { sats, dsats };
         },
-        a: (X2) => ({
-          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X2 })],
-          sats: [...combineFilteredSolutions(`sat(X)`, { X: X2 })]
+        a: (X3) => ({
+          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X3 })],
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X3 })]
         }),
-        s: (X2) => ({
-          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X2 })],
-          sats: [...combineFilteredSolutions(`sat(X)`, { X: X2 })]
+        s: (X3) => ({
+          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X3 })],
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X3 })]
         }),
-        c: (X2) => ({
-          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X2 })],
-          sats: [...combineFilteredSolutions(`sat(X)`, { X: X2 })]
+        c: (X3) => ({
+          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X3 })],
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X3 })]
         }),
-        d: (X2) => ({
+        d: (X3) => ({
           dsats: filterSolutions([{ asm: `0` }]),
-          sats: [...combineFilteredSolutions(`sat(X) 1`, { X: X2 })]
+          sats: [...combineFilteredSolutions(`sat(X) 1`, { X: X3 })]
         }),
-        v: (X2) => ({
-          sats: [...combineFilteredSolutions(`sat(X)`, { X: X2 })]
+        v: (X3) => ({
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X3 })]
         }),
         /**
            * j:X corresponds to SIZE 0NOTEQUAL IF [X] ENDIF
@@ -10258,10 +10258,10 @@ var require_satisfactions = __commonJS({
         
            * DSAT(X) X is a good dsat
            */
-        j: (X2) => {
+        j: (X3) => {
           const dsats = [];
           pushAllowedSolution(dsats, { asm: `0` }, isSolutionAllowed, solutionCounter);
-          const dsats_nzts = (X2.dsats || []).filter(
+          const dsats_nzts = (X3.dsats || []).filter(
             //The top stack corresponds to the last element pushed to the stack,
             //that is, the last element in the produced witness
             (solution) => solution.asm.trim().split(" ").pop() !== "0"
@@ -10269,11 +10269,11 @@ var require_satisfactions = __commonJS({
           for (const solution of dsats_nzts) {
             pushAllowedSolution(dsats, solution, isSolutionAllowed, solutionCounter);
           }
-          return { dsats, sats: [...combineFilteredSolutions(`sat(X)`, { X: X2 })] };
+          return { dsats, sats: [...combineFilteredSolutions(`sat(X)`, { X: X3 })] };
         },
-        n: (X2) => ({
-          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X2 })],
-          sats: [...combineFilteredSolutions(`sat(X)`, { X: X2 })]
+        n: (X3) => ({
+          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X3 })],
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X3 })]
         })
       };
       return satisfactionsMaker;
@@ -16531,10 +16531,10 @@ var require_crypto = __commonJS({
         hash160(data) {
           return (0, legacy_js_1.ripemd160)((0, sha2_js_1.sha256)(data));
         },
-        taggedHash(tag, data) {
-          const prefix2 = TAGGED_HASH_PREFIXES2[tag];
+        taggedHash(tag2, data) {
+          const prefix2 = TAGGED_HASH_PREFIXES2[tag2];
           if (!prefix2)
-            throw new Error(`Error: unsupported tagged hash prefix ${tag}`);
+            throw new Error(`Error: unsupported tagged hash prefix ${tag2}`);
           return (0, sha2_js_1.sha256)((0, uint8array_tools_1.concat)([prefix2, data]));
         }
       };
@@ -19054,8 +19054,8 @@ function validateOutputs(outputs) {
   outputs.forEach(validateOutput);
   return true;
 }
-function craftToSpendTx(message, pkScript, tag = TAG_INTENT_PROOF) {
-  const messageHash = hashMessage(message, tag);
+function craftToSpendTx(message, pkScript, tag2 = TAG_INTENT_PROOF) {
+  const messageHash = hashMessage(message, tag2);
   const tx = new Transaction2({
     version: 0
   });
@@ -19125,8 +19125,8 @@ function craftToSignTx(toSpend, inputs, outputs, message) {
   ];
   return tx;
 }
-function hashMessage(message, tag = TAG_INTENT_PROOF) {
-  return schnorr.utils.taggedHash(tag, new TextEncoder().encode(message));
+function hashMessage(message, tag2 = TAG_INTENT_PROOF) {
+  return schnorr.utils.taggedHash(tag2, new TextEncoder().encode(message));
 }
 function prepareCoinAsIntentProofInput(coin) {
   if (!("tapTree" in coin)) {
@@ -23513,10 +23513,10 @@ function arkadeWitnessHash(witness) {
 }
 function computeArkadeScriptPublicKey(pubKey, script) {
   const hash = arkadeScriptHash(script);
-  const point = schnorr.utils.lift_x(bytesToNumberBE(toXOnly(pubKey, "emulator key")));
+  const point2 = schnorr.utils.lift_x(bytesToNumberBE(toXOnly(pubKey, "emulator key")));
   const scalar2 = bytesToNumberBE(hash) % secp256k1.Point.CURVE().n;
   const tweak = secp256k1.Point.BASE.multiply(scalar2);
-  return schnorr.utils.pointToBytes(point.add(tweak));
+  return schnorr.utils.pointToBytes(point2.add(tweak));
 }
 var VHTLC;
 ((VHTLC2) => {
@@ -25158,13 +25158,13 @@ function aXonly(lst) {
       throw new Error("expected boolean in xOnly array, got" + i + "(" + j + ")");
   });
 }
-var taggedInt = (tag, ...messages) => Fn3.create(Fn3.fromBytes(taggedHash2(tag, ...messages), true));
+var taggedInt = (tag2, ...messages) => Fn3.create(Fn3.fromBytes(taggedHash2(tag2, ...messages), true));
 var evenScalar = (p, n) => hasEven2(p.y) ? n : Fn3.neg(n);
 function mulBase(n) {
   return Point3.BASE.multiply(n);
 }
-function isZero(point) {
-  return point.equals(Point3.ZERO);
+function isZero(point2) {
+  return point2.equals(Point3.ZERO);
 }
 function sortKeys(publicKeys) {
   abytesArray(publicKeys, PUBKEY_LEN);
@@ -25317,9 +25317,9 @@ var Session = class {
    * @returns The key aggregation coefficient as a bigint.
    * @throws {Error} If the provided public key is not included in the list of pubkeys.
    */
-  getSessionKeyAggCoeff(P2) {
+  getSessionKeyAggCoeff(P3) {
     const { publicKeys } = this;
-    const pk = P2.toBytes(true);
+    const pk = P3.toBytes(true);
     const found = publicKeys.some((p) => equalBytes(p, pk));
     if (!found)
       throw new Error("The signer's pubkey must be included in the list of pubkeys");
@@ -25333,11 +25333,11 @@ var Session = class {
     const { R1, R2 } = PubNonce.decode(publicNonce);
     const Re_s_ = R1.add(R2.multiply(b));
     const Re_s = hasEven2(R.y) ? Re_s_ : Re_s_.negate();
-    const P2 = Point3.fromBytes(publicKey);
-    const a = this.getSessionKeyAggCoeff(P2);
+    const P3 = Point3.fromBytes(publicKey);
+    const a = this.getSessionKeyAggCoeff(P3);
     const g = Fn3.mul(evenScalar(Q, 1n), gAcc);
     const left = mulBase(s);
-    const right = Re_s.add(P2.multiply(Fn3.mul(e, Fn3.mul(a, g))));
+    const right = Re_s.add(P3.multiply(Fn3.mul(e, Fn3.mul(a, g))));
     return left.equals(right);
   }
   /**
@@ -25365,11 +25365,11 @@ var Session = class {
     const d_ = Fn3.fromBytes(secret);
     if (Fn3.is0(d_))
       throw new Error("wrong d_");
-    const P2 = mulBase(d_);
-    const pk = P2.toBytes(true);
+    const P3 = mulBase(d_);
+    const pk = P3.toBytes(true);
     if (!equalBytes(pk, originalPk))
       throw new Error("Public key does not match nonceGen argument");
-    const a = this.getSessionKeyAggCoeff(P2);
+    const a = this.getSessionKeyAggCoeff(P3);
     const g = evenScalar(Q, 1n);
     const d = Fn3.mul(g, Fn3.mul(gAcc, d_));
     const s = Fn3.add(k1, Fn3.add(Fn3.mul(b, k2), Fn3.mul(e, Fn3.mul(a, d))));
@@ -25577,8 +25577,8 @@ var Point4 = class _Point {
   X;
   Y;
   Z;
-  constructor(X2, Y, Z) {
-    this.X = FpIsValid(X2);
+  constructor(X3, Y, Z) {
+    this.X = FpIsValid(X3);
     this.Y = FpIsValidNot0(Y);
     this.Z = FpIsValid(Z);
     Object.freeze(this);
@@ -25624,9 +25624,9 @@ var Point4 = class _Point {
   /** Equality check: compare points P&Q. */
   equals(other) {
     const { X: X1, Y: Y1, Z: Z1 } = this;
-    const { X: X2, Y: Y2, Z: Z2 } = apoint(other);
+    const { X: X22, Y: Y2, Z: Z2 } = apoint(other);
     const X1Z2 = M(X1 * Z2);
-    const X2Z1 = M(X2 * Z1);
+    const X2Z1 = M(X22 * Z1);
     const Y1Z2 = M(Y1 * Z2);
     const Y2Z1 = M(Y2 * Z1);
     return X1Z2 === X2Z1 && Y1Z2 === Y2Z1;
@@ -25650,18 +25650,18 @@ var Point4 = class _Point {
   // prettier-ignore
   add(other) {
     const { X: X1, Y: Y1, Z: Z1 } = this;
-    const { X: X2, Y: Y2, Z: Z2 } = apoint(other);
+    const { X: X22, Y: Y2, Z: Z2 } = apoint(other);
     const a = 0n;
     const b = _b;
     let X3 = 0n, Y3 = 0n, Z3 = 0n;
     const b3 = M(b * 3n);
-    let t0 = M(X1 * X2), t1 = M(Y1 * Y2), t2 = M(Z1 * Z2), t3 = M(X1 + Y1);
-    let t4 = M(X2 + Y2);
+    let t0 = M(X1 * X22), t1 = M(Y1 * Y2), t2 = M(Z1 * Z2), t3 = M(X1 + Y1);
+    let t4 = M(X22 + Y2);
     t3 = M(t3 * t4);
     t4 = M(t0 + t1);
     t3 = M(t3 - t4);
     t4 = M(X1 + Z1);
-    let t5 = M(X2 + Z2);
+    let t5 = M(X22 + Z2);
     t4 = M(t4 * t5);
     t5 = M(t0 + t2);
     t4 = M(t4 - t5);
@@ -25965,18 +25965,18 @@ var createKeygen2 = (getPublicKey2) => (seed) => {
   return { secretKey, publicKey: getPublicKey2(secretKey) };
 };
 var keygen = createKeygen2(getPublicKey);
-var getTag = (tag) => Uint8Array.from("BIP0340/" + tag, (c) => c.charCodeAt(0));
+var getTag = (tag2) => Uint8Array.from("BIP0340/" + tag2, (c) => c.charCodeAt(0));
 var T_AUX = "aux";
 var T_NONCE = "nonce";
 var T_CHALLENGE = "challenge";
-var taggedHash3 = (tag, ...messages) => {
+var taggedHash3 = (tag2, ...messages) => {
   const fn = callHash("sha256");
-  const tagH = fn(getTag(tag));
+  const tagH = fn(getTag(tag2));
   return fn(concatBytes4(tagH, tagH, ...messages));
 };
-var taggedHashAsync = async (tag, ...messages) => {
+var taggedHashAsync = async (tag2, ...messages) => {
   const fn = hashes.sha256Async;
-  const tagH = await fn(getTag(tag));
+  const tagH = await fn(getTag(tag2));
   return await fn(concatBytes4(tagH, tagH, ...messages));
 };
 var extpubSchnorr = (priv) => {
@@ -45104,8 +45104,8 @@ function verifyLegacy(message, sigBytes, addressHash) {
   const msgHash = bitcoinMessageHash(message);
   try {
     const sig = secp256k1.Signature.fromBytes(compactSig, "compact").addRecoveryBit(recoveryId);
-    const point = sig.recoverPublicKey(msgHash);
-    const pubkeyBytes = point.toBytes(compressed2);
+    const point2 = sig.recoverPublicKey(msgHash);
+    const pubkeyBytes = point2.toBytes(compressed2);
     return equalBytes(hash160(pubkeyBytes), addressHash);
   } catch {
     return false;
@@ -47398,33 +47398,21 @@ init_define_import_meta_env();
 
 // src/lib/vault/program/connector.ts
 init_define_import_meta_env();
-init_base();
-init_btc_signer();
-init_secp256k1();
+
+// src/lib/vault/program/connectorDual.ts
+init_define_import_meta_env();
+
+// src/lib/vault/program/connectorApproval.ts
+init_define_import_meta_env();
 init_sha2();
+init_base();
 
-// src/lib/vault/protectionTier.ts
+// src/lib/vault/program/script.ts
 init_define_import_meta_env();
-function requireProtectionTier(value) {
-  if (value !== "standard" && value !== "advanced") throw new Error("unsupported protection tier");
-  return value;
-}
-function requireProtectionTierMatchesRecovery(tier, recoveryPub) {
-  const selected = requireProtectionTier(tier);
-  const hasRecovery = typeof recoveryPub === "string" && recoveryPub.trim().length > 0;
-  if (selected === "standard" && hasRecovery) throw new Error("Standard protection must not include a recovery key");
-  if (selected === "advanced" && !hasRecovery) throw new Error("Advanced protection requires a recovery key");
-  return selected;
-}
+init_base();
 
-// src/lib/vault/addressNetwork.ts
+// src/lib/vault/program/constants.ts
 init_define_import_meta_env();
-init_btc_signer();
-function vaultAddressNetwork(network) {
-  if (network === "mutinynet") return TEST_NETWORK;
-  if (network === "bitcoin" || network === "mainnet") return NETWORK;
-  throw new Error("unsupported network");
-}
 
 // src/lib/vault/savingsTree.ts
 init_define_import_meta_env();
@@ -47472,14 +47460,7 @@ function csvChecksigScript(blocks, pub) {
   return new Uint8Array([...lock, OP_CSV, OP_DROP, ...key]);
 }
 
-// src/lib/vault/program/context.ts
-init_define_import_meta_env();
-init_sha2();
-init_base();
-init_btc_signer();
-
 // src/lib/vault/program/constants.ts
-init_define_import_meta_env();
 var PROGRAM_SCHEMA = "arkade-vault/savings-v1";
 var SAVINGS_TEMPLATE = "phone-hww-recovery-savings-v1";
 function isSavingsTemplate(value) {
@@ -47509,53 +47490,6 @@ function familyClaimants(hasRecovery) {
 }
 function familyKeysFor(hasRecovery) {
   return familyClaimants(hasRecovery).map((claimant) => `savings-${claimant}`);
-}
-
-// src/lib/vault/program/context.ts
-function taggedHash4(tag, ...messages) {
-  const tagH = sha256(encodeUtf8(tag));
-  const prefix2 = new Uint8Array(64);
-  prefix2.set(tagH, 0);
-  prefix2.set(tagH, 32);
-  const total = messages.reduce((n, m) => n + m.length, 64);
-  const out = new Uint8Array(total);
-  out.set(prefix2);
-  let offset = 64;
-  for (const msg of messages) {
-    out.set(msg, offset);
-    offset += msg.length;
-  }
-  return sha256(out);
-}
-function appendText(parts, value, name) {
-  if (!value || value !== value.trim() || value !== value.toLowerCase()) {
-    throw new Error(`${name} must be non-empty canonical lowercase`);
-  }
-  const bytes2 = encodeUtf8(value);
-  const len = new Uint8Array(4);
-  new DataView(len.buffer).setUint32(0, bytes2.length, false);
-  parts.push(len, bytes2);
-}
-function encodeTreeContext(input) {
-  const claimant = input.claimant || "";
-  if (claimant && !CLAIMANTS.includes(claimant)) throw new Error("unknown claimant");
-  const parts = [];
-  appendText(parts, input.vaultId, "vaultId");
-  appendText(parts, "savings", "kind");
-  appendText(parts, claimant === "" ? "-" : claimant, "claimant");
-  appendText(parts, input.templateVersion || SAVINGS_TEMPLATE, "templateVersion");
-  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
-  let offset = 0;
-  for (const part of parts) {
-    out.set(part, offset);
-    offset += part.length;
-  }
-  return out;
-}
-function contextInternalKey(input) {
-  const context = taggedHash4(PROGRAM_INTERNAL_TAG, encodeTreeContext(input));
-  const [tweaked] = utils3.taprootTweakPubkey(hex.decode(TAPROOT_NUMS_XONLY), context);
-  return tweaked;
 }
 
 // src/lib/vault/program/packet.ts
@@ -47646,8 +47580,6 @@ function packetWitnessShape(phoneBound) {
 }
 
 // src/lib/vault/program/script.ts
-init_define_import_meta_env();
-init_base();
 var OP2 = {
   VERIFY: 105,
   EQUAL: 135,
@@ -47862,6 +47794,422 @@ function assembleTransitionScript(input) {
     parts.push(pushInt(1));
   }
   return concat4(...parts);
+}
+
+// src/lib/vault/program/connectorApproval.ts
+var P2 = {
+  DEPTH: 116,
+  SUB: 148,
+  PICK: 121,
+  EQUALVERIFY: 136,
+  SIZE: 130,
+  DROP: 117,
+  SHA256INITIALIZE: 196,
+  SHA256UPDATE: 197,
+  SHA256FINALIZE: 198,
+  INSPECTINPUTARKADESCRIPTHASH: 200,
+  INSPECTNUMOUTPUTS: 213,
+  INSPECTOUTPUTSCRIPTPUBKEY: 209,
+  HASH160: 169,
+  INSPECTINPUTOUTPOINT: 199,
+  NUM2BIN: 215,
+  CAT: 126,
+  SHA256: 168,
+  INSPECTINPUTVALUE: 201,
+  INSPECTINPUTSCRIPTPUBKEY: 202,
+  DUP: 118,
+  HASH256: 170,
+  INSPECTOUTPUTVALUE: 207,
+  LEFT: 128,
+  BIN2NUM: 216,
+  SWAP: 124,
+  SUBSTR: 127,
+  EQUAL: 135,
+  IF: 99,
+  ELSE: 103,
+  ADD: 147,
+  ENDIF: 104,
+  CHECKSIGFROMSTACK: 204,
+  VERIFY: 105
+};
+var cs = (n) => n < 253 ? Uint8Array.of(n) : Uint8Array.of(253, n & 255, n >> 8);
+var tag = (s) => {
+  const h = sha256(new TextEncoder().encode(s));
+  return concat4(h, h);
+};
+function buildConnectorApprovalProof(hardware, extra = new Uint8Array()) {
+  const taproot = hardware.length === 34;
+  let len = 1e3;
+  for (let round = 0; round < 20; round++) {
+    const b = [];
+    const op = (...x) => b.push(Uint8Array.from(x)), num2 = (n) => b.push(pushInt(n)), data = (d) => b.push(
+      d.length === 1 && d[0] >= 1 && d[0] <= 16 ? pushInt(d[0]) : d.length === 1 && d[0] === 129 ? pushInt(-1) : pushData(d)
+    );
+    const copy = (i) => {
+      op(P2.DEPTH);
+      num2(i + 1);
+      op(P2.SUB, P2.PICK);
+    };
+    const chunks = Array.from({ length: Math.ceil(len / 500) }, (_, i) => Math.min(500, len - i * 500));
+    const start = taproot ? 3 : 4;
+    const sizes = [64, 64, 35, ...taproot ? [] : [33], ...chunks];
+    op(P2.DEPTH);
+    num2(sizes.length);
+    op(P2.EQUALVERIFY);
+    sizes.forEach((s, i) => {
+      copy(i);
+      op(P2.SIZE);
+      num2(s);
+      op(P2.EQUALVERIFY, P2.DROP);
+    });
+    data(tag("ArkScriptHash"));
+    op(P2.SHA256INITIALIZE);
+    chunks.forEach((_, i) => {
+      copy(i + start);
+      op(P2.SHA256UPDATE);
+    });
+    data(new Uint8Array());
+    op(P2.SHA256FINALIZE);
+    num2(2);
+    op(P2.INSPECTINPUTARKADESCRIPTHASH, P2.EQUALVERIFY);
+    data(concat4(exactPacketOutputPrefix(len, sizes), Uint8Array.of(1, 2, 0), cs(len)));
+    op(P2.SHA256INITIALIZE);
+    chunks.forEach((_, i) => {
+      copy(i + start);
+      op(P2.SHA256UPDATE);
+    });
+    const wlen = cs(sizes.length).length + sizes.reduce((n, s) => n + cs(s).length + s, 0);
+    data(concat4(cs(wlen), cs(sizes.length)));
+    op(P2.SHA256UPDATE);
+    sizes.forEach((s, i) => {
+      data(cs(s));
+      op(P2.SHA256UPDATE);
+      copy(i);
+      op(P2.SHA256UPDATE);
+    });
+    data(new Uint8Array());
+    op(P2.SHA256FINALIZE, P2.INSPECTNUMOUTPUTS);
+    num2(1);
+    op(P2.SUB, P2.INSPECTOUTPUTSCRIPTPUBKEY);
+    num2(-1);
+    op(P2.EQUALVERIFY, P2.EQUALVERIFY);
+    if (!taproot) {
+      copy(3);
+      op(P2.HASH160);
+      data(hardware.slice(2));
+      op(P2.EQUALVERIFY);
+    }
+    if (taproot) {
+      data(concat4(tag("TapSighash"), hex.decode("00030200000000000000")));
+      for (let i = 0; i < 3; i++) {
+        num2(i);
+        op(P2.INSPECTINPUTOUTPOINT);
+        num2(4);
+        op(P2.NUM2BIN, P2.CAT);
+        if (i > 0) op(P2.CAT);
+      }
+      op(P2.SHA256, P2.CAT);
+      data(hex.decode("f401000000000000f401000000000000"));
+      num2(2);
+      op(P2.INSPECTINPUTVALUE);
+      num2(8);
+      op(P2.NUM2BIN, P2.CAT, P2.SHA256, P2.CAT);
+      data(
+        concat4(
+          Uint8Array.of(hardware.length),
+          hardware,
+          Uint8Array.of(hardware.length),
+          hardware,
+          hex.decode("225120")
+        )
+      );
+      num2(2);
+      op(P2.INSPECTINPUTSCRIPTPUBKEY);
+      num2(1);
+      op(P2.EQUALVERIFY, P2.CAT, P2.SHA256, P2.CAT);
+      data(sha256(hex.decode("fdfffffffdfffffffdffffff")));
+      op(P2.CAT);
+    }
+    for (let i = 0; i < 2; i++) {
+      if (taproot) {
+        op(P2.DUP);
+        data(Uint8Array.of(0, i, 0, 0, 0));
+        op(P2.CAT);
+      } else {
+        data(hex.decode("02000000"));
+        for (let j = 0; j < 3; j++) {
+          num2(j);
+          op(P2.INSPECTINPUTOUTPOINT);
+          num2(4);
+          op(P2.NUM2BIN, P2.CAT);
+          if (j > 0) op(P2.CAT);
+        }
+        op(P2.HASH256, P2.CAT);
+        data(new Uint8Array(32));
+        op(P2.CAT);
+        num2(i);
+        op(P2.INSPECTINPUTOUTPOINT);
+        num2(4);
+        op(P2.NUM2BIN, P2.CAT, P2.CAT);
+        data(concat4(hex.decode("1976a914"), hardware.slice(2), hex.decode("88acf401000000000000fdffffff")));
+        op(P2.CAT);
+      }
+      num2(i);
+      op(P2.INSPECTOUTPUTVALUE);
+      num2(8);
+      op(P2.NUM2BIN);
+      if (i === 0) {
+        copy(2);
+        op(P2.DUP);
+        num2(1);
+        op(P2.LEFT, P2.BIN2NUM);
+        num2(1);
+        op(P2.SWAP, P2.SUBSTR, P2.DUP);
+        num2(0);
+        op(P2.INSPECTOUTPUTSCRIPTPUBKEY, P2.DUP);
+        num2(-1);
+        op(P2.EQUAL, P2.IF, P2.DROP, P2.SWAP, P2.SHA256, P2.EQUALVERIFY, P2.ELSE);
+        op(P2.DUP);
+        num2(0);
+        op(P2.EQUAL, P2.IF);
+        num2(1);
+        op(P2.NUM2BIN, P2.ELSE);
+        num2(80);
+        op(P2.ADD);
+        num2(1);
+        op(P2.NUM2BIN, P2.ENDIF, P2.SWAP, P2.SIZE);
+        num2(1);
+        op(P2.NUM2BIN, P2.SWAP, P2.CAT, P2.CAT, P2.EQUALVERIFY, P2.ENDIF);
+        op(P2.SIZE);
+        num2(1);
+        op(P2.NUM2BIN, P2.SWAP, P2.CAT);
+      } else {
+        op(P2.INSPECTNUMOUTPUTS);
+        num2(6);
+        op(P2.EQUAL, P2.IF);
+        data(hex.decode("225120"));
+        num2(1);
+        op(P2.INSPECTOUTPUTSCRIPTPUBKEY);
+        num2(1);
+        op(P2.EQUALVERIFY, P2.CAT, P2.ELSE);
+        data(concat4(Uint8Array.of(hardware.length), hardware));
+        op(P2.ENDIF);
+      }
+      op(P2.CAT, taproot ? P2.SHA256 : P2.HASH256, P2.CAT);
+      if (!taproot) {
+        data(hex.decode("0000000003000000"));
+        op(P2.CAT);
+      }
+      op(taproot ? P2.SHA256 : P2.HASH256);
+      copy(i);
+      op(P2.SWAP);
+      if (taproot) data(hardware.slice(2));
+      else {
+        num2(16);
+        copy(3);
+        op(P2.CAT);
+      }
+      op(P2.CHECKSIGFROMSTACK, P2.VERIFY);
+    }
+    if (taproot) op(P2.DROP);
+    sizes.forEach(() => op(P2.DROP));
+    b.push(extra);
+    num2(1);
+    const result = concat4(...b);
+    if (result.length === len) return result;
+    len = result.length;
+  }
+  throw Error("length convergence");
+}
+
+// src/lib/vault/program/connectorDual.ts
+init_base();
+var X = { inputScript: 202, toAlt: 107, fromAlt: 108, if: 99, endif: 104, boolOr: 155 };
+function buildDualConnectorProgram(r) {
+  return buildConnectorApprovalProof(r.connectorScript, concat4(buildDualPolicy(r), Uint8Array.of(OP2.VERIFY)));
+}
+function buildDualPolicy(r) {
+  validateConnectorRules(r);
+  const chunks = [];
+  const op = (...values) => chunks.push(Uint8Array.from(values));
+  const num2 = (n) => chunks.push(pushInt(n));
+  const data = (b) => chunks.push(pushData(b));
+  const equal = (opcode, n) => {
+    op(opcode);
+    num2(n);
+    op(OP2.EQUALVERIFY);
+  };
+  const script = (opcode, index, b) => {
+    num2(index);
+    op(opcode);
+    num2(b[0] === 81 ? 1 : 0);
+    op(OP2.EQUALVERIFY);
+    data(b.slice(2));
+    op(OP2.EQUALVERIFY);
+  };
+  const withChange = () => {
+    op(OP2.INSPECTNUMOUTPUTS);
+    num2(6);
+    op(OP2.EQUAL, X.if);
+  };
+  const position = (full) => {
+    withChange();
+    num2(full + 1);
+    op(103);
+    num2(full);
+    op(X.endif);
+  };
+  const outputScript = (full, bytes2) => {
+    position(full);
+    op(OP2.INSPECTOUTPUTSCRIPTPUBKEY);
+    num2(bytes2[0] === 81 ? 1 : 0);
+    op(OP2.EQUALVERIFY);
+    data(bytes2.slice(2));
+    op(OP2.EQUALVERIFY);
+  };
+  data(new TextEncoder().encode(DUAL_CONNECTOR_PROGRAM));
+  op(OP2.DROP);
+  equal(OP2.INSPECTVERSION, 2);
+  equal(OP2.INSPECTLOCKTIME, 0);
+  equal(OP2.INSPECTNUMINPUTS, 3);
+  op(OP2.INSPECTNUMOUTPUTS, OP2.DUP);
+  num2(5);
+  op(OP2.EQUAL, OP2.SWAP);
+  num2(6);
+  op(OP2.EQUAL, X.boolOr, OP2.VERIFY);
+  for (const i of [0, 1, 2]) {
+    num2(i);
+    equal(OP2.INSPECTINPUTSEQUENCE, 4294967293);
+  }
+  for (const i of [0, 1]) {
+    script(X.inputScript, i, r.connectorScript);
+    num2(i);
+    equal(OP2.INSPECTINPUTVALUE, 500);
+    outputScript(i + 1, r.connectorScript);
+    position(i + 1);
+    equal(OP2.INSPECTOUTPUTVALUE, 500);
+  }
+  outputScript(3, hex.decode("51024e73"));
+  position(3);
+  equal(OP2.INSPECTOUTPUTVALUE, 240);
+  position(4);
+  equal(OP2.INSPECTOUTPUTVALUE, 0);
+  withChange();
+  num2(2);
+  op(X.inputScript, X.toAlt);
+  num2(1);
+  op(OP2.INSPECTOUTPUTSCRIPTPUBKEY, X.fromAlt, OP2.EQUALVERIFY, OP2.EQUALVERIFY);
+  num2(1);
+  op(OP2.INSPECTOUTPUTVALUE);
+  num2(330);
+  op(OP2.GREATERTHANOREQUAL, OP2.VERIFY, X.endif);
+  num2(0);
+  op(OP2.INSPECTOUTPUTVALUE);
+  num2(294);
+  op(OP2.GREATERTHANOREQUAL, OP2.VERIFY);
+  num2(2);
+  op(OP2.INSPECTINPUTVALUE);
+  num2(0);
+  op(OP2.INSPECTOUTPUTVALUE, OP2.SUB);
+  position(3);
+  op(OP2.INSPECTOUTPUTVALUE, OP2.SUB);
+  withChange();
+  num2(1);
+  op(OP2.INSPECTOUTPUTVALUE, OP2.SUB, X.endif);
+  op(OP2.DUP);
+  num2(0);
+  op(OP2.GREATERTHANOREQUAL, OP2.VERIFY, OP2.DUP);
+  num2(r.absoluteFeeCapSats);
+  op(OP2.LESSTHANOREQUAL, OP2.VERIFY, OP2.TXWEIGHT);
+  num2(r.witnessBytes);
+  op(OP2.ADD);
+  num2(3);
+  op(OP2.ADD);
+  num2(4);
+  op(OP2.DIV);
+  num2(r.feerateCapSatPerV);
+  op(OP2.MUL, OP2.LESSTHANOREQUAL);
+  return concat4(...chunks);
+}
+
+// src/lib/vault/program/connector.ts
+init_base();
+init_btc_signer();
+init_secp256k1();
+init_sha2();
+
+// src/lib/vault/protectionTier.ts
+init_define_import_meta_env();
+function requireProtectionTier(value) {
+  if (value !== "standard" && value !== "advanced") throw new Error("unsupported protection tier");
+  return value;
+}
+function requireProtectionTierMatchesRecovery(tier, recoveryPub) {
+  const selected = requireProtectionTier(tier);
+  const hasRecovery = typeof recoveryPub === "string" && recoveryPub.trim().length > 0;
+  if (selected === "standard" && hasRecovery) throw new Error("Standard protection must not include a recovery key");
+  if (selected === "advanced" && !hasRecovery) throw new Error("Advanced protection requires a recovery key");
+  return selected;
+}
+
+// src/lib/vault/addressNetwork.ts
+init_define_import_meta_env();
+init_btc_signer();
+function vaultAddressNetwork(network) {
+  if (network === "mutinynet") return TEST_NETWORK;
+  if (network === "bitcoin" || network === "mainnet") return NETWORK;
+  throw new Error("unsupported network");
+}
+
+// src/lib/vault/program/context.ts
+init_define_import_meta_env();
+init_sha2();
+init_base();
+init_btc_signer();
+function taggedHash4(tag2, ...messages) {
+  const tagH = sha256(encodeUtf8(tag2));
+  const prefix2 = new Uint8Array(64);
+  prefix2.set(tagH, 0);
+  prefix2.set(tagH, 32);
+  const total = messages.reduce((n, m) => n + m.length, 64);
+  const out = new Uint8Array(total);
+  out.set(prefix2);
+  let offset = 64;
+  for (const msg of messages) {
+    out.set(msg, offset);
+    offset += msg.length;
+  }
+  return sha256(out);
+}
+function appendText(parts, value, name) {
+  if (!value || value !== value.trim() || value !== value.toLowerCase()) {
+    throw new Error(`${name} must be non-empty canonical lowercase`);
+  }
+  const bytes2 = encodeUtf8(value);
+  const len = new Uint8Array(4);
+  new DataView(len.buffer).setUint32(0, bytes2.length, false);
+  parts.push(len, bytes2);
+}
+function encodeTreeContext(input) {
+  const claimant = input.claimant || "";
+  if (claimant && !CLAIMANTS.includes(claimant)) throw new Error("unknown claimant");
+  const parts = [];
+  appendText(parts, input.vaultId, "vaultId");
+  appendText(parts, "savings", "kind");
+  appendText(parts, claimant === "" ? "-" : claimant, "claimant");
+  appendText(parts, input.templateVersion || SAVINGS_TEMPLATE, "templateVersion");
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+function contextInternalKey(input) {
+  const context = taggedHash4(PROGRAM_INTERNAL_TAG, encodeTreeContext(input));
+  const [tweaked] = utils3.taprootTweakPubkey(hex.decode(TAPROOT_NUMS_XONLY), context);
+  return tweaked;
 }
 
 // src/lib/vault/program/trees.ts
@@ -48150,12 +48498,20 @@ function buildVaultProgramFamily(input) {
 // src/lib/vault/program/connector.ts
 var CONNECTOR_PROGRAM = "savings-connector-v1";
 var CONNECTOR_TEMPLATE = "phone-connector-recovery-savings-v1";
-var X = { inputScript: 202, toAlt: 107, fromAlt: 108, if: 99, endif: 104, boolOr: 155 };
-function buildConnectorProgram(r) {
+var DUAL_CONNECTOR_TEMPLATE = "phone-connector-recovery-savings-v2";
+var DUAL_CONNECTOR_PROGRAM = "savings-connector-dual-v2";
+function isConnectorTemplate(template) {
+  return template === CONNECTOR_TEMPLATE || template === DUAL_CONNECTOR_TEMPLATE;
+}
+var X2 = { inputScript: 202, toAlt: 107, fromAlt: 108, if: 99, endif: 104, boolOr: 155 };
+function validateConnectorRules(r) {
   if (!(r.connectorScript.length === 22 && r.connectorScript[0] === 0 && r.connectorScript[1] === 20) && (r.connectorScript.length !== 34 || r.connectorScript[0] !== 81 || r.connectorScript[1] !== 32 || !secp256k1.utils.isValidPublicKey(new Uint8Array([2, ...r.connectorScript.slice(2)]), true)))
     throw new Error("connector native SegWit or Taproot script required");
   if (!Number.isSafeInteger(r.witnessBytes) || r.witnessBytes < 1 || r.witnessBytes > 1e4 || !Number.isSafeInteger(r.absoluteFeeCapSats) || r.absoluteFeeCapSats < 0 || r.absoluteFeeCapSats > 1e5 || !Number.isSafeInteger(r.feerateCapSatPerV) || r.feerateCapSatPerV < 1 || r.feerateCapSatPerV > 100)
     throw new Error("invalid connector fee policy");
+}
+function buildConnectorProgram(r) {
+  validateConnectorRules(r);
   let prefix2 = new Uint8Array();
   for (let attempt = 0; attempt < 8; attempt++) {
     const chunks = [];
@@ -48178,7 +48534,7 @@ function buildConnectorProgram(r) {
     const withChange = () => {
       op(OP2.INSPECTNUMOUTPUTS);
       num2(5);
-      op(OP2.EQUAL, X.if);
+      op(OP2.EQUAL, X2.if);
     };
     data(new TextEncoder().encode(CONNECTOR_PROGRAM));
     op(OP2.DROP);
@@ -48189,23 +48545,23 @@ function buildConnectorProgram(r) {
     num2(4);
     op(OP2.EQUAL, OP2.SWAP);
     num2(5);
-    op(OP2.EQUAL, X.boolOr, OP2.VERIFY);
+    op(OP2.EQUAL, X2.boolOr, OP2.VERIFY);
     for (const i of [0, 1]) {
       num2(i);
       equal(OP2.INSPECTINPUTSEQUENCE, 4294967293);
     }
-    script(X.inputScript, 1, r.connectorScript);
+    script(X2.inputScript, 1, r.connectorScript);
     script(OP2.INSPECTOUTPUTSCRIPTPUBKEY, 1, r.connectorScript);
     script(OP2.INSPECTOUTPUTSCRIPTPUBKEY, 2, hex.decode("51024e73"));
     withChange();
     num2(0);
-    op(X.inputScript, X.toAlt);
+    op(X2.inputScript, X2.toAlt);
     num2(4);
-    op(OP2.INSPECTOUTPUTSCRIPTPUBKEY, X.fromAlt, OP2.EQUALVERIFY, OP2.EQUALVERIFY);
+    op(OP2.INSPECTOUTPUTSCRIPTPUBKEY, X2.fromAlt, OP2.EQUALVERIFY, OP2.EQUALVERIFY);
     num2(4);
     op(OP2.INSPECTOUTPUTVALUE);
     num2(330);
-    op(OP2.GREATERTHANOREQUAL, OP2.VERIFY, X.endif);
+    op(OP2.GREATERTHANOREQUAL, OP2.VERIFY, X2.endif);
     num2(1);
     equal(OP2.INSPECTINPUTVALUE, 1e3);
     num2(1);
@@ -48234,7 +48590,7 @@ function buildConnectorProgram(r) {
     }
     withChange();
     num2(4);
-    op(OP2.INSPECTOUTPUTVALUE, OP2.SUB, X.endif);
+    op(OP2.INSPECTOUTPUTVALUE, OP2.SUB, X2.endif);
     op(OP2.DUP);
     num2(0);
     op(OP2.GREATERTHANOREQUAL, OP2.VERIFY, OP2.DUP);
@@ -48256,15 +48612,17 @@ function buildConnectorProgram(r) {
   throw new Error("connector packet envelope did not converge");
 }
 function buildConnectorFamily(input) {
-  if (input.templateVersion && input.templateVersion !== CONNECTOR_TEMPLATE)
+  if (input.templateVersion && !isConnectorTemplate(input.templateVersion))
     throw new Error("connector template mismatch");
   if (input.network !== "mainnet" && input.network !== "mutinynet") throw new Error("unsupported connector network");
-  const selected = { ...input, templateVersion: CONNECTOR_TEMPLATE, serverFreeClawback: true };
+  const template = input.templateVersion ?? CONNECTOR_TEMPLATE;
+  const dual = template === DUAL_CONNECTOR_TEMPLATE;
+  const selected = { ...input, templateVersion: template, serverFreeClawback: true };
   const base = buildVaultProgramFamily(selected);
   if (input.connectorType !== "p2tr" && input.connectorType !== "p2wpkh") throw new Error("unsupported connector type");
   const connector = input.connectorType === "p2tr" ? p2tr(xOnlyFromCompressed(input.hardwarePub), void 0, vaultAddressNetwork(input.network)) : p2wpkh(hex.decode(input.hardwarePub), vaultAddressNetwork(input.network));
-  const connectorWitnessBytes = input.connectorType === "p2tr" ? 66 : 45;
-  const internal = contextInternalKey({ vaultId: input.vaultId, claimant: "", templateVersion: CONNECTOR_TEMPLATE });
+  const connectorWitnessBytes = dual ? input.connectorType === "p2tr" ? 134 : 90 : input.connectorType === "p2tr" ? 66 : 45;
+  const internal = contextInternalKey({ vaultId: input.vaultId, claimant: "", templateVersion: template });
   const makeNormal = (normal) => {
     const tree = p2tr(
       internal,
@@ -48286,7 +48644,7 @@ function buildConnectorFamily(input) {
     absoluteFeeCapSats: input.absoluteFeeCapSats,
     feerateCapSatPerV: input.feerateCapSatPerV
   };
-  const program = buildConnectorProgram(rules);
+  const program = dual ? buildDualConnectorProgram(rules) : buildConnectorProgram(rules);
   const pair = tweakPair(input.vaultCosignerBase, input.arkadeCosignerBase, program);
   const roles = [
     input.phonePub,
@@ -48330,7 +48688,7 @@ function connectorEnrollmentDigest(input, origin) {
   const canonical2 = (s) => hex.encode(hex.decode(s));
   const fields = [
     "arkade-vault/connector-enrollment-v1",
-    CONNECTOR_TEMPLATE,
+    input.templateVersion ?? CONNECTOR_TEMPLATE,
     input.vaultId,
     input.network,
     input.protectionTier,
@@ -48572,7 +48930,7 @@ function validateVaultProgramDescriptor(d) {
   if (d.schema !== PROGRAM_SCHEMA) throw new Error("unsupported vault schema");
   if (!SUPPORTED_NETWORKS.includes(d.network)) throw new Error(`unsupported network ${d.network}`);
   if (!d.vaultId || String(d.vaultId).trim() === "") throw new Error("vault id required");
-  if (!isSavingsTemplate(d.templateVersion) && d.templateVersion !== CONNECTOR_TEMPLATE)
+  if (!isSavingsTemplate(d.templateVersion) && !isConnectorTemplate(d.templateVersion))
     throw new Error("template version is not this release");
   if (d.policyVersion !== POLICY_VERSION) throw new Error("policy version is not this release");
   requireProtectionTierMatchesRecovery(d.protectionTier, d.keys.recovery);
@@ -48726,7 +49084,7 @@ function hashVaultProgramDescriptor(d) {
   return bytesToHex3(sha256(encodeVaultProgramDescriptor(d)));
 }
 function buildDescriptorFamily(input) {
-  if (input.templateVersion !== CONNECTOR_TEMPLATE) {
+  if (!isConnectorTemplate(input.templateVersion)) {
     if (input.connectorType !== void 0) throw new Error("connector type on a legacy descriptor");
     return buildVaultProgramFamily(input);
   }
@@ -48967,6 +49325,7 @@ function buildConnectorEnrollmentPreview(input) {
   if (input.origin.connectorType !== "p2wpkh" && input.origin.connectorType !== "p2tr")
     fail("connector type must be p2tr or p2wpkh");
   const familyInput = {
+    templateVersion: input.templateVersion ?? CONNECTOR_TEMPLATE,
     connectorType: input.origin.connectorType,
     vaultId: input.vaultId,
     network,
@@ -49001,7 +49360,7 @@ function buildConnectorEnrollmentPreview(input) {
     schema: PROGRAM_SCHEMA,
     network,
     vaultId: input.vaultId,
-    templateVersion: CONNECTOR_TEMPLATE,
+    templateVersion: input.templateVersion ?? CONNECTOR_TEMPLATE,
     policyVersion: POLICY_VERSION,
     protectionTier,
     keys: {
@@ -49055,6 +49414,7 @@ function parseConnectorRecoveryKit(raw2) {
   if (kit.version !== CONNECTOR_KIT_VERSION) fail("unsupported connector kit version");
   const rebuilt = buildConnectorEnrollmentPreview({
     vaultId: kit.vaultId,
+    templateVersion: kit.templateVersion ?? CONNECTOR_TEMPLATE,
     network: kit.network,
     protectionTier: kit.protectionTier,
     phonePub: kit.phonePub,
@@ -49084,6 +49444,7 @@ function connectorRecoveryDescriptor(raw2) {
   const kit = parseConnectorRecoveryKit(raw2);
   return buildConnectorEnrollmentPreview({
     vaultId: kit.vaultId,
+    templateVersion: kit.templateVersion ?? CONNECTOR_TEMPLATE,
     network: kit.network,
     protectionTier: kit.protectionTier,
     origin: kit.origin,
@@ -49119,7 +49480,7 @@ function verifyConnectorStatus(status, pin, options) {
   if (!status?.enrolled) fail("vault is not enrolled");
   if (status.vaultId !== pin.vaultId) fail("connector vault id does not match enrollment");
   if (status.network !== pin.network) fail("connector network does not match enrollment");
-  if (status.templateVersion !== CONNECTOR_TEMPLATE) fail("vault is not a connector enrollment");
+  if (!isConnectorTemplate(status.templateVersion)) fail("vault is not a connector enrollment");
   const identity2 = status.connectorEnrollment;
   if (!identity2 || identity2.connectorPub !== pin.connectorPub || identity2.connectorType !== pin.connectorType || identity2.connectorFingerprint !== pin.connectorFingerprint || identity2.connectorPath.join("/") !== pin.connectorPath.join("/") || identity2.enrollmentDigest !== pin.enrollmentDigest || identity2.descriptorHash !== pin.descriptorHash)
     fail("connector status origin does not match enrollment");
@@ -49153,6 +49514,7 @@ function verifyConnectorStatus(status, pin, options) {
   }
   const preview = buildConnectorEnrollmentPreview({
     vaultId: pin.vaultId,
+    templateVersion: status.templateVersion,
     network: pin.network,
     protectionTier: pin.protectionTier,
     phonePub,
@@ -50969,7 +51331,7 @@ function kitFromFacts(input) {
   const spendingPolicy = input.status?.spendingPolicy;
   const statusSpendingPolicyDigest = String(input.status?.spendingPolicyDigest || "").trim();
   const protectionTier = input.status?.protectionTier;
-  if (liveBases && phonePub && phoneDirectP256 && vaultId && signerOrigin && signerVersion && spendingPolicy && spendingPolicy.program === "vault-policy-v1" && statusSpendingPolicyDigest && protectionTier && protectionTier !== "light" && isSupportedVaultNetwork(input.status?.network) && (liveTemplate === SAVINGS_TEMPLATE || liveTemplate === CONNECTOR_TEMPLATE)) {
+  if (liveBases && phonePub && phoneDirectP256 && vaultId && signerOrigin && signerVersion && spendingPolicy && spendingPolicy.program === "vault-policy-v1" && statusSpendingPolicyDigest && protectionTier && protectionTier !== "light" && isSupportedVaultNetwork(input.status?.network) && (liveTemplate === SAVINGS_TEMPLATE || isConnectorTemplate(liveTemplate))) {
     try {
       const descriptor = buildVaultProgramDescriptor({
         vaultId,
@@ -51016,7 +51378,7 @@ function vaultRecoveryBinding(kit, status) {
   if (hex.encode(script.params.arkdServerPub) !== networkPins(status.network).operatorSignerPub.slice(2))
     throw new Error("Recovery Operator does not match this release");
   const boarding = requireBoardingStatus(status, String(status.vtxoBoardingDescriptor?.boardingPub || ""));
-  if (status.templateVersion === CONNECTOR_TEMPLATE) connectorPinFromVerifiedStatus(status);
+  if (isConnectorTemplate(status.templateVersion)) connectorPinFromVerifiedStatus(status);
   else if (hashBoardingEnrollmentDescriptor({
     schema: "arkade-vault/enrollment-with-board-v1",
     vaultId: status.vaultId,
@@ -51245,6 +51607,62 @@ init_base();
 
 // src/lib/vault/light/recoveryArchive.ts
 init_define_import_meta_env();
+
+// src/lib/vault/recovery/coverage.ts
+init_define_import_meta_env();
+var point = (coin) => `${coin.txid}:${coin.vout}`;
+function spendingRecoveryCoverage(archive, binding2, expected) {
+  const known = /* @__PURE__ */ new Map();
+  if (expected !== null) {
+    if (expected.length > 512) throw new Error("Recovery output limit exceeded");
+    for (const coin of expected) {
+      if (!/^[0-9a-f]{64}$/.test(coin.txid) || !Number.isSafeInteger(coin.vout) || coin.vout < 0 || coin.vout > 4294967295 || !Number.isSafeInteger(coin.value) || coin.value <= 0 || coin.value > 21e14 || coin.script !== binding2.scriptPubKey)
+        throw new Error("Known recovery output does not match this wallet");
+      const prior = known.get(point(coin));
+      if (prior && prior.value !== coin.value) throw new Error("Known recovery outputs disagree");
+      known.set(point(coin), coin);
+    }
+  }
+  const result = {
+    scope: "spending-paths",
+    state: "missing",
+    capturedAt: null,
+    archivedSats: 0,
+    coveredSats: expected === null ? null : 0,
+    missing: [...known.keys()].sort(),
+    mismatched: [],
+    stale: []
+  };
+  if (!archive) return result;
+  let saved;
+  try {
+    saved = validateExitArchive(archive, binding2).coins;
+  } catch {
+    return { ...result, state: "invalid" };
+  }
+  result.capturedAt = archive.capturedAt;
+  result.archivedSats = saved.reduce((total, coin) => total + coin.value, 0);
+  if (expected === null) return { ...result, state: "unknown" };
+  const byPoint = new Map(saved.map((coin) => [point(coin), coin]));
+  result.missing = [];
+  for (const [id, coin] of known) {
+    const match2 = byPoint.get(id);
+    if (!match2) result.missing.push(id);
+    else if (match2.value !== coin.value || match2.script !== coin.script) result.mismatched.push(id);
+    else result.coveredSats += coin.value;
+  }
+  result.stale = saved.filter((coin) => !known.has(point(coin))).map(point).sort();
+  result.missing.sort();
+  result.mismatched.sort();
+  result.state = result.missing.length || result.mismatched.length || result.stale.length ? "incomplete" : "current";
+  return result;
+}
+function requireSpendingRecoveryCoverage(archive, binding2, expected) {
+  if (spendingRecoveryCoverage(archive, binding2, expected).state !== "current")
+    throw new Error("Transaction paths are catching up with your wallet. The previous backup is retained.");
+}
+
+// src/lib/vault/light/recoveryArchive.ts
 function binding(descriptor) {
   const d = validateLightDescriptor(descriptor);
   return { ...d, descriptorHash: lightDescriptorDigest(d) };
@@ -51332,10 +51750,7 @@ function lightArchiveProviders(archive, d) {
 }
 function assertLightArchiveMatchesVtxos(archive, d, expected) {
   if (!expected) return;
-  const { coins } = validateLightRecoveryArchive(archive, d);
-  const fingerprint2 = (values) => values.map((v) => `${v.txid}:${v.vout}:${v.value}:${v.script}`).sort().join("|");
-  if (fingerprint2(expected) !== fingerprint2(coins))
-    throw new Error("Transaction paths are catching up with your wallet. The previous backup is retained.");
+  requireSpendingRecoveryCoverage(archive, binding(d), expected);
 }
 
 // src/lib/vault/light/recovery.ts

@@ -53961,7 +53961,7 @@ function prepareConnectorPayment(input) {
   const vbytes = Math.ceil((unsigned.length * 4 + f.rules.witnessBytes) / 4);
   if (input.feeSats > vbytes * f.rules.feerateCapSatPerV) throw new Error("connector feerate cap exceeded");
   const prepared2 = tx.toPSBT();
-  function mergeResponse(responseText, completePSBT, approvalUnsigned) {
+  function mergeResponse(responseText, completePSBT, approvalUnsigned, hardwareApprovalStage = false) {
     if (responseText.length > 4e6) throw new Error("signer response too large");
     const text = responseText.replace(/\s+/g, "");
     const raw2 = /^[0-9a-f]+$/i.test(text) && text.length % 2 === 0 ? hex.decode(text) : base64.decode(text);
@@ -53972,7 +53972,8 @@ function prepareConnectorPayment(input) {
       throw new Error("hardware changed transaction");
     for (let i = 0; i < coins2.length; i++) {
       const returned = response.getInput(i);
-      if (returned.sighashType !== void 0 && (i === savingsIndex ? returned.sighashType !== 0 : dual ? returned.sighashType !== 3 : returned.sighashType !== 0 && returned.sighashType !== 1))
+      const unsignedSavingsHint = hardwareApprovalStage && dual && i === savingsIndex && returned.sighashType === 3 && !returned.tapKeySig && !returned.tapScriptSig?.length && !returned.partialSig?.length && !returned.finalScriptWitness?.length;
+      if (!unsignedSavingsHint && returned.sighashType !== void 0 && (i === savingsIndex ? returned.sighashType !== 0 : dual ? returned.sighashType !== 3 : returned.sighashType !== 0 && returned.sighashType !== 1))
         throw new Error("connector signature sighash mismatch");
       if (returned.finalScriptSig?.length) throw new Error("unexpected scriptSig");
       if (returned.witnessUtxo && (returned.witnessUtxo.amount !== values[i] || hex.encode(returned.witnessUtxo.script) !== hex.encode(scripts[i])))
@@ -54061,7 +54062,7 @@ function prepareConnectorPayment(input) {
     hardwareApproval: () => hex.encode(approvalPsbt()),
     acceptHardwareApproval(response) {
       const approvalUnsigned = Transaction.fromPSBT(approvalPsbt(), OPTIONS).unsignedTx;
-      const accepted = mergeResponse(response, prepared2, approvalUnsigned);
+      const accepted = mergeResponse(response, prepared2, approvalUnsigned, true);
       return [0, 1].map((i) => hex.encode(accepted.getInput(i).finalScriptWitness[0]));
     },
     // The policy uses a lower witness bound for its ceiling. Fee estimation
