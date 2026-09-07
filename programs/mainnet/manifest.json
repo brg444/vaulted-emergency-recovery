@@ -2,8 +2,8 @@
   "network": "mainnet",
   "sha256": "8372e2ee222c372f28edab116b1d4d82bfae396b75100101d3e1a4453cfb3193",
   "wallet": "brg444/vaulted-bitcoin-wallet",
-  "walletRevision": "c396d225dab47c4ecbaee226a9823561864cb7bc",
-  "workingTreeDirty": true,
+  "walletRevision": "7e8146477373dd50639869c87044a25d4e273514",
+  "workingTreeDirty": false,
   "entry": "tools/program-emergency/recover.ts",
   "inputs": {
     "node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-GOKJNT7E.js": "50e357c411cfcee2609a5c2adda59f455fa41c925d06bb4da5ecaae0204e46c5",
