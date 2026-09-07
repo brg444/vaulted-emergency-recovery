@@ -1,3 +1,5 @@
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { lightRecoveryHandler } from "./light-server";
 
 const network = process.env.RECOVERY_NETWORK || "mainnet";
@@ -17,7 +19,8 @@ const server = Bun.serve({
     : {}),
   port,
   hostname,
-  fetch: lightRecoveryHandler(network),
+  fetch: lightRecoveryHandler(network, fetch, process.env.RECOVERY_ASSET_DIR
+    ? pathToFileURL(resolve(process.env.RECOVERY_ASSET_DIR) + "/") : undefined),
 });
 
 const url = `${tlsCert ? "https" : "http"}://${hostname === "127.0.0.1" ? "127.0.0.1" : hostname}:${server.port}/`;

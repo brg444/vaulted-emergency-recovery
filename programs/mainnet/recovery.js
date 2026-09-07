@@ -1549,8 +1549,8 @@ function assert0(n) {
   if (n !== _0n3)
     throw new Error("invalid wNAF");
 }
-function mulEndoUnsafe(Point5, point, k1, k2) {
-  let acc = point;
+function mulEndoUnsafe(Point5, point2, k1, k2) {
+  let acc = point2;
   let p1 = Point5.ZERO;
   let p2 = Point5.ZERO;
   while (k1 > _0n3 || k2 > _0n3) {
@@ -1646,10 +1646,10 @@ var init_curve = __esm({
        * @param W window size
        * @returns precomputed point tables flattened to a single array
        */
-      precomputeWindow(point, W2) {
+      precomputeWindow(point2, W2) {
         const { windows, windowSize } = calcWOpts(W2, this.bits);
         const points = [];
-        let p = point;
+        let p = point2;
         let base = p;
         for (let window2 = 0; window2 < windows; window2++) {
           base = p;
@@ -1708,27 +1708,27 @@ var init_curve = __esm({
         assert0(n);
         return acc;
       }
-      getPrecomputes(W2, point, transform) {
-        let comp = pointPrecomputes.get(point);
+      getPrecomputes(W2, point2, transform) {
+        let comp = pointPrecomputes.get(point2);
         if (!comp) {
-          comp = this.precomputeWindow(point, W2);
+          comp = this.precomputeWindow(point2, W2);
           if (W2 !== 1) {
             if (typeof transform === "function")
               comp = transform(comp);
-            pointPrecomputes.set(point, comp);
+            pointPrecomputes.set(point2, comp);
           }
         }
         return comp;
       }
-      cached(point, scalar2, transform) {
-        const W2 = getW(point);
-        return this.wNAF(W2, this.getPrecomputes(W2, point, transform), scalar2);
+      cached(point2, scalar2, transform) {
+        const W2 = getW(point2);
+        return this.wNAF(W2, this.getPrecomputes(W2, point2, transform), scalar2);
       }
-      unsafe(point, scalar2, transform, prev) {
-        const W2 = getW(point);
+      unsafe(point2, scalar2, transform, prev) {
+        const W2 = getW(point2);
         if (W2 === 1)
-          return this._unsafeLadder(point, scalar2, prev);
-        return this.wNAFUnsafe(W2, this.getPrecomputes(W2, point, transform), scalar2, prev);
+          return this._unsafeLadder(point2, scalar2, prev);
+        return this.wNAFUnsafe(W2, this.getPrecomputes(W2, point2, transform), scalar2, prev);
       }
       // We calculate precomputes for elliptic curve point multiplication
       // using windowed method. This specifies window size and
@@ -2052,8 +2052,8 @@ function weierstrass(params, extraOpts = {}) {
     if (!Fp.isOdd)
       throw new Error("compression is not supported: Field does not have .isOdd()");
   }
-  function pointToBytes3(_c, point, isCompressed) {
-    const { x, y } = point.toAffine();
+  function pointToBytes3(_c, point2, isCompressed) {
+    const { x, y } = point2.toAffine();
     const bx = Fp.toBytes(x);
     abool(isCompressed, "isCompressed");
     if (isCompressed) {
@@ -2366,20 +2366,20 @@ function weierstrass(params, extraOpts = {}) {
       const { endo: endo2 } = extraOpts;
       if (!Fn4.isValidNot0(scalar2))
         throw new Error("invalid scalar: out of range");
-      let point, fake;
+      let point2, fake;
       const mul = (n) => wnaf.cached(this, n, (p) => normalizeZ(Point5, p));
       if (endo2) {
         const { k1neg, k1, k2neg, k2 } = splitEndoScalarN(scalar2);
         const { p: k1p, f: k1f } = mul(k1);
         const { p: k2p, f: k2f } = mul(k2);
         fake = k1f.add(k2f);
-        point = finishEndo(endo2.beta, k1p, k2p, k1neg, k2neg);
+        point2 = finishEndo(endo2.beta, k1p, k2p, k1neg, k2neg);
       } else {
         const { p, f } = mul(scalar2);
-        point = p;
+        point2 = p;
         fake = f;
       }
-      return normalizeZ(Point5, [point, fake])[0];
+      return normalizeZ(Point5, [point2, fake])[0];
     }
     /**
      * Non-constant-time multiplication. Uses double-and-add algorithm.
@@ -3116,7 +3116,7 @@ var init_secp256k1 = __esm({
     });
     secp256k1 = /* @__PURE__ */ ecdsa(Pointk1, sha256);
     TAGGED_HASH_PREFIXES = {};
-    pointToBytes = (point) => point.toBytes(true).slice(1);
+    pointToBytes = (point2) => point2.toBytes(true).slice(1);
     hasEven = (y) => y % _2n3 === _0n5;
     num = bytesToNumberBE;
     schnorr = /* @__PURE__ */ (() => {
@@ -25678,10 +25678,10 @@ function arkadeWitnessHash(witness) {
 }
 function computeArkadeScriptPublicKey(pubKey, script) {
   const hash = arkadeScriptHash2(script);
-  const point = schnorr.utils.lift_x(bytesToNumberBE(toXOnly(pubKey, "emulator key")));
+  const point2 = schnorr.utils.lift_x(bytesToNumberBE(toXOnly(pubKey, "emulator key")));
   const scalar2 = bytesToNumberBE(hash) % secp256k1.Point.CURVE().n;
   const tweak = secp256k1.Point.BASE.multiply(scalar2);
-  return schnorr.utils.pointToBytes(point.add(tweak));
+  return schnorr.utils.pointToBytes(point2.add(tweak));
 }
 var VHTLC;
 ((VHTLC2) => {
@@ -27328,8 +27328,8 @@ var evenScalar = (p, n) => hasEven2(p.y) ? n : Fn3.neg(n);
 function mulBase(n) {
   return Point3.BASE.multiply(n);
 }
-function isZero(point) {
-  return point.equals(Point3.ZERO);
+function isZero(point2) {
+  return point2.equals(Point3.ZERO);
 }
 function sortKeys(publicKeys) {
   abytesArray(publicKeys, PUBKEY_LEN);
@@ -47347,8 +47347,8 @@ function verifyLegacy(message, sigBytes, addressHash) {
   const msgHash = bitcoinMessageHash(message);
   try {
     const sig = secp256k1.Signature.fromBytes(compactSig, "compact").addRecoveryBit(recoveryId);
-    const point = sig.recoverPublicKey(msgHash);
-    const pubkeyBytes = point.toBytes(compressed2);
+    const point2 = sig.recoverPublicKey(msgHash);
+    const pubkeyBytes = point2.toBytes(compressed2);
     return equalBytes(hash160(pubkeyBytes), addressHash);
   } catch {
     return false;
@@ -53961,7 +53961,7 @@ function prepareConnectorPayment(input) {
   const vbytes = Math.ceil((unsigned.length * 4 + f.rules.witnessBytes) / 4);
   if (input.feeSats > vbytes * f.rules.feerateCapSatPerV) throw new Error("connector feerate cap exceeded");
   const prepared2 = tx.toPSBT();
-  function mergeResponse(responseText, completePSBT, approvalUnsigned) {
+  function mergeResponse(responseText, completePSBT, approvalUnsigned, hardwareApprovalStage = false) {
     if (responseText.length > 4e6) throw new Error("signer response too large");
     const text = responseText.replace(/\s+/g, "");
     const raw2 = /^[0-9a-f]+$/i.test(text) && text.length % 2 === 0 ? hex.decode(text) : base64.decode(text);
@@ -53972,7 +53972,8 @@ function prepareConnectorPayment(input) {
       throw new Error("hardware changed transaction");
     for (let i = 0; i < coins2.length; i++) {
       const returned = response.getInput(i);
-      if (returned.sighashType !== void 0 && (i === savingsIndex ? returned.sighashType !== 0 : dual ? returned.sighashType !== 3 : returned.sighashType !== 0 && returned.sighashType !== 1))
+      const unsignedSavingsHint = hardwareApprovalStage && dual && i === savingsIndex && returned.sighashType === 3 && !returned.tapKeySig && !returned.tapScriptSig?.length && !returned.partialSig?.length && !returned.finalScriptWitness?.length;
+      if (!unsignedSavingsHint && returned.sighashType !== void 0 && (i === savingsIndex ? returned.sighashType !== 0 : dual ? returned.sighashType !== 3 : returned.sighashType !== 0 && returned.sighashType !== 1))
         throw new Error("connector signature sighash mismatch");
       if (returned.finalScriptSig?.length) throw new Error("unexpected scriptSig");
       if (returned.witnessUtxo && (returned.witnessUtxo.amount !== values[i] || hex.encode(returned.witnessUtxo.script) !== hex.encode(scripts[i])))
@@ -54061,7 +54062,7 @@ function prepareConnectorPayment(input) {
     hardwareApproval: () => hex.encode(approvalPsbt()),
     acceptHardwareApproval(response) {
       const approvalUnsigned = Transaction.fromPSBT(approvalPsbt(), OPTIONS).unsignedTx;
-      const accepted = mergeResponse(response, prepared2, approvalUnsigned);
+      const accepted = mergeResponse(response, prepared2, approvalUnsigned, true);
       return [0, 1].map((i) => hex.encode(accepted.getInput(i).finalScriptWitness[0]));
     },
     // The policy uses a lower witness bound for its ceiling. Fee estimation
@@ -54298,13 +54299,17 @@ function validateRecoveryHeader(header) {
     throw new Error("Recovery passkey origin changed");
   return header;
 }
+function validateRecoveryDataBinding(headerValue, archiveValue) {
+  const header = validateRecoveryHeader(headerValue);
+  const archive = validateVaultRecoveryArchive(archiveValue);
+  if (JSON.stringify(recoveryStatusFacts(archive.status)) !== JSON.stringify(header.status) || archive.kit.descriptorHash !== header.kit.descriptorHash)
+    throw new Error("Recovery data does not match its encrypted identity");
+  return { header, archive };
+}
 function validateVaultRecoveryFile(file) {
   if (!file || file.name !== "vaulted-recovery" || file.version !== 1 || JSON.stringify(file).length > MAX_RECOVERY_PLAIN_BYTES)
     throw new Error("Invalid recovery file");
-  const header = validateRecoveryHeader(file.header);
-  const archive = validateVaultRecoveryArchive(file.archive);
-  if (JSON.stringify(recoveryStatusFacts(archive.status)) !== JSON.stringify(header.status) || archive.kit.descriptorHash !== header.kit.descriptorHash)
-    throw new Error("Recovery data does not match its encrypted identity");
+  const { header } = validateRecoveryDataBinding(file.header, file.archive);
   if (isConnectorTemplate2(header.binding.templateVersion)) {
     validateConnectorRecoveryJournal(
       { vaultId: header.binding.vaultId, enrollmentDigest: header.status.connectorEnrollment.enrollmentDigest },
@@ -54615,6 +54620,62 @@ init_base();
 
 // src/lib/vault/light/recoveryArchive.ts
 init_define_import_meta_env();
+
+// src/lib/vault/recovery/coverage.ts
+init_define_import_meta_env();
+var point = (coin) => `${coin.txid}:${coin.vout}`;
+function spendingRecoveryCoverage(archive, binding2, expected) {
+  const known = /* @__PURE__ */ new Map();
+  if (expected !== null) {
+    if (expected.length > 512) throw new Error("Recovery output limit exceeded");
+    for (const coin of expected) {
+      if (!/^[0-9a-f]{64}$/.test(coin.txid) || !Number.isSafeInteger(coin.vout) || coin.vout < 0 || coin.vout > 4294967295 || !Number.isSafeInteger(coin.value) || coin.value <= 0 || coin.value > 21e14 || coin.script !== binding2.scriptPubKey)
+        throw new Error("Known recovery output does not match this wallet");
+      const prior = known.get(point(coin));
+      if (prior && prior.value !== coin.value) throw new Error("Known recovery outputs disagree");
+      known.set(point(coin), coin);
+    }
+  }
+  const result = {
+    scope: "spending-paths",
+    state: "missing",
+    capturedAt: null,
+    archivedSats: 0,
+    coveredSats: expected === null ? null : 0,
+    missing: [...known.keys()].sort(),
+    mismatched: [],
+    stale: []
+  };
+  if (!archive) return result;
+  let saved;
+  try {
+    saved = validateExitArchive(archive, binding2).coins;
+  } catch {
+    return { ...result, state: "invalid" };
+  }
+  result.capturedAt = archive.capturedAt;
+  result.archivedSats = saved.reduce((total, coin) => total + coin.value, 0);
+  if (expected === null) return { ...result, state: "unknown" };
+  const byPoint = new Map(saved.map((coin) => [point(coin), coin]));
+  result.missing = [];
+  for (const [id, coin] of known) {
+    const match2 = byPoint.get(id);
+    if (!match2) result.missing.push(id);
+    else if (match2.value !== coin.value || match2.script !== coin.script) result.mismatched.push(id);
+    else result.coveredSats += coin.value;
+  }
+  result.stale = saved.filter((coin) => !known.has(point(coin))).map(point).sort();
+  result.missing.sort();
+  result.mismatched.sort();
+  result.state = result.missing.length || result.mismatched.length || result.stale.length ? "incomplete" : "current";
+  return result;
+}
+function requireSpendingRecoveryCoverage(archive, binding2, expected) {
+  if (spendingRecoveryCoverage(archive, binding2, expected).state !== "current")
+    throw new Error("Transaction paths are catching up with your wallet. The previous backup is retained.");
+}
+
+// src/lib/vault/light/recoveryArchive.ts
 function binding(descriptor) {
   const d = validateLightDescriptor(descriptor);
   return { ...d, descriptorHash: lightDescriptorDigest(d) };
@@ -54702,10 +54763,7 @@ function lightArchiveProviders(archive, d) {
 }
 function assertLightArchiveMatchesVtxos(archive, d, expected) {
   if (!expected) return;
-  const { coins: coins2 } = validateLightRecoveryArchive(archive, d);
-  const fingerprint3 = (values) => values.map((v) => `${v.txid}:${v.vout}:${v.value}:${v.script}`).sort().join("|");
-  if (fingerprint3(expected) !== fingerprint3(coins2))
-    throw new Error("Transaction paths are catching up with your wallet. The previous backup is retained.");
+  requireSpendingRecoveryCoverage(archive, binding(d), expected);
 }
 
 // src/lib/vault/light/recovery.ts
@@ -55951,6 +56009,34 @@ function recoveryPsbtHasAllSignatures(psbt, requiredKeys) {
   return signed;
 }
 
+// src/lib/vault/recovery/portable.ts
+init_define_import_meta_env();
+var MAX_PORTABLE_RECOVERY_BYTES = 32e6;
+function parsePortableRecoveryPackage(raw2) {
+  const value2 = raw2;
+  if (!value2 || value2.name !== "vaulted-recovery-package" || value2.version !== 1 || Object.keys(value2).sort().join(",") !== "archive,backup,name,version" || JSON.stringify(value2).length > MAX_PORTABLE_RECOVERY_BYTES)
+    throw new Error("Invalid portable recovery package");
+  const backup = parseEncryptedRecoveryBackup(value2.backup);
+  const archive = validateVaultRecoveryArchive(value2.archive);
+  validateRecoveryDataBinding(backup.header, archive);
+  return value2;
+}
+function validateReadableRecoverySource(value2) {
+  if (!value2 || value2.name !== "vaulted-readable-recovery" || value2.version !== 1 || Object.keys(value2).sort().join(",") !== "archive,header,name,version")
+    throw new Error("Invalid readable recovery data");
+  validateRecoveryDataBinding(value2.header, value2.archive);
+  return value2;
+}
+function portableRecoverySource(raw2) {
+  const value2 = parsePortableRecoveryPackage(raw2);
+  return validateReadableRecoverySource({
+    name: "vaulted-readable-recovery",
+    version: 1,
+    header: value2.backup.header,
+    archive: value2.archive
+  });
+}
+
 // tools/program-emergency/recover.ts
 var el = (id) => document.getElementById(id);
 var value = (id) => el(id).value.trim();
@@ -56065,11 +56151,14 @@ function select(id, options2) {
 }
 function review() {
   network();
+  el("import").hidden = true;
+  el("change-file").hidden = false;
   el("review").hidden = false;
   el("prepared").hidden = !prepared;
   const k = source.full?.header.kit || source.publicKit;
-  el("facts").textContent = `${source.light ? "Light" : k?.protectionTier} \xB7 ${network()} \xB7 ${status()?.vaultId || k?.descriptor.vaultId}`;
-  el("coverage").textContent = source.full ? `Saved ${source.full.archive.spending.capturedAt}. Includes Spending, boarding, Savings states and saved payment journals.` : source.light ? `Saved ${source.light.createdAt}. The archive covers its saved Spending and Lightning lockup paths.` : `${source.originalKit?.name === "arkade-connector-enrollment" ? "Connector enrollment kit" : `Recovery Kit version ${source.originalKit?.version || k?.version}`}. Public transaction scripts are verified independently; offchain Spending needs a complete archive. ${k && kitHasUnlock(k) ? "This file can unlock the phone key with its original passkey." : ""}`;
+  el("facts").textContent = `${source.light ? "Light" : k?.protectionTier} \xB7 ${network()} \xB7 Wallet ${(status()?.vaultId || k?.descriptor.vaultId || "").slice(0, 8)}`;
+  el("amount").textContent = source.full ? `${spendingRecoveryCoverage(source.full.archive.spending, vaultRecoveryBinding(source.full.header.kit, source.full.header.status), null).archivedSats.toLocaleString()} sats in saved Spending paths` : "";
+  el("coverage").textContent = source.full ? `Saved ${new Date(source.full.archive.spending.capturedAt).toLocaleString()}. Later wallet activity may need a newer file. ${source.full?.name === "vaulted-readable-recovery" ? "Unlock the protected backup only for payment journals or saved connector approvals." : ""}` : source.light ? `Saved ${source.light.createdAt}. The archive covers its saved Spending and Lightning lockup paths.` : `${source.originalKit?.name === "arkade-connector-enrollment" ? "Connector enrollment kit" : `Recovery Kit version ${source.originalKit?.version || k?.version}`}. Public transaction scripts are verified independently; offchain Spending needs a complete archive. ${k && kitHasUnlock(k) ? "This file can unlock the phone key with its original passkey." : ""}`;
   const options2 = [];
   if (source.full || source.light) options2.push({ value: "spending", label: "Spending \u2014 unilateral Bitcoin exit" });
   if (source.full || source.publicKit?.boarding)
@@ -56090,13 +56179,13 @@ function review() {
           });
       }
   }
-  const journal = source.full?.lightningJournal || source.light?.lightningJournal;
+  const journal = (source.full?.name === "vaulted-recovery" ? source.full.lightningJournal : void 0) || source.light?.lightningJournal;
   for (const entry of journal?.entries || [])
     options2.push({
       value: `lightning:${entry.record.rfqId}`,
       label: `Lightning refund \u2014 ${entry.record.rfqId.slice(0, 12)}`
     });
-  if (source.full?.connectorJournal?.pending)
+  if (source.full?.name === "vaulted-recovery" && source.full.connectorJournal?.pending)
     options2.push({ value: "connector", label: "Saved connector payment \u2014 resume exact approval" });
   select("program", options2);
   select(
@@ -56129,6 +56218,7 @@ function paintCoins() {
 }
 function programChanged() {
   const program = value("program");
+  el("requirements").textContent = program === "spending" ? `Required: ${source.light ? "your owner key" : source.full?.header.kit.protectionTier === "advanced" ? "hardware and recovery keys" : "the wallet key unlocked by your original passkey, and your hardware key"}. Saved transaction paths, Bitcoin fees and the committed waiting periods apply. No new Guardian or Operator approval is required.` : program === "connector" ? "This finishes the saved payment using its retained service approvals and the required hardware signature." : "Use the keys and waiting conditions in this saved account. Review the signing request before approving.";
   el("fee-label").hidden = program === "spending" || program === "boarding" || program === "connector" || program.startsWith("lightning:");
   el("coin-label").hidden = program === "spending" || program === "connector" || program.startsWith("lightning:");
   el("scan").hidden = Boolean(source.light) || program === "spending" || program.startsWith("lightning:") || program === "connector";
@@ -56190,7 +56280,39 @@ async function requestSignature(psbt, required) {
   el("sign-error").textContent = "";
   el("psbt").textContent = psbt;
   el("psbt").value = psbt;
-  el("signers").textContent = `Required keys: ${required.map((k) => `${k.role} (${k.publicKey})`).join(", ")}`;
+  el("signers").textContent = `Required keys: ${required.map((k) => k.role).join(" and ")}`;
+  el("signing-keys").textContent = required.map((k) => `${k.role}: ${k.publicKey}`).join("\n");
+  const outputs = Array.from({ length: tx.outputsLength }, (_, index) => {
+    const output = tx.getOutput(index);
+    const row = document.createElement("p");
+    const amount = document.createElement("strong");
+    amount.textContent = `${output.amount.toLocaleString()} sats`;
+    let destination;
+    try {
+      destination = Address(getNetwork(networkPins(network()).sdkNetwork)).encode(OutScript.decode(output.script));
+    } catch {
+      destination = `Script output: ${hex.encode(OutScript.decode(output.script))}`;
+    }
+    row.append(amount, document.createElement("br"), document.createTextNode(destination));
+    return row;
+  });
+  el("signing-outputs").replaceChildren(...outputs);
+  let inputAmount = 0n;
+  let knownInputs = true;
+  for (let index = 0; index < tx.inputsLength; index++) {
+    const input = tx.getInput(index).witnessUtxo;
+    if (!input) {
+      knownInputs = false;
+      break;
+    }
+    inputAmount += input.amount;
+  }
+  const outputAmount = Array.from({ length: tx.outputsLength }, (_, index) => tx.getOutput(index).amount).reduce(
+    (total, amount) => total + amount,
+    0n
+  );
+  el("signing-fee").textContent = knownInputs ? `Transaction fee: ${(inputAmount - outputAmount).toLocaleString()} sats. Separate parent fee funding may still be needed.` : "Transaction fee is unavailable because an input amount is missing.";
+  el("sign-phone").hidden = !required.some((k) => k.role === "phone");
   el("signing-summary").textContent = `Transaction ${tx.id}
 ${tx.inputsLength} inputs; ${tx.outputsLength} outputs. Review the destination and amount on your signing device.`;
   return new Promise((resolve) => {
@@ -56205,6 +56327,33 @@ async function signatureAction(action) {
     el("sign-error").textContent = err2 instanceof Error ? err2.message : String(err2);
   }
 }
+el("save-psbt").onclick = () => {
+  if (!request) return;
+  const url = URL.createObjectURL(
+    new Blob([Uint8Array.from(recoveryPsbtBytes(request.psbt))], { type: "application/octet-stream" })
+  );
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "Vaulted recovery.psbt";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1e3);
+};
+el("signed-file").onchange = () => void signatureAction(async () => {
+  const file = el("signed-file").files?.[0];
+  const pending = request;
+  if (!pending || !file || file.size > 2e6) throw new Error("Choose a signed PSBT smaller than 2 MB");
+  const bytes2 = new Uint8Array(await file.arrayBuffer());
+  if (request !== pending) throw new Error("The signing request changed. Choose the signed file again.");
+  const text = new TextDecoder().decode(bytes2).trim();
+  request.psbt = acceptRecoveryPsbtSignatures(
+    request.psbt,
+    bytes2[0] === 112 && bytes2[1] === 115 ? hex.encode(bytes2) : text,
+    request.keys.map((k) => k.publicKey)
+  );
+  el("psbt").value = request.psbt;
+  if (draft) draft.signatures[request.key] = request.psbt;
+  el("signed-file").value = "";
+});
 el("accept-signature").onclick = () => void signatureAction(async () => {
   if (!request) throw new Error("No signing request");
   request.psbt = acceptRecoveryPsbtSignatures(
@@ -56304,7 +56453,8 @@ async function prepare2() {
       key.fill(0);
     }
   } else if (d.program === "connector") {
-    if (!source.full?.connectorJournal?.pending) throw new Error("No saved connector operation");
+    if (source.full?.name !== "vaulted-recovery" || !source.full.connectorJournal?.pending)
+      throw new Error("No saved connector operation");
     let file = {
       name: "vaulted-connector-recovery",
       version: 1,
@@ -56321,7 +56471,7 @@ async function prepare2() {
     }
     prepared = file;
   } else if (d.program.startsWith("lightning:")) {
-    const journal = source.full?.lightningJournal || source.light?.lightningJournal;
+    const journal = (source.full?.name === "vaulted-recovery" ? source.full.lightningJournal : void 0) || source.light?.lightningJournal;
     const entry = journal?.entries.find((e) => e.record.rfqId === d.program.slice(10));
     if (!entry || !status()) throw new Error("Saved Lightning lockup is missing");
     prepared = await prepareLightningRecovery(
@@ -56421,7 +56571,7 @@ el("scan").onclick = () => void run(async () => {
         allowUnknownOutputs: true
       });
       const output = tx.getOutput(coin.vout);
-      if (tx.id !== coin.txid || hex.encode(output.script) !== tree.script || Number(output.amount) !== coin.value)
+      if (tx.id !== coin.txid || hex.encode(OutScript.decode(output.script)) !== tree.script || Number(output.amount) !== coin.value)
         throw new Error("Bitcoin parent changed");
       found.set(`${coin.txid}:${coin.vout}`, { ...coin, script: tree.script, parentHex: parentHex.trim() });
     }
@@ -56440,20 +56590,43 @@ el("export-psbt").onclick = () => {
   else if (prepared.name === "vaulted-connector-recovery")
     save("Vaulted connector.psbt", connectorRecoveryHandoff(prepared));
 };
-async function load(data) {
-  const x = data;
+function clearSource() {
   prepared = void 0;
   draft = void 0;
   source = {};
-  raw = data;
+  raw = void 0;
   el("signature").hidden = true;
+  el("review").hidden = true;
+  el("prepared").hidden = true;
   el("open").hidden = true;
+  el("unlock").hidden = true;
+  el("unlock").open = false;
+  coins = [];
+  el("import").hidden = false;
+  el("change-file").hidden = true;
+  el("status").textContent = "";
+}
+async function load(data) {
+  const x = data;
+  clearSource();
+  raw = data;
+  if (x.name === "vaulted-recovery-package") {
+    const pkg = parsePortableRecoveryPackage(data);
+    source = { full: portableRecoverySource(pkg) };
+    el("origin").textContent = `Spending paths can be read without a passkey. Unlock payment journals at ${pkg.backup.header.origin}.`;
+    el("open").hidden = false;
+    el("unlock").hidden = false;
+    review();
+    return;
+  }
   if (x.name === "vaulted-recovery-backup" || x.name === "vaulted-light-backup") {
     const header = data.header;
     const n = header.binding?.network || header.descriptor.network;
     requireReleaseNetwork(n);
     el("origin").textContent = `Use your original passkey at ${header.origin}`;
     el("open").hidden = false;
+    el("unlock").hidden = false;
+    el("unlock").open = true;
     el("review").hidden = true;
     el("prepared").hidden = true;
     return;
@@ -56486,7 +56659,10 @@ async function load(data) {
 function validateSource() {
   if ([source.full, source.light, source.publicKit].filter(Boolean).length !== 1)
     throw new Error("Recovery source must identify one wallet");
-  if (source.full) validateVaultRecoveryFile(source.full);
+  if (source.full) {
+    if (source.full.name === "vaulted-readable-recovery") validateReadableRecoverySource(source.full);
+    else validateVaultRecoveryFile(source.full);
+  }
   if (source.light) validateLightRecoveryFile(source.light);
   if (source.publicKit) source.publicKit = parseRecoveryKit(source.originalKit || source.publicKit);
   network();
@@ -56524,19 +56700,29 @@ function validatePrepared() {
 }
 el("file").onchange = () => void run(async () => {
   const f = el("file").files?.[0];
-  if (!f || f.size > 32e6) throw new Error("Choose a recovery file smaller than 32 MB");
+  if (!f) return;
+  clearSource();
+  if (f.size > 32e6) throw new Error("Choose a recovery file smaller than 32 MB");
   await load(JSON.parse(extractRecoveryKitJson(new Uint8Array(await f.arrayBuffer()))));
 });
 el("open").onclick = () => void run(async () => {
   const name = raw.name;
-  if (name === "vaulted-recovery-backup") source = { full: await openLocalRecoveryBackup(raw) };
+  if (name === "vaulted-recovery-package")
+    source = { full: await openLocalRecoveryBackup(parsePortableRecoveryPackage(raw).backup) };
+  else if (name === "vaulted-recovery-backup") source = { full: await openLocalRecoveryBackup(raw) };
   else {
     const parsed = parseLightEncryptedBackup(raw);
     source = { light: (await openLocalLightBackup(parsed)).file };
   }
   el("open").hidden = true;
+  el("unlock").hidden = true;
   review();
 });
+el("change-file").onclick = () => {
+  if (busy) return;
+  el("import").hidden = false;
+  el("change-file").hidden = true;
+};
 el("stop").onclick = () => {
   controller?.abort();
   el("status").textContent = "Recovery paused. Keep the prepared file.";

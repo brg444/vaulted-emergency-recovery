@@ -1,6 +1,6 @@
 # Vaulted emergency recovery
 
-Recover using a saved Vaulted archive or Recovery Kit when the wallet or its
+Recover using a saved Vaulted recovery package, archive or Recovery Kit when the wallet or its
 services are unavailable. This is the companion to
 [Vaulted](https://github.com/brg444/vaulted-bitcoin-wallet).
 
@@ -9,7 +9,19 @@ before preparing a transaction. Preparation does not broadcast. Save the
 prepared recovery file before starting; after a lost response, import that
 same file to check Bitcoin status and resume.
 
-## Run locally
+## Open the desktop package
+
+A macOS desktop build includes the runtime and both network applications.
+Extract the folder, verify its ZIP checksum against the release record, then
+open `Recover.command`. No package installation is needed to run this build.
+The default network is mainnet; to use test bitcoin, run
+`RECOVERY_NETWORK=mutinynet ./Recover.command` in the extracted folder.
+
+Current development builds are unsigned. Apple signing, notarization and
+actual passkey-provider testing remain release requirements. A successful
+software test does not establish physical hardware or original-passkey support.
+
+## Run from source
 
 ```sh
 bun install
@@ -25,12 +37,24 @@ server, then choose your JSON or ZIP file.
 
 | Saved file                             | Available recovery information                                                                                                      |
 | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Portable recovery package version 1 | Readable Spending paths and onchain parents, with the complete backup and operational journals encrypted inside. Advanced Spending can use hardware and recovery keys without the phone. |
 | Encrypted Standard or Advanced archive | Original passkey envelope, Spending exit graph, onchain parents, pending sends, connector operations and outbound Lightning lockups |
 | Encrypted Light archive                | Original passkey envelope, Spending exit graph and saved payment journals                                                           |
 | Public Recovery Kit version 3          | Verified Savings, Pending and Quarantine scripts; no phone-key unlock data                                                          |
 | Recovery Kit version 4                 | The public scripts plus its original passkey unlock data and any saved boarding pins                                                |
 | Connector enrollment kit version 1     | Exact connector program and key origin; this is the public kit associated with recovery binding version 5                           |
 | Prepared recovery or signing request   | Exact transaction and retained partial signatures for resuming the same action                                                      |
+
+The companion first shows **Funds found in this backup**. Its amount is the
+saved transaction data, not a current balance. Later receipts, payments and
+renewals need updated paths; Bitcoin queries cannot discover missing offchain
+history. Public file validation does not prove key access or current eligibility.
+
+For a portable package, optional passkey unlock opens payment journals and saved
+connector approvals. Standard Spending still needs its phone signature.
+Download the requested PSBT, review it in compatible signing software and import
+the signed file. Keep the exact prepared recovery to resume after interruption.
+A malformed replacement file clears the earlier review and execution controls.
 
 Legacy Normal Savings uses phone and hardware signatures. Standard Spending
 also requires phone and hardware; Advanced Spending requires hardware and the
@@ -82,6 +106,17 @@ Open your original wallet origin. Keep the server bound to loopback and
 restore the hostname mapping when finished. If the original passkey is lost,
 recover access through its provider or use another signing path
 present in your saved program.
+
+## Build a desktop package
+
+After rebuilding the reviewed application bundles, run `bun run build:desktop`
+on a Mac. The ZIP in `dist/` includes its runtime, static applications, a launcher
+and source and binary verification records. Build each supported architecture
+on a matching machine. The release record identifies uncommitted source when
+present; a published candidate requires clean, pinned sources.
+
+See [the integration guide](INTEGRATION.md) for storage obligations and the
+partner demonstration requirements.
 
 ## Verify and rebuild
 
