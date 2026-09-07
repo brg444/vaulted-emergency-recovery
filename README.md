@@ -64,8 +64,8 @@ partial signing requests.
 
 ## Original passkey origin
 
-A passkey works at the HTTPS origin where the wallet was created, including
-its port. The imported backup shows that origin. During a website outage,
+Opening a passkey-protected archive requires the saved wallet origin and its
+WebAuthn RP ID. The imported backup shows that origin, including its port. During a website outage,
 map that hostname to loopback on the recovery computer and use a trusted
 local certificate for the hostname. An unrelated localhost origin cannot
 unlock the original passkey.
@@ -112,5 +112,4 @@ standalone checkout without the reviewed wallet SDK reports them as skipped
 while running the remaining companion tests.
 
 The public-kit parser retains versions 3 and 4 and the connector format.
-Preserve support for all three formats when refreshing copied libraries. The retired map-only interface has been replaced by executable
-recovery and signing handoffs.
+Preserve support for all three formats when refreshing copied libraries. The main interface prepares recovery and external signing requests from the supported artifacts.
