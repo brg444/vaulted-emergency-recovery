@@ -56,9 +56,9 @@ window. Keep this limit explicit until lifecycle persistence is qualified.
 | Lightning funding or refund | Funded lockup, change, claim or refund path and unresolved journal | Public Spending data alone excludes protected payment journals. Unlock and test the funded contract separately. |
 | Connector action | Exact approved transaction and retained signatures | Protected journal restore preserves the existing exact-action checks. A new action cannot reuse old approvals. |
 
-Continuous device-loss coverage requires evidence beyond a local timestamp or
-a Guardian-held copy. The unattended renewal behavior needs an
-explicit decision about independent data delivery before that claim can pass.
+Continuous device-loss coverage requires delivery outside Vaulted before a
+renewal replaces the previous path. This release does not provide that delivery
+while the browser is closed.
 
 ## Reproduce the consumer handoff
 
