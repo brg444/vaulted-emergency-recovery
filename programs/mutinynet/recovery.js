@@ -56589,18 +56589,26 @@ el("export-psbt").onclick = () => {
   else if (prepared.name === "vaulted-connector-recovery")
     save("Vaulted connector.psbt", connectorRecoveryHandoff(prepared));
 };
-async function load(data) {
-  const x = data;
+function clearSource() {
   prepared = void 0;
   draft = void 0;
   source = {};
-  raw = data;
+  raw = void 0;
   el("signature").hidden = true;
   el("review").hidden = true;
   el("prepared").hidden = true;
   el("open").hidden = true;
   el("unlock").hidden = true;
   el("unlock").open = false;
+  coins = [];
+  el("import").hidden = false;
+  el("change-file").hidden = true;
+  el("status").textContent = "";
+}
+async function load(data) {
+  const x = data;
+  clearSource();
+  raw = data;
   if (x.name === "vaulted-recovery-package") {
     const pkg = parsePortableRecoveryPackage(data);
     source = { full: portableRecoverySource(pkg) };
@@ -56691,7 +56699,9 @@ function validatePrepared() {
 }
 el("file").onchange = () => void run(async () => {
   const f = el("file").files?.[0];
-  if (!f || f.size > 32e6) throw new Error("Choose a recovery file smaller than 32 MB");
+  if (!f) return;
+  clearSource();
+  if (f.size > 32e6) throw new Error("Choose a recovery file smaller than 32 MB");
   await load(JSON.parse(extractRecoveryKitJson(new Uint8Array(await f.arrayBuffer()))));
 });
 el("open").onclick = () => void run(async () => {
