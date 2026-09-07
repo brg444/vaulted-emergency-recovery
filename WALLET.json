@@ -7,8 +7,6 @@
     "hex.ts",
     "prfEnvelope.ts",
     "ceremony/directauth.ts",
-    "program/kitBundle.ts",
-    "program/kit.ts",
     "program/constants.ts",
     "program/descriptor.ts",
     "program/trees.ts",
@@ -16,14 +14,13 @@
     "program/packet.ts",
     "program/script.ts",
     "program/tweak.ts",
-    "constants.ts",
     "protectionTier.ts",
-    "types.ts",
     "spendingPolicy.ts",
     "savingsTree.ts",
-    "setupPlan.ts",
     "webauthn.ts",
     "program/connector.ts",
-    "program/connectorEnrollmentCore.ts"
+    "program/connectorEnrollmentCore.ts",
+    "program/connectorDual.ts",
+    "program/connectorApproval.ts"
   ]
 }

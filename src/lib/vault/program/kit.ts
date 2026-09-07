@@ -1,4 +1,4 @@
-import { CONNECTOR_TEMPLATE } from './connector'
+import { isConnectorTemplate } from './connector'
 import { CONNECTOR_KIT_NAME, connectorRecoveryDescriptor } from './connectorEnrollmentCore'
 import { PROGRAM_CSV, PROGRAM_SCHEMA, familyKeysFor, isSavingsTemplate } from './constants'
 import { hashVaultProgramDescriptor, validateVaultProgramDescriptor, type VaultProgramDescriptor } from './descriptor'
@@ -280,7 +280,7 @@ export function inspectRecoveryKit(kit: RecoveryKit): RecoveryKitReport {
       kitHasUnlock(parsed)
         ? 'This file can unlock the phone key on the enrolled website name without Vaulted.'
         : 'This file is a public map only. It cannot unlock the phone key if Vaulted is gone.',
-      d.templateVersion === CONNECTOR_TEMPLATE
+      isConnectorTemplate(d.templateVersion)
         ? 'A new connector Savings payment needs its existing service approvals and hardware signature.'
         : 'Normal Savings can be recovered with the phone and hardware keys without either service.',
       'Starting a one-key delayed recovery still requires both recovery services.',
@@ -292,7 +292,7 @@ export function inspectRecoveryKit(kit: RecoveryKit): RecoveryKitReport {
 }
 
 export function assertKitTemplate(d: VaultProgramDescriptor) {
-  if (d.schema !== PROGRAM_SCHEMA || (!isSavingsTemplate(d.templateVersion) && d.templateVersion !== CONNECTOR_TEMPLATE)) {
+  if (d.schema !== PROGRAM_SCHEMA || (!isSavingsTemplate(d.templateVersion) && !isConnectorTemplate(d.templateVersion))) {
     throw new Error('Recovery Kit does not match the current Vault Program')
   }
 }
