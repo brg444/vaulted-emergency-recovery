@@ -1,22 +1,27 @@
-# Savings connector Recovery Kits
+# Savings connector recovery data
 
-The emergency page can open a version-1 connector kit saved by Vaulted. It
-rebuilds the key origin, Savings script, existing recovery trees, and complete
-Savings and boarding commitment before displaying the vault. Changed public
-facts fail verification.
+The companion accepts version-1 connector enrollment kits and reconstructs the
+family recorded in the kit, including v1 and dual-reserve v2. It verifies the
+key origin, program, Savings script, recovery trees, and enrollment commitment
+before using imported facts.
 
-Connector kits currently contain public recovery information. They identify the
-vault and its recovery paths but contain no passkey unlock envelope. The page
-therefore displays them as maps. Use Vaulted's Recovery flow with the enrolled
-passkey, or compatible recovery tools with the required keys. Version-3 maps
-and version-4 kits with unlock envelopes keep their existing behavior.
+A connector public kit identifies scripts and signing roles but contains no
+passkey unlock envelope. By itself it cannot restore a device key or provide
+missing transaction parents. Encrypted archives and prepared signing requests
+can carry additional data for executable recovery.
 
-The connector's conventional signer input applies to normal Savings withdrawals.
-It does not establish hardware support for directly signing custom recovery
-scripts. The wallet and runtime retain the existing recovery model and its
-separate signer requirements.
+A retained connector payment can finish only when its saved candidate contains
+the approvals required by its enrolled family. A v1 request may await its
+external signature after service approval. A v2 request starts with two hardware
+approvals before device and service signing. The companion validates imported
+partial signatures and refuses changes to the retained transaction.
 
-Twelve public cross-language fixtures cover both networks, Standard and
-Advanced protection, and conventional signer origins. The standalone tests
-also retain legacy network-policy and kit checks. The browser bundle imports
-its network from the kit and does not require the wallet's Vite build settings.
+A new connector payment or a new one-key delayed Savings recovery still needs
+its existing service approvals. Waiting does not add a signing path to a normal
+Savings output. The conventional signer input used by a normal withdrawal does
+not establish device support for the custom delayed recovery scripts.
+
+The public parser also retains direct-hardware Recovery Kits 3 and 4. A kit
+with a passkey envelope has different unlock capabilities from a public map.
+See [the recovery guide](../README.md) for required keys, original-origin setup,
+transaction paths, fees, and preparation versus broadcast.
