@@ -4,6 +4,7 @@ type Network = "mainnet" | "mutinynet";
 export function lightRecoveryHandler(
   network: Network,
   providerFetch: typeof fetch = fetch,
+  assetRoot = new URL("./", import.meta.url),
 ) {
   const provider =
     network === "mainnet"
@@ -35,7 +36,7 @@ export function lightRecoveryHandler(
         });
       return new Response(
         Bun.file(
-          new URL(`./programs/${network}/${program[2]}`, import.meta.url),
+          new URL(`programs/${network}/${program[2]}`, assetRoot),
         ),
         { headers: { "Cache-Control": "no-store" } },
       );
@@ -62,7 +63,7 @@ export function lightRecoveryHandler(
           { status: 409 },
         );
       return new Response(
-        Bun.file(new URL(`./light/${network}/${file[2]}`, import.meta.url)),
+        Bun.file(new URL(`light/${network}/${file[2]}`, assetRoot)),
         { headers: { "Cache-Control": "no-store" } },
       );
     }

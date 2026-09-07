@@ -16,7 +16,8 @@
   "scripts": {
     "start": "bun serve.ts",
     "test": "bun test",
-    "sync:wallet": "bun scripts/sync-from-wallet.ts"
+    "sync:wallet": "bun scripts/sync-from-wallet.ts",
+    "build:desktop": "bun scripts/build-release.ts"
   },
   "dependencies": {
     "@noble/curves": "^2.0.1",
