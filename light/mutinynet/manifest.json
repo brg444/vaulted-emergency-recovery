@@ -1,17 +1,17 @@
 {
   "network": "mutinynet",
-  "sha256": "54de084319811b5ecd1105622bd81a707a8316dd01a0de73f1fbc160d5b3427b",
+  "sha256": "49f91642f68f33cf2bb8020d818820b98224fa4011604b6497839686df793830",
   "wallet": "brg444/vaulted-bitcoin-wallet",
-  "walletRevision": "66867461cd452f1621d34964fc69dbc594e74a5b",
+  "walletRevision": "4327a96ebb4ffe66df8355e7fd890e6102b7219f",
   "workingTreeDirty": false,
   "entry": "tools/light-emergency/recover.ts",
   "inputs": {
     "node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-GOKJNT7E.js": "50e357c411cfcee2609a5c2adda59f455fa41c925d06bb4da5ecaae0204e46c5",
+    "node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-MJ2M4DEH.js": "b84857ca6970ad750b819be0f8d1fede4f2adb65c2fd543eed6f0df8018f94a8",
     "node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-NSBPE2FW.js": "8d341c65547f4c9bcebc3aa505f0ac7538c11f13ca1652214d23287e0654069c",
-    "node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-NWYR47TA.js": "38532953b69b01877668795908d790c2c8d0c8b1e14620034e4897cf07880e7d",
     "node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-ULWK4QGH.js": "570c86a89c09648b15168f865baf855e6956bfc3dc6eba0f7e35f4400ac51c3f",
     "node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-XNQCPSBL.js": "b0d145c8fd6a01de337e51643502b3b71e7f193f83ed37462ed3c1b517d1e527",
-    "node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/index.js": "0bfe2a4cac30e4f3d48c01ac3120add93eb5aecede8622bea5ea9557db70b5ac",
+    "node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/index.js": "6590992543b568a9e18013d4125e7153c33285d86fd39fd83f64415fd246aa75",
     "node_modules/.pnpm/@arkade-os+solver-discovery@0.2.3/node_modules/@arkade-os/solver-discovery/dist/assets.js": "2fd70025a7ed3c33b3b33a4b1c80155f44a7bb8ede8a0892fc0eac027f42bd65",
     "node_modules/.pnpm/@arkade-os+solver-discovery@0.2.3/node_modules/@arkade-os/solver-discovery/dist/discovery.js": "829b48c1ab90a34b50e4fe0485c6925fb2cb85e29e893d34bc702452e542c105",
     "node_modules/.pnpm/@arkade-os+solver-discovery@0.2.3/node_modules/@arkade-os/solver-discovery/dist/feed.js": "71b6053a97dff20a1e8a44037c5c70acd3a601894782e070b5033b0526639bfb",
@@ -212,5 +212,5 @@
   "buildScriptSha256": "0a77640b49608bdfd791e56d51ac08301c1baf2dd87f14c26e6a960573512213",
   "buildHelperSha256": "217c1db336b4a880b0398537fbc4306fb8e051bb61953b793041c13763dd41da",
   "htmlSha256": "ad8cf23a6d735a8032932682f65886d7740a269169de5fb69015b416c159e796",
-  "sourceMapSha256": "66782e1aa1356f1ce1af8df5f067e31a35bede023bb43a0ffd54194a94ef4d75"
+  "sourceMapSha256": "12b31dd3d0cefb6d0e7d75f4568a3137fb5916e209ec2829ee9536eeb87f21b6"
 }

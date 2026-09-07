@@ -17810,7 +17810,7 @@ init_define_import_meta_env();
 // node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/index.js
 init_define_import_meta_env();
 
-// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-NWYR47TA.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-MJ2M4DEH.js
 init_define_import_meta_env();
 
 // node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-GOKJNT7E.js
@@ -25106,7 +25106,7 @@ contractHandlers.register(VHTLCV2ContractHandler);
 contractHandlers.register(BoardingContractHandler);
 contractHandlers.register(ArkadeContractHandler);
 
-// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-NWYR47TA.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-MJ2M4DEH.js
 init_utils3();
 init_btc_signer();
 init_base();
@@ -25435,7 +25435,7 @@ var Session = class {
   }
 };
 
-// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-NWYR47TA.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-MJ2M4DEH.js
 init_utils2();
 
 // node_modules/.pnpm/@noble+secp256k1@3.0.0/node_modules/@noble/secp256k1/index.js
@@ -26126,7 +26126,7 @@ var wNAF2 = (n) => {
   return { p, f };
 };
 
-// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-NWYR47TA.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-MJ2M4DEH.js
 init_secp256k1();
 init_script();
 init_transaction();
@@ -30345,7 +30345,7 @@ var globalEnvironment = new Environment({
 // node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/serialize.js
 init_define_import_meta_env();
 
-// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-NWYR47TA.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-MJ2M4DEH.js
 function generateNonces(publicKey) {
   const nonces = nonceGen(publicKey);
   return { secNonce: nonces.secret, pubNonce: nonces.public };
@@ -35635,7 +35635,7 @@ function buildGraph(rootTxid, chunksByTxid) {
   return new TxTree(rootTx, children);
 }
 function decodeNode(chunk) {
-  const tx = Transaction.fromPSBT(base64.decode(chunk.tx));
+  const tx = Transaction.fromPSBT(base64.decode(chunk.tx), { allowUnknown: true });
   return { tx, children: chunk.children };
 }
 var Batch;
@@ -52198,7 +52198,7 @@ el("stop").onclick = () => controller?.abort();
 @noble/secp256k1/index.js:
   (*! noble-secp256k1 - MIT License (c) 2019 Paul Miller (paulmillr.com) *)
 
-@arkade-os/sdk/dist/chunk-NWYR47TA.js:
+@arkade-os/sdk/dist/chunk-MJ2M4DEH.js:
   (*! Bundled license information:
   
   @noble/hashes/utils.js:
