@@ -40,560 +40,18 @@ var init_define_import_meta_env = __esm({
   }
 });
 
-// node_modules/.pnpm/@scure+base@2.0.0/node_modules/@scure/base/index.js
-var base_exports = {};
-__export(base_exports, {
-  base16: () => base16,
-  base32: () => base32,
-  base32crockford: () => base32crockford,
-  base32hex: () => base32hex,
-  base32hexnopad: () => base32hexnopad,
-  base32nopad: () => base32nopad,
-  base58: () => base58,
-  base58check: () => base58check,
-  base58flickr: () => base58flickr,
-  base58xmr: () => base58xmr,
-  base58xrp: () => base58xrp,
-  base64: () => base64,
-  base64nopad: () => base64nopad,
-  base64url: () => base64url,
-  base64urlnopad: () => base64urlnopad,
-  bech32: () => bech32,
-  bech32m: () => bech32m,
-  bytes: () => bytes,
-  bytesToString: () => bytesToString,
-  createBase58check: () => createBase58check,
-  hex: () => hex,
-  str: () => str,
-  stringToBytes: () => stringToBytes,
-  utf8: () => utf8,
-  utils: () => utils
-});
+// node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/utils.js
 function isBytes(a) {
   return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
 }
-function abytes(b) {
-  if (!isBytes(b))
-    throw new Error("Uint8Array expected");
-}
-function isArrayOf(isString, arr) {
-  if (!Array.isArray(arr))
-    return false;
-  if (arr.length === 0)
-    return true;
-  if (isString) {
-    return arr.every((item) => typeof item === "string");
-  } else {
-    return arr.every((item) => Number.isSafeInteger(item));
-  }
-}
-function afn(input) {
-  if (typeof input !== "function")
-    throw new Error("function expected");
-  return true;
-}
-function astr(label, input) {
-  if (typeof input !== "string")
-    throw new Error(`${label}: string expected`);
-  return true;
-}
-function anumber(n) {
-  if (!Number.isSafeInteger(n))
-    throw new Error(`invalid integer: ${n}`);
-}
-function aArr(input) {
-  if (!Array.isArray(input))
-    throw new Error("array expected");
-}
-function astrArr(label, input) {
-  if (!isArrayOf(true, input))
-    throw new Error(`${label}: array of strings expected`);
-}
-function anumArr(label, input) {
-  if (!isArrayOf(false, input))
-    throw new Error(`${label}: array of numbers expected`);
-}
-// @__NO_SIDE_EFFECTS__
-function chain(...args) {
-  const id = (a) => a;
-  const wrap3 = (a, b) => (c) => a(b(c));
-  const encode3 = args.map((x) => x.encode).reduceRight(wrap3, id);
-  const decode3 = args.map((x) => x.decode).reduce(wrap3, id);
-  return { encode: encode3, decode: decode3 };
-}
-// @__NO_SIDE_EFFECTS__
-function alphabet(letters) {
-  const lettersA = typeof letters === "string" ? letters.split("") : letters;
-  const len = lettersA.length;
-  astrArr("alphabet", lettersA);
-  const indexes = new Map(lettersA.map((l, i) => [l, i]));
-  return {
-    encode: (digits) => {
-      aArr(digits);
-      return digits.map((i) => {
-        if (!Number.isSafeInteger(i) || i < 0 || i >= len)
-          throw new Error(`alphabet.encode: digit index outside alphabet "${i}". Allowed: ${letters}`);
-        return lettersA[i];
-      });
-    },
-    decode: (input) => {
-      aArr(input);
-      return input.map((letter) => {
-        astr("alphabet.decode", letter);
-        const i = indexes.get(letter);
-        if (i === void 0)
-          throw new Error(`Unknown letter: "${letter}". Allowed: ${letters}`);
-        return i;
-      });
-    }
-  };
-}
-// @__NO_SIDE_EFFECTS__
-function join(separator = "") {
-  astr("join", separator);
-  return {
-    encode: (from) => {
-      astrArr("join.decode", from);
-      return from.join(separator);
-    },
-    decode: (to) => {
-      astr("join.decode", to);
-      return to.split(separator);
-    }
-  };
-}
-// @__NO_SIDE_EFFECTS__
-function padding(bits, chr = "=") {
-  anumber(bits);
-  astr("padding", chr);
-  return {
-    encode(data) {
-      astrArr("padding.encode", data);
-      while (data.length * bits % 8)
-        data.push(chr);
-      return data;
-    },
-    decode(input) {
-      astrArr("padding.decode", input);
-      let end = input.length;
-      if (end * bits % 8)
-        throw new Error("padding: invalid, string should have whole number of bytes");
-      for (; end > 0 && input[end - 1] === chr; end--) {
-        const last = end - 1;
-        const byte = last * bits;
-        if (byte % 8 === 0)
-          throw new Error("padding: invalid, string has too much padding");
-      }
-      return input.slice(0, end);
-    }
-  };
-}
-// @__NO_SIDE_EFFECTS__
-function normalize(fn) {
-  afn(fn);
-  return { encode: (from) => from, decode: (to) => fn(to) };
-}
-function convertRadix(data, from, to) {
-  if (from < 2)
-    throw new Error(`convertRadix: invalid from=${from}, base cannot be less than 2`);
-  if (to < 2)
-    throw new Error(`convertRadix: invalid to=${to}, base cannot be less than 2`);
-  aArr(data);
-  if (!data.length)
-    return [];
-  let pos = 0;
-  const res = [];
-  const digits = Array.from(data, (d) => {
-    anumber(d);
-    if (d < 0 || d >= from)
-      throw new Error(`invalid integer: ${d}`);
-    return d;
-  });
-  const dlen = digits.length;
-  while (true) {
-    let carry = 0;
-    let done = true;
-    for (let i = pos; i < dlen; i++) {
-      const digit = digits[i];
-      const fromCarry = from * carry;
-      const digitBase = fromCarry + digit;
-      if (!Number.isSafeInteger(digitBase) || fromCarry / from !== carry || digitBase - digit !== fromCarry) {
-        throw new Error("convertRadix: carry overflow");
-      }
-      const div = digitBase / to;
-      carry = digitBase % to;
-      const rounded = Math.floor(div);
-      digits[i] = rounded;
-      if (!Number.isSafeInteger(rounded) || rounded * to + carry !== digitBase)
-        throw new Error("convertRadix: carry overflow");
-      if (!done)
-        continue;
-      else if (!rounded)
-        pos = i;
-      else
-        done = false;
-    }
-    res.push(carry);
-    if (done)
-      break;
-  }
-  for (let i = 0; i < data.length - 1 && data[i] === 0; i++)
-    res.push(0);
-  return res.reverse();
-}
-function convertRadix2(data, from, to, padding2) {
-  aArr(data);
-  if (from <= 0 || from > 32)
-    throw new Error(`convertRadix2: wrong from=${from}`);
-  if (to <= 0 || to > 32)
-    throw new Error(`convertRadix2: wrong to=${to}`);
-  if (/* @__PURE__ */ radix2carry(from, to) > 32) {
-    throw new Error(`convertRadix2: carry overflow from=${from} to=${to} carryBits=${/* @__PURE__ */ radix2carry(from, to)}`);
-  }
-  let carry = 0;
-  let pos = 0;
-  const max = powers[from];
-  const mask = powers[to] - 1;
-  const res = [];
-  for (const n of data) {
-    anumber(n);
-    if (n >= max)
-      throw new Error(`convertRadix2: invalid data word=${n} from=${from}`);
-    carry = carry << from | n;
-    if (pos + from > 32)
-      throw new Error(`convertRadix2: carry overflow pos=${pos} from=${from}`);
-    pos += from;
-    for (; pos >= to; pos -= to)
-      res.push((carry >> pos - to & mask) >>> 0);
-    const pow = powers[pos];
-    if (pow === void 0)
-      throw new Error("invalid carry");
-    carry &= pow - 1;
-  }
-  carry = carry << to - pos & mask;
-  if (!padding2 && pos >= from)
-    throw new Error("Excess padding");
-  if (!padding2 && carry > 0)
-    throw new Error(`Non-zero padding: ${carry}`);
-  if (padding2 && pos > 0)
-    res.push(carry >>> 0);
-  return res;
-}
-// @__NO_SIDE_EFFECTS__
-function radix(num2) {
-  anumber(num2);
-  const _256 = 2 ** 8;
-  return {
-    encode: (bytes2) => {
-      if (!isBytes(bytes2))
-        throw new Error("radix.encode input should be Uint8Array");
-      return convertRadix(Array.from(bytes2), _256, num2);
-    },
-    decode: (digits) => {
-      anumArr("radix.decode", digits);
-      return Uint8Array.from(convertRadix(digits, num2, _256));
-    }
-  };
-}
-// @__NO_SIDE_EFFECTS__
-function radix2(bits, revPadding = false) {
-  anumber(bits);
-  if (bits <= 0 || bits > 32)
-    throw new Error("radix2: bits should be in (0..32]");
-  if (/* @__PURE__ */ radix2carry(8, bits) > 32 || /* @__PURE__ */ radix2carry(bits, 8) > 32)
-    throw new Error("radix2: carry overflow");
-  return {
-    encode: (bytes2) => {
-      if (!isBytes(bytes2))
-        throw new Error("radix2.encode input should be Uint8Array");
-      return convertRadix2(Array.from(bytes2), 8, bits, !revPadding);
-    },
-    decode: (digits) => {
-      anumArr("radix2.decode", digits);
-      return Uint8Array.from(convertRadix2(digits, bits, 8, revPadding));
-    }
-  };
-}
-function unsafeWrapper(fn) {
-  afn(fn);
-  return function(...args) {
-    try {
-      return fn.apply(null, args);
-    } catch (e) {
-    }
-  };
-}
-function checksum(len, fn) {
-  anumber(len);
-  afn(fn);
-  return {
-    encode(data) {
-      if (!isBytes(data))
-        throw new Error("checksum.encode: input should be Uint8Array");
-      const sum = fn(data).slice(0, len);
-      const res = new Uint8Array(data.length + len);
-      res.set(data);
-      res.set(sum, data.length);
-      return res;
-    },
-    decode(data) {
-      if (!isBytes(data))
-        throw new Error("checksum.decode: input should be Uint8Array");
-      const payload = data.slice(0, -len);
-      const oldChecksum = data.slice(-len);
-      const newChecksum = fn(payload).slice(0, len);
-      for (let i = 0; i < len; i++)
-        if (newChecksum[i] !== oldChecksum[i])
-          throw new Error("Invalid checksum");
-      return payload;
-    }
-  };
-}
-function bech32Polymod(pre) {
-  const b = pre >> 25;
-  let chk = (pre & 33554431) << 5;
-  for (let i = 0; i < POLYMOD_GENERATORS.length; i++) {
-    if ((b >> i & 1) === 1)
-      chk ^= POLYMOD_GENERATORS[i];
-  }
-  return chk;
-}
-function bechChecksum(prefix2, words, encodingConst = 1) {
-  const len = prefix2.length;
-  let chk = 1;
-  for (let i = 0; i < len; i++) {
-    const c = prefix2.charCodeAt(i);
-    if (c < 33 || c > 126)
-      throw new Error(`Invalid prefix (${prefix2})`);
-    chk = bech32Polymod(chk) ^ c >> 5;
-  }
-  chk = bech32Polymod(chk);
-  for (let i = 0; i < len; i++)
-    chk = bech32Polymod(chk) ^ prefix2.charCodeAt(i) & 31;
-  for (let v of words)
-    chk = bech32Polymod(chk) ^ v;
-  for (let i = 0; i < 6; i++)
-    chk = bech32Polymod(chk);
-  chk ^= encodingConst;
-  return BECH_ALPHABET.encode(convertRadix2([chk % powers[30]], 30, 5, false));
-}
-// @__NO_SIDE_EFFECTS__
-function genBech32(encoding) {
-  const ENCODING_CONST = encoding === "bech32" ? 1 : 734539939;
-  const _words = /* @__PURE__ */ radix2(5);
-  const fromWords = _words.decode;
-  const toWords = _words.encode;
-  const fromWordsUnsafe = unsafeWrapper(fromWords);
-  function encode3(prefix2, words, limit = 90) {
-    astr("bech32.encode prefix", prefix2);
-    if (isBytes(words))
-      words = Array.from(words);
-    anumArr("bech32.encode", words);
-    const plen = prefix2.length;
-    if (plen === 0)
-      throw new TypeError(`Invalid prefix length ${plen}`);
-    const actualLength = plen + 7 + words.length;
-    if (limit !== false && actualLength > limit)
-      throw new TypeError(`Length ${actualLength} exceeds limit ${limit}`);
-    const lowered = prefix2.toLowerCase();
-    const sum = bechChecksum(lowered, words, ENCODING_CONST);
-    return `${lowered}1${BECH_ALPHABET.encode(words)}${sum}`;
-  }
-  function decode3(str2, limit = 90) {
-    astr("bech32.decode input", str2);
-    const slen = str2.length;
-    if (slen < 8 || limit !== false && slen > limit)
-      throw new TypeError(`invalid string length: ${slen} (${str2}). Expected (8..${limit})`);
-    const lowered = str2.toLowerCase();
-    if (str2 !== lowered && str2 !== str2.toUpperCase())
-      throw new Error(`String must be lowercase or uppercase`);
-    const sepIndex = lowered.lastIndexOf("1");
-    if (sepIndex === 0 || sepIndex === -1)
-      throw new Error(`Letter "1" must be present between prefix and data only`);
-    const prefix2 = lowered.slice(0, sepIndex);
-    const data = lowered.slice(sepIndex + 1);
-    if (data.length < 6)
-      throw new Error("Data must be at least 6 characters long");
-    const words = BECH_ALPHABET.decode(data).slice(0, -6);
-    const sum = bechChecksum(prefix2, words, ENCODING_CONST);
-    if (!data.endsWith(sum))
-      throw new Error(`Invalid checksum in ${str2}: expected "${sum}"`);
-    return { prefix: prefix2, words };
-  }
-  const decodeUnsafe = unsafeWrapper(decode3);
-  function decodeToBytes(str2) {
-    const { prefix: prefix2, words } = decode3(str2, false);
-    return { prefix: prefix2, words, bytes: fromWords(words) };
-  }
-  function encodeFromBytes(prefix2, bytes2) {
-    return encode3(prefix2, toWords(bytes2));
-  }
-  return {
-    encode: encode3,
-    decode: decode3,
-    encodeFromBytes,
-    decodeToBytes,
-    decodeUnsafe,
-    fromWords,
-    fromWordsUnsafe,
-    toWords
-  };
-}
-var gcd, radix2carry, powers, utils, base16, base32, base32nopad, base32hex, base32hexnopad, base32crockford, hasBase64Builtin, decodeBase64Builtin, base64, base64nopad, base64url, base64urlnopad, genBase58, base58, base58flickr, base58xrp, XMR_BLOCK_LEN, base58xmr, createBase58check, base58check, BECH_ALPHABET, POLYMOD_GENERATORS, bech32, bech32m, utf8, hasHexBuiltin, hexBuiltin, hex, CODERS, coderTypeError, bytesToString, str, stringToBytes, bytes;
-var init_base = __esm({
-  "node_modules/.pnpm/@scure+base@2.0.0/node_modules/@scure/base/index.js"() {
-    init_define_import_meta_env();
-    gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
-    radix2carry = /* @__NO_SIDE_EFFECTS__ */ (from, to) => from + (to - gcd(from, to));
-    powers = /* @__PURE__ */ (() => {
-      let res = [];
-      for (let i = 0; i < 40; i++)
-        res.push(2 ** i);
-      return res;
-    })();
-    utils = {
-      alphabet,
-      chain,
-      checksum,
-      convertRadix,
-      convertRadix2,
-      radix,
-      radix2,
-      join,
-      padding
-    };
-    base16 = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(4), /* @__PURE__ */ alphabet("0123456789ABCDEF"), /* @__PURE__ */ join(""));
-    base32 = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"), /* @__PURE__ */ padding(5), /* @__PURE__ */ join(""));
-    base32nopad = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"), /* @__PURE__ */ join(""));
-    base32hex = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("0123456789ABCDEFGHIJKLMNOPQRSTUV"), /* @__PURE__ */ padding(5), /* @__PURE__ */ join(""));
-    base32hexnopad = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("0123456789ABCDEFGHIJKLMNOPQRSTUV"), /* @__PURE__ */ join(""));
-    base32crockford = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("0123456789ABCDEFGHJKMNPQRSTVWXYZ"), /* @__PURE__ */ join(""), /* @__PURE__ */ normalize((s) => s.toUpperCase().replace(/O/g, "0").replace(/[IL]/g, "1")));
-    hasBase64Builtin = /* @__PURE__ */ (() => typeof Uint8Array.from([]).toBase64 === "function" && typeof Uint8Array.fromBase64 === "function")();
-    decodeBase64Builtin = (s, isUrl) => {
-      astr("base64", s);
-      const re = isUrl ? /^[A-Za-z0-9=_-]+$/ : /^[A-Za-z0-9=+/]+$/;
-      const alphabet2 = isUrl ? "base64url" : "base64";
-      if (s.length > 0 && !re.test(s))
-        throw new Error("invalid base64");
-      return Uint8Array.fromBase64(s, { alphabet: alphabet2, lastChunkHandling: "strict" });
-    };
-    base64 = hasBase64Builtin ? {
-      encode(b) {
-        abytes(b);
-        return b.toBase64();
-      },
-      decode(s) {
-        return decodeBase64Builtin(s, false);
-      }
-    } : /* @__PURE__ */ chain(/* @__PURE__ */ radix2(6), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"), /* @__PURE__ */ padding(6), /* @__PURE__ */ join(""));
-    base64nopad = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(6), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"), /* @__PURE__ */ join(""));
-    base64url = hasBase64Builtin ? {
-      encode(b) {
-        abytes(b);
-        return b.toBase64({ alphabet: "base64url" });
-      },
-      decode(s) {
-        return decodeBase64Builtin(s, true);
-      }
-    } : /* @__PURE__ */ chain(/* @__PURE__ */ radix2(6), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"), /* @__PURE__ */ padding(6), /* @__PURE__ */ join(""));
-    base64urlnopad = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(6), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"), /* @__PURE__ */ join(""));
-    genBase58 = /* @__NO_SIDE_EFFECTS__ */ (abc) => /* @__PURE__ */ chain(/* @__PURE__ */ radix(58), /* @__PURE__ */ alphabet(abc), /* @__PURE__ */ join(""));
-    base58 = /* @__PURE__ */ genBase58("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz");
-    base58flickr = /* @__PURE__ */ genBase58("123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ");
-    base58xrp = /* @__PURE__ */ genBase58("rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz");
-    XMR_BLOCK_LEN = [0, 2, 3, 5, 6, 7, 9, 10, 11];
-    base58xmr = {
-      encode(data) {
-        let res = "";
-        for (let i = 0; i < data.length; i += 8) {
-          const block = data.subarray(i, i + 8);
-          res += base58.encode(block).padStart(XMR_BLOCK_LEN[block.length], "1");
-        }
-        return res;
-      },
-      decode(str2) {
-        let res = [];
-        for (let i = 0; i < str2.length; i += 11) {
-          const slice = str2.slice(i, i + 11);
-          const blockLen = XMR_BLOCK_LEN.indexOf(slice.length);
-          const block = base58.decode(slice);
-          for (let j = 0; j < block.length - blockLen; j++) {
-            if (block[j] !== 0)
-              throw new Error("base58xmr: wrong padding");
-          }
-          res = res.concat(Array.from(block.slice(block.length - blockLen)));
-        }
-        return Uint8Array.from(res);
-      }
-    };
-    createBase58check = (sha2562) => /* @__PURE__ */ chain(checksum(4, (data) => sha2562(sha2562(data))), base58);
-    base58check = createBase58check;
-    BECH_ALPHABET = /* @__PURE__ */ chain(/* @__PURE__ */ alphabet("qpzry9x8gf2tvdw0s3jn54khce6mua7l"), /* @__PURE__ */ join(""));
-    POLYMOD_GENERATORS = [996825010, 642813549, 513874426, 1027748829, 705979059];
-    bech32 = /* @__PURE__ */ genBech32("bech32");
-    bech32m = /* @__PURE__ */ genBech32("bech32m");
-    utf8 = {
-      encode: (data) => new TextDecoder().decode(data),
-      decode: (str2) => new TextEncoder().encode(str2)
-    };
-    hasHexBuiltin = /* @__PURE__ */ (() => typeof Uint8Array.from([]).toHex === "function" && typeof Uint8Array.fromHex === "function")();
-    hexBuiltin = {
-      encode(data) {
-        abytes(data);
-        return data.toHex();
-      },
-      decode(s) {
-        astr("hex", s);
-        return Uint8Array.fromHex(s);
-      }
-    };
-    hex = hasHexBuiltin ? hexBuiltin : /* @__PURE__ */ chain(/* @__PURE__ */ radix2(4), /* @__PURE__ */ alphabet("0123456789abcdef"), /* @__PURE__ */ join(""), /* @__PURE__ */ normalize((s) => {
-      if (typeof s !== "string" || s.length % 2 !== 0)
-        throw new TypeError(`hex.decode: expected string, got ${typeof s} with length ${s.length}`);
-      return s.toLowerCase();
-    }));
-    CODERS = {
-      utf8,
-      hex,
-      base16,
-      base32,
-      base64,
-      base64url,
-      base58,
-      base58xmr
-    };
-    coderTypeError = "Invalid encoding type. Available types: utf8, hex, base16, base32, base64, base64url, base58, base58xmr";
-    bytesToString = (type, bytes2) => {
-      if (typeof type !== "string" || !CODERS.hasOwnProperty(type))
-        throw new TypeError(coderTypeError);
-      if (!isBytes(bytes2))
-        throw new TypeError("bytesToString() expects Uint8Array");
-      return CODERS[type].encode(bytes2);
-    };
-    str = bytesToString;
-    stringToBytes = (type, str2) => {
-      if (!CODERS.hasOwnProperty(type))
-        throw new TypeError(coderTypeError);
-      if (typeof str2 !== "string")
-        throw new TypeError("stringToBytes() expects string");
-      return CODERS[type].decode(str2);
-    };
-    bytes = stringToBytes;
-  }
-});
-
-// node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/utils.js
-function isBytes2(a) {
-  return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
-}
-function anumber2(n, title = "") {
+function anumber(n, title = "") {
   if (!Number.isSafeInteger(n) || n < 0) {
     const prefix2 = title && `"${title}" `;
     throw new Error(`${prefix2}expected integer >= 0, got ${n}`);
   }
 }
-function abytes2(value2, length, title = "") {
-  const bytes2 = isBytes2(value2);
+function abytes(value2, length, title = "") {
+  const bytes2 = isBytes(value2);
   const len = value2?.length;
   const needsLen = length !== void 0;
   if (!bytes2 || needsLen && len !== length) {
@@ -607,8 +65,8 @@ function abytes2(value2, length, title = "") {
 function ahash(h) {
   if (typeof h !== "function" || typeof h.create !== "function")
     throw new Error("Hash must wrapped by utils.createHasher");
-  anumber2(h.outputLen);
-  anumber2(h.blockLen);
+  anumber(h.outputLen);
+  anumber(h.blockLen);
 }
 function aexists(instance, checkFinished = true) {
   if (instance.destroyed)
@@ -617,7 +75,7 @@ function aexists(instance, checkFinished = true) {
     throw new Error("Hash#digest() has already been called");
 }
 function aoutput(out, instance) {
-  abytes2(out, void 0, "digestInto() output");
+  abytes(out, void 0, "digestInto() output");
   const min = instance.outputLen;
   if (out.length < min) {
     throw new Error('"digestInto() output" expected to be of length >=' + min);
@@ -638,8 +96,8 @@ function rotl(word, shift) {
   return word << shift | word >>> 32 - shift >>> 0;
 }
 function bytesToHex(bytes2) {
-  abytes2(bytes2);
-  if (hasHexBuiltin2)
+  abytes(bytes2);
+  if (hasHexBuiltin)
     return bytes2.toHex();
   let hex2 = "";
   for (let i = 0; i < bytes2.length; i++) {
@@ -659,7 +117,7 @@ function asciiToBase16(ch) {
 function hexToBytes(hex2) {
   if (typeof hex2 !== "string")
     throw new Error("hex string expected, got " + typeof hex2);
-  if (hasHexBuiltin2)
+  if (hasHexBuiltin)
     return Uint8Array.fromHex(hex2);
   const hl = hex2.length;
   const al = hl / 2;
@@ -681,7 +139,7 @@ function concatBytes(...arrays) {
   let sum = 0;
   for (let i = 0; i < arrays.length; i++) {
     const a = arrays[i];
-    abytes2(a);
+    abytes(a);
     sum += a.length;
   }
   const res = new Uint8Array(sum);
@@ -707,11 +165,11 @@ function randomBytes(bytesLength = 32) {
     throw new Error("crypto.getRandomValues must be defined");
   return cr2.getRandomValues(new Uint8Array(bytesLength));
 }
-var hasHexBuiltin2, hexes, asciis, oidNist;
+var hasHexBuiltin, hexes, asciis, oidNist;
 var init_utils = __esm({
   "node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/utils.js"() {
     init_define_import_meta_env();
-    hasHexBuiltin2 = /* @__PURE__ */ (() => (
+    hasHexBuiltin = /* @__PURE__ */ (() => (
       // @ts-ignore
       typeof Uint8Array.from([]).toHex === "function" && typeof Uint8Array.fromHex === "function"
     ))();
@@ -757,7 +215,7 @@ var init_md = __esm({
       }
       update(data) {
         aexists(this);
-        abytes2(data);
+        abytes(data);
         const { view: view3, buffer, blockLen } = this;
         const len = data.length;
         for (let pos = 0; pos < len; ) {
@@ -1443,8 +901,8 @@ var utils_exports = {};
 __export(utils_exports, {
   aInRange: () => aInRange,
   abool: () => abool,
-  abytes: () => abytes2,
-  anumber: () => anumber2,
+  abytes: () => abytes,
+  anumber: () => anumber,
   asafenumber: () => asafenumber,
   asciiToBytes: () => asciiToBytes,
   bitGet: () => bitGet,
@@ -1461,7 +919,7 @@ __export(utils_exports, {
   hexToBytes: () => hexToBytes,
   hexToNumber: () => hexToNumber,
   inRange: () => inRange,
-  isBytes: () => isBytes2,
+  isBytes: () => isBytes,
   memoized: () => memoized,
   notImplemented: () => notImplemented,
   numberToBytesBE: () => numberToBytesBE,
@@ -1483,7 +941,7 @@ function abignumber(n) {
     if (!isPosBig(n))
       throw new Error("positive bigint expected, got " + n);
   } else
-    anumber2(n);
+    anumber(n);
   return n;
 }
 function asafenumber(value2, title = "") {
@@ -1505,10 +963,10 @@ function bytesToNumberBE(bytes2) {
   return hexToNumber(bytesToHex(bytes2));
 }
 function bytesToNumberLE(bytes2) {
-  return hexToNumber(bytesToHex(copyBytes(abytes2(bytes2)).reverse()));
+  return hexToNumber(bytesToHex(copyBytes(abytes(bytes2)).reverse()));
 }
 function numberToBytesBE(n, len) {
-  anumber2(len);
+  anumber(len);
   n = abignumber(n);
   const res = hexToBytes(n.toString(16).padStart(len * 2, "0"));
   if (res.length !== len)
@@ -1561,8 +1019,8 @@ function bitSet(n, pos, value2) {
   return n | (value2 ? _1n : _0n) << BigInt(pos);
 }
 function createHmacDrbg(hashLen, qByteLen, hmacFn) {
-  anumber2(hashLen, "hashLen");
-  anumber2(qByteLen, "qByteLen");
+  anumber(hashLen, "hashLen");
+  anumber(qByteLen, "qByteLen");
   if (typeof hmacFn !== "function")
     throw new Error("hmacFn must be a function");
   const u8n2 = (len) => new Uint8Array(len);
@@ -1706,13 +1164,13 @@ function sqrt5mod8(Fp, n) {
   assertIsSquare(Fp, root, n);
   return root;
 }
-function sqrt9mod16(P2) {
-  const Fp_ = Field(P2);
-  const tn = tonelliShanks(P2);
+function sqrt9mod16(P4) {
+  const Fp_ = Field(P4);
+  const tn = tonelliShanks(P4);
   const c1 = tn(Fp_, Fp_.neg(Fp_.ONE));
   const c2 = tn(Fp_, c1);
   const c3 = tn(Fp_, Fp_.neg(c1));
-  const c4 = (P2 + _7n) / _16n;
+  const c4 = (P4 + _7n) / _16n;
   return (Fp, n) => {
     let tv1 = Fp.pow(n, c4);
     let tv2 = Fp.mul(tv1, c1);
@@ -1728,17 +1186,17 @@ function sqrt9mod16(P2) {
     return root;
   };
 }
-function tonelliShanks(P2) {
-  if (P2 < _3n)
+function tonelliShanks(P4) {
+  if (P4 < _3n)
     throw new Error("sqrt is not defined for small field");
-  let Q = P2 - _1n2;
+  let Q = P4 - _1n2;
   let S = 0;
   while (Q % _2n === _0n2) {
     Q /= _2n;
     S++;
   }
   let Z = _2n;
-  const _Fp = Field(P2);
+  const _Fp = Field(P4);
   while (FpLegendre(_Fp, Z) === 1) {
     if (Z++ > 1e3)
       throw new Error("Cannot find square root: probably non-prime P");
@@ -1777,14 +1235,14 @@ function tonelliShanks(P2) {
     return R;
   };
 }
-function FpSqrt(P2) {
-  if (P2 % _4n === _3n)
+function FpSqrt(P4) {
+  if (P4 % _4n === _3n)
     return sqrt3mod4;
-  if (P2 % _8n === _5n)
+  if (P4 % _8n === _5n)
     return sqrt5mod8;
-  if (P2 % _16n === _9n)
-    return sqrt9mod16(P2);
-  return tonelliShanks(P2);
+  if (P4 % _16n === _9n)
+    return sqrt9mod16(P4);
+  return tonelliShanks(P4);
 }
 function validateField(field2) {
   const initial = {
@@ -1845,7 +1303,7 @@ function FpLegendre(Fp, n) {
 }
 function nLength(n, nBitLength) {
   if (nBitLength !== void 0)
-    anumber2(nBitLength);
+    anumber(nBitLength);
   const _nBitLength = nBitLength !== void 0 ? nBitLength : n.toString(2).length;
   const nByteLength = Math.ceil(_nBitLength / 8);
   return { nBitLength: _nBitLength, nByteLength };
@@ -1864,7 +1322,7 @@ function getMinHashLength(fieldOrder) {
   return length + Math.ceil(length / 2);
 }
 function mapHashToField(key, fieldOrder, isLE = false) {
-  abytes2(key);
+  abytes(key);
   const len = key.length;
   const fieldLen = getFieldBytesLength(fieldOrder);
   const minLen = getMinHashLength(fieldOrder);
@@ -2012,7 +1470,7 @@ var init_modular = __esm({
         return this.isLE ? numberToBytesLE(num2, this.BYTES) : numberToBytesBE(num2, this.BYTES);
       }
       fromBytes(bytes2, skipValidation = false) {
-        abytes2(bytes2);
+        abytes(bytes2);
         const { _lengths: allowedLengths, BYTES, isLE, ORDER, _mod: modFromBytes } = this;
         if (allowedLengths) {
           if (!allowedLengths.includes(bytes2.length) || bytes2.length > BYTES) {
@@ -2084,8 +1542,8 @@ function calcOffsets(n, window2, wOpts) {
   const offsetF = offsetStart;
   return { nextN, offset, isZero: isZero2, isNeg, isNegF, offsetF };
 }
-function getW(P2) {
-  return pointWindowSizes.get(P2) || 1;
+function getW(P4) {
+  return pointWindowSizes.get(P4) || 1;
 }
 function assert0(n) {
   if (n !== _0n3)
@@ -2275,10 +1733,10 @@ var init_curve = __esm({
       // We calculate precomputes for elliptic curve point multiplication
       // using windowed method. This specifies window size and
       // stores precomputed values. Usually only base point would be precomputed.
-      createCache(P2, W2) {
+      createCache(P4, W2) {
         validateW(W2, this.bits);
-        pointWindowSizes.set(P2, W2);
-        pointPrecomputes.delete(P2);
+        pointWindowSizes.set(P4, W2);
+        pointPrecomputes.delete(P4);
       }
       hasCache(elm) {
         return getW(elm) !== 1;
@@ -2308,12 +1766,12 @@ function strxor(a, b) {
   return arr;
 }
 function normDST(DST) {
-  if (!isBytes2(DST) && typeof DST !== "string")
+  if (!isBytes(DST) && typeof DST !== "string")
     throw new Error("DST must be Uint8Array or ascii string");
   return typeof DST === "string" ? asciiToBytes(DST) : DST;
 }
 function expand_message_xmd(msg, DST, lenInBytes, H) {
-  abytes2(msg);
+  abytes(msg);
   asafenumber(lenInBytes);
   DST = normDST(DST);
   if (DST.length > 255)
@@ -2336,7 +1794,7 @@ function expand_message_xmd(msg, DST, lenInBytes, H) {
   return pseudo_random_bytes.slice(0, lenInBytes);
 }
 function expand_message_xof(msg, DST, lenInBytes, k, H) {
-  abytes2(msg);
+  abytes(msg);
   asafenumber(lenInBytes);
   DST = normDST(DST);
   if (DST.length > 255) {
@@ -2356,7 +1814,7 @@ function hash_to_field(msg, count, options2) {
   });
   const { p, k, m, hash, expand: expand3, DST } = options2;
   asafenumber(hash.outputLen, "valid hash");
-  abytes2(msg);
+  abytes(msg);
   asafenumber(count);
   const log2p = p.toString(2).length;
   const L3 = Math.ceil((log2p + k) / 8);
@@ -2400,11 +1858,11 @@ function createHasher2(Point5, mapToCurve, defaults) {
     return Point5.fromAffine(mapToCurve(num2));
   }
   function clear(initial) {
-    const P2 = initial.clearCofactor();
-    if (P2.equals(Point5.ZERO))
+    const P4 = initial.clearCofactor();
+    if (P4.equals(Point5.ZERO))
       return Point5.ZERO;
-    P2.assertValidity();
-    return P2;
+    P4.assertValidity();
+    return P4;
   }
   return {
     defaults: Object.freeze(defaults),
@@ -2472,7 +1930,7 @@ var init_hmac = __esm({
       destroyed = false;
       constructor(hash, key) {
         ahash(hash);
-        abytes2(key, void 0, "key");
+        abytes(key, void 0, "key");
         this.iHash = hash.create();
         if (typeof this.iHash.update !== "function")
           throw new Error("Expected instance of class which extends utils.Hash");
@@ -2497,7 +1955,7 @@ var init_hmac = __esm({
       }
       digestInto(out) {
         aexists(this);
-        abytes2(out, this.outputLen, "output");
+        abytes(out, this.outputLen, "output");
         this.finished = true;
         this.iHash.digestInto(out);
         this.oHash.update(out);
@@ -2607,7 +2065,7 @@ function weierstrass(params, extraOpts = {}) {
     }
   }
   function pointFromBytes(bytes2) {
-    abytes2(bytes2, void 0, "Point");
+    abytes(bytes2, void 0, "Point");
     const { publicKey: comp, publicKeyUncompressed: uncomp } = lengths2;
     const length = bytes2.length;
     const head = bytes2[0];
@@ -2674,13 +2132,13 @@ function weierstrass(params, extraOpts = {}) {
     return _splitEndoScalar(k, endo.basises, Fn4.ORDER);
   }
   const toAffineMemo = memoized((p, iz) => {
-    const { X: X3, Y, Z } = p;
+    const { X: X5, Y, Z } = p;
     if (Fp.eql(Z, Fp.ONE))
-      return { x: X3, y: Y };
+      return { x: X5, y: Y };
     const is0 = p.is0();
     if (iz == null)
       iz = is0 ? Fp.ONE : Fp.inv(Z);
-    const x = Fp.mul(X3, iz);
+    const x = Fp.mul(X5, iz);
     const y = Fp.mul(Y, iz);
     const zz = Fp.mul(Z, iz);
     if (is0)
@@ -2724,8 +2182,8 @@ function weierstrass(params, extraOpts = {}) {
     Y;
     Z;
     /** Does NOT validate if the point is valid. Use `.assertValidity()`. */
-    constructor(X3, Y, Z) {
-      this.X = acoord("x", X3);
+    constructor(X5, Y, Z) {
+      this.X = acoord("x", X5);
       this.Y = acoord("y", Y, true);
       this.Z = acoord("z", Z);
       Object.freeze(this);
@@ -2745,9 +2203,9 @@ function weierstrass(params, extraOpts = {}) {
       return new Point5(x, y, Fp.ONE);
     }
     static fromBytes(bytes2) {
-      const P2 = Point5.fromAffine(decodePoint(abytes2(bytes2, void 0, "point")));
-      P2.assertValidity();
-      return P2;
+      const P4 = Point5.fromAffine(decodePoint(abytes(bytes2, void 0, "point")));
+      P4.assertValidity();
+      return P4;
     }
     static fromHex(hex2) {
       return Point5.fromBytes(hexToBytes(hex2));
@@ -2802,7 +2260,7 @@ function weierstrass(params, extraOpts = {}) {
       const { a, b } = CURVE;
       const b3 = Fp.mul(b, _3n2);
       const { X: X1, Y: Y1, Z: Z1 } = this;
-      let X3 = Fp.ZERO, Y3 = Fp.ZERO, Z3 = Fp.ZERO;
+      let X32 = Fp.ZERO, Y3 = Fp.ZERO, Z3 = Fp.ZERO;
       let t0 = Fp.mul(X1, X1);
       let t1 = Fp.mul(Y1, Y1);
       let t2 = Fp.mul(Z1, Z1);
@@ -2810,13 +2268,13 @@ function weierstrass(params, extraOpts = {}) {
       t3 = Fp.add(t3, t3);
       Z3 = Fp.mul(X1, Z1);
       Z3 = Fp.add(Z3, Z3);
-      X3 = Fp.mul(a, Z3);
+      X32 = Fp.mul(a, Z3);
       Y3 = Fp.mul(b3, t2);
-      Y3 = Fp.add(X3, Y3);
-      X3 = Fp.sub(t1, Y3);
+      Y3 = Fp.add(X32, Y3);
+      X32 = Fp.sub(t1, Y3);
       Y3 = Fp.add(t1, Y3);
-      Y3 = Fp.mul(X3, Y3);
-      X3 = Fp.mul(t3, X3);
+      Y3 = Fp.mul(X32, Y3);
+      X32 = Fp.mul(t3, X32);
       Z3 = Fp.mul(b3, Z3);
       t2 = Fp.mul(a, t2);
       t3 = Fp.sub(t0, t2);
@@ -2830,11 +2288,11 @@ function weierstrass(params, extraOpts = {}) {
       t2 = Fp.mul(Y1, Z1);
       t2 = Fp.add(t2, t2);
       t0 = Fp.mul(t2, t3);
-      X3 = Fp.sub(X3, t0);
+      X32 = Fp.sub(X32, t0);
       Z3 = Fp.mul(t2, t1);
       Z3 = Fp.add(Z3, Z3);
       Z3 = Fp.add(Z3, Z3);
-      return new Point5(X3, Y3, Z3);
+      return new Point5(X32, Y3, Z3);
     }
     // Renes-Costello-Batina exception-free addition formula.
     // There is 30% faster Jacobian formula, but it is not complete.
@@ -2844,7 +2302,7 @@ function weierstrass(params, extraOpts = {}) {
       aprjpoint(other);
       const { X: X1, Y: Y1, Z: Z1 } = this;
       const { X: X22, Y: Y2, Z: Z2 } = other;
-      let X3 = Fp.ZERO, Y3 = Fp.ZERO, Z3 = Fp.ZERO;
+      let X32 = Fp.ZERO, Y3 = Fp.ZERO, Z3 = Fp.ZERO;
       const a = CURVE.a;
       const b3 = Fp.mul(CURVE.b, _3n2);
       let t0 = Fp.mul(X1, X22);
@@ -2861,16 +2319,16 @@ function weierstrass(params, extraOpts = {}) {
       t5 = Fp.add(t0, t2);
       t4 = Fp.sub(t4, t5);
       t5 = Fp.add(Y1, Z1);
-      X3 = Fp.add(Y2, Z2);
-      t5 = Fp.mul(t5, X3);
-      X3 = Fp.add(t1, t2);
-      t5 = Fp.sub(t5, X3);
+      X32 = Fp.add(Y2, Z2);
+      t5 = Fp.mul(t5, X32);
+      X32 = Fp.add(t1, t2);
+      t5 = Fp.sub(t5, X32);
       Z3 = Fp.mul(a, t4);
-      X3 = Fp.mul(b3, t2);
-      Z3 = Fp.add(X3, Z3);
-      X3 = Fp.sub(t1, Z3);
+      X32 = Fp.mul(b3, t2);
+      Z3 = Fp.add(X32, Z3);
+      X32 = Fp.sub(t1, Z3);
       Z3 = Fp.add(t1, Z3);
-      Y3 = Fp.mul(X3, Z3);
+      Y3 = Fp.mul(X32, Z3);
       t1 = Fp.add(t0, t0);
       t1 = Fp.add(t1, t0);
       t2 = Fp.mul(a, t2);
@@ -2882,12 +2340,12 @@ function weierstrass(params, extraOpts = {}) {
       t0 = Fp.mul(t1, t4);
       Y3 = Fp.add(Y3, t0);
       t0 = Fp.mul(t5, t4);
-      X3 = Fp.mul(t3, X3);
-      X3 = Fp.sub(X3, t0);
+      X32 = Fp.mul(t3, X32);
+      X32 = Fp.sub(X32, t0);
       t0 = Fp.mul(t3, t1);
       Z3 = Fp.mul(t5, Z3);
       Z3 = Fp.add(Z3, t0);
-      return new Point5(X3, Y3, Z3);
+      return new Point5(X32, Y3, Z3);
     }
     subtract(other) {
       return this.add(other.negate());
@@ -3133,18 +2591,18 @@ function ecdh(Point5, ecdhOpts = {}) {
     }
   }
   function randomSecretKey2(seed = randomBytes_(lengths2.seed)) {
-    return mapHashToField(abytes2(seed, lengths2.seed, "seed"), Fn4.ORDER);
+    return mapHashToField(abytes(seed, lengths2.seed, "seed"), Fn4.ORDER);
   }
   function getPublicKey2(secretKey, isCompressed = true) {
     return Point5.BASE.multiply(Fn4.fromBytes(secretKey)).toBytes(isCompressed);
   }
   function isProbPub(item) {
     const { secretKey, publicKey: publicKey2, publicKeyUncompressed } = lengths2;
-    if (!isBytes2(item))
+    if (!isBytes(item))
       return void 0;
     if ("_lengths" in Fn4 && Fn4._lengths || secretKey === publicKey2)
       return void 0;
-    const l = abytes2(item, void 0, "key").length;
+    const l = abytes(item, void 0, "key").length;
     return l === publicKey2 || l === publicKeyUncompressed;
   }
   function getSharedSecret(secretKeyA, publicKeyB, isCompressed = true) {
@@ -3203,7 +2661,7 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
     validateSigFormat(format);
     const size = lengths2.signature;
     const sizer = format === "compact" ? size : format === "recovered" ? size + 1 : void 0;
-    return abytes2(bytes2, sizer);
+    return abytes(bytes2, sizer);
   }
   class Signature2 {
     r;
@@ -3224,7 +2682,7 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
       validateSigLength(bytes2, format);
       let recid;
       if (format === "der") {
-        const { r: r2, s: s2 } = DER.toSig(abytes2(bytes2));
+        const { r: r2, s: s2 } = DER.toSig(abytes(bytes2));
         return new Signature2(r2, s2);
       }
       if (format === "recovered") {
@@ -3258,7 +2716,7 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
       const x = Fp.toBytes(radj);
       const R = Point5.fromBytes(concatBytes(pprefix((recovery & 1) === 0), x));
       const ir = Fn4.inv(radj);
-      const h = bits2int_modN2(abytes2(messageHash, void 0, "msgHash"));
+      const h = bits2int_modN2(abytes(messageHash, void 0, "msgHash"));
       const u1 = Fn4.create(-h * ir);
       const u2 = Fn4.create(s * ir);
       const Q = Point5.BASE.multiplyUnsafe(u1).add(R.multiplyUnsafe(u2));
@@ -3304,8 +2762,8 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
     return Fn4.toBytes(num2);
   }
   function validateMsgAndHash(message, prehash) {
-    abytes2(message, void 0, "message");
-    return prehash ? abytes2(hash(message), void 0, "prehashed message") : message;
+    abytes(message, void 0, "message");
+    return prehash ? abytes(hash(message), void 0, "prehashed message") : message;
   }
   function prepSig(message, secretKey, opts) {
     const { lowS, prehash, extraEntropy } = validateSigOpts(opts, defaultSigOpts);
@@ -3317,7 +2775,7 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
     const seedArgs = [int2octets(d), int2octets(h1int)];
     if (extraEntropy != null && extraEntropy !== false) {
       const e = extraEntropy === true ? randomBytes3(lengths2.secretKey) : extraEntropy;
-      seedArgs.push(abytes2(e, void 0, "extraEntropy"));
+      seedArgs.push(abytes(e, void 0, "extraEntropy"));
     }
     const seed = concatBytes(...seedArgs);
     const m = h1int;
@@ -3351,16 +2809,16 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
   }
   function verify(signature, message, publicKey2, opts = {}) {
     const { lowS, prehash, format } = validateSigOpts(opts, defaultSigOpts);
-    publicKey2 = abytes2(publicKey2, void 0, "publicKey");
+    publicKey2 = abytes(publicKey2, void 0, "publicKey");
     message = validateMsgAndHash(message, prehash);
-    if (!isBytes2(signature)) {
+    if (!isBytes(signature)) {
       const end = signature instanceof Signature2 ? ", use sig.toBytes()" : "";
       throw new Error("verify expects Uint8Array signature" + end);
     }
     validateSigLength(signature, format);
     try {
       const sig = Signature2.fromBytes(signature, format);
-      const P2 = Point5.fromBytes(publicKey2);
+      const P4 = Point5.fromBytes(publicKey2);
       if (lowS && sig.hasHighS())
         return false;
       const { r, s } = sig;
@@ -3368,7 +2826,7 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
       const is = Fn4.inv(s);
       const u1 = Fn4.create(h * is);
       const u2 = Fn4.create(r * is);
-      const R = Point5.BASE.multiplyUnsafe(u1).add(P2.multiplyUnsafe(u2));
+      const R = Point5.BASE.multiplyUnsafe(u1).add(P4.multiplyUnsafe(u2));
       if (R.is0())
         return false;
       const v = Fn4.create(R.x);
@@ -3416,9 +2874,9 @@ var init_weierstrass = __esm({
       Err: DERErr,
       // Basic building block is TLV (Tag-Length-Value)
       _tlv: {
-        encode: (tag, data) => {
+        encode: (tag3, data) => {
           const { Err: E } = DER;
-          if (tag < 0 || tag > 256)
+          if (tag3 < 0 || tag3 > 256)
             throw new E("tlv.encode: wrong tag");
           if (data.length & 1)
             throw new E("tlv.encode: unpadded data");
@@ -3427,16 +2885,16 @@ var init_weierstrass = __esm({
           if (len.length / 2 & 128)
             throw new E("tlv.encode: long form length too big");
           const lenLen = dataLen > 127 ? numberToHexUnpadded(len.length / 2 | 128) : "";
-          const t = numberToHexUnpadded(tag);
+          const t = numberToHexUnpadded(tag3);
           return t + lenLen + len + data;
         },
         // v - value, l - left bytes (unparsed)
-        decode(tag, data) {
+        decode(tag3, data) {
           const { Err: E } = DER;
           let pos = 0;
-          if (tag < 0 || tag > 256)
+          if (tag3 < 0 || tag3 > 256)
             throw new E("tlv.encode: wrong tag");
-          if (data.length < 2 || data[pos++] !== tag)
+          if (data.length < 2 || data[pos++] !== tag3)
             throw new E("tlv.decode: wrong tlv");
           const first = data[pos++];
           const isLong = !!(first & 128);
@@ -3493,7 +2951,7 @@ var init_weierstrass = __esm({
       },
       toSig(bytes2) {
         const { Err: E, _int: int, _tlv: tlv } = DER;
-        const data = abytes2(bytes2, void 0, "signature");
+        const data = abytes(bytes2, void 0, "signature");
         const { v: seqBytes, l: seqLeftBytes } = tlv.decode(48, data);
         if (seqLeftBytes.length)
           throw new E("invalid signature: left bytes after parsing");
@@ -3527,33 +2985,33 @@ __export(secp256k1_exports, {
   secp256k1_hasher: () => secp256k1_hasher
 });
 function sqrtMod(y) {
-  const P2 = secp256k1_CURVE.p;
+  const P4 = secp256k1_CURVE.p;
   const _3n3 = BigInt(3), _6n = BigInt(6), _11n = BigInt(11), _22n = BigInt(22);
   const _23n = BigInt(23), _44n = BigInt(44), _88n = BigInt(88);
-  const b2 = y * y * y % P2;
-  const b3 = b2 * b2 * y % P2;
-  const b6 = pow2(b3, _3n3, P2) * b3 % P2;
-  const b9 = pow2(b6, _3n3, P2) * b3 % P2;
-  const b11 = pow2(b9, _2n3, P2) * b2 % P2;
-  const b22 = pow2(b11, _11n, P2) * b11 % P2;
-  const b44 = pow2(b22, _22n, P2) * b22 % P2;
-  const b88 = pow2(b44, _44n, P2) * b44 % P2;
-  const b176 = pow2(b88, _88n, P2) * b88 % P2;
-  const b220 = pow2(b176, _44n, P2) * b44 % P2;
-  const b223 = pow2(b220, _3n3, P2) * b3 % P2;
-  const t1 = pow2(b223, _23n, P2) * b22 % P2;
-  const t2 = pow2(t1, _6n, P2) * b2 % P2;
-  const root = pow2(t2, _2n3, P2);
+  const b2 = y * y * y % P4;
+  const b3 = b2 * b2 * y % P4;
+  const b6 = pow2(b3, _3n3, P4) * b3 % P4;
+  const b9 = pow2(b6, _3n3, P4) * b3 % P4;
+  const b11 = pow2(b9, _2n3, P4) * b2 % P4;
+  const b22 = pow2(b11, _11n, P4) * b11 % P4;
+  const b44 = pow2(b22, _22n, P4) * b22 % P4;
+  const b88 = pow2(b44, _44n, P4) * b44 % P4;
+  const b176 = pow2(b88, _88n, P4) * b88 % P4;
+  const b220 = pow2(b176, _44n, P4) * b44 % P4;
+  const b223 = pow2(b220, _3n3, P4) * b3 % P4;
+  const t1 = pow2(b223, _23n, P4) * b22 % P4;
+  const t2 = pow2(t1, _6n, P4) * b2 % P4;
+  const root = pow2(t2, _2n3, P4);
   if (!Fpk1.eql(Fpk1.sqr(root), y))
     throw new Error("Cannot find square root");
   return root;
 }
-function taggedHash(tag, ...messages) {
-  let tagP = TAGGED_HASH_PREFIXES[tag];
+function taggedHash(tag3, ...messages) {
+  let tagP = TAGGED_HASH_PREFIXES[tag3];
   if (tagP === void 0) {
-    const tagH = sha256(asciiToBytes(tag));
+    const tagH = sha256(asciiToBytes(tag3));
     tagP = concatBytes(tagH, tagH);
-    TAGGED_HASH_PREFIXES[tag] = tagP;
+    TAGGED_HASH_PREFIXES[tag3] = tagP;
   }
   return sha256(concatBytes(tagP, ...messages));
 }
@@ -3585,9 +3043,9 @@ function schnorrGetPublicKey(secretKey) {
 }
 function schnorrSign(message, secretKey, auxRand = randomBytes(32)) {
   const { Fn: Fn4 } = Pointk1;
-  const m = abytes2(message, void 0, "message");
+  const m = abytes(message, void 0, "message");
   const { bytes: px, scalar: d } = schnorrGetExtPubKey(secretKey);
-  const a = abytes2(auxRand, 32, "auxRand");
+  const a = abytes(auxRand, 32, "auxRand");
   const t = Fn4.toBytes(d ^ num(taggedHash("BIP0340/aux", a)));
   const rand = taggedHash("BIP0340/nonce", t, px, m);
   const { bytes: rx, scalar: k } = schnorrGetExtPubKey(rand);
@@ -3601,19 +3059,19 @@ function schnorrSign(message, secretKey, auxRand = randomBytes(32)) {
 }
 function schnorrVerify(signature, message, publicKey2) {
   const { Fp, Fn: Fn4, BASE } = Pointk1;
-  const sig = abytes2(signature, 64, "signature");
-  const m = abytes2(message, void 0, "message");
-  const pub = abytes2(publicKey2, 32, "publicKey");
+  const sig = abytes(signature, 64, "signature");
+  const m = abytes(message, void 0, "message");
+  const pub = abytes(publicKey2, 32, "publicKey");
   try {
-    const P2 = lift_x(num(pub));
+    const P4 = lift_x(num(pub));
     const r = num(sig.subarray(0, 32));
     if (!Fp.isValidNot0(r))
       return false;
     const s = num(sig.subarray(32, 64));
     if (!Fn4.isValidNot0(s))
       return false;
-    const e = challenge(Fn4.toBytes(r), pointToBytes(P2), m);
-    const R = BASE.multiplyUnsafe(s).add(P2.multiplyUnsafe(Fn4.neg(e)));
+    const e = challenge(Fn4.toBytes(r), pointToBytes(P4), m);
+    const R = BASE.multiplyUnsafe(s).add(P4.multiplyUnsafe(Fn4.neg(e)));
     const { x, y } = R.toAffine();
     if (R.is0() || !hasEven(y) || x !== r)
       return false;
@@ -3736,6 +3194,548 @@ var init_secp256k1 = __esm({
       expand: "xmd",
       hash: sha256
     }))();
+  }
+});
+
+// node_modules/.pnpm/@scure+base@2.0.0/node_modules/@scure/base/index.js
+var base_exports = {};
+__export(base_exports, {
+  base16: () => base16,
+  base32: () => base32,
+  base32crockford: () => base32crockford,
+  base32hex: () => base32hex,
+  base32hexnopad: () => base32hexnopad,
+  base32nopad: () => base32nopad,
+  base58: () => base58,
+  base58check: () => base58check,
+  base58flickr: () => base58flickr,
+  base58xmr: () => base58xmr,
+  base58xrp: () => base58xrp,
+  base64: () => base64,
+  base64nopad: () => base64nopad,
+  base64url: () => base64url,
+  base64urlnopad: () => base64urlnopad,
+  bech32: () => bech32,
+  bech32m: () => bech32m,
+  bytes: () => bytes,
+  bytesToString: () => bytesToString,
+  createBase58check: () => createBase58check,
+  hex: () => hex,
+  str: () => str,
+  stringToBytes: () => stringToBytes,
+  utf8: () => utf8,
+  utils: () => utils
+});
+function isBytes2(a) {
+  return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
+}
+function abytes2(b) {
+  if (!isBytes2(b))
+    throw new Error("Uint8Array expected");
+}
+function isArrayOf(isString, arr) {
+  if (!Array.isArray(arr))
+    return false;
+  if (arr.length === 0)
+    return true;
+  if (isString) {
+    return arr.every((item) => typeof item === "string");
+  } else {
+    return arr.every((item) => Number.isSafeInteger(item));
+  }
+}
+function afn(input) {
+  if (typeof input !== "function")
+    throw new Error("function expected");
+  return true;
+}
+function astr(label, input) {
+  if (typeof input !== "string")
+    throw new Error(`${label}: string expected`);
+  return true;
+}
+function anumber2(n) {
+  if (!Number.isSafeInteger(n))
+    throw new Error(`invalid integer: ${n}`);
+}
+function aArr(input) {
+  if (!Array.isArray(input))
+    throw new Error("array expected");
+}
+function astrArr(label, input) {
+  if (!isArrayOf(true, input))
+    throw new Error(`${label}: array of strings expected`);
+}
+function anumArr(label, input) {
+  if (!isArrayOf(false, input))
+    throw new Error(`${label}: array of numbers expected`);
+}
+// @__NO_SIDE_EFFECTS__
+function chain(...args) {
+  const id = (a) => a;
+  const wrap3 = (a, b) => (c) => a(b(c));
+  const encode3 = args.map((x) => x.encode).reduceRight(wrap3, id);
+  const decode3 = args.map((x) => x.decode).reduce(wrap3, id);
+  return { encode: encode3, decode: decode3 };
+}
+// @__NO_SIDE_EFFECTS__
+function alphabet(letters) {
+  const lettersA = typeof letters === "string" ? letters.split("") : letters;
+  const len = lettersA.length;
+  astrArr("alphabet", lettersA);
+  const indexes = new Map(lettersA.map((l, i) => [l, i]));
+  return {
+    encode: (digits) => {
+      aArr(digits);
+      return digits.map((i) => {
+        if (!Number.isSafeInteger(i) || i < 0 || i >= len)
+          throw new Error(`alphabet.encode: digit index outside alphabet "${i}". Allowed: ${letters}`);
+        return lettersA[i];
+      });
+    },
+    decode: (input) => {
+      aArr(input);
+      return input.map((letter) => {
+        astr("alphabet.decode", letter);
+        const i = indexes.get(letter);
+        if (i === void 0)
+          throw new Error(`Unknown letter: "${letter}". Allowed: ${letters}`);
+        return i;
+      });
+    }
+  };
+}
+// @__NO_SIDE_EFFECTS__
+function join(separator = "") {
+  astr("join", separator);
+  return {
+    encode: (from) => {
+      astrArr("join.decode", from);
+      return from.join(separator);
+    },
+    decode: (to) => {
+      astr("join.decode", to);
+      return to.split(separator);
+    }
+  };
+}
+// @__NO_SIDE_EFFECTS__
+function padding(bits, chr = "=") {
+  anumber2(bits);
+  astr("padding", chr);
+  return {
+    encode(data) {
+      astrArr("padding.encode", data);
+      while (data.length * bits % 8)
+        data.push(chr);
+      return data;
+    },
+    decode(input) {
+      astrArr("padding.decode", input);
+      let end = input.length;
+      if (end * bits % 8)
+        throw new Error("padding: invalid, string should have whole number of bytes");
+      for (; end > 0 && input[end - 1] === chr; end--) {
+        const last = end - 1;
+        const byte = last * bits;
+        if (byte % 8 === 0)
+          throw new Error("padding: invalid, string has too much padding");
+      }
+      return input.slice(0, end);
+    }
+  };
+}
+// @__NO_SIDE_EFFECTS__
+function normalize(fn) {
+  afn(fn);
+  return { encode: (from) => from, decode: (to) => fn(to) };
+}
+function convertRadix(data, from, to) {
+  if (from < 2)
+    throw new Error(`convertRadix: invalid from=${from}, base cannot be less than 2`);
+  if (to < 2)
+    throw new Error(`convertRadix: invalid to=${to}, base cannot be less than 2`);
+  aArr(data);
+  if (!data.length)
+    return [];
+  let pos = 0;
+  const res = [];
+  const digits = Array.from(data, (d) => {
+    anumber2(d);
+    if (d < 0 || d >= from)
+      throw new Error(`invalid integer: ${d}`);
+    return d;
+  });
+  const dlen = digits.length;
+  while (true) {
+    let carry = 0;
+    let done = true;
+    for (let i = pos; i < dlen; i++) {
+      const digit = digits[i];
+      const fromCarry = from * carry;
+      const digitBase = fromCarry + digit;
+      if (!Number.isSafeInteger(digitBase) || fromCarry / from !== carry || digitBase - digit !== fromCarry) {
+        throw new Error("convertRadix: carry overflow");
+      }
+      const div = digitBase / to;
+      carry = digitBase % to;
+      const rounded = Math.floor(div);
+      digits[i] = rounded;
+      if (!Number.isSafeInteger(rounded) || rounded * to + carry !== digitBase)
+        throw new Error("convertRadix: carry overflow");
+      if (!done)
+        continue;
+      else if (!rounded)
+        pos = i;
+      else
+        done = false;
+    }
+    res.push(carry);
+    if (done)
+      break;
+  }
+  for (let i = 0; i < data.length - 1 && data[i] === 0; i++)
+    res.push(0);
+  return res.reverse();
+}
+function convertRadix2(data, from, to, padding2) {
+  aArr(data);
+  if (from <= 0 || from > 32)
+    throw new Error(`convertRadix2: wrong from=${from}`);
+  if (to <= 0 || to > 32)
+    throw new Error(`convertRadix2: wrong to=${to}`);
+  if (/* @__PURE__ */ radix2carry(from, to) > 32) {
+    throw new Error(`convertRadix2: carry overflow from=${from} to=${to} carryBits=${/* @__PURE__ */ radix2carry(from, to)}`);
+  }
+  let carry = 0;
+  let pos = 0;
+  const max = powers[from];
+  const mask = powers[to] - 1;
+  const res = [];
+  for (const n of data) {
+    anumber2(n);
+    if (n >= max)
+      throw new Error(`convertRadix2: invalid data word=${n} from=${from}`);
+    carry = carry << from | n;
+    if (pos + from > 32)
+      throw new Error(`convertRadix2: carry overflow pos=${pos} from=${from}`);
+    pos += from;
+    for (; pos >= to; pos -= to)
+      res.push((carry >> pos - to & mask) >>> 0);
+    const pow = powers[pos];
+    if (pow === void 0)
+      throw new Error("invalid carry");
+    carry &= pow - 1;
+  }
+  carry = carry << to - pos & mask;
+  if (!padding2 && pos >= from)
+    throw new Error("Excess padding");
+  if (!padding2 && carry > 0)
+    throw new Error(`Non-zero padding: ${carry}`);
+  if (padding2 && pos > 0)
+    res.push(carry >>> 0);
+  return res;
+}
+// @__NO_SIDE_EFFECTS__
+function radix(num2) {
+  anumber2(num2);
+  const _256 = 2 ** 8;
+  return {
+    encode: (bytes2) => {
+      if (!isBytes2(bytes2))
+        throw new Error("radix.encode input should be Uint8Array");
+      return convertRadix(Array.from(bytes2), _256, num2);
+    },
+    decode: (digits) => {
+      anumArr("radix.decode", digits);
+      return Uint8Array.from(convertRadix(digits, num2, _256));
+    }
+  };
+}
+// @__NO_SIDE_EFFECTS__
+function radix2(bits, revPadding = false) {
+  anumber2(bits);
+  if (bits <= 0 || bits > 32)
+    throw new Error("radix2: bits should be in (0..32]");
+  if (/* @__PURE__ */ radix2carry(8, bits) > 32 || /* @__PURE__ */ radix2carry(bits, 8) > 32)
+    throw new Error("radix2: carry overflow");
+  return {
+    encode: (bytes2) => {
+      if (!isBytes2(bytes2))
+        throw new Error("radix2.encode input should be Uint8Array");
+      return convertRadix2(Array.from(bytes2), 8, bits, !revPadding);
+    },
+    decode: (digits) => {
+      anumArr("radix2.decode", digits);
+      return Uint8Array.from(convertRadix2(digits, bits, 8, revPadding));
+    }
+  };
+}
+function unsafeWrapper(fn) {
+  afn(fn);
+  return function(...args) {
+    try {
+      return fn.apply(null, args);
+    } catch (e) {
+    }
+  };
+}
+function checksum(len, fn) {
+  anumber2(len);
+  afn(fn);
+  return {
+    encode(data) {
+      if (!isBytes2(data))
+        throw new Error("checksum.encode: input should be Uint8Array");
+      const sum = fn(data).slice(0, len);
+      const res = new Uint8Array(data.length + len);
+      res.set(data);
+      res.set(sum, data.length);
+      return res;
+    },
+    decode(data) {
+      if (!isBytes2(data))
+        throw new Error("checksum.decode: input should be Uint8Array");
+      const payload = data.slice(0, -len);
+      const oldChecksum = data.slice(-len);
+      const newChecksum = fn(payload).slice(0, len);
+      for (let i = 0; i < len; i++)
+        if (newChecksum[i] !== oldChecksum[i])
+          throw new Error("Invalid checksum");
+      return payload;
+    }
+  };
+}
+function bech32Polymod(pre) {
+  const b = pre >> 25;
+  let chk = (pre & 33554431) << 5;
+  for (let i = 0; i < POLYMOD_GENERATORS.length; i++) {
+    if ((b >> i & 1) === 1)
+      chk ^= POLYMOD_GENERATORS[i];
+  }
+  return chk;
+}
+function bechChecksum(prefix2, words, encodingConst = 1) {
+  const len = prefix2.length;
+  let chk = 1;
+  for (let i = 0; i < len; i++) {
+    const c = prefix2.charCodeAt(i);
+    if (c < 33 || c > 126)
+      throw new Error(`Invalid prefix (${prefix2})`);
+    chk = bech32Polymod(chk) ^ c >> 5;
+  }
+  chk = bech32Polymod(chk);
+  for (let i = 0; i < len; i++)
+    chk = bech32Polymod(chk) ^ prefix2.charCodeAt(i) & 31;
+  for (let v of words)
+    chk = bech32Polymod(chk) ^ v;
+  for (let i = 0; i < 6; i++)
+    chk = bech32Polymod(chk);
+  chk ^= encodingConst;
+  return BECH_ALPHABET.encode(convertRadix2([chk % powers[30]], 30, 5, false));
+}
+// @__NO_SIDE_EFFECTS__
+function genBech32(encoding) {
+  const ENCODING_CONST = encoding === "bech32" ? 1 : 734539939;
+  const _words = /* @__PURE__ */ radix2(5);
+  const fromWords = _words.decode;
+  const toWords = _words.encode;
+  const fromWordsUnsafe = unsafeWrapper(fromWords);
+  function encode3(prefix2, words, limit = 90) {
+    astr("bech32.encode prefix", prefix2);
+    if (isBytes2(words))
+      words = Array.from(words);
+    anumArr("bech32.encode", words);
+    const plen = prefix2.length;
+    if (plen === 0)
+      throw new TypeError(`Invalid prefix length ${plen}`);
+    const actualLength = plen + 7 + words.length;
+    if (limit !== false && actualLength > limit)
+      throw new TypeError(`Length ${actualLength} exceeds limit ${limit}`);
+    const lowered = prefix2.toLowerCase();
+    const sum = bechChecksum(lowered, words, ENCODING_CONST);
+    return `${lowered}1${BECH_ALPHABET.encode(words)}${sum}`;
+  }
+  function decode3(str2, limit = 90) {
+    astr("bech32.decode input", str2);
+    const slen = str2.length;
+    if (slen < 8 || limit !== false && slen > limit)
+      throw new TypeError(`invalid string length: ${slen} (${str2}). Expected (8..${limit})`);
+    const lowered = str2.toLowerCase();
+    if (str2 !== lowered && str2 !== str2.toUpperCase())
+      throw new Error(`String must be lowercase or uppercase`);
+    const sepIndex = lowered.lastIndexOf("1");
+    if (sepIndex === 0 || sepIndex === -1)
+      throw new Error(`Letter "1" must be present between prefix and data only`);
+    const prefix2 = lowered.slice(0, sepIndex);
+    const data = lowered.slice(sepIndex + 1);
+    if (data.length < 6)
+      throw new Error("Data must be at least 6 characters long");
+    const words = BECH_ALPHABET.decode(data).slice(0, -6);
+    const sum = bechChecksum(prefix2, words, ENCODING_CONST);
+    if (!data.endsWith(sum))
+      throw new Error(`Invalid checksum in ${str2}: expected "${sum}"`);
+    return { prefix: prefix2, words };
+  }
+  const decodeUnsafe = unsafeWrapper(decode3);
+  function decodeToBytes(str2) {
+    const { prefix: prefix2, words } = decode3(str2, false);
+    return { prefix: prefix2, words, bytes: fromWords(words) };
+  }
+  function encodeFromBytes(prefix2, bytes2) {
+    return encode3(prefix2, toWords(bytes2));
+  }
+  return {
+    encode: encode3,
+    decode: decode3,
+    encodeFromBytes,
+    decodeToBytes,
+    decodeUnsafe,
+    fromWords,
+    fromWordsUnsafe,
+    toWords
+  };
+}
+var gcd, radix2carry, powers, utils, base16, base32, base32nopad, base32hex, base32hexnopad, base32crockford, hasBase64Builtin, decodeBase64Builtin, base64, base64nopad, base64url, base64urlnopad, genBase58, base58, base58flickr, base58xrp, XMR_BLOCK_LEN, base58xmr, createBase58check, base58check, BECH_ALPHABET, POLYMOD_GENERATORS, bech32, bech32m, utf8, hasHexBuiltin2, hexBuiltin, hex, CODERS, coderTypeError, bytesToString, str, stringToBytes, bytes;
+var init_base = __esm({
+  "node_modules/.pnpm/@scure+base@2.0.0/node_modules/@scure/base/index.js"() {
+    init_define_import_meta_env();
+    gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+    radix2carry = /* @__NO_SIDE_EFFECTS__ */ (from, to) => from + (to - gcd(from, to));
+    powers = /* @__PURE__ */ (() => {
+      let res = [];
+      for (let i = 0; i < 40; i++)
+        res.push(2 ** i);
+      return res;
+    })();
+    utils = {
+      alphabet,
+      chain,
+      checksum,
+      convertRadix,
+      convertRadix2,
+      radix,
+      radix2,
+      join,
+      padding
+    };
+    base16 = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(4), /* @__PURE__ */ alphabet("0123456789ABCDEF"), /* @__PURE__ */ join(""));
+    base32 = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"), /* @__PURE__ */ padding(5), /* @__PURE__ */ join(""));
+    base32nopad = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"), /* @__PURE__ */ join(""));
+    base32hex = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("0123456789ABCDEFGHIJKLMNOPQRSTUV"), /* @__PURE__ */ padding(5), /* @__PURE__ */ join(""));
+    base32hexnopad = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("0123456789ABCDEFGHIJKLMNOPQRSTUV"), /* @__PURE__ */ join(""));
+    base32crockford = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(5), /* @__PURE__ */ alphabet("0123456789ABCDEFGHJKMNPQRSTVWXYZ"), /* @__PURE__ */ join(""), /* @__PURE__ */ normalize((s) => s.toUpperCase().replace(/O/g, "0").replace(/[IL]/g, "1")));
+    hasBase64Builtin = /* @__PURE__ */ (() => typeof Uint8Array.from([]).toBase64 === "function" && typeof Uint8Array.fromBase64 === "function")();
+    decodeBase64Builtin = (s, isUrl) => {
+      astr("base64", s);
+      const re = isUrl ? /^[A-Za-z0-9=_-]+$/ : /^[A-Za-z0-9=+/]+$/;
+      const alphabet2 = isUrl ? "base64url" : "base64";
+      if (s.length > 0 && !re.test(s))
+        throw new Error("invalid base64");
+      return Uint8Array.fromBase64(s, { alphabet: alphabet2, lastChunkHandling: "strict" });
+    };
+    base64 = hasBase64Builtin ? {
+      encode(b) {
+        abytes2(b);
+        return b.toBase64();
+      },
+      decode(s) {
+        return decodeBase64Builtin(s, false);
+      }
+    } : /* @__PURE__ */ chain(/* @__PURE__ */ radix2(6), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"), /* @__PURE__ */ padding(6), /* @__PURE__ */ join(""));
+    base64nopad = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(6), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"), /* @__PURE__ */ join(""));
+    base64url = hasBase64Builtin ? {
+      encode(b) {
+        abytes2(b);
+        return b.toBase64({ alphabet: "base64url" });
+      },
+      decode(s) {
+        return decodeBase64Builtin(s, true);
+      }
+    } : /* @__PURE__ */ chain(/* @__PURE__ */ radix2(6), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"), /* @__PURE__ */ padding(6), /* @__PURE__ */ join(""));
+    base64urlnopad = /* @__PURE__ */ chain(/* @__PURE__ */ radix2(6), /* @__PURE__ */ alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"), /* @__PURE__ */ join(""));
+    genBase58 = /* @__NO_SIDE_EFFECTS__ */ (abc) => /* @__PURE__ */ chain(/* @__PURE__ */ radix(58), /* @__PURE__ */ alphabet(abc), /* @__PURE__ */ join(""));
+    base58 = /* @__PURE__ */ genBase58("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz");
+    base58flickr = /* @__PURE__ */ genBase58("123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ");
+    base58xrp = /* @__PURE__ */ genBase58("rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz");
+    XMR_BLOCK_LEN = [0, 2, 3, 5, 6, 7, 9, 10, 11];
+    base58xmr = {
+      encode(data) {
+        let res = "";
+        for (let i = 0; i < data.length; i += 8) {
+          const block = data.subarray(i, i + 8);
+          res += base58.encode(block).padStart(XMR_BLOCK_LEN[block.length], "1");
+        }
+        return res;
+      },
+      decode(str2) {
+        let res = [];
+        for (let i = 0; i < str2.length; i += 11) {
+          const slice = str2.slice(i, i + 11);
+          const blockLen = XMR_BLOCK_LEN.indexOf(slice.length);
+          const block = base58.decode(slice);
+          for (let j = 0; j < block.length - blockLen; j++) {
+            if (block[j] !== 0)
+              throw new Error("base58xmr: wrong padding");
+          }
+          res = res.concat(Array.from(block.slice(block.length - blockLen)));
+        }
+        return Uint8Array.from(res);
+      }
+    };
+    createBase58check = (sha2562) => /* @__PURE__ */ chain(checksum(4, (data) => sha2562(sha2562(data))), base58);
+    base58check = createBase58check;
+    BECH_ALPHABET = /* @__PURE__ */ chain(/* @__PURE__ */ alphabet("qpzry9x8gf2tvdw0s3jn54khce6mua7l"), /* @__PURE__ */ join(""));
+    POLYMOD_GENERATORS = [996825010, 642813549, 513874426, 1027748829, 705979059];
+    bech32 = /* @__PURE__ */ genBech32("bech32");
+    bech32m = /* @__PURE__ */ genBech32("bech32m");
+    utf8 = {
+      encode: (data) => new TextDecoder().decode(data),
+      decode: (str2) => new TextEncoder().encode(str2)
+    };
+    hasHexBuiltin2 = /* @__PURE__ */ (() => typeof Uint8Array.from([]).toHex === "function" && typeof Uint8Array.fromHex === "function")();
+    hexBuiltin = {
+      encode(data) {
+        abytes2(data);
+        return data.toHex();
+      },
+      decode(s) {
+        astr("hex", s);
+        return Uint8Array.fromHex(s);
+      }
+    };
+    hex = hasHexBuiltin2 ? hexBuiltin : /* @__PURE__ */ chain(/* @__PURE__ */ radix2(4), /* @__PURE__ */ alphabet("0123456789abcdef"), /* @__PURE__ */ join(""), /* @__PURE__ */ normalize((s) => {
+      if (typeof s !== "string" || s.length % 2 !== 0)
+        throw new TypeError(`hex.decode: expected string, got ${typeof s} with length ${s.length}`);
+      return s.toLowerCase();
+    }));
+    CODERS = {
+      utf8,
+      hex,
+      base16,
+      base32,
+      base64,
+      base64url,
+      base58,
+      base58xmr
+    };
+    coderTypeError = "Invalid encoding type. Available types: utf8, hex, base16, base32, base64, base64url, base58, base58xmr";
+    bytesToString = (type, bytes2) => {
+      if (typeof type !== "string" || !CODERS.hasOwnProperty(type))
+        throw new TypeError(coderTypeError);
+      if (!isBytes2(bytes2))
+        throw new TypeError("bytesToString() expects Uint8Array");
+      return CODERS[type].encode(bytes2);
+    };
+    str = bytesToString;
+    stringToBytes = (type, str2) => {
+      if (!CODERS.hasOwnProperty(type))
+        throw new TypeError(coderTypeError);
+      if (typeof str2 !== "string")
+        throw new TypeError("stringToBytes() expects string");
+      return CODERS[type].decode(str2);
+    };
+    bytes = stringToBytes;
   }
 });
 
@@ -5159,17 +5159,17 @@ function tapTweak(a, b) {
 function taprootTweakPrivKey(privKey, merkleRoot = Uint8Array.of()) {
   const u = schnorr.utils;
   const seckey0 = bytesToNumberBE(privKey);
-  const P2 = Point.BASE.multiply(seckey0);
-  const seckey = hasEven2(P2.y) ? seckey0 : Fn.neg(seckey0);
-  const xP = u.pointToBytes(P2);
+  const P4 = Point.BASE.multiply(seckey0);
+  const seckey = hasEven2(P4.y) ? seckey0 : Fn.neg(seckey0);
+  const xP = u.pointToBytes(P4);
   const t = tapTweak(xP, merkleRoot);
   return numberToBytesBE(Fn.add(seckey, t), 32);
 }
 function taprootTweakPubkey(pubKey, h) {
   const u = schnorr.utils;
   const t = tapTweak(pubKey, h);
-  const P2 = u.lift_x(bytesToNumberBE(pubKey));
-  const Q = P2.add(Point.BASE.multiply(t));
+  const P4 = u.lift_x(bytesToNumberBE(pubKey));
+  const Q = P4.add(Point.BASE.multiply(t));
   const parity = hasEven2(Q.y) ? 0 : 1;
   return [u.pointToBytes(Q), parity];
 }
@@ -5242,7 +5242,7 @@ __export(script_exports, {
   CompactSize: () => CompactSize,
   CompactSizeLen: () => CompactSizeLen,
   MAX_SCRIPT_BYTE_LENGTH: () => MAX_SCRIPT_BYTE_LENGTH,
-  OP: () => OP,
+  OP: () => OP2,
   OPNames: () => OPNames,
   OpToNum: () => OpToNum,
   RawInput: () => RawInput,
@@ -5317,14 +5317,14 @@ function validateRawTx(tx) {
     throw new Error("Segwit flag with empty witnesses array");
   return tx;
 }
-var MAX_SCRIPT_BYTE_LENGTH, OP, OPNames, Script, CSLimits, CompactSize, CompactSizeLen, VarBytes, RawWitness, BTCArray, RawInput, RawOutput, _RawTx, RawTx, RawOldTx;
+var MAX_SCRIPT_BYTE_LENGTH, OP2, OPNames, Script, CSLimits, CompactSize, CompactSizeLen, VarBytes, RawWitness, BTCArray, RawInput, RawOutput, _RawTx, RawTx, RawOldTx;
 var init_script = __esm({
   "node_modules/.pnpm/@scure+btc-signer@2.0.1/node_modules/@scure/btc-signer/script.js"() {
     init_define_import_meta_env();
     init_micro_packed();
     init_utils3();
     MAX_SCRIPT_BYTE_LENGTH = 520;
-    OP = {
+    OP2 = {
       OP_0: 0,
       PUSHDATA1: 76,
       PUSHDATA2: 77,
@@ -5448,21 +5448,21 @@ var init_script = __esm({
       // Invalid
       INVALID: 255
     };
-    OPNames = reverseObject(OP);
+    OPNames = reverseObject(OP2);
     Script = wrap({
       encodeStream: (w, value2) => {
         for (let o of value2) {
           if (typeof o === "string") {
-            if (OP[o] === void 0)
+            if (OP2[o] === void 0)
               throw new Error(`Unknown opcode=${o}`);
-            w.byte(OP[o]);
+            w.byte(OP2[o]);
             continue;
           } else if (typeof o === "number") {
             if (o === 0) {
               w.byte(0);
               continue;
             } else if (1 <= o && o <= 16) {
-              w.byte(OP.OP_1 - 1 + o);
+              w.byte(OP2.OP_1 - 1 + o);
               continue;
             }
           }
@@ -5471,16 +5471,16 @@ var init_script = __esm({
           if (!isBytes4(o))
             throw new Error(`Wrong Script OP=${o} (${typeof o})`);
           const len = o.length;
-          if (len < OP.PUSHDATA1)
+          if (len < OP2.PUSHDATA1)
             w.byte(len);
           else if (len <= 255) {
-            w.byte(OP.PUSHDATA1);
+            w.byte(OP2.PUSHDATA1);
             w.byte(len);
           } else if (len <= 65535) {
-            w.byte(OP.PUSHDATA2);
+            w.byte(OP2.PUSHDATA2);
             w.bytes(U16LE.encode(len));
           } else {
-            w.byte(OP.PUSHDATA4);
+            w.byte(OP2.PUSHDATA4);
             w.bytes(U32LE.encode(len));
           }
           w.bytes(o);
@@ -5490,23 +5490,23 @@ var init_script = __esm({
         const out = [];
         while (!r.isEnd()) {
           const cur = r.byte();
-          if (OP.OP_0 < cur && cur <= OP.PUSHDATA4) {
+          if (OP2.OP_0 < cur && cur <= OP2.PUSHDATA4) {
             let len;
-            if (cur < OP.PUSHDATA1)
+            if (cur < OP2.PUSHDATA1)
               len = cur;
-            else if (cur === OP.PUSHDATA1)
+            else if (cur === OP2.PUSHDATA1)
               len = U8.decodeStream(r);
-            else if (cur === OP.PUSHDATA2)
+            else if (cur === OP2.PUSHDATA2)
               len = U16LE.decodeStream(r);
-            else if (cur === OP.PUSHDATA4)
+            else if (cur === OP2.PUSHDATA4)
               len = U32LE.decodeStream(r);
             else
               throw new Error("Should be not possible");
             out.push(r.bytes(len));
           } else if (cur === 0) {
             out.push(0);
-          } else if (OP.OP_1 <= cur && cur <= OP.OP_16) {
-            out.push(cur - (OP.OP_1 - 1));
+          } else if (OP2.OP_1 <= cur && cur <= OP2.OP_16) {
+            out.push(cur - (OP2.OP_1 - 1));
           } else {
             const op = OPNames[cur];
             if (op === void 0)
@@ -6019,8 +6019,8 @@ function checkTaprootScript(script, internalPubKey, allowUnknownOutputs = false,
   const out = OutScript.decode(script);
   if (out.type === "unknown") {
     if (customScripts) {
-      const cs = apply(Script, coders.match(customScripts));
-      const c = cs.decode(script);
+      const cs3 = apply(Script, coders.match(customScripts));
+      const c = cs3.decode(script);
       if (c !== void 0) {
         if (typeof c.type !== "string" || !c.type.startsWith("tr_"))
           throw new Error(`P2TR: invalid custom type=${c.type}`);
@@ -6532,16 +6532,16 @@ var init_payment = __esm({
       };
     };
     p2sh = (child, network2 = NETWORK) => {
-      const cs = child.script;
-      if (!isBytes4(cs))
+      const cs3 = child.script;
+      if (!isBytes4(cs3))
         throw new Error(`Wrong script: ${typeof child.script}, expected Uint8Array`);
-      const hash = hash160(cs);
+      const hash = hash160(cs3);
       const script = OutScript.encode({ type: "sh", hash });
-      checkScript(script, cs, child.witnessScript);
+      checkScript(script, cs3, child.witnessScript);
       if (child.witnessScript) {
         return {
           type: "sh",
-          redeemScript: cs,
+          redeemScript: cs3,
           script: OutScript.encode({ type: "sh", hash }),
           address: Address(network2).encode({ type: "sh", hash }),
           hash,
@@ -6550,7 +6550,7 @@ var init_payment = __esm({
       } else {
         return {
           type: "sh",
-          redeemScript: cs,
+          redeemScript: cs3,
           script: OutScript.encode({ type: "sh", hash }),
           address: Address(network2).encode({ type: "sh", hash }),
           hash
@@ -6558,15 +6558,15 @@ var init_payment = __esm({
       }
     };
     p2wsh = (child, network2 = NETWORK) => {
-      const cs = child.script;
-      if (!isBytes4(cs))
-        throw new Error(`Wrong script: ${typeof cs}, expected Uint8Array`);
-      const hash = sha256(cs);
+      const cs3 = child.script;
+      if (!isBytes4(cs3))
+        throw new Error(`Wrong script: ${typeof cs3}, expected Uint8Array`);
+      const hash = sha256(cs3);
       const script = OutScript.encode({ type: "wsh", hash });
-      checkScript(script, void 0, cs);
+      checkScript(script, void 0, cs3);
       return {
         type: "wsh",
-        witnessScript: cs,
+        witnessScript: cs3,
         script: OutScript.encode({ type: "wsh", hash }),
         address: Address(network2).encode({ type: "wsh", hash }),
         hash
@@ -6703,11 +6703,11 @@ function validateOpts(opts) {
   if (_opts.allowUnknownVersion ? typeof _opts.version === "number" : ![-1, 0, 1, 2, 3].includes(_opts.version))
     throw new Error(`Unknown version: ${_opts.version}`);
   if (_opts.customScripts !== void 0) {
-    const cs = _opts.customScripts;
-    if (!Array.isArray(cs)) {
-      throw new Error(`wrong custom scripts type (expected array): customScripts=${cs} (${typeof cs})`);
+    const cs3 = _opts.customScripts;
+    if (!Array.isArray(cs3)) {
+      throw new Error(`wrong custom scripts type (expected array): customScripts=${cs3} (${typeof cs3})`);
     }
-    for (const s of cs) {
+    for (const s of cs3) {
       if (typeof s.encode !== "function" || typeof s.decode !== "function")
         throw new Error(`wrong script=${s} (${typeof s})`);
       if (s.finalizeTaproot !== void 0 && typeof s.finalizeTaproot !== "function")
@@ -8085,7 +8085,7 @@ __export(btc_signer_exports, {
   Decimal: () => Decimal,
   MAX_SCRIPT_BYTE_LENGTH: () => MAX_SCRIPT_BYTE_LENGTH,
   NETWORK: () => NETWORK,
-  OP: () => OP,
+  OP: () => OP2,
   OutScript: () => OutScript,
   PSBTCombine: () => PSBTCombine,
   RawTx: () => RawTx,
@@ -8445,8 +8445,8 @@ var require_lodash = __commonJS({
       return value2 === other || value2 !== value2 && other !== other;
     }
     function isFunction(value2) {
-      var tag = isObject(value2) ? objectToString.call(value2) : "";
-      return tag == funcTag || tag == genTag;
+      var tag3 = isObject(value2) ? objectToString.call(value2) : "";
+      return tag3 == funcTag || tag3 == genTag;
     }
     function isObject(value2) {
       var type = typeof value2;
@@ -10067,57 +10067,57 @@ var require_satisfactions = __commonJS({
           sats: filterSolutions([{ asm: `<hash160_preimage(${h})>` }]),
           dsats: filterSolutions([{ asm: `<random_preimage()>` }])
         }),
-        andor: (X3, Y, Z) => ({
+        andor: (X5, Y, Z) => ({
           dsats: [
-            ...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X3, Y, Z }),
-            ...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X3, Y, Z })
+            ...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X5, Y, Z }),
+            ...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X5, Y, Z })
           ],
           sats: [
-            ...combineFilteredSolutions("sat(Y) sat(X)", { X: X3, Y, Z }),
-            ...combineFilteredSolutions("sat(Z) dsat(X)", { X: X3, Y, Z })
+            ...combineFilteredSolutions("sat(Y) sat(X)", { X: X5, Y, Z }),
+            ...combineFilteredSolutions("sat(Z) dsat(X)", { X: X5, Y, Z })
           ]
         }),
-        and_v: (X3, Y) => ({
-          dsats: [...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X3, Y })],
-          sats: [...combineFilteredSolutions(`sat(Y) sat(X)`, { X: X3, Y })]
+        and_v: (X5, Y) => ({
+          dsats: [...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X5, Y })],
+          sats: [...combineFilteredSolutions(`sat(Y) sat(X)`, { X: X5, Y })]
         }),
-        and_b: (X3, Y) => ({
+        and_b: (X5, Y) => ({
           dsats: [
-            ...combineFilteredSolutions(`dsat(Y) dsat(X)`, { X: X3, Y }),
-            ...combineFilteredSolutions(`sat(Y) dsat(X)`, { X: X3, Y }),
-            ...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X3, Y })
+            ...combineFilteredSolutions(`dsat(Y) dsat(X)`, { X: X5, Y }),
+            ...combineFilteredSolutions(`sat(Y) dsat(X)`, { X: X5, Y }),
+            ...combineFilteredSolutions(`dsat(Y) sat(X)`, { X: X5, Y })
           ],
-          sats: [...combineFilteredSolutions(`sat(Y) sat(X)`, { Y, X: X3 })]
+          sats: [...combineFilteredSolutions(`sat(Y) sat(X)`, { Y, X: X5 })]
         }),
-        or_b: (X3, Z) => ({
-          dsats: [...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X3, Z })],
+        or_b: (X5, Z) => ({
+          dsats: [...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X5, Z })],
           sats: [
-            ...combineFilteredSolutions(`dsat(Z) sat(X)`, { X: X3, Z }),
-            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X3, Z }),
-            ...combineFilteredSolutions(`sat(Z) sat(X)`, { X: X3, Z })
+            ...combineFilteredSolutions(`dsat(Z) sat(X)`, { X: X5, Z }),
+            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X5, Z }),
+            ...combineFilteredSolutions(`sat(Z) sat(X)`, { X: X5, Z })
           ]
         }),
-        or_c: (X3, Z) => ({
+        or_c: (X5, Z) => ({
           sats: [
-            ...combineFilteredSolutions(`sat(X)`, { X: X3, Z }),
-            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X3, Z })
+            ...combineFilteredSolutions(`sat(X)`, { X: X5, Z }),
+            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X5, Z })
           ]
         }),
-        or_d: (X3, Z) => ({
-          dsats: [...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X3, Z })],
+        or_d: (X5, Z) => ({
+          dsats: [...combineFilteredSolutions(`dsat(Z) dsat(X)`, { X: X5, Z })],
           sats: [
-            ...combineFilteredSolutions(`sat(X)`, { X: X3, Z }),
-            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X3, Z })
+            ...combineFilteredSolutions(`sat(X)`, { X: X5, Z }),
+            ...combineFilteredSolutions(`sat(Z) dsat(X)`, { X: X5, Z })
           ]
         }),
-        or_i: (X3, Z) => ({
+        or_i: (X5, Z) => ({
           dsats: [
-            ...combineFilteredSolutions(`dsat(X) 1`, { X: X3, Z }),
-            ...combineFilteredSolutions(`dsat(Z) 0`, { X: X3, Z })
+            ...combineFilteredSolutions(`dsat(X) 1`, { X: X5, Z }),
+            ...combineFilteredSolutions(`dsat(Z) 0`, { X: X5, Z })
           ],
           sats: [
-            ...combineFilteredSolutions(`sat(X) 1`, { X: X3, Z }),
-            ...combineFilteredSolutions(`sat(Z) 0`, { X: X3, Z })
+            ...combineFilteredSolutions(`sat(X) 1`, { X: X5, Z }),
+            ...combineFilteredSolutions(`sat(Z) 0`, { X: X5, Z })
           ]
         }),
         /*
@@ -10206,24 +10206,24 @@ var require_satisfactions = __commonJS({
           });
           return { sats, dsats };
         },
-        a: (X3) => ({
-          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X3 })],
-          sats: [...combineFilteredSolutions(`sat(X)`, { X: X3 })]
+        a: (X5) => ({
+          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X5 })],
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X5 })]
         }),
-        s: (X3) => ({
-          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X3 })],
-          sats: [...combineFilteredSolutions(`sat(X)`, { X: X3 })]
+        s: (X5) => ({
+          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X5 })],
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X5 })]
         }),
-        c: (X3) => ({
-          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X3 })],
-          sats: [...combineFilteredSolutions(`sat(X)`, { X: X3 })]
+        c: (X5) => ({
+          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X5 })],
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X5 })]
         }),
-        d: (X3) => ({
+        d: (X5) => ({
           dsats: filterSolutions([{ asm: `0` }]),
-          sats: [...combineFilteredSolutions(`sat(X) 1`, { X: X3 })]
+          sats: [...combineFilteredSolutions(`sat(X) 1`, { X: X5 })]
         }),
-        v: (X3) => ({
-          sats: [...combineFilteredSolutions(`sat(X)`, { X: X3 })]
+        v: (X5) => ({
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X5 })]
         }),
         /**
            * j:X corresponds to SIZE 0NOTEQUAL IF [X] ENDIF
@@ -10258,10 +10258,10 @@ var require_satisfactions = __commonJS({
         
            * DSAT(X) X is a good dsat
            */
-        j: (X3) => {
+        j: (X5) => {
           const dsats = [];
           pushAllowedSolution(dsats, { asm: `0` }, isSolutionAllowed, solutionCounter);
-          const dsats_nzts = (X3.dsats || []).filter(
+          const dsats_nzts = (X5.dsats || []).filter(
             //The top stack corresponds to the last element pushed to the stack,
             //that is, the last element in the produced witness
             (solution) => solution.asm.trim().split(" ").pop() !== "0"
@@ -10269,11 +10269,11 @@ var require_satisfactions = __commonJS({
           for (const solution of dsats_nzts) {
             pushAllowedSolution(dsats, solution, isSolutionAllowed, solutionCounter);
           }
-          return { dsats, sats: [...combineFilteredSolutions(`sat(X)`, { X: X3 })] };
+          return { dsats, sats: [...combineFilteredSolutions(`sat(X)`, { X: X5 })] };
         },
-        n: (X3) => ({
-          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X3 })],
-          sats: [...combineFilteredSolutions(`sat(X)`, { X: X3 })]
+        n: (X5) => ({
+          dsats: [...combineFilteredSolutions(`dsat(X)`, { X: X5 })],
+          sats: [...combineFilteredSolutions(`sat(X)`, { X: X5 })]
         })
       };
       return satisfactionsMaker;
@@ -15514,7 +15514,7 @@ var init_bip32 = __esm({
         return base58check3.encode(this.serialize(this.versions.public, this._publicKey));
       }
       static fromMasterSeed(seed, versions = BITCOIN_VERSIONS) {
-        abytes2(seed);
+        abytes(seed);
         if (8 * seed.length < 128 || 8 * seed.length > 512) {
           throw new Error("HDKey: seed length must be between 128 and 512 bits; 256 bits is advised, got " + seed.length);
         }
@@ -15664,12 +15664,12 @@ var init_bip32 = __esm({
         if (!this._privateKey) {
           throw new Error("No privateKey set!");
         }
-        abytes2(hash, 32);
+        abytes(hash, 32);
         return secp256k1.sign(hash, this._privateKey, { prehash: false });
       }
       verify(hash, signature) {
-        abytes2(hash, 32);
-        abytes2(signature, 64);
+        abytes(hash, 32);
+        abytes(signature, 64);
         if (!this._publicKey) {
           throw new Error("No publicKey set!");
         }
@@ -15692,7 +15692,7 @@ var init_bip32 = __esm({
         if (!this.chainCode) {
           throw new Error("No chainCode set");
         }
-        abytes2(key, 33);
+        abytes(key, 33);
         return concatBytes(toU32(version2), new Uint8Array([this.depth]), toU32(this.parentFingerprint), toU32(this.index), this.chainCode, key);
       }
     };
@@ -16531,10 +16531,10 @@ var require_crypto = __commonJS({
         hash160(data) {
           return (0, legacy_js_1.ripemd160)((0, sha2_js_1.sha256)(data));
         },
-        taggedHash(tag, data) {
-          const prefix2 = TAGGED_HASH_PREFIXES2[tag];
+        taggedHash(tag3, data) {
+          const prefix2 = TAGGED_HASH_PREFIXES2[tag3];
           if (!prefix2)
-            throw new Error(`Error: unsupported tagged hash prefix ${tag}`);
+            throw new Error(`Error: unsupported tagged hash prefix ${tag3}`);
           return (0, sha2_js_1.sha256)((0, uint8array_tools_1.concat)([prefix2, data]));
         }
       };
@@ -17815,14 +17815,66 @@ init_define_import_meta_env();
 
 // tools/offline-recovery/src/lib/vault/program/connector.ts
 init_define_import_meta_env();
-init_base();
-init_btc_signer();
-init_secp256k1();
-init_sha2();
 
-// tools/offline-recovery/src/lib/vault/spendingPolicy.ts
+// tools/offline-recovery/src/lib/vault/program/connectorDual.ts
+init_define_import_meta_env();
+
+// tools/offline-recovery/src/lib/vault/program/connectorApproval.ts
 init_define_import_meta_env();
 init_sha2();
+init_base();
+
+// tools/offline-recovery/src/lib/vault/program/script.ts
+init_define_import_meta_env();
+
+// node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/nist.js
+init_define_import_meta_env();
+init_sha2();
+init_weierstrass();
+var p256_CURVE = /* @__PURE__ */ (() => ({
+  p: BigInt("0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff"),
+  n: BigInt("0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551"),
+  h: BigInt(1),
+  a: BigInt("0xffffffff00000001000000000000000000000000fffffffffffffffffffffffc"),
+  b: BigInt("0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b"),
+  Gx: BigInt("0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296"),
+  Gy: BigInt("0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5")
+}))();
+var p256_Point = /* @__PURE__ */ weierstrass(p256_CURVE);
+var p256 = /* @__PURE__ */ ecdsa(p256_Point, sha256);
+
+// tools/offline-recovery/src/lib/vault/program/script.ts
+init_base();
+
+// tools/offline-recovery/src/lib/vault/constants.ts
+init_define_import_meta_env();
+var POLICY_VERSION = "vault-spending-policy-v1";
+var TX_RECIPIENT_CAP_SATS = 5e4;
+var PERIOD_ALLOWANCE_SATS = 1e5;
+var MUTINYNET_ABSOLUTE_FEE_CEILING_SATS = 5e3;
+var MUTINYNET_FEERATE_CEILING_SAT_PER_V = 10;
+var MAINNET_ABSOLUTE_FEE_CEILING_SATS = 2e4;
+var MAINNET_FEERATE_CEILING_SAT_PER_V = 25;
+var bakedReleaseNetwork = String(
+  define_import_meta_env_default?.VITE_VAULT_RELEASE_NETWORK || ""
+).trim();
+var ABSOLUTE_FEE_CEILING_SATS = bakedReleaseNetwork === "mainnet" ? MAINNET_ABSOLUTE_FEE_CEILING_SATS : MUTINYNET_ABSOLUTE_FEE_CEILING_SATS;
+var FEERATE_CEILING_SAT_PER_V = bakedReleaseNetwork === "mainnet" ? MAINNET_FEERATE_CEILING_SAT_PER_V : MUTINYNET_FEERATE_CEILING_SAT_PER_V;
+var DUST_SATS = 330;
+var SUPPORTED_NETWORKS = ["mutinynet", "mainnet"];
+function isSupportedVaultNetwork(value2) {
+  return typeof value2 === "string" && SUPPORTED_NETWORKS.includes(value2);
+}
+function requireSupportedVaultNetwork(value2) {
+  if (!isSupportedVaultNetwork(value2)) throw new Error(`unsupported Vault network ${String(value2 || "")}`);
+  return value2;
+}
+
+// tools/offline-recovery/src/lib/vault/program/constants.ts
+init_define_import_meta_env();
+
+// tools/offline-recovery/src/lib/vault/savingsTree.ts
+init_define_import_meta_env();
 
 // tools/offline-recovery/src/lib/vault/hex.ts
 init_define_import_meta_env();
@@ -17850,152 +17902,7 @@ function encodeUtf8(value2) {
   return new TextEncoder().encode(value2);
 }
 
-// tools/offline-recovery/src/lib/vault/constants.ts
-init_define_import_meta_env();
-var POLICY_VERSION = "vault-spending-policy-v1";
-var TX_RECIPIENT_CAP_SATS = 5e4;
-var PERIOD_ALLOWANCE_SATS = 1e5;
-var MUTINYNET_ABSOLUTE_FEE_CEILING_SATS = 5e3;
-var MUTINYNET_FEERATE_CEILING_SAT_PER_V = 10;
-var MAINNET_ABSOLUTE_FEE_CEILING_SATS = 2e4;
-var MAINNET_FEERATE_CEILING_SAT_PER_V = 25;
-var bakedReleaseNetwork = String(
-  define_import_meta_env_default?.VITE_VAULT_RELEASE_NETWORK || ""
-).trim();
-var ABSOLUTE_FEE_CEILING_SATS = bakedReleaseNetwork === "mainnet" ? MAINNET_ABSOLUTE_FEE_CEILING_SATS : MUTINYNET_ABSOLUTE_FEE_CEILING_SATS;
-var FEERATE_CEILING_SAT_PER_V = bakedReleaseNetwork === "mainnet" ? MAINNET_FEERATE_CEILING_SAT_PER_V : MUTINYNET_FEERATE_CEILING_SAT_PER_V;
-var DUST_SATS = 330;
-var SUPPORTED_NETWORKS = ["mutinynet", "mainnet"];
-function isSupportedVaultNetwork(value2) {
-  return typeof value2 === "string" && SUPPORTED_NETWORKS.includes(value2);
-}
-function requireSupportedVaultNetwork(value2) {
-  if (!isSupportedVaultNetwork(value2)) throw new Error(`unsupported Vault network ${String(value2 || "")}`);
-  return value2;
-}
-
-// tools/offline-recovery/src/lib/vault/spendingPolicy.ts
-var SPENDING_POLICY_PROGRAM = "vault-policy-v1";
-var SPENDING_POLICY_PERIOD = "rolling-24h";
-var SPENDING_POLICY_BOUNDS = {
-  periodAllowanceSats: { min: 330, max: 1e9 },
-  txRecipientCapSats: { min: 330, max: 1e8 },
-  absoluteFeeCapSats: { min: ABSOLUTE_FEE_CEILING_SATS, max: ABSOLUTE_FEE_CEILING_SATS },
-  feerateCapSatPerV: { min: FEERATE_CEILING_SAT_PER_V, max: FEERATE_CEILING_SAT_PER_V }
-};
-function policyBounds(network2) {
-  if (network2 === void 0) return SPENDING_POLICY_BOUNDS;
-  requireSupportedVaultNetwork(network2);
-  const fee = network2 === "mainnet" ? MAINNET_ABSOLUTE_FEE_CEILING_SATS : MUTINYNET_ABSOLUTE_FEE_CEILING_SATS;
-  const rate = network2 === "mainnet" ? MAINNET_FEERATE_CEILING_SAT_PER_V : MUTINYNET_FEERATE_CEILING_SAT_PER_V;
-  return {
-    ...SPENDING_POLICY_BOUNDS,
-    absoluteFeeCapSats: { min: fee, max: fee },
-    feerateCapSatPerV: { min: rate, max: rate }
-  };
-}
-function defaultSpendingPolicy(network2) {
-  const bounds = policyBounds(network2);
-  return {
-    program: SPENDING_POLICY_PROGRAM,
-    schema: POLICY_VERSION,
-    period: SPENDING_POLICY_PERIOD,
-    periodAllowanceSats: PERIOD_ALLOWANCE_SATS,
-    txRecipientCapSats: TX_RECIPIENT_CAP_SATS,
-    absoluteFeeCapSats: bounds.absoluteFeeCapSats.min,
-    feerateCapSatPerV: bounds.feerateCapSatPerV.min
-  };
-}
-var CURRENT_SPENDING_POLICY_CAPABILITIES = {
-  program: SPENDING_POLICY_PROGRAM,
-  schema: POLICY_VERSION,
-  period: SPENDING_POLICY_PERIOD,
-  bounds: SPENDING_POLICY_BOUNDS,
-  presets: [
-    {
-      id: "lower-exposure",
-      label: "Lower exposure",
-      policy: {
-        ...defaultSpendingPolicy(),
-        txRecipientCapSats: 25e3,
-        periodAllowanceSats: 5e4
-      }
-    },
-    { id: "everyday", label: "Everyday", policy: defaultSpendingPolicy() }
-  ]
-};
-function requireBound(value2, bound, name) {
-  if (!Number.isSafeInteger(value2) || Number(value2) < bound.min || Number(value2) > bound.max) {
-    throw new Error(`${name} must be between ${bound.min} and ${bound.max}`);
-  }
-  return Number(value2);
-}
-function validateSpendingPolicy(value2, network2) {
-  const bounds = policyBounds(network2);
-  if (!value2 || typeof value2 !== "object" || Array.isArray(value2)) throw new Error("spending policy required");
-  const p = value2;
-  const expected = [
-    "program",
-    "schema",
-    "period",
-    "periodAllowanceSats",
-    "txRecipientCapSats",
-    "absoluteFeeCapSats",
-    "feerateCapSatPerV"
-  ];
-  const fields = Object.keys(p);
-  if (fields.length !== expected.length || expected.some((name) => !Object.prototype.hasOwnProperty.call(p, name))) {
-    throw new Error("spending policy fields");
-  }
-  if (p.program !== SPENDING_POLICY_PROGRAM) throw new Error("unsupported spending policy program");
-  if (p.schema !== POLICY_VERSION) throw new Error("unsupported spending policy schema");
-  if (p.period !== SPENDING_POLICY_PERIOD) throw new Error("unsupported spending policy period");
-  const policy = {
-    program: SPENDING_POLICY_PROGRAM,
-    schema: POLICY_VERSION,
-    period: SPENDING_POLICY_PERIOD,
-    periodAllowanceSats: requireBound(p.periodAllowanceSats, bounds.periodAllowanceSats, "period allowance"),
-    txRecipientCapSats: requireBound(p.txRecipientCapSats, bounds.txRecipientCapSats, "transaction recipient cap"),
-    absoluteFeeCapSats: requireBound(p.absoluteFeeCapSats, bounds.absoluteFeeCapSats, "absolute fee cap"),
-    feerateCapSatPerV: requireBound(p.feerateCapSatPerV, bounds.feerateCapSatPerV, "feerate cap")
-  };
-  if (policy.periodAllowanceSats < policy.txRecipientCapSats) {
-    throw new Error("period allowance must be at least the transaction recipient cap");
-  }
-  return policy;
-}
-function canonicalSpendingPolicy(policy, network2) {
-  return JSON.stringify(validateSpendingPolicy(policy, network2));
-}
-function spendingPolicyDigest(policy, network2) {
-  return bytesToHex2(sha256(encodeUtf8(canonicalSpendingPolicy(policy, network2))));
-}
-
-// tools/offline-recovery/src/lib/vault/protectionTier.ts
-init_define_import_meta_env();
-function requireProtectionTier(value2) {
-  if (value2 !== "standard" && value2 !== "advanced") throw new Error("unsupported protection tier");
-  return value2;
-}
-function requireProtectionTierMatchesRecovery(tier, recoveryPub) {
-  const selected = requireProtectionTier(tier);
-  const hasRecovery = typeof recoveryPub === "string" && recoveryPub.trim().length > 0;
-  if (selected === "standard" && hasRecovery) throw new Error("Standard protection must not include a recovery key");
-  if (selected === "advanced" && !hasRecovery) throw new Error("Advanced protection requires a recovery key");
-  return selected;
-}
-
-// tools/offline-recovery/src/lib/vault/addressNetwork.ts
-init_define_import_meta_env();
-init_btc_signer();
-function vaultAddressNetwork(network2) {
-  if (network2 === "mutinynet") return TEST_NETWORK;
-  if (network2 === "bitcoin" || network2 === "mainnet") return NETWORK;
-  throw new Error("unsupported network");
-}
-
 // tools/offline-recovery/src/lib/vault/savingsTree.ts
-init_define_import_meta_env();
 var TAPROOT_NUMS_XONLY = "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0";
 var OP_CHECKSIG = 172;
 var OP_CHECKSIGVERIFY = 173;
@@ -18040,14 +17947,7 @@ function csvChecksigScript(blocks, pub) {
   return new Uint8Array([...lock, OP_CSV, OP_DROP, ...key]);
 }
 
-// tools/offline-recovery/src/lib/vault/program/context.ts
-init_define_import_meta_env();
-init_sha2();
-init_base();
-init_btc_signer();
-
 // tools/offline-recovery/src/lib/vault/program/constants.ts
-init_define_import_meta_env();
 var PROGRAM_SCHEMA = "arkade-vault/savings-v1";
 var SAVINGS_TEMPLATE = "phone-hww-recovery-savings-v1";
 function isSavingsTemplate(value2) {
@@ -18077,53 +17977,6 @@ function familyClaimants(hasRecovery) {
 }
 function familyKeysFor(hasRecovery) {
   return familyClaimants(hasRecovery).map((claimant) => `savings-${claimant}`);
-}
-
-// tools/offline-recovery/src/lib/vault/program/context.ts
-function taggedHash2(tag, ...messages) {
-  const tagH = sha256(encodeUtf8(tag));
-  const prefix2 = new Uint8Array(64);
-  prefix2.set(tagH, 0);
-  prefix2.set(tagH, 32);
-  const total = messages.reduce((n, m) => n + m.length, 64);
-  const out = new Uint8Array(total);
-  out.set(prefix2);
-  let offset = 64;
-  for (const msg of messages) {
-    out.set(msg, offset);
-    offset += msg.length;
-  }
-  return sha256(out);
-}
-function appendText(parts, value2, name) {
-  if (!value2 || value2 !== value2.trim() || value2 !== value2.toLowerCase()) {
-    throw new Error(`${name} must be non-empty canonical lowercase`);
-  }
-  const bytes2 = encodeUtf8(value2);
-  const len = new Uint8Array(4);
-  new DataView(len.buffer).setUint32(0, bytes2.length, false);
-  parts.push(len, bytes2);
-}
-function encodeTreeContext(input) {
-  const claimant = input.claimant || "";
-  if (claimant && !CLAIMANTS.includes(claimant)) throw new Error("unknown claimant");
-  const parts = [];
-  appendText(parts, input.vaultId, "vaultId");
-  appendText(parts, "savings", "kind");
-  appendText(parts, claimant === "" ? "-" : claimant, "claimant");
-  appendText(parts, input.templateVersion || SAVINGS_TEMPLATE, "templateVersion");
-  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
-  let offset = 0;
-  for (const part of parts) {
-    out.set(part, offset);
-    offset += part.length;
-  }
-  return out;
-}
-function contextInternalKey(input) {
-  const context = taggedHash2(PROGRAM_INTERNAL_TAG, encodeTreeContext(input));
-  const [tweaked] = utils3.taprootTweakPubkey(hex.decode(TAPROOT_NUMS_XONLY), context);
-  return tweaked;
 }
 
 // tools/offline-recovery/src/lib/vault/program/packet.ts
@@ -18214,27 +18067,7 @@ function packetWitnessShape(phoneBound) {
 }
 
 // tools/offline-recovery/src/lib/vault/program/script.ts
-init_define_import_meta_env();
-
-// node_modules/.pnpm/@noble+curves@2.0.1/node_modules/@noble/curves/nist.js
-init_define_import_meta_env();
-init_sha2();
-init_weierstrass();
-var p256_CURVE = /* @__PURE__ */ (() => ({
-  p: BigInt("0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff"),
-  n: BigInt("0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551"),
-  h: BigInt(1),
-  a: BigInt("0xffffffff00000001000000000000000000000000fffffffffffffffffffffffc"),
-  b: BigInt("0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b"),
-  Gx: BigInt("0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296"),
-  Gy: BigInt("0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5")
-}))();
-var p256_Point = /* @__PURE__ */ weierstrass(p256_CURVE);
-var p256 = /* @__PURE__ */ ecdsa(p256_Point, sha256);
-
-// tools/offline-recovery/src/lib/vault/program/script.ts
-init_base();
-var OP2 = {
+var OP = {
   VERIFY: 105,
   EQUAL: 135,
   EQUALVERIFY: 136,
@@ -18362,92 +18195,607 @@ function buildTransitionScript(input) {
 }
 function assembleTransitionScript(input) {
   const parts = [
-    new Uint8Array([OP2.INSPECTVERSION]),
+    new Uint8Array([OP.INSPECTVERSION]),
     pushInt(2),
-    new Uint8Array([OP2.EQUALVERIFY]),
-    new Uint8Array([OP2.INSPECTLOCKTIME]),
+    new Uint8Array([OP.EQUALVERIFY]),
+    new Uint8Array([OP.INSPECTLOCKTIME]),
     pushInt(0),
-    new Uint8Array([OP2.EQUALVERIFY]),
-    new Uint8Array([OP2.INSPECTNUMINPUTS]),
+    new Uint8Array([OP.EQUALVERIFY]),
+    new Uint8Array([OP.INSPECTNUMINPUTS]),
     pushInt(1),
-    new Uint8Array([OP2.EQUALVERIFY]),
+    new Uint8Array([OP.EQUALVERIFY]),
     pushInt(0),
-    new Uint8Array([OP2.INSPECTINPUTSEQUENCE]),
+    new Uint8Array([OP.INSPECTINPUTSEQUENCE]),
     pushInt(TRANSITION_SEQUENCE),
-    new Uint8Array([OP2.EQUALVERIFY]),
-    new Uint8Array([OP2.INSPECTNUMOUTPUTS]),
+    new Uint8Array([OP.EQUALVERIFY]),
+    new Uint8Array([OP.INSPECTNUMOUTPUTS]),
     pushInt(TRANSITION_OUTPUT_COUNT),
-    new Uint8Array([OP2.EQUALVERIFY]),
+    new Uint8Array([OP.EQUALVERIFY]),
     pushInt(0),
-    new Uint8Array([OP2.INSPECTOUTPUTSCRIPTPUBKEY]),
+    new Uint8Array([OP.INSPECTOUTPUTSCRIPTPUBKEY]),
     pushInt(1),
-    new Uint8Array([OP2.EQUALVERIFY]),
+    new Uint8Array([OP.EQUALVERIFY]),
     pushData(input.dest),
-    new Uint8Array([OP2.EQUALVERIFY]),
+    new Uint8Array([OP.EQUALVERIFY]),
     pushInt(0),
-    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
+    new Uint8Array([OP.INSPECTOUTPUTVALUE]),
     pushInt(DUST_SATS),
-    new Uint8Array([OP2.GREATERTHANOREQUAL, OP2.VERIFY]),
+    new Uint8Array([OP.GREATERTHANOREQUAL, OP.VERIFY]),
     pushInt(P2A_OUTPUT_INDEX),
-    new Uint8Array([OP2.INSPECTOUTPUTSCRIPTPUBKEY]),
+    new Uint8Array([OP.INSPECTOUTPUTSCRIPTPUBKEY]),
     pushInt(1),
-    new Uint8Array([OP2.EQUALVERIFY]),
+    new Uint8Array([OP.EQUALVERIFY]),
     pushData(p2aProgram()),
-    new Uint8Array([OP2.EQUALVERIFY]),
+    new Uint8Array([OP.EQUALVERIFY]),
     pushInt(P2A_OUTPUT_INDEX),
-    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
+    new Uint8Array([OP.INSPECTOUTPUTVALUE]),
     pushInt(P2A_VALUE_SATS),
-    new Uint8Array([OP2.EQUALVERIFY]),
+    new Uint8Array([OP.EQUALVERIFY]),
     pushInt(PACKET_OUTPUT_INDEX),
-    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
+    new Uint8Array([OP.INSPECTOUTPUTVALUE]),
     pushInt(0),
-    new Uint8Array([OP2.EQUALVERIFY]),
+    new Uint8Array([OP.EQUALVERIFY]),
     pushInt(EMULATOR_PACKET_TYPE),
-    new Uint8Array([OP2.INSPECTPACKET, OP2.VERIFY]),
+    new Uint8Array([OP.INSPECTPACKET, OP.VERIFY]),
     pushData(input.prefix),
-    new Uint8Array([OP2.SWAP, OP2.CAT, OP2.SHA256]),
+    new Uint8Array([OP.SWAP, OP.CAT, OP.SHA256]),
     pushInt(PACKET_OUTPUT_INDEX),
-    new Uint8Array([OP2.INSPECTOUTPUTSCRIPTPUBKEY]),
+    new Uint8Array([OP.INSPECTOUTPUTSCRIPTPUBKEY]),
     pushInt(-1),
-    new Uint8Array([OP2.EQUALVERIFY, OP2.EQUALVERIFY]),
+    new Uint8Array([OP.EQUALVERIFY, OP.EQUALVERIFY]),
     pushInt(0),
-    new Uint8Array([OP2.INSPECTINPUTVALUE]),
+    new Uint8Array([OP.INSPECTINPUTVALUE]),
     pushInt(0),
-    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
-    new Uint8Array([OP2.SUB]),
+    new Uint8Array([OP.INSPECTOUTPUTVALUE]),
+    new Uint8Array([OP.SUB]),
     pushInt(P2A_OUTPUT_INDEX),
-    new Uint8Array([OP2.INSPECTOUTPUTVALUE]),
-    new Uint8Array([OP2.SUB]),
-    new Uint8Array([OP2.DUP]),
+    new Uint8Array([OP.INSPECTOUTPUTVALUE]),
+    new Uint8Array([OP.SUB]),
+    new Uint8Array([OP.DUP]),
     pushInt(0),
-    new Uint8Array([OP2.GREATERTHANOREQUAL, OP2.VERIFY]),
-    new Uint8Array([OP2.DUP]),
+    new Uint8Array([OP.GREATERTHANOREQUAL, OP.VERIFY]),
+    new Uint8Array([OP.DUP]),
     pushInt(input.feeCap),
-    new Uint8Array([OP2.LESSTHANOREQUAL, OP2.VERIFY]),
-    new Uint8Array([OP2.DUP]),
-    new Uint8Array([OP2.TXWEIGHT]),
+    new Uint8Array([OP.LESSTHANOREQUAL, OP.VERIFY]),
+    new Uint8Array([OP.DUP]),
+    new Uint8Array([OP.TXWEIGHT]),
     pushInt(input.witnessBytes),
-    new Uint8Array([OP2.ADD]),
+    new Uint8Array([OP.ADD]),
     pushInt(3),
-    new Uint8Array([OP2.ADD]),
+    new Uint8Array([OP.ADD]),
     pushInt(4),
-    new Uint8Array([OP2.DIV]),
+    new Uint8Array([OP.DIV]),
     pushInt(input.feerateCap),
-    new Uint8Array([OP2.MUL]),
-    new Uint8Array([OP2.LESSTHANOREQUAL, OP2.VERIFY]),
-    new Uint8Array([OP2.DROP])
+    new Uint8Array([OP.MUL]),
+    new Uint8Array([OP.LESSTHANOREQUAL, OP.VERIFY]),
+    new Uint8Array([OP.DROP])
   ];
   if (input.phone) {
     parts.push(
       pushInt(0),
-      new Uint8Array([OP2.SIGHASH]),
+      new Uint8Array([OP.SIGHASH]),
       pushData(new Uint8Array([DIRECT_P256_CSFS_PREFIX, ...input.phone])),
-      new Uint8Array([OP2.CHECKSIGFROMSTACK])
+      new Uint8Array([OP.CHECKSIGFROMSTACK])
     );
   } else {
     parts.push(pushInt(1));
   }
   return concat2(...parts);
+}
+
+// tools/offline-recovery/src/lib/vault/program/connectorApproval.ts
+var P = {
+  DEPTH: 116,
+  SUB: 148,
+  PICK: 121,
+  EQUALVERIFY: 136,
+  SIZE: 130,
+  DROP: 117,
+  SHA256INITIALIZE: 196,
+  SHA256UPDATE: 197,
+  SHA256FINALIZE: 198,
+  INSPECTINPUTARKADESCRIPTHASH: 200,
+  INSPECTNUMOUTPUTS: 213,
+  INSPECTOUTPUTSCRIPTPUBKEY: 209,
+  HASH160: 169,
+  INSPECTINPUTOUTPOINT: 199,
+  NUM2BIN: 215,
+  CAT: 126,
+  SHA256: 168,
+  INSPECTINPUTVALUE: 201,
+  INSPECTINPUTSCRIPTPUBKEY: 202,
+  DUP: 118,
+  HASH256: 170,
+  INSPECTOUTPUTVALUE: 207,
+  LEFT: 128,
+  BIN2NUM: 216,
+  SWAP: 124,
+  SUBSTR: 127,
+  EQUAL: 135,
+  IF: 99,
+  ELSE: 103,
+  ADD: 147,
+  ENDIF: 104,
+  CHECKSIGFROMSTACK: 204,
+  VERIFY: 105
+};
+var cs = (n) => n < 253 ? Uint8Array.of(n) : Uint8Array.of(253, n & 255, n >> 8);
+var tag = (s) => {
+  const h = sha256(new TextEncoder().encode(s));
+  return concat2(h, h);
+};
+function buildConnectorApprovalProof(hardware, extra = new Uint8Array()) {
+  const taproot = hardware.length === 34;
+  let len = 1e3;
+  for (let round = 0; round < 20; round++) {
+    const b = [];
+    const op = (...x) => b.push(Uint8Array.from(x)), num2 = (n) => b.push(pushInt(n)), data = (d) => b.push(
+      d.length === 1 && d[0] >= 1 && d[0] <= 16 ? pushInt(d[0]) : d.length === 1 && d[0] === 129 ? pushInt(-1) : pushData(d)
+    );
+    const copy2 = (i) => {
+      op(P.DEPTH);
+      num2(i + 1);
+      op(P.SUB, P.PICK);
+    };
+    const chunks = Array.from({ length: Math.ceil(len / 500) }, (_, i) => Math.min(500, len - i * 500));
+    const start = taproot ? 3 : 4;
+    const sizes = [64, 64, 35, ...taproot ? [] : [33], ...chunks];
+    op(P.DEPTH);
+    num2(sizes.length);
+    op(P.EQUALVERIFY);
+    sizes.forEach((s, i) => {
+      copy2(i);
+      op(P.SIZE);
+      num2(s);
+      op(P.EQUALVERIFY, P.DROP);
+    });
+    data(tag("ArkScriptHash"));
+    op(P.SHA256INITIALIZE);
+    chunks.forEach((_, i) => {
+      copy2(i + start);
+      op(P.SHA256UPDATE);
+    });
+    data(new Uint8Array());
+    op(P.SHA256FINALIZE);
+    num2(2);
+    op(P.INSPECTINPUTARKADESCRIPTHASH, P.EQUALVERIFY);
+    data(concat2(exactPacketOutputPrefix(len, sizes), Uint8Array.of(1, 2, 0), cs(len)));
+    op(P.SHA256INITIALIZE);
+    chunks.forEach((_, i) => {
+      copy2(i + start);
+      op(P.SHA256UPDATE);
+    });
+    const wlen = cs(sizes.length).length + sizes.reduce((n, s) => n + cs(s).length + s, 0);
+    data(concat2(cs(wlen), cs(sizes.length)));
+    op(P.SHA256UPDATE);
+    sizes.forEach((s, i) => {
+      data(cs(s));
+      op(P.SHA256UPDATE);
+      copy2(i);
+      op(P.SHA256UPDATE);
+    });
+    data(new Uint8Array());
+    op(P.SHA256FINALIZE, P.INSPECTNUMOUTPUTS);
+    num2(1);
+    op(P.SUB, P.INSPECTOUTPUTSCRIPTPUBKEY);
+    num2(-1);
+    op(P.EQUALVERIFY, P.EQUALVERIFY);
+    if (!taproot) {
+      copy2(3);
+      op(P.HASH160);
+      data(hardware.slice(2));
+      op(P.EQUALVERIFY);
+    }
+    if (taproot) {
+      data(concat2(tag("TapSighash"), hex.decode("00030200000000000000")));
+      for (let i = 0; i < 3; i++) {
+        num2(i);
+        op(P.INSPECTINPUTOUTPOINT);
+        num2(4);
+        op(P.NUM2BIN, P.CAT);
+        if (i > 0) op(P.CAT);
+      }
+      op(P.SHA256, P.CAT);
+      data(hex.decode("f401000000000000f401000000000000"));
+      num2(2);
+      op(P.INSPECTINPUTVALUE);
+      num2(8);
+      op(P.NUM2BIN, P.CAT, P.SHA256, P.CAT);
+      data(
+        concat2(
+          Uint8Array.of(hardware.length),
+          hardware,
+          Uint8Array.of(hardware.length),
+          hardware,
+          hex.decode("225120")
+        )
+      );
+      num2(2);
+      op(P.INSPECTINPUTSCRIPTPUBKEY);
+      num2(1);
+      op(P.EQUALVERIFY, P.CAT, P.SHA256, P.CAT);
+      data(sha256(hex.decode("fdfffffffdfffffffdffffff")));
+      op(P.CAT);
+    }
+    for (let i = 0; i < 2; i++) {
+      if (taproot) {
+        op(P.DUP);
+        data(Uint8Array.of(0, i, 0, 0, 0));
+        op(P.CAT);
+      } else {
+        data(hex.decode("02000000"));
+        for (let j = 0; j < 3; j++) {
+          num2(j);
+          op(P.INSPECTINPUTOUTPOINT);
+          num2(4);
+          op(P.NUM2BIN, P.CAT);
+          if (j > 0) op(P.CAT);
+        }
+        op(P.HASH256, P.CAT);
+        data(new Uint8Array(32));
+        op(P.CAT);
+        num2(i);
+        op(P.INSPECTINPUTOUTPOINT);
+        num2(4);
+        op(P.NUM2BIN, P.CAT, P.CAT);
+        data(concat2(hex.decode("1976a914"), hardware.slice(2), hex.decode("88acf401000000000000fdffffff")));
+        op(P.CAT);
+      }
+      num2(i);
+      op(P.INSPECTOUTPUTVALUE);
+      num2(8);
+      op(P.NUM2BIN);
+      if (i === 0) {
+        copy2(2);
+        op(P.DUP);
+        num2(1);
+        op(P.LEFT, P.BIN2NUM);
+        num2(1);
+        op(P.SWAP, P.SUBSTR, P.DUP);
+        num2(0);
+        op(P.INSPECTOUTPUTSCRIPTPUBKEY, P.DUP);
+        num2(-1);
+        op(P.EQUAL, P.IF, P.DROP, P.SWAP, P.SHA256, P.EQUALVERIFY, P.ELSE);
+        op(P.DUP);
+        num2(0);
+        op(P.EQUAL, P.IF);
+        num2(1);
+        op(P.NUM2BIN, P.ELSE);
+        num2(80);
+        op(P.ADD);
+        num2(1);
+        op(P.NUM2BIN, P.ENDIF, P.SWAP, P.SIZE);
+        num2(1);
+        op(P.NUM2BIN, P.SWAP, P.CAT, P.CAT, P.EQUALVERIFY, P.ENDIF);
+        op(P.SIZE);
+        num2(1);
+        op(P.NUM2BIN, P.SWAP, P.CAT);
+      } else {
+        op(P.INSPECTNUMOUTPUTS);
+        num2(6);
+        op(P.EQUAL, P.IF);
+        data(hex.decode("225120"));
+        num2(1);
+        op(P.INSPECTOUTPUTSCRIPTPUBKEY);
+        num2(1);
+        op(P.EQUALVERIFY, P.CAT, P.ELSE);
+        data(concat2(Uint8Array.of(hardware.length), hardware));
+        op(P.ENDIF);
+      }
+      op(P.CAT, taproot ? P.SHA256 : P.HASH256, P.CAT);
+      if (!taproot) {
+        data(hex.decode("0000000003000000"));
+        op(P.CAT);
+      }
+      op(taproot ? P.SHA256 : P.HASH256);
+      copy2(i);
+      op(P.SWAP);
+      if (taproot) data(hardware.slice(2));
+      else {
+        num2(16);
+        copy2(3);
+        op(P.CAT);
+      }
+      op(P.CHECKSIGFROMSTACK, P.VERIFY);
+    }
+    if (taproot) op(P.DROP);
+    sizes.forEach(() => op(P.DROP));
+    b.push(extra);
+    num2(1);
+    const result = concat2(...b);
+    if (result.length === len) return result;
+    len = result.length;
+  }
+  throw Error("length convergence");
+}
+
+// tools/offline-recovery/src/lib/vault/program/connectorDual.ts
+init_base();
+var X = { inputScript: 202, toAlt: 107, fromAlt: 108, if: 99, endif: 104, boolOr: 155 };
+function buildDualConnectorProgram(r) {
+  return buildConnectorApprovalProof(r.connectorScript, concat2(buildDualPolicy(r), Uint8Array.of(OP.VERIFY)));
+}
+function buildDualPolicy(r) {
+  validateConnectorRules(r);
+  const chunks = [];
+  const op = (...values) => chunks.push(Uint8Array.from(values));
+  const num2 = (n) => chunks.push(pushInt(n));
+  const data = (b) => chunks.push(pushData(b));
+  const equal = (opcode, n) => {
+    op(opcode);
+    num2(n);
+    op(OP.EQUALVERIFY);
+  };
+  const script = (opcode, index, b) => {
+    num2(index);
+    op(opcode);
+    num2(b[0] === 81 ? 1 : 0);
+    op(OP.EQUALVERIFY);
+    data(b.slice(2));
+    op(OP.EQUALVERIFY);
+  };
+  const withChange = () => {
+    op(OP.INSPECTNUMOUTPUTS);
+    num2(6);
+    op(OP.EQUAL, X.if);
+  };
+  const position = (full) => {
+    withChange();
+    num2(full + 1);
+    op(103);
+    num2(full);
+    op(X.endif);
+  };
+  const outputScript = (full, bytes2) => {
+    position(full);
+    op(OP.INSPECTOUTPUTSCRIPTPUBKEY);
+    num2(bytes2[0] === 81 ? 1 : 0);
+    op(OP.EQUALVERIFY);
+    data(bytes2.slice(2));
+    op(OP.EQUALVERIFY);
+  };
+  data(new TextEncoder().encode(DUAL_CONNECTOR_PROGRAM));
+  op(OP.DROP);
+  equal(OP.INSPECTVERSION, 2);
+  equal(OP.INSPECTLOCKTIME, 0);
+  equal(OP.INSPECTNUMINPUTS, 3);
+  op(OP.INSPECTNUMOUTPUTS, OP.DUP);
+  num2(5);
+  op(OP.EQUAL, OP.SWAP);
+  num2(6);
+  op(OP.EQUAL, X.boolOr, OP.VERIFY);
+  for (const i of [0, 1, 2]) {
+    num2(i);
+    equal(OP.INSPECTINPUTSEQUENCE, 4294967293);
+  }
+  for (const i of [0, 1]) {
+    script(X.inputScript, i, r.connectorScript);
+    num2(i);
+    equal(OP.INSPECTINPUTVALUE, 500);
+    outputScript(i + 1, r.connectorScript);
+    position(i + 1);
+    equal(OP.INSPECTOUTPUTVALUE, 500);
+  }
+  outputScript(3, hex.decode("51024e73"));
+  position(3);
+  equal(OP.INSPECTOUTPUTVALUE, 240);
+  position(4);
+  equal(OP.INSPECTOUTPUTVALUE, 0);
+  withChange();
+  num2(2);
+  op(X.inputScript, X.toAlt);
+  num2(1);
+  op(OP.INSPECTOUTPUTSCRIPTPUBKEY, X.fromAlt, OP.EQUALVERIFY, OP.EQUALVERIFY);
+  num2(1);
+  op(OP.INSPECTOUTPUTVALUE);
+  num2(330);
+  op(OP.GREATERTHANOREQUAL, OP.VERIFY, X.endif);
+  num2(0);
+  op(OP.INSPECTOUTPUTVALUE);
+  num2(294);
+  op(OP.GREATERTHANOREQUAL, OP.VERIFY);
+  num2(2);
+  op(OP.INSPECTINPUTVALUE);
+  num2(0);
+  op(OP.INSPECTOUTPUTVALUE, OP.SUB);
+  position(3);
+  op(OP.INSPECTOUTPUTVALUE, OP.SUB);
+  withChange();
+  num2(1);
+  op(OP.INSPECTOUTPUTVALUE, OP.SUB, X.endif);
+  op(OP.DUP);
+  num2(0);
+  op(OP.GREATERTHANOREQUAL, OP.VERIFY, OP.DUP);
+  num2(r.absoluteFeeCapSats);
+  op(OP.LESSTHANOREQUAL, OP.VERIFY, OP.TXWEIGHT);
+  num2(r.witnessBytes);
+  op(OP.ADD);
+  num2(3);
+  op(OP.ADD);
+  num2(4);
+  op(OP.DIV);
+  num2(r.feerateCapSatPerV);
+  op(OP.MUL, OP.LESSTHANOREQUAL);
+  return concat2(...chunks);
+}
+
+// tools/offline-recovery/src/lib/vault/program/connector.ts
+init_base();
+init_btc_signer();
+init_secp256k1();
+init_sha2();
+
+// tools/offline-recovery/src/lib/vault/spendingPolicy.ts
+init_define_import_meta_env();
+init_sha2();
+var SPENDING_POLICY_PROGRAM = "vault-policy-v1";
+var SPENDING_POLICY_PERIOD = "rolling-24h";
+var SPENDING_POLICY_BOUNDS = {
+  periodAllowanceSats: { min: 330, max: 1e9 },
+  txRecipientCapSats: { min: 330, max: 1e8 },
+  absoluteFeeCapSats: { min: ABSOLUTE_FEE_CEILING_SATS, max: ABSOLUTE_FEE_CEILING_SATS },
+  feerateCapSatPerV: { min: FEERATE_CEILING_SAT_PER_V, max: FEERATE_CEILING_SAT_PER_V }
+};
+function policyBounds(network2) {
+  if (network2 === void 0) return SPENDING_POLICY_BOUNDS;
+  requireSupportedVaultNetwork(network2);
+  const fee = network2 === "mainnet" ? MAINNET_ABSOLUTE_FEE_CEILING_SATS : MUTINYNET_ABSOLUTE_FEE_CEILING_SATS;
+  const rate = network2 === "mainnet" ? MAINNET_FEERATE_CEILING_SAT_PER_V : MUTINYNET_FEERATE_CEILING_SAT_PER_V;
+  return {
+    ...SPENDING_POLICY_BOUNDS,
+    absoluteFeeCapSats: { min: fee, max: fee },
+    feerateCapSatPerV: { min: rate, max: rate }
+  };
+}
+function defaultSpendingPolicy(network2) {
+  const bounds = policyBounds(network2);
+  return {
+    program: SPENDING_POLICY_PROGRAM,
+    schema: POLICY_VERSION,
+    period: SPENDING_POLICY_PERIOD,
+    periodAllowanceSats: PERIOD_ALLOWANCE_SATS,
+    txRecipientCapSats: TX_RECIPIENT_CAP_SATS,
+    absoluteFeeCapSats: bounds.absoluteFeeCapSats.min,
+    feerateCapSatPerV: bounds.feerateCapSatPerV.min
+  };
+}
+var CURRENT_SPENDING_POLICY_CAPABILITIES = {
+  program: SPENDING_POLICY_PROGRAM,
+  schema: POLICY_VERSION,
+  period: SPENDING_POLICY_PERIOD,
+  bounds: SPENDING_POLICY_BOUNDS,
+  presets: [
+    {
+      id: "lower-exposure",
+      label: "Lower exposure",
+      policy: {
+        ...defaultSpendingPolicy(),
+        txRecipientCapSats: 25e3,
+        periodAllowanceSats: 5e4
+      }
+    },
+    { id: "everyday", label: "Everyday", policy: defaultSpendingPolicy() }
+  ]
+};
+function requireBound(value2, bound, name) {
+  if (!Number.isSafeInteger(value2) || Number(value2) < bound.min || Number(value2) > bound.max) {
+    throw new Error(`${name} must be between ${bound.min} and ${bound.max}`);
+  }
+  return Number(value2);
+}
+function validateSpendingPolicy(value2, network2) {
+  const bounds = policyBounds(network2);
+  if (!value2 || typeof value2 !== "object" || Array.isArray(value2)) throw new Error("spending policy required");
+  const p = value2;
+  const expected = [
+    "program",
+    "schema",
+    "period",
+    "periodAllowanceSats",
+    "txRecipientCapSats",
+    "absoluteFeeCapSats",
+    "feerateCapSatPerV"
+  ];
+  const fields = Object.keys(p);
+  if (fields.length !== expected.length || expected.some((name) => !Object.prototype.hasOwnProperty.call(p, name))) {
+    throw new Error("spending policy fields");
+  }
+  if (p.program !== SPENDING_POLICY_PROGRAM) throw new Error("unsupported spending policy program");
+  if (p.schema !== POLICY_VERSION) throw new Error("unsupported spending policy schema");
+  if (p.period !== SPENDING_POLICY_PERIOD) throw new Error("unsupported spending policy period");
+  const policy = {
+    program: SPENDING_POLICY_PROGRAM,
+    schema: POLICY_VERSION,
+    period: SPENDING_POLICY_PERIOD,
+    periodAllowanceSats: requireBound(p.periodAllowanceSats, bounds.periodAllowanceSats, "period allowance"),
+    txRecipientCapSats: requireBound(p.txRecipientCapSats, bounds.txRecipientCapSats, "transaction recipient cap"),
+    absoluteFeeCapSats: requireBound(p.absoluteFeeCapSats, bounds.absoluteFeeCapSats, "absolute fee cap"),
+    feerateCapSatPerV: requireBound(p.feerateCapSatPerV, bounds.feerateCapSatPerV, "feerate cap")
+  };
+  if (policy.periodAllowanceSats < policy.txRecipientCapSats) {
+    throw new Error("period allowance must be at least the transaction recipient cap");
+  }
+  return policy;
+}
+function canonicalSpendingPolicy(policy, network2) {
+  return JSON.stringify(validateSpendingPolicy(policy, network2));
+}
+function spendingPolicyDigest(policy, network2) {
+  return bytesToHex2(sha256(encodeUtf8(canonicalSpendingPolicy(policy, network2))));
+}
+
+// tools/offline-recovery/src/lib/vault/protectionTier.ts
+init_define_import_meta_env();
+function requireProtectionTier(value2) {
+  if (value2 !== "standard" && value2 !== "advanced") throw new Error("unsupported protection tier");
+  return value2;
+}
+function requireProtectionTierMatchesRecovery(tier, recoveryPub) {
+  const selected = requireProtectionTier(tier);
+  const hasRecovery = typeof recoveryPub === "string" && recoveryPub.trim().length > 0;
+  if (selected === "standard" && hasRecovery) throw new Error("Standard protection must not include a recovery key");
+  if (selected === "advanced" && !hasRecovery) throw new Error("Advanced protection requires a recovery key");
+  return selected;
+}
+
+// tools/offline-recovery/src/lib/vault/addressNetwork.ts
+init_define_import_meta_env();
+init_btc_signer();
+function vaultAddressNetwork(network2) {
+  if (network2 === "mutinynet") return TEST_NETWORK;
+  if (network2 === "bitcoin" || network2 === "mainnet") return NETWORK;
+  throw new Error("unsupported network");
+}
+
+// tools/offline-recovery/src/lib/vault/program/context.ts
+init_define_import_meta_env();
+init_sha2();
+init_base();
+init_btc_signer();
+function taggedHash2(tag3, ...messages) {
+  const tagH = sha256(encodeUtf8(tag3));
+  const prefix2 = new Uint8Array(64);
+  prefix2.set(tagH, 0);
+  prefix2.set(tagH, 32);
+  const total = messages.reduce((n, m) => n + m.length, 64);
+  const out = new Uint8Array(total);
+  out.set(prefix2);
+  let offset = 64;
+  for (const msg of messages) {
+    out.set(msg, offset);
+    offset += msg.length;
+  }
+  return sha256(out);
+}
+function appendText(parts, value2, name) {
+  if (!value2 || value2 !== value2.trim() || value2 !== value2.toLowerCase()) {
+    throw new Error(`${name} must be non-empty canonical lowercase`);
+  }
+  const bytes2 = encodeUtf8(value2);
+  const len = new Uint8Array(4);
+  new DataView(len.buffer).setUint32(0, bytes2.length, false);
+  parts.push(len, bytes2);
+}
+function encodeTreeContext(input) {
+  const claimant = input.claimant || "";
+  if (claimant && !CLAIMANTS.includes(claimant)) throw new Error("unknown claimant");
+  const parts = [];
+  appendText(parts, input.vaultId, "vaultId");
+  appendText(parts, "savings", "kind");
+  appendText(parts, claimant === "" ? "-" : claimant, "claimant");
+  appendText(parts, input.templateVersion || SAVINGS_TEMPLATE, "templateVersion");
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+function contextInternalKey(input) {
+  const context = taggedHash2(PROGRAM_INTERNAL_TAG, encodeTreeContext(input));
+  const [tweaked] = utils3.taprootTweakPubkey(hex.decode(TAPROOT_NUMS_XONLY), context);
+  return tweaked;
 }
 
 // tools/offline-recovery/src/lib/vault/program/trees.ts
@@ -18731,12 +19079,20 @@ function buildVaultProgramFamily(input) {
 // tools/offline-recovery/src/lib/vault/program/connector.ts
 var CONNECTOR_PROGRAM = "savings-connector-v1";
 var CONNECTOR_TEMPLATE = "phone-connector-recovery-savings-v1";
-var X = { inputScript: 202, toAlt: 107, fromAlt: 108, if: 99, endif: 104, boolOr: 155 };
-function buildConnectorProgram(r) {
+var DUAL_CONNECTOR_TEMPLATE = "phone-connector-recovery-savings-v2";
+var DUAL_CONNECTOR_PROGRAM = "savings-connector-dual-v2";
+function isConnectorTemplate(template) {
+  return template === CONNECTOR_TEMPLATE || template === DUAL_CONNECTOR_TEMPLATE;
+}
+var X2 = { inputScript: 202, toAlt: 107, fromAlt: 108, if: 99, endif: 104, boolOr: 155 };
+function validateConnectorRules(r) {
   if (!(r.connectorScript.length === 22 && r.connectorScript[0] === 0 && r.connectorScript[1] === 20) && (r.connectorScript.length !== 34 || r.connectorScript[0] !== 81 || r.connectorScript[1] !== 32 || !secp256k1.utils.isValidPublicKey(new Uint8Array([2, ...r.connectorScript.slice(2)]), true)))
     throw new Error("connector native SegWit or Taproot script required");
   if (!Number.isSafeInteger(r.witnessBytes) || r.witnessBytes < 1 || r.witnessBytes > 1e4 || !Number.isSafeInteger(r.absoluteFeeCapSats) || r.absoluteFeeCapSats < 0 || r.absoluteFeeCapSats > 1e5 || !Number.isSafeInteger(r.feerateCapSatPerV) || r.feerateCapSatPerV < 1 || r.feerateCapSatPerV > 100)
     throw new Error("invalid connector fee policy");
+}
+function buildConnectorProgram(r) {
+  validateConnectorRules(r);
   let prefix2 = new Uint8Array();
   for (let attempt = 0; attempt < 8; attempt++) {
     const chunks = [];
@@ -18746,89 +19102,89 @@ function buildConnectorProgram(r) {
     const equal = (opcode, n) => {
       op(opcode);
       num2(n);
-      op(OP2.EQUALVERIFY);
+      op(OP.EQUALVERIFY);
     };
     const script = (opcode, index, b) => {
       num2(index);
       op(opcode);
       num2(b[0] === 81 ? 1 : 0);
-      op(OP2.EQUALVERIFY);
+      op(OP.EQUALVERIFY);
       data(b.slice(2));
-      op(OP2.EQUALVERIFY);
+      op(OP.EQUALVERIFY);
     };
     const withChange = () => {
-      op(OP2.INSPECTNUMOUTPUTS);
+      op(OP.INSPECTNUMOUTPUTS);
       num2(5);
-      op(OP2.EQUAL, X.if);
+      op(OP.EQUAL, X2.if);
     };
     data(new TextEncoder().encode(CONNECTOR_PROGRAM));
-    op(OP2.DROP);
-    equal(OP2.INSPECTVERSION, 2);
-    equal(OP2.INSPECTLOCKTIME, 0);
-    equal(OP2.INSPECTNUMINPUTS, 2);
-    op(OP2.INSPECTNUMOUTPUTS, OP2.DUP);
+    op(OP.DROP);
+    equal(OP.INSPECTVERSION, 2);
+    equal(OP.INSPECTLOCKTIME, 0);
+    equal(OP.INSPECTNUMINPUTS, 2);
+    op(OP.INSPECTNUMOUTPUTS, OP.DUP);
     num2(4);
-    op(OP2.EQUAL, OP2.SWAP);
+    op(OP.EQUAL, OP.SWAP);
     num2(5);
-    op(OP2.EQUAL, X.boolOr, OP2.VERIFY);
+    op(OP.EQUAL, X2.boolOr, OP.VERIFY);
     for (const i of [0, 1]) {
       num2(i);
-      equal(OP2.INSPECTINPUTSEQUENCE, 4294967293);
+      equal(OP.INSPECTINPUTSEQUENCE, 4294967293);
     }
-    script(X.inputScript, 1, r.connectorScript);
-    script(OP2.INSPECTOUTPUTSCRIPTPUBKEY, 1, r.connectorScript);
-    script(OP2.INSPECTOUTPUTSCRIPTPUBKEY, 2, hex.decode("51024e73"));
+    script(X2.inputScript, 1, r.connectorScript);
+    script(OP.INSPECTOUTPUTSCRIPTPUBKEY, 1, r.connectorScript);
+    script(OP.INSPECTOUTPUTSCRIPTPUBKEY, 2, hex.decode("51024e73"));
     withChange();
     num2(0);
-    op(X.inputScript, X.toAlt);
+    op(X2.inputScript, X2.toAlt);
     num2(4);
-    op(OP2.INSPECTOUTPUTSCRIPTPUBKEY, X.fromAlt, OP2.EQUALVERIFY, OP2.EQUALVERIFY);
+    op(OP.INSPECTOUTPUTSCRIPTPUBKEY, X2.fromAlt, OP.EQUALVERIFY, OP.EQUALVERIFY);
     num2(4);
-    op(OP2.INSPECTOUTPUTVALUE);
+    op(OP.INSPECTOUTPUTVALUE);
     num2(330);
-    op(OP2.GREATERTHANOREQUAL, OP2.VERIFY, X.endif);
+    op(OP.GREATERTHANOREQUAL, OP.VERIFY, X2.endif);
     num2(1);
-    equal(OP2.INSPECTINPUTVALUE, 1e3);
+    equal(OP.INSPECTINPUTVALUE, 1e3);
     num2(1);
-    equal(OP2.INSPECTOUTPUTVALUE, 1e3);
+    equal(OP.INSPECTOUTPUTVALUE, 1e3);
     num2(2);
-    equal(OP2.INSPECTOUTPUTVALUE, 240);
+    equal(OP.INSPECTOUTPUTVALUE, 240);
     num2(3);
-    equal(OP2.INSPECTOUTPUTVALUE, 0);
+    equal(OP.INSPECTOUTPUTVALUE, 0);
     num2(0);
-    op(OP2.INSPECTOUTPUTVALUE);
+    op(OP.INSPECTOUTPUTVALUE);
     num2(294);
-    op(OP2.GREATERTHANOREQUAL, OP2.VERIFY);
+    op(OP.GREATERTHANOREQUAL, OP.VERIFY);
     num2(1);
-    op(OP2.INSPECTPACKET, OP2.VERIFY);
+    op(OP.INSPECTPACKET, OP.VERIFY);
     data(prefix2);
-    op(OP2.SWAP, OP2.CAT, OP2.SHA256);
+    op(OP.SWAP, OP.CAT, OP.SHA256);
     num2(3);
-    op(OP2.INSPECTOUTPUTSCRIPTPUBKEY);
+    op(OP.INSPECTOUTPUTSCRIPTPUBKEY);
     num2(-1);
-    op(OP2.EQUALVERIFY, OP2.EQUALVERIFY);
+    op(OP.EQUALVERIFY, OP.EQUALVERIFY);
     num2(0);
-    op(OP2.INSPECTINPUTVALUE);
+    op(OP.INSPECTINPUTVALUE);
     for (const i of [0, 2]) {
       num2(i);
-      op(OP2.INSPECTOUTPUTVALUE, OP2.SUB);
+      op(OP.INSPECTOUTPUTVALUE, OP.SUB);
     }
     withChange();
     num2(4);
-    op(OP2.INSPECTOUTPUTVALUE, OP2.SUB, X.endif);
-    op(OP2.DUP);
+    op(OP.INSPECTOUTPUTVALUE, OP.SUB, X2.endif);
+    op(OP.DUP);
     num2(0);
-    op(OP2.GREATERTHANOREQUAL, OP2.VERIFY, OP2.DUP);
+    op(OP.GREATERTHANOREQUAL, OP.VERIFY, OP.DUP);
     num2(r.absoluteFeeCapSats);
-    op(OP2.LESSTHANOREQUAL, OP2.VERIFY, OP2.TXWEIGHT);
+    op(OP.LESSTHANOREQUAL, OP.VERIFY, OP.TXWEIGHT);
     num2(r.witnessBytes);
-    op(OP2.ADD);
+    op(OP.ADD);
     num2(3);
-    op(OP2.ADD);
+    op(OP.ADD);
     num2(4);
-    op(OP2.DIV);
+    op(OP.DIV);
     num2(r.feerateCapSatPerV);
-    op(OP2.MUL, OP2.LESSTHANOREQUAL);
+    op(OP.MUL, OP.LESSTHANOREQUAL);
     const result = concat2(...chunks);
     const next = exactPacketOutputPrefix(result.length, []);
     if (hex.encode(next) === hex.encode(prefix2)) return result;
@@ -18837,15 +19193,17 @@ function buildConnectorProgram(r) {
   throw new Error("connector packet envelope did not converge");
 }
 function buildConnectorFamily(input) {
-  if (input.templateVersion && input.templateVersion !== CONNECTOR_TEMPLATE)
+  if (input.templateVersion && !isConnectorTemplate(input.templateVersion))
     throw new Error("connector template mismatch");
   if (input.network !== "mainnet" && input.network !== "mutinynet") throw new Error("unsupported connector network");
-  const selected = { ...input, templateVersion: CONNECTOR_TEMPLATE, serverFreeClawback: true };
+  const template = input.templateVersion ?? CONNECTOR_TEMPLATE;
+  const dual = template === DUAL_CONNECTOR_TEMPLATE;
+  const selected = { ...input, templateVersion: template, serverFreeClawback: true };
   const base = buildVaultProgramFamily(selected);
   if (input.connectorType !== "p2tr" && input.connectorType !== "p2wpkh") throw new Error("unsupported connector type");
   const connector = input.connectorType === "p2tr" ? p2tr(xOnlyFromCompressed(input.hardwarePub), void 0, vaultAddressNetwork(input.network)) : p2wpkh(hex.decode(input.hardwarePub), vaultAddressNetwork(input.network));
-  const connectorWitnessBytes = input.connectorType === "p2tr" ? 66 : 45;
-  const internal = contextInternalKey({ vaultId: input.vaultId, claimant: "", templateVersion: CONNECTOR_TEMPLATE });
+  const connectorWitnessBytes = dual ? input.connectorType === "p2tr" ? 134 : 90 : input.connectorType === "p2tr" ? 66 : 45;
+  const internal = contextInternalKey({ vaultId: input.vaultId, claimant: "", templateVersion: template });
   const makeNormal = (normal) => {
     const tree = p2tr(
       internal,
@@ -18867,7 +19225,7 @@ function buildConnectorFamily(input) {
     absoluteFeeCapSats: input.absoluteFeeCapSats,
     feerateCapSatPerV: input.feerateCapSatPerV
   };
-  const program = buildConnectorProgram(rules);
+  const program = dual ? buildDualConnectorProgram(rules) : buildConnectorProgram(rules);
   const pair = tweakPair(input.vaultCosignerBase, input.arkadeCosignerBase, program);
   const roles = [
     input.phonePub,
@@ -18911,7 +19269,7 @@ function connectorEnrollmentDigest(input, origin) {
   const canonical2 = (s) => hex.encode(hex.decode(s));
   const fields = [
     "arkade-vault/connector-enrollment-v1",
-    CONNECTOR_TEMPLATE,
+    input.templateVersion ?? CONNECTOR_TEMPLATE,
     input.vaultId,
     input.network,
     input.protectionTier,
@@ -19028,7 +19386,7 @@ function validateVaultProgramDescriptor(d) {
   if (d.schema !== PROGRAM_SCHEMA) throw new Error("unsupported vault schema");
   if (!SUPPORTED_NETWORKS.includes(d.network)) throw new Error(`unsupported network ${d.network}`);
   if (!d.vaultId || String(d.vaultId).trim() === "") throw new Error("vault id required");
-  if (!isSavingsTemplate(d.templateVersion) && d.templateVersion !== CONNECTOR_TEMPLATE)
+  if (!isSavingsTemplate(d.templateVersion) && !isConnectorTemplate(d.templateVersion))
     throw new Error("template version is not this release");
   if (d.policyVersion !== POLICY_VERSION) throw new Error("policy version is not this release");
   requireProtectionTierMatchesRecovery(d.protectionTier, d.keys.recovery);
@@ -19182,7 +19540,7 @@ function hashVaultProgramDescriptor(d) {
   return bytesToHex2(sha256(encodeVaultProgramDescriptor(d)));
 }
 function buildDescriptorFamily(input) {
-  if (input.templateVersion !== CONNECTOR_TEMPLATE) {
+  if (!isConnectorTemplate(input.templateVersion)) {
     if (input.connectorType !== void 0) throw new Error("connector type on a legacy descriptor");
     return buildVaultProgramFamily(input);
   }
@@ -19273,6 +19631,7 @@ function buildConnectorEnrollmentPreview(input) {
   if (input.origin.connectorType !== "p2wpkh" && input.origin.connectorType !== "p2tr")
     fail("connector type must be p2tr or p2wpkh");
   const familyInput = {
+    templateVersion: input.templateVersion ?? CONNECTOR_TEMPLATE,
     connectorType: input.origin.connectorType,
     vaultId: input.vaultId,
     network: network2,
@@ -19307,7 +19666,7 @@ function buildConnectorEnrollmentPreview(input) {
     schema: PROGRAM_SCHEMA,
     network: network2,
     vaultId: input.vaultId,
-    templateVersion: CONNECTOR_TEMPLATE,
+    templateVersion: input.templateVersion ?? CONNECTOR_TEMPLATE,
     policyVersion: POLICY_VERSION,
     protectionTier,
     keys: {
@@ -19361,6 +19720,7 @@ function parseConnectorRecoveryKit(raw2) {
   if (kit2.version !== CONNECTOR_KIT_VERSION) fail("unsupported connector kit version");
   const rebuilt = buildConnectorEnrollmentPreview({
     vaultId: kit2.vaultId,
+    templateVersion: kit2.templateVersion ?? CONNECTOR_TEMPLATE,
     network: kit2.network,
     protectionTier: kit2.protectionTier,
     phonePub: kit2.phonePub,
@@ -19390,6 +19750,7 @@ function connectorRecoveryDescriptor(raw2) {
   const kit2 = parseConnectorRecoveryKit(raw2);
   return buildConnectorEnrollmentPreview({
     vaultId: kit2.vaultId,
+    templateVersion: kit2.templateVersion ?? CONNECTOR_TEMPLATE,
     network: kit2.network,
     protectionTier: kit2.protectionTier,
     origin: kit2.origin,
@@ -20833,7 +21194,7 @@ var Intent;
   }
   Intent2.encodeMessage = encodeMessage;
 })(Intent || (Intent = {}));
-var OP_RETURN_EMPTY_PKSCRIPT = new Uint8Array([OP.RETURN]);
+var OP_RETURN_EMPTY_PKSCRIPT = new Uint8Array([OP2.RETURN]);
 var ZERO_32 = new Uint8Array(32).fill(0);
 var MAX_INDEX = 4294967295;
 var TAG_INTENT_PROOF = "ark-intent-proof-message";
@@ -20858,8 +21219,8 @@ function validateOutputs(outputs) {
   outputs.forEach(validateOutput);
   return true;
 }
-function craftToSpendTx(message, pkScript, tag = TAG_INTENT_PROOF) {
-  const messageHash = hashMessage(message, tag);
+function craftToSpendTx(message, pkScript, tag3 = TAG_INTENT_PROOF) {
+  const messageHash = hashMessage(message, tag3);
   const tx = new Transaction2({
     version: 0
   });
@@ -20929,8 +21290,8 @@ function craftToSignTx(toSpend, inputs, outputs, message) {
   ];
   return tx;
 }
-function hashMessage(message, tag = TAG_INTENT_PROOF) {
-  return schnorr.utils.taggedHash(tag, new TextEncoder().encode(message));
+function hashMessage(message, tag3 = TAG_INTENT_PROOF) {
+  return schnorr.utils.taggedHash(tag3, new TextEncoder().encode(message));
 }
 function prepareCoinAsIntentProofInput(coin) {
   if (!("tapTree" in coin)) {
@@ -25088,7 +25449,7 @@ var ARKADE_OPCODE_VALUES = Object.fromEntries(
 );
 function buildBitcoinOpcodeNames() {
   const names = {};
-  for (const [key, value2] of Object.entries(OP)) {
+  for (const [key, value2] of Object.entries(OP2)) {
     if (typeof value2 === "number") {
       const name = key.startsWith("OP_") ? key : `OP_${key}`;
       names[value2] = name;
@@ -25099,7 +25460,7 @@ function buildBitcoinOpcodeNames() {
 }
 function buildBitcoinOpcodeValues() {
   const values = {};
-  for (const [key, value2] of Object.entries(OP)) {
+  for (const [key, value2] of Object.entries(OP2)) {
     if (typeof value2 === "number") {
       const name = key.startsWith("OP_") ? key : `OP_${key}`;
       values[name] = value2;
@@ -25164,7 +25525,7 @@ function encode2(value2) {
 function decode2(value2) {
   return codec.decode(value2);
 }
-var ARKADE_OPS = { ...OP, ...ARKADE_OP };
+var ARKADE_OPS = { ...OP2, ...ARKADE_OP };
 var ArkadeOPNames = {};
 for (const [k, v] of Object.entries(ARKADE_OPS)) {
   if (typeof v === "number") ArkadeOPNames[v] = k;
@@ -25184,20 +25545,20 @@ var ArkadeScript = wrap2({
       if (!(o instanceof Uint8Array)) throw new Error(`Wrong Script OP=${o} (${typeof o})`);
       const len = o.length;
       if (len === 1 && o[0] >= 1 && o[0] <= 16) {
-        w.byte(OP.OP_1 - 1 + o[0]);
+        w.byte(OP2.OP_1 - 1 + o[0]);
         continue;
       } else if (len === 1 && o[0] === 129) {
-        w.byte(OP["1NEGATE"]);
+        w.byte(OP2["1NEGATE"]);
         continue;
-      } else if (len < OP.PUSHDATA1) w.byte(len);
+      } else if (len < OP2.PUSHDATA1) w.byte(len);
       else if (len <= 255) {
-        w.byte(OP.PUSHDATA1);
+        w.byte(OP2.PUSHDATA1);
         w.byte(len);
       } else if (len <= 65535) {
-        w.byte(OP.PUSHDATA2);
+        w.byte(OP2.PUSHDATA2);
         w.bytes(U16LE2.encode(len));
       } else {
-        w.byte(OP.PUSHDATA4);
+        w.byte(OP2.PUSHDATA4);
         w.bytes(U32LE2.encode(len));
       }
       w.bytes(o);
@@ -25207,19 +25568,19 @@ var ArkadeScript = wrap2({
     const out = [];
     while (!r.isEnd()) {
       const cur = r.byte();
-      if (OP.OP_0 < cur && cur <= OP.PUSHDATA4) {
+      if (OP2.OP_0 < cur && cur <= OP2.PUSHDATA4) {
         let len;
-        if (cur < OP.PUSHDATA1) len = cur;
-        else if (cur === OP.PUSHDATA1) len = U82.decodeStream(r);
-        else if (cur === OP.PUSHDATA2) len = U16LE2.decodeStream(r);
-        else if (cur === OP.PUSHDATA4) len = U32LE2.decodeStream(r);
+        if (cur < OP2.PUSHDATA1) len = cur;
+        else if (cur === OP2.PUSHDATA1) len = U82.decodeStream(r);
+        else if (cur === OP2.PUSHDATA2) len = U16LE2.decodeStream(r);
+        else if (cur === OP2.PUSHDATA4) len = U32LE2.decodeStream(r);
         else throw new Error("Should be not possible");
         out.push(r.bytes(len));
       } else if (cur === 0) {
         out.push(0);
-      } else if (OP.OP_1 <= cur && cur <= OP.OP_16) {
-        out.push(cur - (OP.OP_1 - 1));
-      } else if (cur === OP["1NEGATE"]) {
+      } else if (OP2.OP_1 <= cur && cur <= OP2.OP_16) {
+        out.push(cur - (OP2.OP_1 - 1));
+      } else if (cur === OP2["1NEGATE"]) {
         out.push(-1);
       } else {
         const op = ArkadeOPNames[cur];
@@ -26947,12 +27308,12 @@ var PubNonce = struct({ R1: compressed, R2: compressed });
 var SecretNonce = struct({ k1: scalar, k2: scalar, publicKey: createBytes(PUBKEY_LEN) });
 function abytesOptional(b, ...lengths2) {
   if (b !== void 0)
-    abytes2(b, ...lengths2);
+    abytes(b, ...lengths2);
 }
 function abytesArray(lst, ...lengths2) {
   if (!Array.isArray(lst))
     throw new Error("expected array");
-  lst.forEach((i) => abytes2(i, ...lengths2));
+  lst.forEach((i) => abytes(i, ...lengths2));
 }
 function aXonly(lst) {
   if (!Array.isArray(lst))
@@ -26962,7 +27323,7 @@ function aXonly(lst) {
       throw new Error("expected boolean in xOnly array, got" + i + "(" + j + ")");
   });
 }
-var taggedInt = (tag, ...messages) => Fn3.create(Fn3.fromBytes(taggedHash3(tag, ...messages), true));
+var taggedInt = (tag3, ...messages) => Fn3.create(Fn3.fromBytes(taggedHash3(tag3, ...messages), true));
 var evenScalar = (p, n) => hasEven2(p.y) ? n : Fn3.neg(n);
 function mulBase(n) {
   return Point3.BASE.multiply(n);
@@ -26986,8 +27347,8 @@ function keyAggL(publicKeys) {
   return taggedHash3("KeyAgg list", ...publicKeys);
 }
 function keyAggCoeffInternal(publicKey1, publicKey2, L3) {
-  abytes2(publicKey1, PUBKEY_LEN);
-  abytes2(publicKey2, PUBKEY_LEN);
+  abytes(publicKey1, PUBKEY_LEN);
+  abytes(publicKey2, PUBKEY_LEN);
   if (equalBytes(publicKey1, publicKey2))
     return 1n;
   return taggedInt("KeyAgg coefficient", L3, publicKey1);
@@ -27033,14 +27394,14 @@ function aux(secret, rand) {
 }
 var nonceHash = (rand, publicKey2, aggPublicKey, i, msgPrefixed, extraIn) => taggedInt("MuSig/nonce", rand, new Uint8Array([publicKey2.length]), publicKey2, new Uint8Array([aggPublicKey.length]), aggPublicKey, msgPrefixed, numberToBytesBE(extraIn.length, 4), extraIn, new Uint8Array([i]));
 function nonceGen(publicKey2, secretKey, aggPublicKey = new Uint8Array(0), msg, extraIn = new Uint8Array(0), rand = randomBytes(32)) {
-  abytes2(publicKey2, PUBKEY_LEN);
+  abytes(publicKey2, PUBKEY_LEN);
   abytesOptional(secretKey, 32);
-  abytes2(aggPublicKey);
+  abytes(aggPublicKey);
   if (![0, 32].includes(aggPublicKey.length))
     throw new Error("wrong aggPublicKey");
   abytesOptional(msg);
-  abytes2(extraIn);
-  abytes2(rand, 32);
+  abytes(extraIn);
+  abytes(rand, 32);
   if (secretKey !== void 0)
     rand = aux(secretKey, rand);
   const msgPrefixed = msg !== void 0 ? concatBytes(Uint8Array.of(1), numberToBytesBE(msg.length, 8), msg) : Uint8Array.of(0);
@@ -27096,7 +27457,7 @@ var Session = class {
     abytesArray(publicKeys, 33);
     abytesArray(tweaks, 32);
     aXonly(isXonly);
-    abytes2(msg);
+    abytes(msg);
     if (tweaks.length !== isXonly.length)
       throw new Error("The tweaks and isXonly arrays must have the same length");
     const { aggPublicKey, gAcc, tweakAcc } = keyAggregate(publicKeys, tweaks, isXonly);
@@ -27121,9 +27482,9 @@ var Session = class {
    * @returns The key aggregation coefficient as a bigint.
    * @throws {Error} If the provided public key is not included in the list of pubkeys.
    */
-  getSessionKeyAggCoeff(P2) {
+  getSessionKeyAggCoeff(P4) {
     const { publicKeys } = this;
-    const pk = P2.toBytes(true);
+    const pk = P4.toBytes(true);
     const found = publicKeys.some((p) => equalBytes(p, pk));
     if (!found)
       throw new Error("The signer's pubkey must be included in the list of pubkeys");
@@ -27137,11 +27498,11 @@ var Session = class {
     const { R1, R2 } = PubNonce.decode(publicNonce);
     const Re_s_ = R1.add(R2.multiply(b));
     const Re_s = hasEven2(R.y) ? Re_s_ : Re_s_.negate();
-    const P2 = Point3.fromBytes(publicKey2);
-    const a = this.getSessionKeyAggCoeff(P2);
+    const P4 = Point3.fromBytes(publicKey2);
+    const a = this.getSessionKeyAggCoeff(P4);
     const g = Fn3.mul(evenScalar(Q, 1n), gAcc);
     const left = mulBase(s);
-    const right = Re_s.add(P2.multiply(Fn3.mul(e, Fn3.mul(a, g))));
+    const right = Re_s.add(P4.multiply(Fn3.mul(e, Fn3.mul(a, g))));
     return left.equals(right);
   }
   /**
@@ -27154,7 +27515,7 @@ var Session = class {
    * @throws {Error} If the input is invalid, such as wrong array sizes, invalid nonce or secret key.
    */
   sign(secretNonce, secret, fastSign = false) {
-    abytes2(secret, 32);
+    abytes(secret, 32);
     if (typeof fastSign !== "boolean")
       throw new Error("expected boolean");
     const { Q, gAcc, b, R, e } = this;
@@ -27169,11 +27530,11 @@ var Session = class {
     const d_ = Fn3.fromBytes(secret);
     if (Fn3.is0(d_))
       throw new Error("wrong d_");
-    const P2 = mulBase(d_);
-    const pk = P2.toBytes(true);
+    const P4 = mulBase(d_);
+    const pk = P4.toBytes(true);
     if (!equalBytes(pk, originalPk))
       throw new Error("Public key does not match nonceGen argument");
-    const a = this.getSessionKeyAggCoeff(P2);
+    const a = this.getSessionKeyAggCoeff(P4);
     const g = evenScalar(Q, 1n);
     const d = Fn3.mul(g, Fn3.mul(gAcc, d_));
     const s = Fn3.add(k1, Fn3.add(Fn3.mul(b, k2), Fn3.mul(e, Fn3.mul(a, d))));
@@ -27202,12 +27563,12 @@ var Session = class {
    */
   partialSigVerify(partialSig, pubNonces, i) {
     const { publicKeys, tweaks, isXonly } = this;
-    abytes2(partialSig, 32);
+    abytes(partialSig, 32);
     abytesArray(pubNonces, 66);
     abytesArray(publicKeys, PUBKEY_LEN);
     abytesArray(tweaks, 32);
     aXonly(isXonly);
-    anumber2(i);
+    anumber(i);
     if (pubNonces.length !== publicKeys.length)
       throw new Error("The pubNonces and publicKeys arrays must have the same length");
     if (tweaks.length !== isXonly.length)
@@ -27253,7 +27614,7 @@ var secp256k1_CURVE2 = {
   Gx: 0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798n,
   Gy: 0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8n
 };
-var { p: P, n: N, Gx, Gy, b: _b } = secp256k1_CURVE2;
+var { p: P2, n: N, Gx, Gy, b: _b } = secp256k1_CURVE2;
 var L = 32;
 var L2 = 64;
 var lengths = {
@@ -27335,7 +27696,7 @@ var randomBytes2 = (len = L) => {
 };
 var big = BigInt;
 var arange = (n, min, max, msg = "bad number: out of range") => isBig(n) && min <= n && n < max ? n : err(msg);
-var M = (a, b = P) => {
+var M = (a, b = P2) => {
   const r = a % b;
   return r >= 0n ? r : b + r;
 };
@@ -27359,8 +27720,8 @@ var callHash = (name) => {
 };
 var apoint = (p) => p instanceof Point4 ? p : err("Point expected");
 var koblitz = (x) => M(M(x * x) * x + _b);
-var FpIsValid = (n) => arange(n, 0n, P);
-var FpIsValidNot0 = (n) => arange(n, 1n, P);
+var FpIsValid = (n) => arange(n, 0n, P2);
+var FpIsValidNot0 = (n) => arange(n, 1n, P2);
 var FnIsValidNot0 = (n) => arange(n, 1n, N);
 var isEven = (y) => (y & 1n) === 0n;
 var u8of = (n) => Uint8Array.of(n);
@@ -27368,10 +27729,10 @@ var getPrefix = (y) => u8of(isEven(y) ? 2 : 3);
 var lift_x2 = (x) => {
   const c = koblitz(FpIsValidNot0(x));
   let r = 1n;
-  for (let num2 = c, e = (P + 1n) / 4n; e > 0n; e >>= 1n) {
+  for (let num2 = c, e = (P2 + 1n) / 4n; e > 0n; e >>= 1n) {
     if (e & 1n)
-      r = r * num2 % P;
-    num2 = num2 * num2 % P;
+      r = r * num2 % P2;
+    num2 = num2 * num2 % P2;
   }
   return M(r * r) === c ? r : err("sqrt invalid");
 };
@@ -27381,8 +27742,8 @@ var Point4 = class _Point {
   X;
   Y;
   Z;
-  constructor(X3, Y, Z) {
-    this.X = FpIsValid(X3);
+  constructor(X5, Y, Z) {
+    this.X = FpIsValid(X5);
     this.Y = FpIsValidNot0(Y);
     this.Z = FpIsValid(Z);
     Object.freeze(this);
@@ -27457,7 +27818,7 @@ var Point4 = class _Point {
     const { X: X22, Y: Y2, Z: Z2 } = apoint(other);
     const a = 0n;
     const b = _b;
-    let X3 = 0n, Y3 = 0n, Z3 = 0n;
+    let X32 = 0n, Y3 = 0n, Z3 = 0n;
     const b3 = M(b * 3n);
     let t0 = M(X1 * X22), t1 = M(Y1 * Y2), t2 = M(Z1 * Z2), t3 = M(X1 + Y1);
     let t4 = M(X22 + Y2);
@@ -27470,16 +27831,16 @@ var Point4 = class _Point {
     t5 = M(t0 + t2);
     t4 = M(t4 - t5);
     t5 = M(Y1 + Z1);
-    X3 = M(Y2 + Z2);
-    t5 = M(t5 * X3);
-    X3 = M(t1 + t2);
-    t5 = M(t5 - X3);
+    X32 = M(Y2 + Z2);
+    t5 = M(t5 * X32);
+    X32 = M(t1 + t2);
+    t5 = M(t5 - X32);
     Z3 = M(a * t4);
-    X3 = M(b3 * t2);
-    Z3 = M(X3 + Z3);
-    X3 = M(t1 - Z3);
+    X32 = M(b3 * t2);
+    Z3 = M(X32 + Z3);
+    X32 = M(t1 - Z3);
     Z3 = M(t1 + Z3);
-    Y3 = M(X3 * Z3);
+    Y3 = M(X32 * Z3);
     t1 = M(t0 + t0);
     t1 = M(t1 + t0);
     t2 = M(a * t2);
@@ -27491,12 +27852,12 @@ var Point4 = class _Point {
     t0 = M(t1 * t4);
     Y3 = M(Y3 + t0);
     t0 = M(t5 * t4);
-    X3 = M(t3 * X3);
-    X3 = M(X3 - t0);
+    X32 = M(t3 * X32);
+    X32 = M(X32 - t0);
     t0 = M(t3 * t1);
     Z3 = M(t5 * Z3);
     Z3 = M(Z3 + t0);
-    return new _Point(X3, Y3, Z3);
+    return new _Point(X32, Y3, Z3);
   }
   subtract(other) {
     return this.add(apoint(other).negate());
@@ -27536,7 +27897,7 @@ var Point4 = class _Point {
       return { x: 0n, y: 0n };
     if (z === 1n)
       return { x, y };
-    const iz = invert2(z, P);
+    const iz = invert2(z, P2);
     if (M(z * iz) !== 1n)
       err("inverse invalid");
     return { x: M(x * iz), y: M(y * iz) };
@@ -27769,18 +28130,18 @@ var createKeygen2 = (getPublicKey2) => (seed) => {
   return { secretKey, publicKey: getPublicKey2(secretKey) };
 };
 var keygen = createKeygen2(getPublicKey);
-var getTag = (tag) => Uint8Array.from("BIP0340/" + tag, (c) => c.charCodeAt(0));
+var getTag = (tag3) => Uint8Array.from("BIP0340/" + tag3, (c) => c.charCodeAt(0));
 var T_AUX = "aux";
 var T_NONCE = "nonce";
 var T_CHALLENGE = "challenge";
-var taggedHash4 = (tag, ...messages) => {
+var taggedHash4 = (tag3, ...messages) => {
   const fn = callHash("sha256");
-  const tagH = fn(getTag(tag));
+  const tagH = fn(getTag(tag3));
   return fn(concatBytes4(tagH, tagH, ...messages));
 };
-var taggedHashAsync = async (tag, ...messages) => {
+var taggedHashAsync = async (tag3, ...messages) => {
   const fn = hashes.sha256Async;
-  const tagH = await fn(getTag(tag));
+  const tagH = await fn(getTag(tag3));
   return await fn(concatBytes4(tagH, tagH, ...messages));
 };
 var extpubSchnorr = (priv) => {
@@ -27851,7 +28212,7 @@ var _verifSchnorr = (signature, message, publicKey2, challengeFn) => {
     const P_ = new Point4(x, y_, 1n).assertValidity();
     const px = numTo32b(P_.toAffine().x);
     const r = sliceBytesNumBE(sig, 0, L);
-    arange(r, 1n, P);
+    arange(r, 1n, P2);
     const s = sliceBytesNumBE(sig, L, L2);
     arange(s, 1n, N);
     const i = concatBytes4(numTo32b(r), px, msg);
@@ -48118,7 +48479,7 @@ __export2(arkade_exports, {
   ArkadeScript: () => ArkadeScript,
   ArkadeTransactionBuilder: () => ArkadeTransactionBuilder,
   BigNum: () => bignum_exports,
-  OP: () => OP,
+  OP: () => OP2,
   OPCODE_NAMES: () => OPCODE_NAMES,
   OPCODE_VALUES: () => OPCODE_VALUES,
   SUPPORTED_PROGRAM_VERSION: () => SUPPORTED_PROGRAM_VERSION,
@@ -48792,40 +49153,19 @@ init_define_import_meta_env();
 
 // src/lib/vault/program/connector.ts
 init_define_import_meta_env();
-init_base();
-init_btc_signer();
+
+// src/lib/vault/program/connectorDual.ts
+init_define_import_meta_env();
+
+// src/lib/vault/program/connectorApproval.ts
+init_define_import_meta_env();
 init_secp256k1();
 init_sha2();
+init_base();
 
-// src/lib/vault/spendingPolicy.ts
+// src/lib/vault/program/script.ts
 init_define_import_meta_env();
-init_sha2();
-
-// src/lib/vault/hex.ts
-init_define_import_meta_env();
-function requireLowerHex2(value2, name, exactBytes) {
-  if (!value2 || value2 !== value2.toLowerCase() || value2.length % 2 !== 0 || !/^[0-9a-f]+$/.test(value2)) {
-    throw new Error(`${name} must be canonical lowercase hex`);
-  }
-  if (exactBytes !== void 0 && value2.length !== exactBytes * 2) {
-    throw new Error(`${name} must be ${exactBytes} bytes`);
-  }
-  return value2;
-}
-function hexToBytes4(value2) {
-  const hex2 = requireLowerHex2(value2, "hex");
-  const out = new Uint8Array(hex2.length / 2);
-  for (let i = 0; i < out.length; i++) {
-    out[i] = parseInt(hex2.slice(i * 2, i * 2 + 2), 16);
-  }
-  return out;
-}
-function bytesToHex4(bytes2) {
-  return Array.from(bytes2, (b) => b.toString(16).padStart(2, "0")).join("");
-}
-function encodeUtf82(value2) {
-  return new TextEncoder().encode(value2);
-}
+init_base();
 
 // src/lib/vault/constants.ts
 init_define_import_meta_env();
@@ -48863,128 +49203,39 @@ var FEERATE_CEILING_SAT_PER_V2 = bakedReleaseNetwork2 === "mainnet" ? MAINNET_FE
 var DUST_SATS2 = 330;
 var RECENT_HISTORY_LIMIT = 100;
 
-// src/lib/vault/spendingPolicy.ts
-var SPENDING_POLICY_PROGRAM2 = "vault-policy-v1";
-var SPENDING_POLICY_PERIOD2 = "rolling-24h";
-var SPENDING_POLICY_BOUNDS2 = {
-  periodAllowanceSats: { min: 330, max: 1e9 },
-  txRecipientCapSats: { min: 330, max: 1e8 },
-  absoluteFeeCapSats: { min: ABSOLUTE_FEE_CEILING_SATS2, max: ABSOLUTE_FEE_CEILING_SATS2 },
-  feerateCapSatPerV: { min: FEERATE_CEILING_SAT_PER_V2, max: FEERATE_CEILING_SAT_PER_V2 }
-};
-function policyBounds2(network2) {
-  if (network2 === void 0) return SPENDING_POLICY_BOUNDS2;
-  requireSupportedVaultNetwork2(network2);
-  const fee = network2 === "mainnet" ? MAINNET_ABSOLUTE_FEE_CEILING_SATS2 : MUTINYNET_ABSOLUTE_FEE_CEILING_SATS2;
-  const rate = network2 === "mainnet" ? MAINNET_FEERATE_CEILING_SAT_PER_V2 : MUTINYNET_FEERATE_CEILING_SAT_PER_V2;
-  return {
-    ...SPENDING_POLICY_BOUNDS2,
-    absoluteFeeCapSats: { min: fee, max: fee },
-    feerateCapSatPerV: { min: rate, max: rate }
-  };
-}
-function defaultSpendingPolicy2(network2) {
-  const bounds = policyBounds2(network2);
-  return {
-    program: SPENDING_POLICY_PROGRAM2,
-    schema: POLICY_VERSION2,
-    period: SPENDING_POLICY_PERIOD2,
-    periodAllowanceSats: PERIOD_ALLOWANCE_SATS2,
-    txRecipientCapSats: TX_RECIPIENT_CAP_SATS2,
-    absoluteFeeCapSats: bounds.absoluteFeeCapSats.min,
-    feerateCapSatPerV: bounds.feerateCapSatPerV.min
-  };
-}
-var CURRENT_SPENDING_POLICY_CAPABILITIES2 = {
-  program: SPENDING_POLICY_PROGRAM2,
-  schema: POLICY_VERSION2,
-  period: SPENDING_POLICY_PERIOD2,
-  bounds: SPENDING_POLICY_BOUNDS2,
-  presets: [
-    {
-      id: "lower-exposure",
-      label: "Lower exposure",
-      policy: {
-        ...defaultSpendingPolicy2(),
-        txRecipientCapSats: 25e3,
-        periodAllowanceSats: 5e4
-      }
-    },
-    { id: "everyday", label: "Everyday", policy: defaultSpendingPolicy2() }
-  ]
-};
-function requireBound2(value2, bound, name) {
-  if (!Number.isSafeInteger(value2) || Number(value2) < bound.min || Number(value2) > bound.max) {
-    throw new Error(`${name} must be between ${bound.min} and ${bound.max}`);
-  }
-  return Number(value2);
-}
-function validateSpendingPolicy2(value2, network2) {
-  const bounds = policyBounds2(network2);
-  if (!value2 || typeof value2 !== "object" || Array.isArray(value2)) throw new Error("spending policy required");
-  const p = value2;
-  const expected = [
-    "program",
-    "schema",
-    "period",
-    "periodAllowanceSats",
-    "txRecipientCapSats",
-    "absoluteFeeCapSats",
-    "feerateCapSatPerV"
-  ];
-  const fields = Object.keys(p);
-  if (fields.length !== expected.length || expected.some((name) => !Object.prototype.hasOwnProperty.call(p, name))) {
-    throw new Error("spending policy fields");
-  }
-  if (p.program !== SPENDING_POLICY_PROGRAM2) throw new Error("unsupported spending policy program");
-  if (p.schema !== POLICY_VERSION2) throw new Error("unsupported spending policy schema");
-  if (p.period !== SPENDING_POLICY_PERIOD2) throw new Error("unsupported spending policy period");
-  const policy = {
-    program: SPENDING_POLICY_PROGRAM2,
-    schema: POLICY_VERSION2,
-    period: SPENDING_POLICY_PERIOD2,
-    periodAllowanceSats: requireBound2(p.periodAllowanceSats, bounds.periodAllowanceSats, "period allowance"),
-    txRecipientCapSats: requireBound2(p.txRecipientCapSats, bounds.txRecipientCapSats, "transaction recipient cap"),
-    absoluteFeeCapSats: requireBound2(p.absoluteFeeCapSats, bounds.absoluteFeeCapSats, "absolute fee cap"),
-    feerateCapSatPerV: requireBound2(p.feerateCapSatPerV, bounds.feerateCapSatPerV, "feerate cap")
-  };
-  if (policy.periodAllowanceSats < policy.txRecipientCapSats) {
-    throw new Error("period allowance must be at least the transaction recipient cap");
-  }
-  return policy;
-}
-function canonicalSpendingPolicy2(policy, network2) {
-  return JSON.stringify(validateSpendingPolicy2(policy, network2));
-}
-function spendingPolicyDigest2(policy, network2) {
-  return bytesToHex4(sha256(encodeUtf82(canonicalSpendingPolicy2(policy, network2))));
-}
-
-// src/lib/vault/protectionTier.ts
+// src/lib/vault/program/constants.ts
 init_define_import_meta_env();
-function requireProtectionTier2(value2) {
-  if (value2 !== "standard" && value2 !== "advanced") throw new Error("unsupported protection tier");
-  return value2;
-}
-function requireProtectionTierMatchesRecovery2(tier, recoveryPub) {
-  const selected = requireProtectionTier2(tier);
-  const hasRecovery = typeof recoveryPub === "string" && recoveryPub.trim().length > 0;
-  if (selected === "standard" && hasRecovery) throw new Error("Standard protection must not include a recovery key");
-  if (selected === "advanced" && !hasRecovery) throw new Error("Advanced protection requires a recovery key");
-  return selected;
-}
-
-// src/lib/vault/addressNetwork.ts
-init_define_import_meta_env();
-init_btc_signer();
-function vaultAddressNetwork2(network2) {
-  if (network2 === "mutinynet") return TEST_NETWORK;
-  if (network2 === "bitcoin" || network2 === "mainnet") return NETWORK;
-  throw new Error("unsupported network");
-}
 
 // src/lib/vault/savingsTree.ts
 init_define_import_meta_env();
+
+// src/lib/vault/hex.ts
+init_define_import_meta_env();
+function requireLowerHex2(value2, name, exactBytes) {
+  if (!value2 || value2 !== value2.toLowerCase() || value2.length % 2 !== 0 || !/^[0-9a-f]+$/.test(value2)) {
+    throw new Error(`${name} must be canonical lowercase hex`);
+  }
+  if (exactBytes !== void 0 && value2.length !== exactBytes * 2) {
+    throw new Error(`${name} must be ${exactBytes} bytes`);
+  }
+  return value2;
+}
+function hexToBytes4(value2) {
+  const hex2 = requireLowerHex2(value2, "hex");
+  const out = new Uint8Array(hex2.length / 2);
+  for (let i = 0; i < out.length; i++) {
+    out[i] = parseInt(hex2.slice(i * 2, i * 2 + 2), 16);
+  }
+  return out;
+}
+function bytesToHex4(bytes2) {
+  return Array.from(bytes2, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+function encodeUtf82(value2) {
+  return new TextEncoder().encode(value2);
+}
+
+// src/lib/vault/savingsTree.ts
 var TAPROOT_NUMS_XONLY2 = "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0";
 var OP_CHECKSIG2 = 172;
 var OP_CHECKSIGVERIFY2 = 173;
@@ -49029,14 +49280,7 @@ function csvChecksigScript2(blocks, pub) {
   return new Uint8Array([...lock, OP_CSV2, OP_DROP2, ...key]);
 }
 
-// src/lib/vault/program/context.ts
-init_define_import_meta_env();
-init_sha2();
-init_base();
-init_btc_signer();
-
 // src/lib/vault/program/constants.ts
-init_define_import_meta_env();
 var PROGRAM_SCHEMA2 = "arkade-vault/savings-v1";
 var SAVINGS_TEMPLATE2 = "phone-hww-recovery-savings-v1";
 function isSavingsTemplate2(value2) {
@@ -49066,53 +49310,6 @@ function familyClaimants2(hasRecovery) {
 }
 function familyKeysFor2(hasRecovery) {
   return familyClaimants2(hasRecovery).map((claimant) => `savings-${claimant}`);
-}
-
-// src/lib/vault/program/context.ts
-function taggedHash5(tag, ...messages) {
-  const tagH = sha256(encodeUtf82(tag));
-  const prefix2 = new Uint8Array(64);
-  prefix2.set(tagH, 0);
-  prefix2.set(tagH, 32);
-  const total = messages.reduce((n, m) => n + m.length, 64);
-  const out = new Uint8Array(total);
-  out.set(prefix2);
-  let offset = 64;
-  for (const msg of messages) {
-    out.set(msg, offset);
-    offset += msg.length;
-  }
-  return sha256(out);
-}
-function appendText3(parts, value2, name) {
-  if (!value2 || value2 !== value2.trim() || value2 !== value2.toLowerCase()) {
-    throw new Error(`${name} must be non-empty canonical lowercase`);
-  }
-  const bytes2 = encodeUtf82(value2);
-  const len = new Uint8Array(4);
-  new DataView(len.buffer).setUint32(0, bytes2.length, false);
-  parts.push(len, bytes2);
-}
-function encodeTreeContext2(input) {
-  const claimant = input.claimant || "";
-  if (claimant && !CLAIMANTS2.includes(claimant)) throw new Error("unknown claimant");
-  const parts = [];
-  appendText3(parts, input.vaultId, "vaultId");
-  appendText3(parts, "savings", "kind");
-  appendText3(parts, claimant === "" ? "-" : claimant, "claimant");
-  appendText3(parts, input.templateVersion || SAVINGS_TEMPLATE2, "templateVersion");
-  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
-  let offset = 0;
-  for (const part of parts) {
-    out.set(part, offset);
-    offset += part.length;
-  }
-  return out;
-}
-function contextInternalKey2(input) {
-  const context = taggedHash5(PROGRAM_INTERNAL_TAG2, encodeTreeContext2(input));
-  const [tweaked] = utils3.taprootTweakPubkey(hex.decode(TAPROOT_NUMS_XONLY2), context);
-  return tweaked;
 }
 
 // src/lib/vault/program/packet.ts
@@ -49213,8 +49410,6 @@ function emulatorPacketScript(authScript, phoneBound, phoneSig) {
 }
 
 // src/lib/vault/program/script.ts
-init_define_import_meta_env();
-init_base();
 var OP3 = {
   VERIFY: 105,
   EQUAL: 135,
@@ -49429,6 +49624,537 @@ function assembleTransitionScript2(input) {
     parts.push(pushInt2(1));
   }
   return concat7(...parts);
+}
+
+// src/lib/vault/program/connectorApproval.ts
+var P3 = {
+  DEPTH: 116,
+  SUB: 148,
+  PICK: 121,
+  EQUALVERIFY: 136,
+  SIZE: 130,
+  DROP: 117,
+  SHA256INITIALIZE: 196,
+  SHA256UPDATE: 197,
+  SHA256FINALIZE: 198,
+  INSPECTINPUTARKADESCRIPTHASH: 200,
+  INSPECTNUMOUTPUTS: 213,
+  INSPECTOUTPUTSCRIPTPUBKEY: 209,
+  HASH160: 169,
+  INSPECTINPUTOUTPOINT: 199,
+  NUM2BIN: 215,
+  CAT: 126,
+  SHA256: 168,
+  INSPECTINPUTVALUE: 201,
+  INSPECTINPUTSCRIPTPUBKEY: 202,
+  DUP: 118,
+  HASH256: 170,
+  INSPECTOUTPUTVALUE: 207,
+  LEFT: 128,
+  BIN2NUM: 216,
+  SWAP: 124,
+  SUBSTR: 127,
+  EQUAL: 135,
+  IF: 99,
+  ELSE: 103,
+  ADD: 147,
+  ENDIF: 104,
+  CHECKSIGFROMSTACK: 204,
+  VERIFY: 105
+};
+var cs2 = (n) => n < 253 ? Uint8Array.of(n) : Uint8Array.of(253, n & 255, n >> 8);
+var tag2 = (s) => {
+  const h = sha256(new TextEncoder().encode(s));
+  return concat7(h, h);
+};
+function connectorApprovalWitness(script, sigs, recipient, publicKey2) {
+  if (recipient.length > 34) throw Error("recipient length");
+  const padded = new Uint8Array(35);
+  padded[0] = recipient.length;
+  padded.set(recipient, 1);
+  const encoded = sigs ? sigs.map((s) => {
+    if (!publicKey2) return s.slice(0, 64);
+    return secp256k1.Signature.fromBytes(s.slice(0, -1), "der").toBytes("compact");
+  }) : [new Uint8Array(64), new Uint8Array(64)];
+  return [
+    ...encoded,
+    padded,
+    ...publicKey2 ? [publicKey2] : [],
+    ...Array.from({ length: Math.ceil(script.length / 500) }, (_, i) => script.slice(i * 500, (i + 1) * 500))
+  ];
+}
+function buildConnectorApprovalProof2(hardware, extra = new Uint8Array()) {
+  const taproot = hardware.length === 34;
+  let len = 1e3;
+  for (let round = 0; round < 20; round++) {
+    const b = [];
+    const op = (...x) => b.push(Uint8Array.from(x)), num2 = (n) => b.push(pushInt2(n)), data = (d) => b.push(
+      d.length === 1 && d[0] >= 1 && d[0] <= 16 ? pushInt2(d[0]) : d.length === 1 && d[0] === 129 ? pushInt2(-1) : pushData2(d)
+    );
+    const copy2 = (i) => {
+      op(P3.DEPTH);
+      num2(i + 1);
+      op(P3.SUB, P3.PICK);
+    };
+    const chunks = Array.from({ length: Math.ceil(len / 500) }, (_, i) => Math.min(500, len - i * 500));
+    const start = taproot ? 3 : 4;
+    const sizes = [64, 64, 35, ...taproot ? [] : [33], ...chunks];
+    op(P3.DEPTH);
+    num2(sizes.length);
+    op(P3.EQUALVERIFY);
+    sizes.forEach((s, i) => {
+      copy2(i);
+      op(P3.SIZE);
+      num2(s);
+      op(P3.EQUALVERIFY, P3.DROP);
+    });
+    data(tag2("ArkScriptHash"));
+    op(P3.SHA256INITIALIZE);
+    chunks.forEach((_, i) => {
+      copy2(i + start);
+      op(P3.SHA256UPDATE);
+    });
+    data(new Uint8Array());
+    op(P3.SHA256FINALIZE);
+    num2(2);
+    op(P3.INSPECTINPUTARKADESCRIPTHASH, P3.EQUALVERIFY);
+    data(concat7(exactPacketOutputPrefix2(len, sizes), Uint8Array.of(1, 2, 0), cs2(len)));
+    op(P3.SHA256INITIALIZE);
+    chunks.forEach((_, i) => {
+      copy2(i + start);
+      op(P3.SHA256UPDATE);
+    });
+    const wlen = cs2(sizes.length).length + sizes.reduce((n, s) => n + cs2(s).length + s, 0);
+    data(concat7(cs2(wlen), cs2(sizes.length)));
+    op(P3.SHA256UPDATE);
+    sizes.forEach((s, i) => {
+      data(cs2(s));
+      op(P3.SHA256UPDATE);
+      copy2(i);
+      op(P3.SHA256UPDATE);
+    });
+    data(new Uint8Array());
+    op(P3.SHA256FINALIZE, P3.INSPECTNUMOUTPUTS);
+    num2(1);
+    op(P3.SUB, P3.INSPECTOUTPUTSCRIPTPUBKEY);
+    num2(-1);
+    op(P3.EQUALVERIFY, P3.EQUALVERIFY);
+    if (!taproot) {
+      copy2(3);
+      op(P3.HASH160);
+      data(hardware.slice(2));
+      op(P3.EQUALVERIFY);
+    }
+    if (taproot) {
+      data(concat7(tag2("TapSighash"), hex.decode("00030200000000000000")));
+      for (let i = 0; i < 3; i++) {
+        num2(i);
+        op(P3.INSPECTINPUTOUTPOINT);
+        num2(4);
+        op(P3.NUM2BIN, P3.CAT);
+        if (i > 0) op(P3.CAT);
+      }
+      op(P3.SHA256, P3.CAT);
+      data(hex.decode("f401000000000000f401000000000000"));
+      num2(2);
+      op(P3.INSPECTINPUTVALUE);
+      num2(8);
+      op(P3.NUM2BIN, P3.CAT, P3.SHA256, P3.CAT);
+      data(
+        concat7(
+          Uint8Array.of(hardware.length),
+          hardware,
+          Uint8Array.of(hardware.length),
+          hardware,
+          hex.decode("225120")
+        )
+      );
+      num2(2);
+      op(P3.INSPECTINPUTSCRIPTPUBKEY);
+      num2(1);
+      op(P3.EQUALVERIFY, P3.CAT, P3.SHA256, P3.CAT);
+      data(sha256(hex.decode("fdfffffffdfffffffdffffff")));
+      op(P3.CAT);
+    }
+    for (let i = 0; i < 2; i++) {
+      if (taproot) {
+        op(P3.DUP);
+        data(Uint8Array.of(0, i, 0, 0, 0));
+        op(P3.CAT);
+      } else {
+        data(hex.decode("02000000"));
+        for (let j = 0; j < 3; j++) {
+          num2(j);
+          op(P3.INSPECTINPUTOUTPOINT);
+          num2(4);
+          op(P3.NUM2BIN, P3.CAT);
+          if (j > 0) op(P3.CAT);
+        }
+        op(P3.HASH256, P3.CAT);
+        data(new Uint8Array(32));
+        op(P3.CAT);
+        num2(i);
+        op(P3.INSPECTINPUTOUTPOINT);
+        num2(4);
+        op(P3.NUM2BIN, P3.CAT, P3.CAT);
+        data(concat7(hex.decode("1976a914"), hardware.slice(2), hex.decode("88acf401000000000000fdffffff")));
+        op(P3.CAT);
+      }
+      num2(i);
+      op(P3.INSPECTOUTPUTVALUE);
+      num2(8);
+      op(P3.NUM2BIN);
+      if (i === 0) {
+        copy2(2);
+        op(P3.DUP);
+        num2(1);
+        op(P3.LEFT, P3.BIN2NUM);
+        num2(1);
+        op(P3.SWAP, P3.SUBSTR, P3.DUP);
+        num2(0);
+        op(P3.INSPECTOUTPUTSCRIPTPUBKEY, P3.DUP);
+        num2(-1);
+        op(P3.EQUAL, P3.IF, P3.DROP, P3.SWAP, P3.SHA256, P3.EQUALVERIFY, P3.ELSE);
+        op(P3.DUP);
+        num2(0);
+        op(P3.EQUAL, P3.IF);
+        num2(1);
+        op(P3.NUM2BIN, P3.ELSE);
+        num2(80);
+        op(P3.ADD);
+        num2(1);
+        op(P3.NUM2BIN, P3.ENDIF, P3.SWAP, P3.SIZE);
+        num2(1);
+        op(P3.NUM2BIN, P3.SWAP, P3.CAT, P3.CAT, P3.EQUALVERIFY, P3.ENDIF);
+        op(P3.SIZE);
+        num2(1);
+        op(P3.NUM2BIN, P3.SWAP, P3.CAT);
+      } else {
+        op(P3.INSPECTNUMOUTPUTS);
+        num2(6);
+        op(P3.EQUAL, P3.IF);
+        data(hex.decode("225120"));
+        num2(1);
+        op(P3.INSPECTOUTPUTSCRIPTPUBKEY);
+        num2(1);
+        op(P3.EQUALVERIFY, P3.CAT, P3.ELSE);
+        data(concat7(Uint8Array.of(hardware.length), hardware));
+        op(P3.ENDIF);
+      }
+      op(P3.CAT, taproot ? P3.SHA256 : P3.HASH256, P3.CAT);
+      if (!taproot) {
+        data(hex.decode("0000000003000000"));
+        op(P3.CAT);
+      }
+      op(taproot ? P3.SHA256 : P3.HASH256);
+      copy2(i);
+      op(P3.SWAP);
+      if (taproot) data(hardware.slice(2));
+      else {
+        num2(16);
+        copy2(3);
+        op(P3.CAT);
+      }
+      op(P3.CHECKSIGFROMSTACK, P3.VERIFY);
+    }
+    if (taproot) op(P3.DROP);
+    sizes.forEach(() => op(P3.DROP));
+    b.push(extra);
+    num2(1);
+    const result = concat7(...b);
+    if (result.length === len) return result;
+    len = result.length;
+  }
+  throw Error("length convergence");
+}
+
+// src/lib/vault/program/connectorDual.ts
+init_base();
+var X3 = { inputScript: 202, toAlt: 107, fromAlt: 108, if: 99, endif: 104, boolOr: 155 };
+function buildDualConnectorProgram2(r) {
+  return buildConnectorApprovalProof2(r.connectorScript, concat7(buildDualPolicy2(r), Uint8Array.of(OP3.VERIFY)));
+}
+function buildDualPolicy2(r) {
+  validateConnectorRules2(r);
+  const chunks = [];
+  const op = (...values) => chunks.push(Uint8Array.from(values));
+  const num2 = (n) => chunks.push(pushInt2(n));
+  const data = (b) => chunks.push(pushData2(b));
+  const equal = (opcode, n) => {
+    op(opcode);
+    num2(n);
+    op(OP3.EQUALVERIFY);
+  };
+  const script = (opcode, index, b) => {
+    num2(index);
+    op(opcode);
+    num2(b[0] === 81 ? 1 : 0);
+    op(OP3.EQUALVERIFY);
+    data(b.slice(2));
+    op(OP3.EQUALVERIFY);
+  };
+  const withChange = () => {
+    op(OP3.INSPECTNUMOUTPUTS);
+    num2(6);
+    op(OP3.EQUAL, X3.if);
+  };
+  const position = (full) => {
+    withChange();
+    num2(full + 1);
+    op(103);
+    num2(full);
+    op(X3.endif);
+  };
+  const outputScript = (full, bytes2) => {
+    position(full);
+    op(OP3.INSPECTOUTPUTSCRIPTPUBKEY);
+    num2(bytes2[0] === 81 ? 1 : 0);
+    op(OP3.EQUALVERIFY);
+    data(bytes2.slice(2));
+    op(OP3.EQUALVERIFY);
+  };
+  data(new TextEncoder().encode(DUAL_CONNECTOR_PROGRAM2));
+  op(OP3.DROP);
+  equal(OP3.INSPECTVERSION, 2);
+  equal(OP3.INSPECTLOCKTIME, 0);
+  equal(OP3.INSPECTNUMINPUTS, 3);
+  op(OP3.INSPECTNUMOUTPUTS, OP3.DUP);
+  num2(5);
+  op(OP3.EQUAL, OP3.SWAP);
+  num2(6);
+  op(OP3.EQUAL, X3.boolOr, OP3.VERIFY);
+  for (const i of [0, 1, 2]) {
+    num2(i);
+    equal(OP3.INSPECTINPUTSEQUENCE, 4294967293);
+  }
+  for (const i of [0, 1]) {
+    script(X3.inputScript, i, r.connectorScript);
+    num2(i);
+    equal(OP3.INSPECTINPUTVALUE, 500);
+    outputScript(i + 1, r.connectorScript);
+    position(i + 1);
+    equal(OP3.INSPECTOUTPUTVALUE, 500);
+  }
+  outputScript(3, hex.decode("51024e73"));
+  position(3);
+  equal(OP3.INSPECTOUTPUTVALUE, 240);
+  position(4);
+  equal(OP3.INSPECTOUTPUTVALUE, 0);
+  withChange();
+  num2(2);
+  op(X3.inputScript, X3.toAlt);
+  num2(1);
+  op(OP3.INSPECTOUTPUTSCRIPTPUBKEY, X3.fromAlt, OP3.EQUALVERIFY, OP3.EQUALVERIFY);
+  num2(1);
+  op(OP3.INSPECTOUTPUTVALUE);
+  num2(330);
+  op(OP3.GREATERTHANOREQUAL, OP3.VERIFY, X3.endif);
+  num2(0);
+  op(OP3.INSPECTOUTPUTVALUE);
+  num2(294);
+  op(OP3.GREATERTHANOREQUAL, OP3.VERIFY);
+  num2(2);
+  op(OP3.INSPECTINPUTVALUE);
+  num2(0);
+  op(OP3.INSPECTOUTPUTVALUE, OP3.SUB);
+  position(3);
+  op(OP3.INSPECTOUTPUTVALUE, OP3.SUB);
+  withChange();
+  num2(1);
+  op(OP3.INSPECTOUTPUTVALUE, OP3.SUB, X3.endif);
+  op(OP3.DUP);
+  num2(0);
+  op(OP3.GREATERTHANOREQUAL, OP3.VERIFY, OP3.DUP);
+  num2(r.absoluteFeeCapSats);
+  op(OP3.LESSTHANOREQUAL, OP3.VERIFY, OP3.TXWEIGHT);
+  num2(r.witnessBytes);
+  op(OP3.ADD);
+  num2(3);
+  op(OP3.ADD);
+  num2(4);
+  op(OP3.DIV);
+  num2(r.feerateCapSatPerV);
+  op(OP3.MUL, OP3.LESSTHANOREQUAL);
+  return concat7(...chunks);
+}
+
+// src/lib/vault/program/connector.ts
+init_base();
+init_btc_signer();
+init_secp256k1();
+init_sha2();
+
+// src/lib/vault/spendingPolicy.ts
+init_define_import_meta_env();
+init_sha2();
+var SPENDING_POLICY_PROGRAM2 = "vault-policy-v1";
+var SPENDING_POLICY_PERIOD2 = "rolling-24h";
+var SPENDING_POLICY_BOUNDS2 = {
+  periodAllowanceSats: { min: 330, max: 1e9 },
+  txRecipientCapSats: { min: 330, max: 1e8 },
+  absoluteFeeCapSats: { min: ABSOLUTE_FEE_CEILING_SATS2, max: ABSOLUTE_FEE_CEILING_SATS2 },
+  feerateCapSatPerV: { min: FEERATE_CEILING_SAT_PER_V2, max: FEERATE_CEILING_SAT_PER_V2 }
+};
+function policyBounds2(network2) {
+  if (network2 === void 0) return SPENDING_POLICY_BOUNDS2;
+  requireSupportedVaultNetwork2(network2);
+  const fee = network2 === "mainnet" ? MAINNET_ABSOLUTE_FEE_CEILING_SATS2 : MUTINYNET_ABSOLUTE_FEE_CEILING_SATS2;
+  const rate = network2 === "mainnet" ? MAINNET_FEERATE_CEILING_SAT_PER_V2 : MUTINYNET_FEERATE_CEILING_SAT_PER_V2;
+  return {
+    ...SPENDING_POLICY_BOUNDS2,
+    absoluteFeeCapSats: { min: fee, max: fee },
+    feerateCapSatPerV: { min: rate, max: rate }
+  };
+}
+function defaultSpendingPolicy2(network2) {
+  const bounds = policyBounds2(network2);
+  return {
+    program: SPENDING_POLICY_PROGRAM2,
+    schema: POLICY_VERSION2,
+    period: SPENDING_POLICY_PERIOD2,
+    periodAllowanceSats: PERIOD_ALLOWANCE_SATS2,
+    txRecipientCapSats: TX_RECIPIENT_CAP_SATS2,
+    absoluteFeeCapSats: bounds.absoluteFeeCapSats.min,
+    feerateCapSatPerV: bounds.feerateCapSatPerV.min
+  };
+}
+var CURRENT_SPENDING_POLICY_CAPABILITIES2 = {
+  program: SPENDING_POLICY_PROGRAM2,
+  schema: POLICY_VERSION2,
+  period: SPENDING_POLICY_PERIOD2,
+  bounds: SPENDING_POLICY_BOUNDS2,
+  presets: [
+    {
+      id: "lower-exposure",
+      label: "Lower exposure",
+      policy: {
+        ...defaultSpendingPolicy2(),
+        txRecipientCapSats: 25e3,
+        periodAllowanceSats: 5e4
+      }
+    },
+    { id: "everyday", label: "Everyday", policy: defaultSpendingPolicy2() }
+  ]
+};
+function requireBound2(value2, bound, name) {
+  if (!Number.isSafeInteger(value2) || Number(value2) < bound.min || Number(value2) > bound.max) {
+    throw new Error(`${name} must be between ${bound.min} and ${bound.max}`);
+  }
+  return Number(value2);
+}
+function validateSpendingPolicy2(value2, network2) {
+  const bounds = policyBounds2(network2);
+  if (!value2 || typeof value2 !== "object" || Array.isArray(value2)) throw new Error("spending policy required");
+  const p = value2;
+  const expected = [
+    "program",
+    "schema",
+    "period",
+    "periodAllowanceSats",
+    "txRecipientCapSats",
+    "absoluteFeeCapSats",
+    "feerateCapSatPerV"
+  ];
+  const fields = Object.keys(p);
+  if (fields.length !== expected.length || expected.some((name) => !Object.prototype.hasOwnProperty.call(p, name))) {
+    throw new Error("spending policy fields");
+  }
+  if (p.program !== SPENDING_POLICY_PROGRAM2) throw new Error("unsupported spending policy program");
+  if (p.schema !== POLICY_VERSION2) throw new Error("unsupported spending policy schema");
+  if (p.period !== SPENDING_POLICY_PERIOD2) throw new Error("unsupported spending policy period");
+  const policy = {
+    program: SPENDING_POLICY_PROGRAM2,
+    schema: POLICY_VERSION2,
+    period: SPENDING_POLICY_PERIOD2,
+    periodAllowanceSats: requireBound2(p.periodAllowanceSats, bounds.periodAllowanceSats, "period allowance"),
+    txRecipientCapSats: requireBound2(p.txRecipientCapSats, bounds.txRecipientCapSats, "transaction recipient cap"),
+    absoluteFeeCapSats: requireBound2(p.absoluteFeeCapSats, bounds.absoluteFeeCapSats, "absolute fee cap"),
+    feerateCapSatPerV: requireBound2(p.feerateCapSatPerV, bounds.feerateCapSatPerV, "feerate cap")
+  };
+  if (policy.periodAllowanceSats < policy.txRecipientCapSats) {
+    throw new Error("period allowance must be at least the transaction recipient cap");
+  }
+  return policy;
+}
+function canonicalSpendingPolicy2(policy, network2) {
+  return JSON.stringify(validateSpendingPolicy2(policy, network2));
+}
+function spendingPolicyDigest2(policy, network2) {
+  return bytesToHex4(sha256(encodeUtf82(canonicalSpendingPolicy2(policy, network2))));
+}
+
+// src/lib/vault/protectionTier.ts
+init_define_import_meta_env();
+function requireProtectionTier2(value2) {
+  if (value2 !== "standard" && value2 !== "advanced") throw new Error("unsupported protection tier");
+  return value2;
+}
+function requireProtectionTierMatchesRecovery2(tier, recoveryPub) {
+  const selected = requireProtectionTier2(tier);
+  const hasRecovery = typeof recoveryPub === "string" && recoveryPub.trim().length > 0;
+  if (selected === "standard" && hasRecovery) throw new Error("Standard protection must not include a recovery key");
+  if (selected === "advanced" && !hasRecovery) throw new Error("Advanced protection requires a recovery key");
+  return selected;
+}
+
+// src/lib/vault/addressNetwork.ts
+init_define_import_meta_env();
+init_btc_signer();
+function vaultAddressNetwork2(network2) {
+  if (network2 === "mutinynet") return TEST_NETWORK;
+  if (network2 === "bitcoin" || network2 === "mainnet") return NETWORK;
+  throw new Error("unsupported network");
+}
+
+// src/lib/vault/program/context.ts
+init_define_import_meta_env();
+init_sha2();
+init_base();
+init_btc_signer();
+function taggedHash5(tag3, ...messages) {
+  const tagH = sha256(encodeUtf82(tag3));
+  const prefix2 = new Uint8Array(64);
+  prefix2.set(tagH, 0);
+  prefix2.set(tagH, 32);
+  const total = messages.reduce((n, m) => n + m.length, 64);
+  const out = new Uint8Array(total);
+  out.set(prefix2);
+  let offset = 64;
+  for (const msg of messages) {
+    out.set(msg, offset);
+    offset += msg.length;
+  }
+  return sha256(out);
+}
+function appendText3(parts, value2, name) {
+  if (!value2 || value2 !== value2.trim() || value2 !== value2.toLowerCase()) {
+    throw new Error(`${name} must be non-empty canonical lowercase`);
+  }
+  const bytes2 = encodeUtf82(value2);
+  const len = new Uint8Array(4);
+  new DataView(len.buffer).setUint32(0, bytes2.length, false);
+  parts.push(len, bytes2);
+}
+function encodeTreeContext2(input) {
+  const claimant = input.claimant || "";
+  if (claimant && !CLAIMANTS2.includes(claimant)) throw new Error("unknown claimant");
+  const parts = [];
+  appendText3(parts, input.vaultId, "vaultId");
+  appendText3(parts, "savings", "kind");
+  appendText3(parts, claimant === "" ? "-" : claimant, "claimant");
+  appendText3(parts, input.templateVersion || SAVINGS_TEMPLATE2, "templateVersion");
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+function contextInternalKey2(input) {
+  const context = taggedHash5(PROGRAM_INTERNAL_TAG2, encodeTreeContext2(input));
+  const [tweaked] = utils3.taprootTweakPubkey(hex.decode(TAPROOT_NUMS_XONLY2), context);
+  return tweaked;
 }
 
 // src/lib/vault/program/trees.ts
@@ -49726,12 +50452,20 @@ function buildVaultProgramFamily2(input) {
 // src/lib/vault/program/connector.ts
 var CONNECTOR_PROGRAM2 = "savings-connector-v1";
 var CONNECTOR_TEMPLATE2 = "phone-connector-recovery-savings-v1";
-var X2 = { inputScript: 202, toAlt: 107, fromAlt: 108, if: 99, endif: 104, boolOr: 155 };
-function buildConnectorProgram2(r) {
+var DUAL_CONNECTOR_TEMPLATE2 = "phone-connector-recovery-savings-v2";
+var DUAL_CONNECTOR_PROGRAM2 = "savings-connector-dual-v2";
+function isConnectorTemplate2(template) {
+  return template === CONNECTOR_TEMPLATE2 || template === DUAL_CONNECTOR_TEMPLATE2;
+}
+var X4 = { inputScript: 202, toAlt: 107, fromAlt: 108, if: 99, endif: 104, boolOr: 155 };
+function validateConnectorRules2(r) {
   if (!(r.connectorScript.length === 22 && r.connectorScript[0] === 0 && r.connectorScript[1] === 20) && (r.connectorScript.length !== 34 || r.connectorScript[0] !== 81 || r.connectorScript[1] !== 32 || !secp256k1.utils.isValidPublicKey(new Uint8Array([2, ...r.connectorScript.slice(2)]), true)))
     throw new Error("connector native SegWit or Taproot script required");
   if (!Number.isSafeInteger(r.witnessBytes) || r.witnessBytes < 1 || r.witnessBytes > 1e4 || !Number.isSafeInteger(r.absoluteFeeCapSats) || r.absoluteFeeCapSats < 0 || r.absoluteFeeCapSats > 1e5 || !Number.isSafeInteger(r.feerateCapSatPerV) || r.feerateCapSatPerV < 1 || r.feerateCapSatPerV > 100)
     throw new Error("invalid connector fee policy");
+}
+function buildConnectorProgram2(r) {
+  validateConnectorRules2(r);
   let prefix2 = new Uint8Array();
   for (let attempt = 0; attempt < 8; attempt++) {
     const chunks = [];
@@ -49754,7 +50488,7 @@ function buildConnectorProgram2(r) {
     const withChange = () => {
       op(OP3.INSPECTNUMOUTPUTS);
       num2(5);
-      op(OP3.EQUAL, X2.if);
+      op(OP3.EQUAL, X4.if);
     };
     data(new TextEncoder().encode(CONNECTOR_PROGRAM2));
     op(OP3.DROP);
@@ -49765,23 +50499,23 @@ function buildConnectorProgram2(r) {
     num2(4);
     op(OP3.EQUAL, OP3.SWAP);
     num2(5);
-    op(OP3.EQUAL, X2.boolOr, OP3.VERIFY);
+    op(OP3.EQUAL, X4.boolOr, OP3.VERIFY);
     for (const i of [0, 1]) {
       num2(i);
       equal(OP3.INSPECTINPUTSEQUENCE, 4294967293);
     }
-    script(X2.inputScript, 1, r.connectorScript);
+    script(X4.inputScript, 1, r.connectorScript);
     script(OP3.INSPECTOUTPUTSCRIPTPUBKEY, 1, r.connectorScript);
     script(OP3.INSPECTOUTPUTSCRIPTPUBKEY, 2, hex.decode("51024e73"));
     withChange();
     num2(0);
-    op(X2.inputScript, X2.toAlt);
+    op(X4.inputScript, X4.toAlt);
     num2(4);
-    op(OP3.INSPECTOUTPUTSCRIPTPUBKEY, X2.fromAlt, OP3.EQUALVERIFY, OP3.EQUALVERIFY);
+    op(OP3.INSPECTOUTPUTSCRIPTPUBKEY, X4.fromAlt, OP3.EQUALVERIFY, OP3.EQUALVERIFY);
     num2(4);
     op(OP3.INSPECTOUTPUTVALUE);
     num2(330);
-    op(OP3.GREATERTHANOREQUAL, OP3.VERIFY, X2.endif);
+    op(OP3.GREATERTHANOREQUAL, OP3.VERIFY, X4.endif);
     num2(1);
     equal(OP3.INSPECTINPUTVALUE, 1e3);
     num2(1);
@@ -49810,7 +50544,7 @@ function buildConnectorProgram2(r) {
     }
     withChange();
     num2(4);
-    op(OP3.INSPECTOUTPUTVALUE, OP3.SUB, X2.endif);
+    op(OP3.INSPECTOUTPUTVALUE, OP3.SUB, X4.endif);
     op(OP3.DUP);
     num2(0);
     op(OP3.GREATERTHANOREQUAL, OP3.VERIFY, OP3.DUP);
@@ -49832,15 +50566,17 @@ function buildConnectorProgram2(r) {
   throw new Error("connector packet envelope did not converge");
 }
 function buildConnectorFamily2(input) {
-  if (input.templateVersion && input.templateVersion !== CONNECTOR_TEMPLATE2)
+  if (input.templateVersion && !isConnectorTemplate2(input.templateVersion))
     throw new Error("connector template mismatch");
   if (input.network !== "mainnet" && input.network !== "mutinynet") throw new Error("unsupported connector network");
-  const selected = { ...input, templateVersion: CONNECTOR_TEMPLATE2, serverFreeClawback: true };
+  const template = input.templateVersion ?? CONNECTOR_TEMPLATE2;
+  const dual = template === DUAL_CONNECTOR_TEMPLATE2;
+  const selected = { ...input, templateVersion: template, serverFreeClawback: true };
   const base = buildVaultProgramFamily2(selected);
   if (input.connectorType !== "p2tr" && input.connectorType !== "p2wpkh") throw new Error("unsupported connector type");
   const connector = input.connectorType === "p2tr" ? p2tr(xOnlyFromCompressed2(input.hardwarePub), void 0, vaultAddressNetwork2(input.network)) : p2wpkh(hex.decode(input.hardwarePub), vaultAddressNetwork2(input.network));
-  const connectorWitnessBytes = input.connectorType === "p2tr" ? 66 : 45;
-  const internal = contextInternalKey2({ vaultId: input.vaultId, claimant: "", templateVersion: CONNECTOR_TEMPLATE2 });
+  const connectorWitnessBytes = dual ? input.connectorType === "p2tr" ? 134 : 90 : input.connectorType === "p2tr" ? 66 : 45;
+  const internal = contextInternalKey2({ vaultId: input.vaultId, claimant: "", templateVersion: template });
   const makeNormal = (normal) => {
     const tree = p2tr(
       internal,
@@ -49862,7 +50598,7 @@ function buildConnectorFamily2(input) {
     absoluteFeeCapSats: input.absoluteFeeCapSats,
     feerateCapSatPerV: input.feerateCapSatPerV
   };
-  const program = buildConnectorProgram2(rules);
+  const program = dual ? buildDualConnectorProgram2(rules) : buildConnectorProgram2(rules);
   const pair = tweakPair2(input.vaultCosignerBase, input.arkadeCosignerBase, program);
   const roles = [
     input.phonePub,
@@ -49906,7 +50642,7 @@ function connectorEnrollmentDigest2(input, origin) {
   const canonical2 = (s) => hex.encode(hex.decode(s));
   const fields = [
     "arkade-vault/connector-enrollment-v1",
-    CONNECTOR_TEMPLATE2,
+    input.templateVersion ?? CONNECTOR_TEMPLATE2,
     input.vaultId,
     input.network,
     input.protectionTier,
@@ -50110,7 +50846,7 @@ function validateVaultProgramDescriptor2(d) {
   if (d.schema !== PROGRAM_SCHEMA2) throw new Error("unsupported vault schema");
   if (!SUPPORTED_NETWORKS2.includes(d.network)) throw new Error(`unsupported network ${d.network}`);
   if (!d.vaultId || String(d.vaultId).trim() === "") throw new Error("vault id required");
-  if (!isSavingsTemplate2(d.templateVersion) && d.templateVersion !== CONNECTOR_TEMPLATE2)
+  if (!isSavingsTemplate2(d.templateVersion) && !isConnectorTemplate2(d.templateVersion))
     throw new Error("template version is not this release");
   if (d.policyVersion !== POLICY_VERSION2) throw new Error("policy version is not this release");
   requireProtectionTierMatchesRecovery2(d.protectionTier, d.keys.recovery);
@@ -50281,7 +51017,7 @@ function familyFromDescriptor(d) {
   });
 }
 function buildDescriptorFamily2(input) {
-  if (input.templateVersion !== CONNECTOR_TEMPLATE2) {
+  if (!isConnectorTemplate2(input.templateVersion)) {
     if (input.connectorType !== void 0) throw new Error("connector type on a legacy descriptor");
     return buildVaultProgramFamily2(input);
   }
@@ -50372,6 +51108,7 @@ function buildConnectorEnrollmentPreview2(input) {
   if (input.origin.connectorType !== "p2wpkh" && input.origin.connectorType !== "p2tr")
     fail2("connector type must be p2tr or p2wpkh");
   const familyInput = {
+    templateVersion: input.templateVersion ?? CONNECTOR_TEMPLATE2,
     connectorType: input.origin.connectorType,
     vaultId: input.vaultId,
     network: network2,
@@ -50406,7 +51143,7 @@ function buildConnectorEnrollmentPreview2(input) {
     schema: PROGRAM_SCHEMA2,
     network: network2,
     vaultId: input.vaultId,
-    templateVersion: CONNECTOR_TEMPLATE2,
+    templateVersion: input.templateVersion ?? CONNECTOR_TEMPLATE2,
     policyVersion: POLICY_VERSION2,
     protectionTier,
     keys: {
@@ -50460,6 +51197,7 @@ function parseConnectorRecoveryKit2(raw2) {
   if (kit2.version !== CONNECTOR_KIT_VERSION2) fail2("unsupported connector kit version");
   const rebuilt = buildConnectorEnrollmentPreview2({
     vaultId: kit2.vaultId,
+    templateVersion: kit2.templateVersion ?? CONNECTOR_TEMPLATE2,
     network: kit2.network,
     protectionTier: kit2.protectionTier,
     phonePub: kit2.phonePub,
@@ -50489,6 +51227,7 @@ function connectorRecoveryDescriptor2(raw2) {
   const kit2 = parseConnectorRecoveryKit2(raw2);
   return buildConnectorEnrollmentPreview2({
     vaultId: kit2.vaultId,
+    templateVersion: kit2.templateVersion ?? CONNECTOR_TEMPLATE2,
     network: kit2.network,
     protectionTier: kit2.protectionTier,
     origin: kit2.origin,
@@ -52506,7 +53245,7 @@ function verifyConnectorStatus(status2, pin, options2) {
   if (!status2?.enrolled) fail2("vault is not enrolled");
   if (status2.vaultId !== pin.vaultId) fail2("connector vault id does not match enrollment");
   if (status2.network !== pin.network) fail2("connector network does not match enrollment");
-  if (status2.templateVersion !== CONNECTOR_TEMPLATE2) fail2("vault is not a connector enrollment");
+  if (!isConnectorTemplate2(status2.templateVersion)) fail2("vault is not a connector enrollment");
   const identity2 = status2.connectorEnrollment;
   if (!identity2 || identity2.connectorPub !== pin.connectorPub || identity2.connectorType !== pin.connectorType || identity2.connectorFingerprint !== pin.connectorFingerprint || identity2.connectorPath.join("/") !== pin.connectorPath.join("/") || identity2.enrollmentDigest !== pin.enrollmentDigest || identity2.descriptorHash !== pin.descriptorHash)
     fail2("connector status origin does not match enrollment");
@@ -52540,6 +53279,7 @@ function verifyConnectorStatus(status2, pin, options2) {
   }
   const preview = buildConnectorEnrollmentPreview2({
     vaultId: pin.vaultId,
+    templateVersion: status2.templateVersion,
     network: pin.network,
     protectionTier: pin.protectionTier,
     phonePub,
@@ -52611,7 +53351,7 @@ function kitFromFacts(input) {
   const spendingPolicy = input.status?.spendingPolicy;
   const statusSpendingPolicyDigest = String(input.status?.spendingPolicyDigest || "").trim();
   const protectionTier = input.status?.protectionTier;
-  if (liveBases && phonePub && phoneDirectP256 && vaultId && signerOrigin && signerVersion && spendingPolicy && spendingPolicy.program === "vault-policy-v1" && statusSpendingPolicyDigest && protectionTier && protectionTier !== "light" && isSupportedVaultNetwork2(input.status?.network) && (liveTemplate === SAVINGS_TEMPLATE2 || liveTemplate === CONNECTOR_TEMPLATE2)) {
+  if (liveBases && phonePub && phoneDirectP256 && vaultId && signerOrigin && signerVersion && spendingPolicy && spendingPolicy.program === "vault-policy-v1" && statusSpendingPolicyDigest && protectionTier && protectionTier !== "light" && isSupportedVaultNetwork2(input.status?.network) && (liveTemplate === SAVINGS_TEMPLATE2 || isConnectorTemplate2(liveTemplate))) {
     try {
       const descriptor = buildVaultProgramDescriptor({
         vaultId,
@@ -52913,7 +53653,7 @@ function vaultRecoveryBinding(kit2, status2) {
   if (hex.encode(script.params.arkdServerPub) !== networkPins(status2.network).operatorSignerPub.slice(2))
     throw new Error("Recovery Operator does not match this release");
   const boarding = requireBoardingStatus(status2, String(status2.vtxoBoardingDescriptor?.boardingPub || ""));
-  if (status2.templateVersion === CONNECTOR_TEMPLATE2) connectorPinFromVerifiedStatus(status2);
+  if (isConnectorTemplate2(status2.templateVersion)) connectorPinFromVerifiedStatus(status2);
   else if (hashBoardingEnrollmentDescriptor({
     schema: "arkade-vault/enrollment-with-board-v1",
     vaultId: status2.vaultId,
@@ -53123,9 +53863,15 @@ function prepareConnectorPayment(input) {
   const connectorPublicKey = input.origin.publicKey.slice();
   const connectorType = input.contract.connectorType;
   const f = buildConnectorFamily2(input.contract);
-  const scripts = [f.savings.script, f.connector.script];
-  const coins2 = [input.savings, input.reserve];
-  if (coins2[0].txid === coins2[1].txid && coins2[0].vout === coins2[1].vout) throw new Error("duplicate connector input");
+  const dual = input.contract.templateVersion === DUAL_CONNECTOR_TEMPLATE2;
+  if (dual !== !!input.secondReserve) throw new Error("connector reserve count mismatch");
+  const savingsIndex = dual ? 2 : 0;
+  const reserveIndices = dual ? [0, 1] : [1];
+  const reserveAmount = dual ? 500n : 1000n;
+  const scripts = dual ? [f.connector.script, f.connector.script, f.savings.script] : [f.savings.script, f.connector.script];
+  const coins2 = dual ? [input.reserve, input.secondReserve, input.savings] : [input.savings, input.reserve];
+  if (new Set(coins2.map((coin) => `${coin.txid}:${coin.vout}`)).size !== coins2.length)
+    throw new Error("duplicate connector input");
   const tx = new Transaction(OPTIONS);
   const values = [];
   const signingLeaf = f.savings.tapLeafScript?.find(
@@ -53159,11 +53905,14 @@ function prepareConnectorPayment(input) {
       sequence: 4294967293,
       nonWitnessUtxo: raw2,
       witnessUtxo: { amount: out.amount, script: out.script },
-      ...index === 0 ? { tapLeafScript: [signingLeaf], tapInternalKey: f.savings.tapInternalKey } : { ...connectorMetadata, ...input.contract.connectorType === "p2wpkh" ? { sighashType: 1 } : {} }
+      ...index === savingsIndex ? { tapLeafScript: [signingLeaf], tapInternalKey: f.savings.tapInternalKey } : {
+        ...connectorMetadata,
+        ...dual ? { sighashType: 3 } : input.contract.connectorType === "p2wpkh" ? { sighashType: 1 } : {}
+      }
     });
     tx.updateInput(index, { unknown: [[{ type: 222, key: new TextEncoder().encode("prevouttx") }, raw2]] });
   }
-  if (values[1] !== 1000n || values[0] + values[1] > 2100000000000000n)
+  if (reserveIndices.some((i) => values[i] !== reserveAmount) || values.reduce((sum, v) => sum + v, 0n) > 2100000000000000n)
     throw new Error("invalid reserve or total value");
   const recipientScript = hex.decode(scriptHexFromAddress(input.recipient, input.contract.network));
   if (!["pkh", "sh", "wpkh", "wsh", "tr"].includes(OutScript.decode(recipientScript).type))
@@ -53171,129 +53920,198 @@ function prepareConnectorPayment(input) {
   const dust = bitcoinDustSats(input.recipient, input.contract.network);
   if (!Number.isSafeInteger(input.amountSats) || input.amountSats < dust || !Number.isSafeInteger(input.feeSats) || input.feeSats < 0 || input.feeSats > f.rules.absoluteFeeCapSats)
     throw new Error("invalid connector amount or fee");
-  const change = values[0] - BigInt(input.amountSats) - BigInt(input.feeSats) - 240n;
+  const change = values[savingsIndex] - BigInt(input.amountSats) - BigInt(input.feeSats) - 240n;
   if (change < 0n || change > 0n && change < 330n) throw new Error("Savings change must be absent or non-dust");
   tx.addOutput({
     script: recipientScript,
     amount: BigInt(input.amountSats)
   });
-  tx.addOutput({
-    script: f.connector.script,
-    amount: 1000n,
-    ...connectorMetadata
-  });
+  if (dual && change > 0n) tx.addOutput({ script: f.savings.script, amount: change });
+  for (let i = 0; i < reserveIndices.length; i++)
+    tx.addOutput({ script: f.connector.script, amount: reserveAmount, ...connectorMetadata });
   tx.addOutput({ script: hex.decode("51024e73"), amount: 240n });
-  tx.addOutput({ script: emulatorPacketScript(f.program, false), amount: 0n });
-  if (change > 0n) tx.addOutput({ script: f.savings.script, amount: change });
+  tx.addOutput({
+    script: dual ? encodeExtensionScript2([
+      {
+        type: 1,
+        data: encodeEmulatorPacket2({
+          vin: savingsIndex,
+          script: f.program,
+          witness: connectorApprovalWitness(
+            f.program,
+            input.hardwareSignatures?.map((sig) => hex.decode(sig)),
+            recipientScript,
+            connectorType === "p2wpkh" ? connectorPublicKey : void 0
+          )
+        })
+      }
+    ]) : emulatorPacketScript(f.program, false),
+    amount: 0n
+  });
+  if (!dual && change > 0n) tx.addOutput({ script: f.savings.script, amount: change });
+  if (input.hardwareSignatures) {
+    if (!dual || input.hardwareSignatures.length !== 2) throw new Error("unexpected hardware approval");
+    input.hardwareSignatures.forEach(
+      (sig, i) => tx.updateInput(i, {
+        finalScriptWitness: connectorType === "p2tr" ? [hex.decode(sig)] : [hex.decode(sig), connectorPublicKey]
+      })
+    );
+  }
   const unsigned = tx.unsignedTx;
   const vbytes = Math.ceil((unsigned.length * 4 + f.rules.witnessBytes) / 4);
   if (input.feeSats > vbytes * f.rules.feerateCapSatPerV) throw new Error("connector feerate cap exceeded");
   const prepared2 = tx.toPSBT();
+  function mergeResponse(responseText, completePSBT, approvalUnsigned) {
+    if (responseText.length > 4e6) throw new Error("signer response too large");
+    const text = responseText.replace(/\s+/g, "");
+    const raw2 = /^[0-9a-f]+$/i.test(text) && text.length % 2 === 0 ? hex.decode(text) : base64.decode(text);
+    const isPSBT = hex.encode(raw2.slice(0, 5)) === "70736274ff";
+    const response = isPSBT ? Transaction.fromPSBT(raw2, OPTIONS) : Transaction.fromRaw(raw2, OPTIONS);
+    const returnedUnsigned = hex.encode(response.unsignedTx);
+    if (returnedUnsigned !== hex.encode(approvalUnsigned) && (!dual || returnedUnsigned !== hex.encode(unsigned)))
+      throw new Error("hardware changed transaction");
+    for (let i = 0; i < coins2.length; i++) {
+      const returned = response.getInput(i);
+      if (returned.sighashType !== void 0 && (i === savingsIndex ? returned.sighashType !== 0 : dual ? returned.sighashType !== 3 : returned.sighashType !== 0 && returned.sighashType !== 1))
+        throw new Error("connector signature sighash mismatch");
+      if (returned.finalScriptSig?.length) throw new Error("unexpected scriptSig");
+      if (returned.witnessUtxo && (returned.witnessUtxo.amount !== values[i] || hex.encode(returned.witnessUtxo.script) !== hex.encode(scripts[i])))
+        throw new Error("hardware changed prevout");
+    }
+    const result = Transaction.fromPSBT(completePSBT, OPTIONS);
+    for (const reserveIndex of reserveIndices) {
+      const approval = response.getInput(reserveIndex);
+      if (approval.tapScriptSig?.length || approval.finalScriptSig?.length)
+        throw new Error("unexpected connector signing path");
+      let finalWitness = approval.finalScriptWitness;
+      if (connectorType === "p2tr") {
+        if (approval.partialSig?.length || finalWitness && finalWitness.length !== 1)
+          throw new Error("invalid Taproot witness");
+        const sig = finalWitness?.[0] ?? approval.tapKeySig;
+        if (!sig || (dual ? sig.length !== 65 || sig[64] !== 3 : sig.length !== 64 && (sig.length !== 65 || sig[64] !== 1)) || finalWitness && approval.tapKeySig && hex.encode(sig) !== hex.encode(approval.tapKeySig))
+          throw new Error("invalid Taproot signature encoding");
+        const sighash = sig.length === 64 ? 0 : sig[64];
+        if (approval.sighashType === 1 && sighash !== 1) throw new Error("signature sighash mismatch");
+        if (!schnorr.verify(
+          sig.slice(0, 64),
+          tx.preimageWitnessV1(reserveIndex, scripts, sighash, values),
+          f.connector.script.slice(2)
+        ))
+          throw new Error("invalid connector signature");
+        finalWitness = [sig.slice()];
+      } else {
+        if (approval.tapKeySig || (approval.partialSig?.length ?? 0) > 1)
+          throw new Error("unexpected connector signature");
+        const partial = approval.partialSig?.[0];
+        if (partial) {
+          if (finalWitness && (finalWitness.length !== 2 || hex.encode(finalWitness[0]) !== hex.encode(partial[1]) || hex.encode(finalWitness[1]) !== hex.encode(partial[0])))
+            throw new Error("conflicting connector signatures");
+          finalWitness = [partial[1], partial[0]];
+        }
+        if (!finalWitness || finalWitness.length !== 2) throw new Error("native SegWit witness required");
+        const [sig, pub] = finalWitness;
+        if (sig.length < 9 || sig.length > 73 || sig[sig.length - 1] !== (dual ? 3 : 1) || hex.encode(pub) !== hex.encode(connectorPublicKey))
+          throw new Error("native SegWit ALL signature required");
+        const scriptCode = new Uint8Array([118, 169, 20, ...f.connector.script.slice(2), 136, 172]);
+        const message = tx.preimageWitnessV0(reserveIndex, scriptCode, dual ? 3 : 1, values[reserveIndex]);
+        if (!secp256k1.verify(sig.slice(0, -1), message, pub, { format: "der", prehash: false, lowS: true }))
+          throw new Error("invalid connector signature");
+        finalWitness = finalWitness.map((item) => item.slice());
+      }
+      result.updateInput(reserveIndex, { finalScriptWitness: finalWitness });
+    }
+    return result;
+  }
+  if (input.hardwareSignatures) mergeResponse(hex.encode(prepared2), prepared2, unsigned);
+  function requireHardwareApproval() {
+    if (dual && !input.hardwareSignatures) throw new Error("hardware approval required before Savings signatures");
+  }
+  function approvalPsbt() {
+    if (!dual) throw new Error("hardware-first approval requires connector v2");
+    const wire = RawPSBTV0.decode(prepared2);
+    wire.global.unsignedTx.outputs.pop();
+    wire.outputs.pop();
+    delete wire.inputs[savingsIndex].finalScriptWitness;
+    delete wire.inputs[savingsIndex].finalScriptSig;
+    delete wire.inputs[savingsIndex].tapLeafScript;
+    delete wire.inputs[savingsIndex].tapInternalKey;
+    return RawPSBTV0.encode(wire);
+  }
   const verifyPhoneStage = (response) => {
+    requireHardwareApproval();
     if (response.length > 4e6) throw new Error("phone signing response too large");
     const wire = RawPSBTV0.decode(hex.decode(response));
-    const signatures = wire.inputs[0]?.tapScriptSig;
+    const signatures = wire.inputs[savingsIndex]?.tapScriptSig;
     if (signatures?.length !== 1) throw new Error("exactly one phone signature required");
     const [[key, signature]] = signatures;
     if (signature.length !== 64 || hex.encode(key.pubKey) !== hex.encode(xOnlyFromCompressed2(phonePub)) || hex.encode(key.leafHash) !== hex.encode(tapLeafHash(f.savings.normal)) || !schnorr.verify(
       signature,
-      tx.preimageWitnessV1(0, scripts, 0, values, -1, f.savings.normal),
+      tx.preimageWitnessV1(savingsIndex, scripts, 0, values, -1, f.savings.normal),
       xOnlyFromCompressed2(phonePub)
     ))
       throw new Error("invalid phone signature");
-    delete wire.inputs[0].tapScriptSig;
+    delete wire.inputs[savingsIndex].tapScriptSig;
     if (hex.encode(RawPSBTV0.encode(wire)) !== hex.encode(RawPSBTV0.encode(RawPSBTV0.decode(prepared2))))
       throw new Error("phone changed connector candidate");
-    wire.inputs[0].tapScriptSig = signatures;
+    wire.inputs[savingsIndex].tapScriptSig = signatures;
     return hex.encode(RawPSBTV0.encode(wire));
   };
   return {
     psbt: () => hex.encode(prepared2.slice()),
+    hardwareApproval: () => hex.encode(approvalPsbt()),
+    acceptHardwareApproval(response) {
+      const approvalUnsigned = Transaction.fromPSBT(approvalPsbt(), OPTIONS).unsignedTx;
+      const accepted = mergeResponse(response, prepared2, approvalUnsigned);
+      return [0, 1].map((i) => hex.encode(accepted.getInput(i).finalScriptWitness[0]));
+    },
     // The policy uses a lower witness bound for its ceiling. Fee estimation
     // instead allows a maximum-size ECDSA signature or Taproot ALL signature.
     estimatedVbytes: Math.ceil(
-      (unsigned.length * 4 + f.rules.witnessBytes + (connectorType === "p2wpkh" ? 64 : 1)) / 4
+      (unsigned.length * 4 + f.rules.witnessBytes + (connectorType === "p2wpkh" ? 64 * reserveIndices.length : dual ? 0 : 1)) / 4
     ),
     verifyPhoneStage,
     signPhone(privateKey) {
+      requireHardwareApproval();
       const phone2 = Transaction.fromPSBT(prepared2, OPTIONS);
-      phone2.signIdx(privateKey, 0, [0]);
+      phone2.signIdx(privateKey, savingsIndex, [0]);
       return verifyPhoneStage(hex.encode(phone2.toPSBT()));
     },
     forHardware(witness) {
+      requireHardwareApproval();
       if (witness.length !== 5 || witness.slice(0, 3).some((sig) => sig.length !== 64) || hex.encode(witness[3]) !== hex.encode(f.savings.normal) || hex.encode(witness[4]) !== hex.encode(f.savings.control))
         throw new Error("invalid Savings witness");
-      const message = tx.preimageWitnessV1(0, scripts, 0, values, -1, f.savings.normal);
+      const message = tx.preimageWitnessV1(savingsIndex, scripts, 0, values, -1, f.savings.normal);
       const pubs = [f.normalTweaks.arkade, f.normalTweaks.vault, phonePub].map(xOnlyFromCompressed2);
       if (pubs.some((pub, i) => !schnorr.verify(witness[i], message, pub))) throw new Error("invalid Savings signature");
       const savedWitness = witness.map((item) => item.slice());
       const hardware = Transaction.fromPSBT(prepared2, OPTIONS);
-      hardware.updateInput(0, {
-        finalScriptWitness: savedWitness,
-        finalScriptSig: new Uint8Array(),
-        tapLeafScript: void 0,
-        tapInternalKey: void 0
-      });
+      if (!dual)
+        hardware.updateInput(savingsIndex, {
+          finalScriptWitness: savedWitness,
+          finalScriptSig: new Uint8Array(),
+          tapLeafScript: void 0,
+          tapInternalKey: void 0
+        });
       const finalized = RawPSBTV0.decode(hardware.toPSBT());
-      finalized.inputs[0].finalScriptSig = new Uint8Array();
+      if (dual) {
+        finalized.inputs[savingsIndex].finalScriptWitness = savedWitness;
+        delete finalized.inputs[savingsIndex].tapLeafScript;
+        delete finalized.inputs[savingsIndex].tapInternalKey;
+      }
+      finalized.inputs[savingsIndex].finalScriptSig = new Uint8Array();
+      const completePSBT = RawPSBTV0.encode(finalized);
+      if (dual) {
+        finalized.global.unsignedTx.outputs.pop();
+        finalized.outputs.pop();
+        delete finalized.inputs[savingsIndex].finalScriptWitness;
+        delete finalized.inputs[savingsIndex].finalScriptSig;
+      }
       const hardwarePSBT = RawPSBTV0.encode(finalized);
+      const approvalUnsigned = Transaction.fromPSBT(hardwarePSBT, OPTIONS).unsignedTx;
       return {
         psbt: () => hex.encode(hardwarePSBT.slice()),
         accept(responseText) {
-          if (responseText.length > 4e6) throw new Error("signer response too large");
-          const text = responseText.replace(/\s+/g, "");
-          const raw2 = /^[0-9a-f]+$/i.test(text) && text.length % 2 === 0 ? hex.decode(text) : base64.decode(text);
-          const isPSBT = hex.encode(raw2.slice(0, 5)) === "70736274ff";
-          const response = isPSBT ? Transaction.fromPSBT(raw2, OPTIONS) : Transaction.fromRaw(raw2, OPTIONS);
-          if (hex.encode(response.unsignedTx) !== hex.encode(unsigned)) throw new Error("hardware changed transaction");
-          for (let i = 0; i < 2; i++) {
-            const returned = response.getInput(i);
-            if (returned.sighashType !== void 0 && returned.sighashType !== 0 && (i !== 1 || returned.sighashType !== 1))
-              throw new Error("signature must commit all outputs");
-            if (returned.finalScriptSig?.length) throw new Error("unexpected scriptSig");
-            if (returned.witnessUtxo && (returned.witnessUtxo.amount !== values[i] || hex.encode(returned.witnessUtxo.script) !== hex.encode(scripts[i])))
-              throw new Error("hardware changed prevout");
-          }
-          const approval = response.getInput(1);
-          if (approval.tapScriptSig?.length || approval.finalScriptSig?.length)
-            throw new Error("unexpected connector signing path");
-          let finalWitness = approval.finalScriptWitness;
-          if (connectorType === "p2tr") {
-            if (approval.partialSig?.length || finalWitness && finalWitness.length !== 1)
-              throw new Error("invalid Taproot witness");
-            const sig = finalWitness?.[0] ?? approval.tapKeySig;
-            if (!sig || sig.length !== 64 && (sig.length !== 65 || sig[64] !== 1) || finalWitness && approval.tapKeySig && hex.encode(sig) !== hex.encode(approval.tapKeySig))
-              throw new Error("invalid Taproot signature encoding");
-            const sighash = sig.length === 64 ? 0 : 1;
-            if (approval.sighashType === 1 && sighash !== 1) throw new Error("signature sighash mismatch");
-            if (!schnorr.verify(
-              sig.slice(0, 64),
-              tx.preimageWitnessV1(1, scripts, sighash, values),
-              f.connector.script.slice(2)
-            ))
-              throw new Error("invalid connector signature");
-            finalWitness = [sig.slice()];
-          } else {
-            if (approval.tapKeySig || (approval.partialSig?.length ?? 0) > 1)
-              throw new Error("unexpected connector signature");
-            const partial = approval.partialSig?.[0];
-            if (partial) {
-              if (finalWitness && (finalWitness.length !== 2 || hex.encode(finalWitness[0]) !== hex.encode(partial[1]) || hex.encode(finalWitness[1]) !== hex.encode(partial[0])))
-                throw new Error("conflicting connector signatures");
-              finalWitness = [partial[1], partial[0]];
-            }
-            if (!finalWitness || finalWitness.length !== 2) throw new Error("native SegWit witness required");
-            const [sig, pub] = finalWitness;
-            if (sig.length < 9 || sig.length > 73 || sig[sig.length - 1] !== 1 || hex.encode(pub) !== hex.encode(connectorPublicKey))
-              throw new Error("native SegWit ALL signature required");
-            const scriptCode = new Uint8Array([118, 169, 20, ...f.connector.script.slice(2), 136, 172]);
-            const message2 = tx.preimageWitnessV0(1, scriptCode, 1, values[1]);
-            if (!secp256k1.verify(sig.slice(0, -1), message2, pub, { format: "der", prehash: false, lowS: true }))
-              throw new Error("invalid connector signature");
-            finalWitness = finalWitness.map((item) => item.slice());
-          }
-          const result = Transaction.fromPSBT(hardwarePSBT, OPTIONS);
-          result.updateInput(1, { finalScriptWitness: finalWitness });
+          const result = mergeResponse(responseText, completePSBT, approvalUnsigned);
           return { txHex: hex.encode(result.extract()), txid: result.id };
         }
       };
@@ -53310,7 +54128,7 @@ function toOrigin3(origin) {
 function isRecordShape(value2) {
   if (!value2 || typeof value2 !== "object") return false;
   const record = value2;
-  return record.version === CONNECTOR_STORE_VERSION && typeof record.enrollmentDigest === "string" && typeof record.candidatePsbt === "string" && typeof record.signaturesMayHaveIssued === "boolean" && (record.phoneSignedPsbt === void 0 || typeof record.phoneSignedPsbt === "string") && (record.operationId === void 0 || typeof record.operationId === "string" && /^[0-9a-f]{32}$/.test(record.operationId)) && typeof record.recipient === "string" && Number.isSafeInteger(record.amountSats) && Number.isSafeInteger(record.feeSats) && !!record.contract && typeof record.contract.vaultId === "string" && !!record.origin && !!record.savings && !!record.reserve && (record.savingsWitness === void 0 || Array.isArray(record.savingsWitness)) && (record.signedTxHex === void 0 || typeof record.signedTxHex === "string") && (record.txid === void 0 || typeof record.txid === "string");
+  return record.version === CONNECTOR_STORE_VERSION && typeof record.enrollmentDigest === "string" && typeof record.candidatePsbt === "string" && typeof record.signaturesMayHaveIssued === "boolean" && (record.phoneSignedPsbt === void 0 || typeof record.phoneSignedPsbt === "string") && (record.operationId === void 0 || typeof record.operationId === "string" && /^[0-9a-f]{32}$/.test(record.operationId)) && typeof record.recipient === "string" && Number.isSafeInteger(record.amountSats) && Number.isSafeInteger(record.feeSats) && !!record.contract && typeof record.contract.vaultId === "string" && !!record.origin && !!record.savings && !!record.reserve && (record.hardwareSignatures === void 0 || Array.isArray(record.hardwareSignatures) && record.hardwareSignatures.length === 2 && record.hardwareSignatures.every((sig) => typeof sig === "string" && /^[0-9a-f]{18,146}$/.test(sig))) && (record.savingsWitness === void 0 || Array.isArray(record.savingsWitness)) && (record.signedTxHex === void 0 || typeof record.signedTxHex === "string") && (record.txid === void 0 || typeof record.txid === "string");
 }
 function validateConnectorRecoveryRecord(expected, raw2) {
   const vaultId = expected.vaultId.trim();
@@ -53327,6 +54145,8 @@ function validateConnectorRecoveryRecord(expected, raw2) {
     enrollmentDigest: expected.enrollmentDigest,
     savings: record.savings,
     reserve: record.reserve,
+    secondReserve: record.secondReserve,
+    hardwareSignatures: record.hardwareSignatures,
     recipient: record.recipient,
     amountSats: record.amountSats,
     feeSats: record.feeSats
@@ -53417,7 +54237,7 @@ function recoveryBinding(kit2, status2) {
     protectionTier: kit2.protectionTier,
     policyVersion: status2.policyVersion,
     spendingPolicyDigest: kit2.spendingPolicyDigest,
-    descriptorHash: status2.templateVersion === CONNECTOR_TEMPLATE2 ? status2.connectorEnrollment.descriptorHash : status2.vtxoBoardingDescriptorHash
+    descriptorHash: isConnectorTemplate2(status2.templateVersion) ? status2.connectorEnrollment.descriptorHash : status2.vtxoBoardingDescriptorHash
   };
 }
 function recoveryStatusFacts(status2) {
@@ -53485,7 +54305,7 @@ function validateVaultRecoveryFile(file) {
   const archive = validateVaultRecoveryArchive(file.archive);
   if (JSON.stringify(recoveryStatusFacts(archive.status)) !== JSON.stringify(header.status) || archive.kit.descriptorHash !== header.kit.descriptorHash)
     throw new Error("Recovery data does not match its encrypted identity");
-  if (header.binding.templateVersion === CONNECTOR_TEMPLATE2) {
+  if (isConnectorTemplate2(header.binding.templateVersion)) {
     validateConnectorRecoveryJournal(
       { vaultId: header.binding.vaultId, enrollmentDigest: header.status.connectorEnrollment.enrollmentDigest },
       file.connectorJournal
@@ -54206,7 +55026,7 @@ function pathFacts(kit2, path) {
   const d = kit2.descriptor;
   const family = familyFromDescriptor(d);
   if (path.program === "savings-admin") {
-    if (d.templateVersion === CONNECTOR_TEMPLATE2)
+    if (isConnectorTemplate2(d.templateVersion))
       throw new Error("Connector Savings requires its saved payment and cosigner authorization");
     return {
       tree: family.savings,
@@ -54872,7 +55692,7 @@ function validateConnectorRecoveryFile(file) {
   if (!file || file.name !== "vaulted-connector-recovery" || file.version !== 1)
     throw new Error("Invalid connector recovery file");
   const header = validateRecoveryHeader(file.header);
-  if (header.binding.templateVersion !== CONNECTOR_TEMPLATE2)
+  if (!isConnectorTemplate2(header.binding.templateVersion))
     throw new Error("Connector recovery needs its enrolled contract");
   return validateConnectorRecoveryRecord(
     { vaultId: header.binding.vaultId, enrollmentDigest: header.status.connectorEnrollment.enrollmentDigest },
@@ -54900,7 +55720,8 @@ async function executeConnectorRecovery(value2, chain3) {
   const file = JSON.parse(JSON.stringify(value2));
   const view3 = validateConnectorRecoveryFile(file);
   if (!view3.record.signedTxHex || !view3.record.txid) throw new Error("The required connector signature is missing");
-  for (const coin of [view3.record.savings, view3.record.reserve]) {
+  for (const coin of [view3.record.savings, view3.record.reserve, view3.record.secondReserve]) {
+    if (!coin) continue;
     const spent = await chain3.outspend(coin.txid, coin.vout);
     if (spent.spent) {
       if (spent.txid !== view3.record.txid)
@@ -55254,7 +56075,7 @@ function review() {
   if (source.full || source.publicKit?.boarding)
     options2.push({ value: "boarding", label: "Boarding \u2014 phone recovery after its delay" });
   if (k) {
-    if (k.descriptor.templateVersion !== CONNECTOR_TEMPLATE2)
+    if (!isConnectorTemplate2(k.descriptor.templateVersion))
       options2.push({ value: "savings-admin", label: "Savings \u2014 phone and hardware" });
     for (const claimant of ["phone", "hardware", "recovery"])
       if (k.descriptor.pending[`savings-${claimant}`]) {
@@ -55786,10 +56607,6 @@ el("execute").onclick = () => void run(async () => {
 });
 /*! Bundled license information:
 
-@scure/base/index.js:
-@scure/base/lib/index.js:
-  (*! scure-base - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
-
 @noble/hashes/utils.js:
   (*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
 
@@ -55800,6 +56617,10 @@ el("execute").onclick = () => void run(async () => {
 @noble/curves/secp256k1.js:
 @noble/curves/nist.js:
   (*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
+
+@scure/base/index.js:
+@scure/base/lib/index.js:
+  (*! scure-base - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
 
 @scure/btc-signer/index.js:
   (*! scure-btc-signer - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
