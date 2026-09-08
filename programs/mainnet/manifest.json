@@ -1,8 +1,8 @@
 {
   "network": "mainnet",
-  "sha256": "17bf56afe3a6ebeb3a72e9fe09eca5ef4dedcc3875438c4b6e3485fa1ae90861",
+  "sha256": "9099bcf9369c7e227d8ccde821b4c81db9a08b49679deedf0635d5301b7d5a8e",
   "wallet": "brg444/vaulted-bitcoin-wallet",
-  "walletRevision": "4327a96ebb4ffe66df8355e7fd890e6102b7219f",
+  "walletRevision": "8e2538fed841bfff84d497580cc5cc7a59d01171",
   "workingTreeDirty": false,
   "entry": "tools/program-emergency/recover.ts",
   "inputs": {
@@ -137,11 +137,12 @@
     "src/lib/vault/light/contract.ts": "33e392eda543f20f21881b97589b2e54c1e0b05865b4215ffb48af387cbee277",
     "src/lib/vault/light/contractHandler.ts": "91904a148aa2e5801092dad4d7235ff72c3e5867d25bb3876b18413d30290a19",
     "src/lib/vault/light/enrollment.ts": "1245fdb2480e7aa722c811f2bf47f191d2672578b5a925e396a651b0f71e7f87",
-    "src/lib/vault/light/exitRepository.ts": "ed70104205e19f5ecf3861e9e7488554c8dfbe56413348482bc7e2e152c7f787",
+    "src/lib/vault/light/exitRepository.ts": "45d26ef74425ce7d9be37412ca7d0704345d026bae52b860b5687c60f576c93b",
     "src/lib/vault/light/keyBackup.ts": "b4085ab101c4f989a3d5956111d8783a2742283c023716595b6a25966d825abb",
     "src/lib/vault/light/passkey.ts": "d70873111e0087aef229fc93b81a2946e44f689b5c950fdeafc78cf628b0357f",
+    "src/lib/vault/light/portable.ts": "8f86f9b3bbc08e338bbd599e90c6722484a3eab251f40858e464d4d7b4b025e7",
     "src/lib/vault/light/recovery.ts": "3dc588d8a8d1cdc1c5ca8e0d21c0820abb23b68cf72138fb49e100e25bd8ba69",
-    "src/lib/vault/light/recoveryArchive.ts": "e450b744c1ceee5ff5c8228539db1f53a674b649d633eb890ba5e1fa1ebd6bad",
+    "src/lib/vault/light/recoveryArchive.ts": "ad2f621925f84cfd5f781facc9167fb65dfcf3b88d848043f81c9562856c1aa3",
     "src/lib/vault/light/status.ts": "14b77721164af1968ba2f2b995523867cbe11bddd32496f4d2b962803990eec2",
     "src/lib/vault/lightningInvoice.ts": "509ffced5c01af6e65f5dd14dd3dc261e0d7ccc14c0f51a8425cb51359b0cd3b",
     "src/lib/vault/lightningLifecycle.ts": "93d7065d6b7af4baa8a7875b43d227defff234596698003dead7f4708aee2ee0",
@@ -181,12 +182,16 @@
     "src/lib/vault/recovery/backupCodec.ts": "6c7f307156bc0b9687239a12cb3a8536fd710628585baee34f20fcae2b6e5811",
     "src/lib/vault/recovery/compression.ts": "b58bad1eaad7209f0e73948f511544595abd52c30d77d2d36b032cb846b1329f",
     "src/lib/vault/recovery/coverage.ts": "86e9a5bffeb6dec7886943bb50bc944b9f4a77ecd05e760165a3359972ed98ec",
-    "src/lib/vault/recovery/exitArchive.ts": "75e4957b3a51f09d6e5cc2790985101bea2fdeef7ab97e05738c62fac012d162",
+    "src/lib/vault/recovery/exitArchive.ts": "4ca6f2521575c42dc8d573d40f793be9d5e0b141c282a02015ce434a98585695",
+    "src/lib/vault/recovery/fileStore.ts": "7f9d76183c7cb3e8ea5a76947384ebf063e40cfa61b4c8ebe4c26c4ddbd4ebe0",
+    "src/lib/vault/recovery/finalization.ts": "ad6089b5f6b091a52d2cdf97331de7906147e0023eca769ab454dc7824d1e192",
     "src/lib/vault/recovery/graphPackage.ts": "c49a195953ae9ebe39413295135ab05f449e044415f750f4c0a2e633c000cd7e",
     "src/lib/vault/recovery/journals.ts": "c5b98848b3d9063535b2aa73245a8ca029ed5208740c31bb72b27fe3a3c25918",
+    "src/lib/vault/recovery/lifecycleStore.ts": "6ce512d00c2731ae223b890044ae59c2243dfa27129ee13a050d71994146d15f",
     "src/lib/vault/recovery/lightningArchive.ts": "bd965778f6b3694ffce9e7c632a049eb40649e6b1974973aec6d480e77c4ffc5",
     "src/lib/vault/recovery/lightningRecovery.ts": "1a957db61363a164b0c5a404ce0decbbb77b98a2e91b3e94515b3f003553f707",
-    "src/lib/vault/recovery/portable.ts": "401fce0d010799516c4120e6ea615a130695867bd085dcea0b29cb395d28b905",
+    "src/lib/vault/recovery/portable.ts": "8fc6c25612a06ddc8652b0aaaffc97405a14a4cde5d70e11064ec9cebc97d3cd",
+    "src/lib/vault/recovery/retainedRepository.ts": "4cfc0514f061e39c133baad1252460baf79f6fbbeeacb83fc73cc720693b64af",
     "src/lib/vault/recovery/signatureImport.ts": "b3568f0d6b2df9182cc4be93f53d543a3432dbdfc2b0eb52ffe53cc119ebf629",
     "src/lib/vault/releaseNetwork.ts": "beb6b107e4a79efc9b18c830ef4731518c0e955aae602d1f90891ff1502f0fc2",
     "src/lib/vault/savingsSpend.ts": "4edf9cc652273a58b38a8ab8b8f7859cb6166198483c1a19cd29f7a603e2c096",
@@ -200,14 +205,14 @@
     "src/lib/vault/vtxo/board.ts": "fda12da9571eea28653b9185034a5ebdf6d98c2801852e252cd277c878fe397c",
     "src/lib/vault/vtxo/boardingRecoveryFile.ts": "0c07edaefcbafe7c86cc7048a8074c42aabdfdcdeaaf2a5c11ea96eca8f06189",
     "src/lib/vault/vtxo/contractHandler.ts": "fe311e03885f7c82ecff4c65154a867fe4a9bc19ad9d8768a05b2d9b1768a16e",
-    "src/lib/vault/vtxo/exitRepository.ts": "c45ccdf2b916610b10ef1b1d91cb33bc851910b46917e7e6f1067676723360ea",
+    "src/lib/vault/vtxo/exitRepository.ts": "67336c1e29369fabcefe184f05b9e0b849d076b7e227358a845b30885c29ad52",
     "src/lib/vault/vtxo/feePolicy.ts": "4b15798bfd0e68cf657b69cbc5220992a7dbd90514497fbabd44c07b2a1e30ec",
     "src/lib/vault/vtxo/lock.ts": "9e3780f01469389abe3f2d2a07f9126359ab37577b7447620f03c35967d23ba2",
-    "src/lib/vault/vtxo/recoveryArchive.ts": "2865262e3284076227059fec4dd7c1efd72ccaff4c73073ceef5c22596c13dc6",
+    "src/lib/vault/vtxo/recoveryArchive.ts": "0d0a1ed9f67d431d04540dd089da0bc747be0aa94af431007aa564449d3a7e43",
     "src/lib/vault/vtxo/reserveAuth.ts": "f1e5595b0870d5b38d6852b4a73ee5955c629c486970006771e040a0296515c0",
     "src/lib/vault/vtxo/script.ts": "29a96299e5a0a34dc8b7045789db57ca42f67f923541aec9d2d8c7a62947c13d",
     "src/lib/vault/vtxo/sdkOperationAdapter.ts": "d27dc3197b3a04991c21280f218fb8800d116f80b48582b562197ae90fbc72bb",
-    "src/lib/vault/vtxo/spend.ts": "612500d1e53324186852c4056d5fbf010c78ac7d6ce5d7b32c9593541d4ff7bb",
+    "src/lib/vault/vtxo/spend.ts": "fe1ea6d353cb21058be70e5138629d78e5357e2755b391f2fb1d948c34031efc",
     "src/lib/vault/vtxo/spendingRecovery.ts": "7d96c1a10477076cbbcb5d1fe7b72c04cfafe0f9b9028f4f6cb8d9d742d5586c",
     "src/lib/vault/vtxo/walletWorkerNames.ts": "9a5d2a46f7e942805e1d91576d43639519e30e9b6e642adfb3b06c08c3edba74",
     "src/lib/vault/webauthn.ts": "20a38e72406d73ae12f0945f09e855ddae0dcf29e9e5630042b8695874a1bfc1",
@@ -233,7 +238,7 @@
     "tools/offline-recovery/src/lib/vault/savingsTree.ts": "4a640b9518795c244ab92691770091ec67d0191272efd3d3f7a1328b2b75b14b",
     "tools/offline-recovery/src/lib/vault/setupPlan.ts": "b124b6e4d4ecca260eb3a5f7edd52d2a1f8aab1087e6606a1bb826dc9ce89bea",
     "tools/offline-recovery/src/lib/vault/spendingPolicy.ts": "cd2b22dba2cad5f313d203d6aa26387fe7e8589bba394d7131990431f9c02f3a",
-    "tools/program-emergency/recover.ts": "95bf55dff358046ae2fbab4c99bbbf49bd4796e0b7fc8884b2829854097d7b86"
+    "tools/program-emergency/recover.ts": "59179b8f8b4b79450e5a6030151ea0444bdd15a248bf72807fef3285e46b1294"
   },
   "defines": {
     "import.meta.env": {
@@ -245,5 +250,5 @@
   "buildScriptSha256": "16548a7d2dc86a91b55fc4fe215f780e74df0b2da78e846321c8e9cb76f71394",
   "buildHelperSha256": "217c1db336b4a880b0398537fbc4306fb8e051bb61953b793041c13763dd41da",
   "htmlSha256": "64225bcf8914b8e81e23b2116b9f7ddbaeb6b812e98d0c0e63399779aa53ff37",
-  "sourceMapSha256": "8209033aed5f9ca32a37201155f0ffd184e0013c58dd85a9464301d3f21e591d"
+  "sourceMapSha256": "4f895c81e9ba77ca59fa2250d66db511b52791932e6fe44780bd0c003e42a630"
 }

@@ -36593,8 +36593,8 @@ var awaitTransaction = (transaction) => new Promise((resolve, reject) => {
   transaction.onerror = () => reject(transaction.error);
   transaction.onabort = () => reject(transaction.error ?? new Error("transaction aborted"));
 });
-var deleteByIndex = (store, indexName, value) => {
-  const request = store.index(indexName).openCursor(IDBKeyRange.only(value));
+var deleteByIndex = (store2, indexName, value) => {
+  const request = store2.index(indexName).openCursor(IDBKeyRange.only(value));
   request.onsuccess = () => {
     const cursor = request.result;
     if (!cursor) return;
@@ -36602,9 +36602,9 @@ var deleteByIndex = (store, indexName, value) => {
     cursor.continue();
   };
 };
-var getAllByIndexValues = (store, indexName, values) => {
+var getAllByIndexValues = (store2, indexName, values) => {
   if (values.length === 0) return Promise.resolve([]);
-  const index = store.index(indexName);
+  const index = store2.index(indexName);
   return Promise.all(values.map((value) => promisifyRequest(index.getAll(value)))).then(
     (results) => results.flat()
   );
@@ -36952,9 +36952,9 @@ function initDatabaseWithIntents(db, oldVersion, transaction) {
     });
   }
 }
-function dedupeIntentIds(store, onComplete) {
+function dedupeIntentIds(store2, onComplete) {
   const seen = /* @__PURE__ */ new Set();
-  const cursorRequest = store.openCursor();
+  const cursorRequest = store2.openCursor();
   cursorRequest.onsuccess = () => {
     const cursor = cursorRequest.result;
     if (!cursor) {
@@ -36973,8 +36973,8 @@ function dedupeIntentIds(store, onComplete) {
   };
 }
 function backfillVtxoScripts(transaction) {
-  const store = transaction.objectStore(STORE_VTXOS);
-  const cursorRequest = store.openCursor();
+  const store2 = transaction.objectStore(STORE_VTXOS);
+  const cursorRequest = store2.openCursor();
   cursorRequest.onsuccess = () => {
     const cursor = cursorRequest.result;
     if (!cursor) return;
@@ -37024,12 +37024,12 @@ var IndexedDBVirtualTxRepository = class {
       );
     }
     const transaction = db.transaction([STORE_VIRTUAL_TXS], "readwrite");
-    const store = transaction.objectStore(STORE_VIRTUAL_TXS);
+    const store2 = transaction.objectStore(STORE_VIRTUAL_TXS);
     for (const tx of merged.values()) {
-      const getReq = store.get(tx.txid);
+      const getReq = store2.get(tx.txid);
       getReq.onsuccess = () => {
         const prev = getReq.result;
-        store.put({
+        store2.put({
           txid: tx.txid,
           psbt: tx.psbt ?? prev?.psbt ?? null,
           expiresAt: tx.expiresAt ?? prev?.expiresAt ?? null,
@@ -37041,19 +37041,19 @@ var IndexedDBVirtualTxRepository = class {
   }
   async getVirtualTx(txid) {
     const db = await this.getDB();
-    const store = db.transaction([STORE_VIRTUAL_TXS], "readonly").objectStore(STORE_VIRTUAL_TXS);
-    const r = await promisifyRequest(store.get(txid));
+    const store2 = db.transaction([STORE_VIRTUAL_TXS], "readonly").objectStore(STORE_VIRTUAL_TXS);
+    const r = await promisifyRequest(store2.get(txid));
     return r ?? null;
   }
   async setBranch(vtxo, branch) {
     const db = await this.getDB();
     const transaction = db.transaction([STORE_VTXO_BRANCHES], "readwrite");
-    const store = transaction.objectStore(STORE_VTXO_BRANCHES);
-    const getAllReq = store.index("vtxo").getAll(IDBKeyRange.only([vtxo.txid, vtxo.vout]));
+    const store2 = transaction.objectStore(STORE_VTXO_BRANCHES);
+    const getAllReq = store2.index("vtxo").getAll(IDBKeyRange.only([vtxo.txid, vtxo.vout]));
     getAllReq.onsuccess = () => {
       const existing = getAllReq.result;
-      for (const e of existing) store.delete([e.vtxoTxid, e.vtxoVout, e.position]);
-      for (const b of branch) store.put(b);
+      for (const e of existing) store2.delete([e.vtxoTxid, e.vtxoVout, e.position]);
+      for (const b of branch) store2.put(b);
     };
     await awaitTransaction(transaction);
   }
@@ -39352,23 +39352,23 @@ var IndexedDBContractRepository = class {
   async getContracts(filter) {
     try {
       const db = await this.getDB();
-      const store = db.transaction([STORE_CONTRACTS], "readonly").objectStore(STORE_CONTRACTS);
+      const store2 = db.transaction([STORE_CONTRACTS], "readonly").objectStore(STORE_CONTRACTS);
       if (!filter || Object.keys(filter).length === 0) {
-        return await promisifyRequest(store.getAll()) ?? [];
+        return await promisifyRequest(store2.getAll()) ?? [];
       }
       const normalizedFilter = normalizeFilter(filter);
       if (normalizedFilter.has("script")) {
         const scripts = normalizedFilter.get("script");
         const contracts = await Promise.all(
           scripts.map(
-            (script) => promisifyRequest(store.get(script))
+            (script) => promisifyRequest(store2.get(script))
           )
         );
         return this.applyContractFilter(contracts, normalizedFilter);
       }
       if (normalizedFilter.has("state")) {
         const contracts = await getAllByIndexValues(
-          store,
+          store2,
           "state",
           normalizedFilter.get("state")
         );
@@ -39376,13 +39376,13 @@ var IndexedDBContractRepository = class {
       }
       if (normalizedFilter.has("type")) {
         const contracts = await getAllByIndexValues(
-          store,
+          store2,
           "type",
           normalizedFilter.get("type")
         );
         return this.applyContractFilter(contracts, normalizedFilter);
       }
-      const allContracts = await promisifyRequest(store.getAll()) ?? [];
+      const allContracts = await promisifyRequest(store2.getAll()) ?? [];
       return this.applyContractFilter(allContracts, normalizedFilter);
     } catch (error) {
       console.error("Failed to get contracts:", error);
@@ -39467,9 +39467,9 @@ var IndexedDBWalletRepository = class {
   async getVtxos(address) {
     try {
       const db = await this.getDB();
-      const store = db.transaction([STORE_VTXOS], "readonly").objectStore(STORE_VTXOS);
+      const store2 = db.transaction([STORE_VTXOS], "readonly").objectStore(STORE_VTXOS);
       const results = await promisifyRequest(
-        store.index("address").getAll(address)
+        store2.index("address").getAll(address)
       );
       return (results || []).map(deserializeVtxoWithBackfill);
     } catch (error) {
@@ -39481,10 +39481,10 @@ var IndexedDBWalletRepository = class {
     try {
       const db = await this.getDB();
       const transaction = db.transaction([STORE_VTXOS], "readwrite");
-      const store = transaction.objectStore(STORE_VTXOS);
+      const store2 = transaction.objectStore(STORE_VTXOS);
       for (const vtxo of vtxos) {
         const serialized = serializeVtxo(vtxo);
-        store.put({ address, ...serialized });
+        store2.put({ address, ...serialized });
       }
       await awaitTransaction(transaction);
     } catch (error) {
@@ -39506,9 +39506,9 @@ var IndexedDBWalletRepository = class {
   async getVtxosForScript(script) {
     try {
       const db = await this.getDB();
-      const store = db.transaction([STORE_VTXOS], "readonly").objectStore(STORE_VTXOS);
+      const store2 = db.transaction([STORE_VTXOS], "readonly").objectStore(STORE_VTXOS);
       const results = await promisifyRequest(
-        store.index("script").getAll(script)
+        store2.index("script").getAll(script)
       );
       const matching = (results || []).filter((r) => r.script === script);
       const byOutpoint = /* @__PURE__ */ new Map();
@@ -39556,8 +39556,8 @@ var IndexedDBWalletRepository = class {
   async getUtxos(address) {
     try {
       const db = await this.getDB();
-      const store = db.transaction([STORE_UTXOS], "readonly").objectStore(STORE_UTXOS);
-      const results = await promisifyRequest(store.index("address").getAll(address));
+      const store2 = db.transaction([STORE_UTXOS], "readonly").objectStore(STORE_UTXOS);
+      const results = await promisifyRequest(store2.index("address").getAll(address));
       return (results || []).map(deserializeUtxo);
     } catch (error) {
       console.error(`Failed to get UTXOs for address ${address}:`, error);
@@ -39568,8 +39568,8 @@ var IndexedDBWalletRepository = class {
     try {
       const db = await this.getDB();
       const transaction = db.transaction([STORE_UTXOS], "readwrite");
-      const store = transaction.objectStore(STORE_UTXOS);
-      for (const utxo of utxos) store.put({ address, ...serializeUtxo(utxo) });
+      const store2 = transaction.objectStore(STORE_UTXOS);
+      for (const utxo of utxos) store2.put({ address, ...serializeUtxo(utxo) });
       await awaitTransaction(transaction);
     } catch (error) {
       console.error(`Failed to save UTXOs for address ${address}:`, error);
@@ -39590,9 +39590,9 @@ var IndexedDBWalletRepository = class {
   async getTransactionHistory(address) {
     try {
       const db = await this.getDB();
-      const store = db.transaction([STORE_TRANSACTIONS], "readonly").objectStore(STORE_TRANSACTIONS);
+      const store2 = db.transaction([STORE_TRANSACTIONS], "readonly").objectStore(STORE_TRANSACTIONS);
       const results = await promisifyRequest(
-        store.index("address").getAll(address)
+        store2.index("address").getAll(address)
       );
       return (results || []).sort((a, b) => a.createdAt - b.createdAt);
     } catch (error) {
@@ -39604,9 +39604,9 @@ var IndexedDBWalletRepository = class {
     try {
       const db = await this.getDB();
       const transaction = db.transaction([STORE_TRANSACTIONS], "readwrite");
-      const store = transaction.objectStore(STORE_TRANSACTIONS);
+      const store2 = transaction.objectStore(STORE_TRANSACTIONS);
       for (const tx of txs) {
-        store.put({
+        store2.put({
           address,
           ...tx,
           keyBoardingTxid: tx.key.boardingTxid,
@@ -39634,9 +39634,9 @@ var IndexedDBWalletRepository = class {
   async getWalletState() {
     try {
       const db = await this.getDB();
-      const store = db.transaction([STORE_WALLET_STATE], "readonly").objectStore(STORE_WALLET_STATE);
+      const store2 = db.transaction([STORE_WALLET_STATE], "readonly").objectStore(STORE_WALLET_STATE);
       const result = await promisifyRequest(
-        store.get("state")
+        store2.get("state")
       );
       return result?.data ?? null;
     } catch (error) {
@@ -49103,6 +49103,26 @@ init_base();
 
 // src/lib/vault/vtxo/walletWorkerNames.ts
 init_define_import_meta_env();
+init_sha2();
+init_base();
+function vaultId(value) {
+  const id = String(value || "").trim();
+  if (!id) throw new Error("Vault ID required for wallet storage");
+  return id;
+}
+function vaultWalletNamespace(value) {
+  return hex.encode(sha256(new TextEncoder().encode(vaultId(value)))).slice(0, 32);
+}
+function vaultWalletDatabase(value) {
+  return vaultWalletDatabaseForNamespace(vaultWalletNamespace(value));
+}
+function requireNamespace(value) {
+  if (!/^[0-9a-f]{32}$/.test(value)) throw new Error("Invalid Vault wallet namespace");
+  return value;
+}
+function vaultWalletDatabaseForNamespace(value) {
+  return `arkade-vault-wallet:${requireNamespace(value)}:wallet`;
+}
 
 // src/lib/vault/vtxo/board.ts
 var BOARDING_PROGRAM = "vault-board-v1";
@@ -49276,11 +49296,11 @@ function concatParts(parts) {
   }
   return out;
 }
-function hashConnectorBoarding(vaultId, savingsHash, boarding) {
+function hashConnectorBoarding(vaultId2, savingsHash, boarding) {
   if (!/^[0-9a-f]{64}$/.test(savingsHash)) fail("connector savings hash required");
   const fields = [
     BOARDING_ENROLLMENT_SCHEMA,
-    vaultId,
+    vaultId2,
     savingsHash,
     boarding.schema,
     boarding.program,
@@ -49967,6 +49987,14 @@ async function captureExitArchive(d, repository, previous) {
   requireExitArchiveInfo(info, d);
   const getCoins = async () => (await indexer.getVtxos({ scripts: [d.scriptPubKey] })).vtxos.filter((v) => !v.isSpent);
   const coins = await getCoins();
+  const archive = await captureExitArchiveForCoins(d, repository, previous, coins, info, indexer);
+  const fingerprint2 = (values) => values.map((v) => `${outpoint(v)}:${v.value}:${v.script}`).sort().join("|");
+  if (fingerprint2(coins) !== fingerprint2(await getCoins()))
+    throw new Error("Your balance changed while saving recovery data");
+  return archive;
+}
+async function captureExitArchiveForCoins(d, repository, previous, coins, info, indexer) {
+  requireExitArchiveInfo(info, d);
   if (coins.length > 512) throw new Error("Recovery output limit exceeded");
   const previousCoins = previous ? validateExitArchive(previous, d).coins : [];
   const removed = previousCoins.filter((old) => !coins.some((coin) => outpoint(coin) === outpoint(old)));
@@ -49975,7 +50003,11 @@ async function captureExitArchive(d, repository, previous) {
     if (removed.some((old) => !resolved.some((coin) => outpoint(coin) === outpoint(old) && coin.isSpent)))
       throw new Error("An earlier output is missing. Previous recovery data has been retained.");
   }
-  const resolver = createExitChainResolver({ indexer, repository });
+  const resolver = createExitChainResolver({
+    indexer,
+    repository,
+    extraSources: previous ? [exitArchiveProviders(previous, d).source] : []
+  });
   const branches = {};
   const wanted = /* @__PURE__ */ new Set();
   for (const coin of coins) {
@@ -49994,9 +50026,6 @@ async function captureExitArchive(d, repository, previous) {
       transactions[Transaction2.fromPSBT(base64.decode(psbt)).id] = psbt;
     }
   }
-  const fingerprint2 = (values) => values.map((v) => `${outpoint(v)}:${v.value}:${v.script}`).sort().join("|");
-  if (fingerprint2(coins) !== fingerprint2(await getCoins()))
-    throw new Error("Your balance changed while saving recovery data");
   const archive = {
     version: 1,
     descriptorHash: d.descriptorHash,
@@ -50491,9 +50520,19 @@ var REFUND_MTP_LAG_SECONDS = 2 * 60 * 60;
 
 // src/lib/vault/light/exitRepository.ts
 init_define_import_meta_env();
+
+// src/lib/vault/recovery/retainedRepository.ts
+init_define_import_meta_env();
+var RetainedExitRepository = class extends IndexedDBVirtualTxRepository {
+  async pruneForSpentVtxo(outpoint2) {
+    void outpoint2;
+  }
+};
+
+// src/lib/vault/light/exitRepository.ts
 function lightExitRepository(descriptor) {
   const valid = validateLightDescriptor(descriptor);
-  return new IndexedDBVirtualTxRepository(`vaulted-light:${valid.vaultId}:exit-paths`);
+  return new RetainedExitRepository(`vaulted-light:${valid.vaultId}:exit-paths`);
 }
 
 // src/lib/vault/vtxo/exitRepository.ts
@@ -50592,6 +50631,57 @@ function storedLightningProfile(record) {
 
 // src/lib/vault/vtxo/spend.ts
 init_define_import_meta_env();
+
+// src/lib/vault/recovery/finalization.ts
+init_define_import_meta_env();
+
+// src/lib/vault/recovery/fileStore.ts
+init_define_import_meta_env();
+init_sha2();
+init_base();
+async function recoveryFileStore(key, next) {
+  return store(key, next, false);
+}
+async function store(key, next, importing) {
+  const importKey = importing ? `import:${key}:${hex.encode(sha256(new TextEncoder().encode(JSON.stringify(next))))}` : null;
+  const db = await new Promise((resolve, reject) => {
+    const request = indexedDB.open("vaulted-complete-recovery", 1);
+    request.onupgradeneeded = () => request.result.createObjectStore("files");
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+  try {
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction("files", next === void 0 ? "readonly" : "readwrite");
+      const files = tx.objectStore("files");
+      let result = null;
+      let failure;
+      const request = files.get(key);
+      request.onsuccess = () => {
+        try {
+          const previous = request.result;
+          result = previous ?? null;
+          if (next === void 0) return;
+          if (importKey) files.put(next, importKey);
+          if (importing && previous !== void 0) return;
+          if (previous !== void 0) files.put(previous, `previous:${key}`);
+          files.put(next, key);
+          result = next;
+        } catch (error) {
+          failure = error;
+          tx.abort();
+        }
+      };
+      tx.oncomplete = () => resolve(result);
+      tx.onerror = () => reject(failure ?? tx.error);
+      tx.onabort = () => reject(failure ?? tx.error);
+    });
+  } finally {
+    db.close();
+  }
+}
+
+// src/lib/vault/vtxo/spend.ts
 init_btc_signer();
 init_payment();
 init_base();
@@ -50669,13 +50759,13 @@ function operationBytes(operationId) {
   return hex.decode(operationId);
 }
 function vtxoReserveDigest(input) {
-  const vaultId = encoder2.encode(input.vaultId);
-  if (vaultId.length === 0) throw new Error("vault id required");
+  const vaultId2 = encoder2.encode(input.vaultId);
+  if (vaultId2.length === 0) throw new Error("vault id required");
   if (input.destScript.length === 0) throw new Error("destination script required");
   const payload = concat6(
     uint32LE(VTXO_RESERVE_VERSION),
     field(operationBytes(input.operationId)),
-    field(vaultId),
+    field(vaultId2),
     field(encoder2.encode(VTXO_RESERVE_PURPOSE)),
     field(input.destScript),
     uint64LE(input.amountSats)
@@ -50826,8 +50916,8 @@ function persistedReservationFactsAreValid(record) {
   }
   return inputTotal === record.amountSats + record.feeSats + record.changeSats;
 }
-function parsePersistedVtxoSpend(vaultId, parsed) {
-  if (parsed && parsed.vaultId === vaultId && isVtxoOperationId(parsed.operationId) && parsed.stage && parsed.destAddress && typeof parsed.amountSats === "number" && (parsed.reservePhoneSignature === void 0 || /^[0-9a-f]{128}$/.test(parsed.reservePhoneSignature)) && persistedReservationFactsAreValid(parsed) && (parsed.stage === "pre-reserve" || parsed.bundleDigest && (parsed.stage === "reserved" || parsed.arkTxid))) {
+function parsePersistedVtxoSpend(vaultId2, parsed) {
+  if (parsed && parsed.vaultId === vaultId2 && isVtxoOperationId(parsed.operationId) && parsed.stage && parsed.destAddress && typeof parsed.amountSats === "number" && (parsed.reservePhoneSignature === void 0 || /^[0-9a-f]{128}$/.test(parsed.reservePhoneSignature)) && persistedReservationFactsAreValid(parsed) && (parsed.stage === "pre-reserve" || parsed.bundleDigest && (parsed.stage === "reserved" || parsed.arkTxid))) {
     return parsed;
   }
   return void 0;
@@ -51323,7 +51413,7 @@ function kitFromFacts(input) {
   const phonePub = input.enrollment?.phoneBip340Pub || input.status?.phoneBip340Pub || "";
   const phoneDirectP256 = input.enrollment?.phoneDirectP256 || input.status?.phoneDirectP256 || "";
   if (!hardwarePub) return null;
-  const vaultId = input.status?.vaultId || input.enrollment?.vaultId || "";
+  const vaultId2 = input.status?.vaultId || input.enrollment?.vaultId || "";
   const liveBases = Boolean(input.status?.vaultCosignerBasePub && input.status?.arkadeCosignerBasePub);
   const liveTemplate = String(input.status?.templateVersion || "");
   const signerOrigin = String(input.status?.arkadeCosignerOrigin || "").trim();
@@ -51331,10 +51421,10 @@ function kitFromFacts(input) {
   const spendingPolicy = input.status?.spendingPolicy;
   const statusSpendingPolicyDigest = String(input.status?.spendingPolicyDigest || "").trim();
   const protectionTier = input.status?.protectionTier;
-  if (liveBases && phonePub && phoneDirectP256 && vaultId && signerOrigin && signerVersion && spendingPolicy && spendingPolicy.program === "vault-policy-v1" && statusSpendingPolicyDigest && protectionTier && protectionTier !== "light" && isSupportedVaultNetwork(input.status?.network) && (liveTemplate === SAVINGS_TEMPLATE || isConnectorTemplate(liveTemplate))) {
+  if (liveBases && phonePub && phoneDirectP256 && vaultId2 && signerOrigin && signerVersion && spendingPolicy && spendingPolicy.program === "vault-policy-v1" && statusSpendingPolicyDigest && protectionTier && protectionTier !== "light" && isSupportedVaultNetwork(input.status?.network) && (liveTemplate === SAVINGS_TEMPLATE || isConnectorTemplate(liveTemplate))) {
     try {
       const descriptor = buildVaultProgramDescriptor({
-        vaultId,
+        vaultId: vaultId2,
         network: input.status.network,
         phonePub,
         hardwarePub,
@@ -51366,6 +51456,99 @@ function kitFromFacts(input) {
     }
   }
   return null;
+}
+
+// src/lib/vault/recovery/lifecycleStore.ts
+init_define_import_meta_env();
+
+// src/lib/vault/recovery/coverage.ts
+init_define_import_meta_env();
+var point = (coin) => `${coin.txid}:${coin.vout}`;
+function spendingRecoveryCoverage(archive, binding2, expected) {
+  const known = /* @__PURE__ */ new Map();
+  if (expected !== null) {
+    if (expected.length > 512) throw new Error("Recovery output limit exceeded");
+    for (const coin of expected) {
+      if (!/^[0-9a-f]{64}$/.test(coin.txid) || !Number.isSafeInteger(coin.vout) || coin.vout < 0 || coin.vout > 4294967295 || !Number.isSafeInteger(coin.value) || coin.value <= 0 || coin.value > 21e14 || coin.script !== binding2.scriptPubKey)
+        throw new Error("Known recovery output does not match this wallet");
+      const prior = known.get(point(coin));
+      if (prior && prior.value !== coin.value) throw new Error("Known recovery outputs disagree");
+      known.set(point(coin), coin);
+    }
+  }
+  const result = {
+    scope: "spending-paths",
+    state: "missing",
+    capturedAt: null,
+    archivedSats: 0,
+    coveredSats: expected === null ? null : 0,
+    missing: [...known.keys()].sort(),
+    mismatched: [],
+    stale: []
+  };
+  if (!archive) return result;
+  let saved;
+  try {
+    saved = validateExitArchive(archive, binding2).coins;
+  } catch {
+    return { ...result, state: "invalid" };
+  }
+  result.capturedAt = archive.capturedAt;
+  result.archivedSats = saved.reduce((total, coin) => total + coin.value, 0);
+  if (expected === null) return { ...result, state: "unknown" };
+  const byPoint = new Map(saved.map((coin) => [point(coin), coin]));
+  result.missing = [];
+  for (const [id, coin] of known) {
+    const match2 = byPoint.get(id);
+    if (!match2) result.missing.push(id);
+    else if (match2.value !== coin.value || match2.script !== coin.script) result.mismatched.push(id);
+    else result.coveredSats += coin.value;
+  }
+  result.stale = saved.filter((coin) => !known.has(point(coin))).map(point).sort();
+  result.missing.sort();
+  result.mismatched.sort();
+  result.state = result.missing.length || result.mismatched.length || result.stale.length ? "incomplete" : "current";
+  return result;
+}
+function requireSpendingRecoveryCoverage(archive, binding2, expected) {
+  if (spendingRecoveryCoverage(archive, binding2, expected).state !== "current")
+    throw new Error("Transaction paths are catching up with your wallet. The previous backup is retained.");
+}
+
+// src/lib/vault/recovery/lifecycleStore.ts
+var recoveryTransitionKey = (database2, script) => `lifecycle:${database2}:${script}`;
+function readRecoveryTransition(database2, script) {
+  return recoveryFileStore(recoveryTransitionKey(database2, script));
+}
+async function loadLifecycleArchive(database2, binding2) {
+  if (!await readRecoveryTransition(database2, binding2.scriptPubKey)) return null;
+  const run2 = async () => {
+    const transition = await readRecoveryTransition(database2, binding2.scriptPubKey);
+    if (!transition) return null;
+    const repository = new IndexedDBWalletRepository(database2);
+    try {
+      const coins = (await repository.getVtxosForScript(binding2.scriptPubKey)).filter((v) => !v.isSpent && !v.spentBy);
+      const source = transition.prepared ?? transition.archive;
+      if (!source) throw new Error("Recovery paths are still syncing. Previous paths are retained.");
+      validateExitArchive(source, { ...binding2, descriptorHash: recoveryTransitionKey(database2, binding2.scriptPubKey) });
+      const archive = { ...source, descriptorHash: binding2.descriptorHash };
+      requireSpendingRecoveryCoverage(archive, binding2, coins);
+      requireSpendingRecoveryCoverage(archive, binding2, transition.outputs);
+      if (transition.pending)
+        await recoveryFileStore(recoveryTransitionKey(database2, binding2.scriptPubKey), {
+          ...transition,
+          pending: false,
+          archive: source,
+          prepared: void 0,
+          error: void 0
+        });
+      return archive;
+    } finally {
+      await repository[Symbol.asyncDispose]();
+    }
+  };
+  if (!navigator.locks) throw new Error("Web Locks required for recovery persistence");
+  return navigator.locks.request(`vaulted:recovery-write:${database2}`, run2);
 }
 
 // src/lib/vault/vtxo/recoveryArchive.ts
@@ -51607,62 +51790,6 @@ init_base();
 
 // src/lib/vault/light/recoveryArchive.ts
 init_define_import_meta_env();
-
-// src/lib/vault/recovery/coverage.ts
-init_define_import_meta_env();
-var point = (coin) => `${coin.txid}:${coin.vout}`;
-function spendingRecoveryCoverage(archive, binding2, expected) {
-  const known = /* @__PURE__ */ new Map();
-  if (expected !== null) {
-    if (expected.length > 512) throw new Error("Recovery output limit exceeded");
-    for (const coin of expected) {
-      if (!/^[0-9a-f]{64}$/.test(coin.txid) || !Number.isSafeInteger(coin.vout) || coin.vout < 0 || coin.vout > 4294967295 || !Number.isSafeInteger(coin.value) || coin.value <= 0 || coin.value > 21e14 || coin.script !== binding2.scriptPubKey)
-        throw new Error("Known recovery output does not match this wallet");
-      const prior = known.get(point(coin));
-      if (prior && prior.value !== coin.value) throw new Error("Known recovery outputs disagree");
-      known.set(point(coin), coin);
-    }
-  }
-  const result = {
-    scope: "spending-paths",
-    state: "missing",
-    capturedAt: null,
-    archivedSats: 0,
-    coveredSats: expected === null ? null : 0,
-    missing: [...known.keys()].sort(),
-    mismatched: [],
-    stale: []
-  };
-  if (!archive) return result;
-  let saved;
-  try {
-    saved = validateExitArchive(archive, binding2).coins;
-  } catch {
-    return { ...result, state: "invalid" };
-  }
-  result.capturedAt = archive.capturedAt;
-  result.archivedSats = saved.reduce((total, coin) => total + coin.value, 0);
-  if (expected === null) return { ...result, state: "unknown" };
-  const byPoint = new Map(saved.map((coin) => [point(coin), coin]));
-  result.missing = [];
-  for (const [id, coin] of known) {
-    const match2 = byPoint.get(id);
-    if (!match2) result.missing.push(id);
-    else if (match2.value !== coin.value || match2.script !== coin.script) result.mismatched.push(id);
-    else result.coveredSats += coin.value;
-  }
-  result.stale = saved.filter((coin) => !known.has(point(coin))).map(point).sort();
-  result.missing.sort();
-  result.mismatched.sort();
-  result.state = result.missing.length || result.mismatched.length || result.stale.length ? "incomplete" : "current";
-  return result;
-}
-function requireSpendingRecoveryCoverage(archive, binding2, expected) {
-  if (spendingRecoveryCoverage(archive, binding2, expected).state !== "current")
-    throw new Error("Transaction paths are catching up with your wallet. The previous backup is retained.");
-}
-
-// src/lib/vault/light/recoveryArchive.ts
 function binding(descriptor) {
   const d = validateLightDescriptor(descriptor);
   return { ...d, descriptorHash: lightDescriptorDigest(d) };
@@ -51703,7 +51830,12 @@ async function storeLightRecoveryArchive(archive, d) {
   try {
     await new Promise((resolve, reject) => {
       const tx = db.transaction("archive", "readwrite");
-      tx.objectStore("archive").put(archive, "current");
+      const store2 = tx.objectStore("archive");
+      const prior = store2.get("current");
+      prior.onsuccess = () => {
+        if (prior.result) store2.put(prior.result, "previous");
+        store2.put(archive, "current");
+      };
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
       tx.onabort = () => reject(tx.error);
@@ -51733,11 +51865,7 @@ function captureLightRecoveryArchive(d, expected) {
 async function capture(d, expected) {
   const repository = lightExitRepository(d);
   try {
-    const archive = await captureExitArchive(
-      binding(d),
-      repository,
-      await loadLightRecoveryArchive(d).catch(() => null)
-    );
+    const archive = await loadLifecycleArchive(vaultWalletDatabase(d.vaultId), binding(d)) ?? await captureExitArchive(binding(d), repository, await loadLightRecoveryArchive(d).catch(() => null));
     assertLightArchiveMatchesVtxos(archive, d, expected);
     await storeLightRecoveryArchive(archive, d);
     return archive;
@@ -51991,6 +52119,40 @@ async function openLocalLightBackup(value, withOwner) {
   }
 }
 
+// src/lib/vault/light/portable.ts
+init_define_import_meta_env();
+
+// src/lib/vault/recovery/portable.ts
+init_define_import_meta_env();
+
+// src/lib/vault/recovery/backupCodec.ts
+init_define_import_meta_env();
+
+// src/lib/vault/program/connectorStore.ts
+init_define_import_meta_env();
+
+// src/lib/vault/program/connectorPayment.ts
+init_define_import_meta_env();
+
+// src/lib/vault/recovery/backupCodec.ts
+var encoder6 = new TextEncoder();
+
+// src/lib/vault/recovery/portable.ts
+var MAX_PORTABLE_RECOVERY_BYTES = 32e6;
+
+// src/lib/vault/light/portable.ts
+function parseLightRecoveryPackage(raw2) {
+  const value = raw2;
+  if (!value || value.name !== "vaulted-light-recovery-package" || value.version !== 1 || Object.keys(value).sort().join(",") !== "archive,backup,name,version" || JSON.stringify(value).length > MAX_PORTABLE_RECOVERY_BYTES)
+    throw new Error("Invalid Light recovery package");
+  const backup = parseLightEncryptedBackup(value.backup);
+  const archive = validateLightRecoveryArchive(value.archive, backup.header.descriptor).archive;
+  return { name: value.name, version: 1, archive, backup };
+}
+function unwrapLightRecoveryPackage(raw2) {
+  return raw2?.name === "vaulted-light-recovery-package" ? parseLightRecoveryPackage(raw2).backup : raw2;
+}
+
 // src/lib/vault/light/recoveryProgress.ts
 init_define_import_meta_env();
 
@@ -52095,7 +52257,7 @@ el("file").onchange = () => void run(async () => {
   el("exit").hidden = true;
   const selected = el("file").files?.[0];
   if (!selected || selected.size > 32e6) throw new Error("Choose a Light recovery file smaller than 32 MB");
-  raw = JSON.parse(await selected.text());
+  raw = unwrapLightRecoveryPackage(JSON.parse(await selected.text()));
   if (raw.name === "vaulted-light-backup") {
     const encrypted = parseLightEncryptedBackup(raw);
     requireReleaseNetwork(encrypted.header.descriptor.network);
