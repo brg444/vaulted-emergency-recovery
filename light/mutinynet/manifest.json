@@ -1,8 +1,8 @@
 {
   "network": "mutinynet",
-  "sha256": "5089242e9b90b7c8fa4c6f0a10164ab406cb4c6d5c5aeb1e713194a8854c24e8",
+  "sha256": "9f9a634f2e39ec9b72a58786ad2472d6724cbdef874725e158fcd569ef42aed5",
   "wallet": "brg444/vaulted-bitcoin-wallet",
-  "walletRevision": "8e2538fed841bfff84d497580cc5cc7a59d01171",
+  "walletRevision": "2aaf63553e0a95afa56beb8c298dddaf30a91b49",
   "workingTreeDirty": false,
   "entry": "tools/light-emergency/recover.ts",
   "inputs": {
@@ -181,12 +181,13 @@
     "src/lib/vault/recovery/backupCodec.ts": "6c7f307156bc0b9687239a12cb3a8536fd710628585baee34f20fcae2b6e5811",
     "src/lib/vault/recovery/compression.ts": "b58bad1eaad7209f0e73948f511544595abd52c30d77d2d36b032cb846b1329f",
     "src/lib/vault/recovery/coverage.ts": "86e9a5bffeb6dec7886943bb50bc944b9f4a77ecd05e760165a3359972ed98ec",
-    "src/lib/vault/recovery/exitArchive.ts": "4ca6f2521575c42dc8d573d40f793be9d5e0b141c282a02015ce434a98585695",
+    "src/lib/vault/recovery/exitArchive.ts": "9e088b3fc22d98a80ac7c2e070e180e3fbf98b080d7841201d27b3918a6eb530",
     "src/lib/vault/recovery/fileStore.ts": "7f9d76183c7cb3e8ea5a76947384ebf063e40cfa61b4c8ebe4c26c4ddbd4ebe0",
-    "src/lib/vault/recovery/finalization.ts": "ad6089b5f6b091a52d2cdf97331de7906147e0023eca769ab454dc7824d1e192",
+    "src/lib/vault/recovery/finalization.ts": "030ed4b1da41ccc7f0fadb3e5a0b8e0d9c6faaa462375ae74e097e8f43034bb5",
     "src/lib/vault/recovery/journals.ts": "c5b98848b3d9063535b2aa73245a8ca029ed5208740c31bb72b27fe3a3c25918",
     "src/lib/vault/recovery/lifecycleStore.ts": "6ce512d00c2731ae223b890044ae59c2243dfa27129ee13a050d71994146d15f",
     "src/lib/vault/recovery/lightningArchive.ts": "bd965778f6b3694ffce9e7c632a049eb40649e6b1974973aec6d480e77c4ffc5",
+    "src/lib/vault/recovery/pagedIndexer.ts": "aa290671c317f5aaedf0def5bf7dde5e8962c0bfd93164aac53664404852ff91",
     "src/lib/vault/recovery/portable.ts": "8fc6c25612a06ddc8652b0aaaffc97405a14a4cde5d70e11064ec9cebc97d3cd",
     "src/lib/vault/recovery/retainedRepository.ts": "4cfc0514f061e39c133baad1252460baf79f6fbbeeacb83fc73cc720693b64af",
     "src/lib/vault/releaseNetwork.ts": "beb6b107e4a79efc9b18c830ef4731518c0e955aae602d1f90891ff1502f0fc2",
@@ -206,7 +207,7 @@
     "src/lib/vault/vtxo/reserveAuth.ts": "f1e5595b0870d5b38d6852b4a73ee5955c629c486970006771e040a0296515c0",
     "src/lib/vault/vtxo/script.ts": "29a96299e5a0a34dc8b7045789db57ca42f67f923541aec9d2d8c7a62947c13d",
     "src/lib/vault/vtxo/sdkOperationAdapter.ts": "d27dc3197b3a04991c21280f218fb8800d116f80b48582b562197ae90fbc72bb",
-    "src/lib/vault/vtxo/spend.ts": "fe1ea6d353cb21058be70e5138629d78e5357e2755b391f2fb1d948c34031efc",
+    "src/lib/vault/vtxo/spend.ts": "12497845e681f43ffa43f826c335c77e989cfd1032468b3096a85194d655886d",
     "src/lib/vault/vtxo/walletWorkerNames.ts": "9a5d2a46f7e942805e1d91576d43639519e30e9b6e642adfb3b06c08c3edba74",
     "src/lib/vault/webauthn.ts": "20a38e72406d73ae12f0945f09e855ddae0dcf29e9e5630042b8695874a1bfc1",
     "tools/light-emergency/recover.ts": "f14a756d507402f8a06a72c26708abd0e66941e9d58410e919fa9404d40d4bc0"
@@ -221,5 +222,5 @@
   "buildScriptSha256": "0a77640b49608bdfd791e56d51ac08301c1baf2dd87f14c26e6a960573512213",
   "buildHelperSha256": "217c1db336b4a880b0398537fbc4306fb8e051bb61953b793041c13763dd41da",
   "htmlSha256": "ad8cf23a6d735a8032932682f65886d7740a269169de5fb69015b416c159e796",
-  "sourceMapSha256": "3092ff57b9ab25d7146d0d7bb0d90b478ae200577921ab96e21e02e25e820ed6"
+  "sourceMapSha256": "e062d0370fa07e850da969dee095b026fed74f7359082a328e603d287145466e"
 }

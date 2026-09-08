@@ -37124,6 +37124,14 @@ function wrapHandlerWithIntentPersistence(base, deps) {
     }
   };
 }
+var ChainedTxType = /* @__PURE__ */ ((ChainedTxType2) => {
+  ChainedTxType2[ChainedTxType2["Unspecified"] = 0] = "Unspecified";
+  ChainedTxType2[ChainedTxType2["Commitment"] = 1] = "Commitment";
+  ChainedTxType2[ChainedTxType2["Ark"] = 2] = "Ark";
+  ChainedTxType2[ChainedTxType2["Tree"] = 3] = "Tree";
+  ChainedTxType2[ChainedTxType2["Checkpoint"] = 4] = "Checkpoint";
+  return ChainedTxType2;
+})(ChainedTxType || {});
 function mergeChainedTxType(incoming, prev) {
   if (incoming !== 0) return incoming;
   return prev ?? 0;
@@ -52047,6 +52055,71 @@ init_define_import_meta_env();
 // src/lib/vault/recovery/finalization.ts
 init_define_import_meta_env();
 
+// src/lib/vault/recovery/pagedIndexer.ts
+init_define_import_meta_env();
+async function allPages(fetchPage) {
+  const values = [];
+  let index;
+  const seen = /* @__PURE__ */ new Set();
+  for (let count = 0; count < 64; count++) {
+    const result = await fetchPage(index);
+    values.push(...result.values);
+    if (values.length > 4096) throw new Error("Recovery pagination limit exceeded");
+    const page = result.page;
+    if (!page) return values;
+    if (!Number.isSafeInteger(page.current) || page.current < 0 || !Number.isSafeInteger(page.total) || page.total < 0 || !Number.isSafeInteger(page.next) || page.next < 0 || seen.has(page.current))
+      throw new Error("Invalid recovery pagination");
+    seen.add(page.current);
+    if (page.next === 0 || page.current === page.total && page.next === page.current) return values;
+    if (page.next <= page.current || page.next > page.total || !result.values.length)
+      throw new Error("Recovery pagination did not advance");
+    index = page.next;
+  }
+  throw new Error("Recovery pagination limit exceeded");
+}
+function pagedRecoveryIndexer(indexer) {
+  return new Proxy(indexer, {
+    get(target, key) {
+      if (key === "getVtxoChain")
+        return async (outpoint2) => ({
+          chain: await allPages(async (pageIndex) => {
+            const result = await target.getVtxoChain(
+              outpoint2,
+              pageIndex === void 0 ? void 0 : { pageIndex, pageSize: 100 }
+            );
+            return { values: result.chain, page: result.page };
+          })
+        });
+      if (key === "getVirtualTxs")
+        return async (ids) => ({
+          txs: await allPages(async (pageIndex) => {
+            const result = await target.getVirtualTxs(
+              ids,
+              pageIndex === void 0 ? void 0 : { pageIndex, pageSize: 100 }
+            );
+            return { values: result.txs, page: result.page };
+          })
+        });
+      const value2 = Reflect.get(target, key);
+      return typeof value2 === "function" ? value2.bind(target) : value2;
+    }
+  });
+}
+function recoveryChainResolver(indexer, repository, extraSources = []) {
+  const completeBranches = new Proxy(repository, {
+    get(target, key) {
+      if (key === "getBranch")
+        return async (outpoint2) => {
+          const branch = await target.getBranch(outpoint2);
+          return branch.some((node) => node.type === ChainedTxType.Commitment) ? branch : [];
+        };
+      const value2 = Reflect.get(target, key);
+      return typeof value2 === "function" ? value2.bind(target) : value2;
+    }
+  });
+  return createExitChainResolver({ indexer: pagedRecoveryIndexer(indexer), repository: completeBranches, extraSources });
+}
+
 // src/lib/vault/recovery/exitArchive.ts
 init_define_import_meta_env();
 init_base();
@@ -52230,11 +52303,11 @@ async function captureExitArchiveForCoins(d, repository, previous, coins2, info,
     if (removed.some((old) => !resolved.some((coin) => outpoint(coin) === outpoint(old) && coin.isSpent)))
       throw new Error("An earlier output is missing. Previous recovery data has been retained.");
   }
-  const resolver = createExitChainResolver({
+  const resolver = recoveryChainResolver(
     indexer,
     repository,
-    extraSources: previous ? [exitArchiveProviders(previous, d).source] : []
-  });
+    previous ? [exitArchiveProviders(previous, d).source] : []
+  );
   const branches = {};
   const wanted = /* @__PURE__ */ new Set();
   for (const coin of coins2) {
