@@ -1,4 +1,4 @@
-# Savings connector recovery data
+# Existing wallets: Savings connector recovery data
 
 The companion accepts version-1 connector enrollment kits and reconstructs the
 family recorded in the kit, including v1 and dual-reserve v2. It verifies the

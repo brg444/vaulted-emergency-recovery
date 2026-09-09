@@ -86,3 +86,34 @@ Keep funded test-network evidence labeled with its network and source revision.
 A new mainnet or physical-device claim requires its own evidence. Qualify
 Lightning refund separately, and show the service requirements for Savings
 beside the independent Spending result.
+
+## Native Ledger Savings
+
+Native Ledger Savings signs the Savings input directly with the phone and Ledger.
+Its normal payment uses the recipient and optional Savings change. Connector
+reserves, retained connector approvals and proof packets belong only to existing
+connector contracts and their migration transactions.
+
+The companion must reconstruct a new native contract from its immutable account
+origins, network, vault identity, Spending policy and exact recovery programs.
+Receive and change are separate scripts with separate child keys; each saved
+parent must be checked against its enrolled coordinate. Both scripts need normal
+and delayed-recovery coverage before new enrollment is enabled.
+
+The Ledger registration record preserves the policy name, template, key vector,
+policy identifier, authorization HMAC and verified addresses. Losing the HMAC
+requires registering the exact original policy again with the same Ledger seed.
+The record contains no phone key and cannot establish recovery completeness.
+Never interpret an existing phone scalar backup as a new HD seed. The phone HD
+backup and its restore validation must be delivered with the new contract.
+
+Keep native registration metadata in the complete recovery package only after
+the package schema and canonical contract reconstruction support it. A standalone
+registration record must not unlock the recovery execution controls. Reject
+unsupported contracts before presenting signing or execution controls.
+The present release continues to accept its existing package schemas; it does
+not enable native Ledger recovery.
+
+Spending exit capture, successor-path synchronization and fee funding retain their
+existing requirements. A Savings signer change does not replace Spending recovery
+data or change its committed exit paths.

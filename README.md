@@ -9,6 +9,20 @@ before preparing a transaction. Preparation does not broadcast. Save the
 prepared recovery file before starting; after a lost response, import that
 same file to check Bitcoin status and resume.
 
+## Savings contract support
+
+The saved contract determines the recovery path. Existing connector wallets keep
+their original approval journals and signing requirements; retain those files
+until the funds and unresolved transactions have been explicitly migrated.
+[Connector recovery](docs/savings-connector.md) applies to those existing wallets.
+
+The native Ledger Savings integration is being developed separately. Its
+registration record contains the exact public wallet policy and Ledger
+registration authorization. That record is not a recovery package and is not
+accepted as one by this release. Native activation requires the complete recovery
+family, phone HD backup restoration and verified receive/change coin recovery.
+See [the integration requirements](INTEGRATION.md#native-ledger-savings).
+
 ## Open the desktop package
 
 A macOS desktop build includes the runtime and both network applications.
