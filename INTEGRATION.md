@@ -89,56 +89,64 @@ beside the independent Spending result.
 
 ## Native Ledger Savings
 
-Native Ledger Savings signs the Savings input directly with the phone and Ledger.
-Its normal payment uses the recipient and optional Savings change. Connector
-reserves, retained connector approvals and proof packets belong only to existing
-connector contracts and their migration transactions.
+The new `phone-ledger-guardian-savings-v1` contract requires phone and Ledger for
+normal Savings withdrawals. Its transaction contains the Savings input,
+recipient and optional Savings change. Connector reserves and retained connector
+approvals continue to belong to existing funded connector contracts.
 
-The companion must reconstruct a new native contract from its immutable account
-origins, network, vault identity and Spending policy, then derive its exact
-recovery programs. Imported programs cannot supply alternative destinations.
-Receive and change are separate scripts with separate child keys; each saved
-parent must be checked against its enrolled coordinate. Both scripts need normal
-and delayed-recovery coverage before new enrollment is enabled.
+Recovery initiation requires a user authority and Guardian. The Guardian alone
+cannot spend; compromise of both authorities can bypass the pending destination
+and delay. After the pending transaction confirms, its claim and cancellation
+scripts apply. Hardware claims wait 6 blocks, phone claims 144 and the optional
+recovery key 288. Cancellation without a service and quarantine release require
+all remaining user authorities: one for Standard and two for Advanced.
+
+The public Emulator has no signature in this new Savings contract. The Guardian
+reconstructs and validates the recovery transaction through its named
+capability. Its one-input, one-output candidate uses fee replacement without an
+anchor, so a fee increase requires the acting user and Guardian again. A service
+outage before confirmation can prevent that increase.
+
+The companion must reconstruct the entire native contract from immutable
+account origins, network, vault identity, Spending policy, PhoneDirectP256 key
+and Guardian base. Receive and change use separate child keys at index zero;
+both converge on one pending and one quarantine destination per claimant. Each
+saved parent must match its enrolled coordinate. Imported scripts cannot supply
+alternative destinations or signing paths.
 
 The Ledger registration record preserves the policy name, template, key vector,
 policy identifier, authorization HMAC and verified addresses. Losing the HMAC
 requires registering the exact original policy again with the same Ledger seed.
 The record contains no phone key and cannot establish recovery completeness.
-Never interpret an existing phone scalar backup as a new HD seed. The phone HD
-backup and its restore validation must be delivered with the new contract.
 
-Keep native registration metadata in the complete recovery package only after
-the package schema and canonical contract reconstruction support it. Signing and execution
-controls require a validated recovery package that reconstructs a supported
-contract.
-The present release continues to accept its existing package schemas; it does
-not enable native Ledger recovery.
+The wallet now has a separate, versioned encrypted Savings HD-seed envelope.
+It binds the contract digest, purpose and exact phone BIP86 origin. The existing
+Spending scalar retains its own envelope and meaning. Complete package export
+and restore must preserve and verify both before native enrollment is enabled;
+the standalone encryption primitive does not provide that integration.
 
-Spending exit capture, successor-path synchronization and fee funding retain their
-existing requirements. A Savings signer change does not replace Spending recovery
-data or change its committed exit paths.
+The present companion still accepts its existing schemas and leaves new native
+Ledger recovery disabled. Package parsing, canonical reconstruction, phone
+unlock, partial PSBT signing, interrupted execution and confirmation tracking
+must support the new contract before refreshing the executable bundles. Keep
+all existing connector and legacy readers until their funded contracts and
+unresolved operations have been migrated explicitly.
 
+Wallet and runtime share complete vectors for both networks and tiers. Core accepted 37 funded script paths and ten recovery initiation fee
+replacements; the simulator passed four normal withdrawals and eleven recovery
+signing cases. These tests qualify scripts and signing separately from the
+Guardian service lifecycle and physical hardware. The earlier two-service
+candidate's results cannot qualify this new contract. Release evidence must
+identify the precise wallet, runtime, companion and Ledger app revisions.
 
-### Complete native contract qualification
+Spending exit capture, successor-path synchronization and Bitcoin fee funding
+retain their existing requirements. Savings registration and its HD envelope
+cannot reconstruct missing Spending transaction paths. Closed-browser renewal
+and off-device backup delivery retain the qualification limits described above.
 
-The wallet and runtime now share complete native family vectors for both networks
-and tiers. Receive index zero and change index zero converge on one pending and
-one quarantine output per claimant. Recovery account branches are 4 for matured
-claims, 6 for cooperative cancellation, 8 for server-free cancellation and 10 for
-quarantine release; recovery index zero is the enrolled coordinate. Existing
-connector schemas and addresses retain their original interpretation.
-
-Bitcoin Core has accepted 37 funded fixture spends covering every native leaf,
-with premature claims and destination substitutions rejected. These fixtures use
-public cosigner secrets directly and establish Bitcoin signing authority. The
-current public Emulator reader still rejects the additional BIP32 derivation of
-recovery cosigner keys. Native recovery activation therefore requires a service
-upgrade, evaluated-program signing tests and the complete package/phone-HD
-restore implementation. Registration metadata alone remains insufficient.
-
-
-Speculos also completed eleven recovery signing cases across eight policies
-containing the hardware key, with verified destination, amount, fee and output
-commitment. This qualifies the tested Bitcoin Test 2.4.2 simulator build; physical
-hardware and the service-assisted recovery lifecycle remain unqualified.
+Ledger Savings qualification does not qualify the existing Spending exit tree.
+That tree uses fixed NUMS/Operator/delegate points and a CSV DROP prefix absent
+from the tested Ledger policy compiler. The shared enrollment hardware field
+must retain an explicitly supported Spending recovery authority; assigning it a
+Ledger Savings child without an exact exit test can leave that path unusable
+with the intended signer. Resolve this before enabling the new wallet template.
