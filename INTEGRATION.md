@@ -133,8 +133,9 @@ all existing connector and legacy readers until their funded contracts and
 unresolved operations have been migrated explicitly.
 
 Wallet and runtime share complete vectors for both networks and tiers. Core accepted 37 funded script paths and ten recovery initiation fee
-replacements; the simulator passed four normal withdrawals and eleven recovery
-signing cases. These tests qualify scripts and signing separately from the
+replacements; the simulator passed four normal withdrawals and fifteen recovery
+signing cases, including hardware initiation from receive and change outputs.
+These tests qualify scripts and signing separately from the
 Guardian service lifecycle and physical hardware. The earlier two-service
 candidate's results cannot qualify this new contract. Release evidence must
 identify the precise wallet, runtime, companion and Ledger app revisions.
