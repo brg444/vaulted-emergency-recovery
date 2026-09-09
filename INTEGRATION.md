@@ -95,7 +95,8 @@ reserves, retained connector approvals and proof packets belong only to existing
 connector contracts and their migration transactions.
 
 The companion must reconstruct a new native contract from its immutable account
-origins, network, vault identity, Spending policy and exact recovery programs.
+origins, network, vault identity and Spending policy, then derive its exact
+recovery programs. Imported programs cannot supply alternative destinations.
 Receive and change are separate scripts with separate child keys; each saved
 parent must be checked against its enrolled coordinate. Both scripts need normal
 and delayed-recovery coverage before new enrollment is enabled.
@@ -117,3 +118,27 @@ not enable native Ledger recovery.
 Spending exit capture, successor-path synchronization and fee funding retain their
 existing requirements. A Savings signer change does not replace Spending recovery
 data or change its committed exit paths.
+
+
+### Complete native contract qualification
+
+The wallet and runtime now share complete native family vectors for both networks
+and tiers. Receive index zero and change index zero converge on one pending and
+one quarantine output per claimant. Recovery account branches are 4 for matured
+claims, 6 for cooperative cancellation, 8 for server-free cancellation and 10 for
+quarantine release; recovery index zero is the enrolled coordinate. Existing
+connector schemas and addresses retain their original interpretation.
+
+Bitcoin Core has accepted 37 funded fixture spends covering every native leaf,
+with premature claims and destination substitutions rejected. These fixtures use
+public cosigner secrets directly and establish Bitcoin signing authority. The
+current public Emulator reader still rejects the additional BIP32 derivation of
+recovery cosigner keys. Native recovery activation therefore requires a service
+upgrade, evaluated-program signing tests and the complete package/phone-HD
+restore implementation. Registration metadata alone remains insufficient.
+
+
+Speculos also completed eleven recovery signing cases across eight policies
+containing the hardware key, with verified destination, amount, fee and output
+commitment. This qualifies the tested Bitcoin Test 2.4.2 simulator build; physical
+hardware and the service-assisted recovery lifecycle remain unqualified.
