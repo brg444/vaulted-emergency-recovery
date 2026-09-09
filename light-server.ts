@@ -26,7 +26,7 @@ export function lightRecoveryHandler(
         },
       });
     const program =
-      /^\/programs\/(mainnet|mutinynet)\/(index\.html|recovery\.js(?:\.map)?|manifest\.json)$/.exec(
+      /^\/programs\/(mainnet|mutinynet)\/(index\.html|offline-sign\.html|(?:recovery|offline-sign)\.js(?:\.map)?|manifest\.json)$/.exec(
         url.pathname,
       );
     if (program && req.method === "GET") {
@@ -38,7 +38,9 @@ export function lightRecoveryHandler(
         Bun.file(
           new URL(`programs/${network}/${program[2]}`, assetRoot),
         ),
-        { headers: { "Cache-Control": "no-store" } },
+        { headers: { "Cache-Control": "no-store", ...(program[2] === "offline-sign.html" ? {
+          "Content-Security-Policy": "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'none'; form-action 'none'; base-uri 'none'; worker-src 'none'; object-src 'none'",
+        } : {}) } },
       );
     }
     if (

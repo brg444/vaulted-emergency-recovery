@@ -125,12 +125,11 @@ Spending scalar retains its own envelope and meaning. Complete package export
 and restore must preserve and verify both before native enrollment is enabled;
 the standalone encryption primitive does not provide that integration.
 
-The present companion still accepts its existing schemas and leaves new native
-Ledger recovery disabled. Package parsing, canonical reconstruction, phone
-unlock, partial PSBT signing, interrupted execution and confirmation tracking
-must support the new contract before refreshing the executable bundles. Keep
-all existing connector and legacy readers until their funded contracts and
-unresolved operations have been migrated explicitly.
+The program bundles accept native Ledger kit version 4 and complete recovery
+header version 2, preserving both phone identities and registered policies.
+The companion supports public exit paths, partial signatures and saved-action
+resume. Existing connector and legacy readers remain available for funded
+contracts and unresolved operations.
 
 Wallet and runtime share complete vectors for both networks and tiers. Core accepted 37 funded script paths and ten recovery initiation fee
 replacements; the simulator passed four normal withdrawals and fifteen recovery
@@ -145,9 +144,18 @@ retain their existing requirements. Savings registration and its HD envelope
 cannot reconstruct missing Spending transaction paths. Closed-browser renewal
 and off-device backup delivery retain the qualification limits described above.
 
-Ledger Savings qualification does not qualify the existing Spending exit tree.
-That tree uses fixed NUMS/Operator/delegate points and a CSV DROP prefix absent
-from the tested Ledger policy compiler. The shared enrollment hardware field
-must retain an explicitly supported Spending recovery authority; assigning it a
-Ledger Savings child without an exact exit test can leave that path unusable
-with the intended signer. Resolve this before enabling the new wallet template.
+Ordinary Savings uses the stock Ledger app. Emergency Spending recovery keeps
+its original Standard phone-plus-hardware or Advanced hardware-plus-recovery
+threshold, using the separately bundled offline seed signer. New enrollments
+bind those external Spending keys to account `/12/0`; existing enrollments keep
+their original keys. The seed page refuses online use and clears seed fields
+after signing. Entering a seed exposes every account protected by it to that
+computer, so retire the seed after emergency recovery.
+
+The fee signer uses the enrolled hardware account's ordinary Taproot `/0/0`
+receive key, or the enrolled recovery account for Advanced. It verifies the
+complete exit package and funding parents, then signs only fee inputs with
+output-committing signatures. Mainnet-script fixtures completed parent and CPFP
+publication plus the delayed sweep on isolated Bitcoin Core regtest. The early
+sweep was rejected before maturity. This is software evidence, not a physical
+Ledger or live-mainnet exit claim.
