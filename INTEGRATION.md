@@ -108,9 +108,9 @@ Never interpret an existing phone scalar backup as a new HD seed. The phone HD
 backup and its restore validation must be delivered with the new contract.
 
 Keep native registration metadata in the complete recovery package only after
-the package schema and canonical contract reconstruction support it. A standalone
-registration record must not unlock the recovery execution controls. Reject
-unsupported contracts before presenting signing or execution controls.
+the package schema and canonical contract reconstruction support it. Signing and execution
+controls require a validated recovery package that reconstructs a supported
+contract.
 The present release continues to accept its existing package schemas; it does
 not enable native Ledger recovery.
 
