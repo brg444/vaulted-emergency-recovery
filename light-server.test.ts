@@ -18,6 +18,12 @@ describe("Light recovery network isolation", () => {
         (await handle(new Request(`${origin}/programs/${network}/index.html`)))
           .status,
       ).toBe(200);
+      const offline = await handle(new Request(`${origin}/programs/${network}/offline-sign.html`));
+      expect(offline.status).toBe(200);
+      expect(offline.headers.get("Content-Security-Policy")).toContain("connect-src 'none'");
+      expect(offline.headers.get("Content-Security-Policy")).toContain("form-action 'none'");
+      expect(await offline.text()).toContain('mnemonic');
+      expect((await handle(new Request(`${origin}/programs/${network}/offline-sign.js`))).status).toBe(200);
       const home = await handle(new Request(`${origin}/light/`));
       expect(home.headers.get("Location")).toBe(`/light/${network}/index.html`);
       const other = network === "mainnet" ? "mutinynet" : "mainnet";

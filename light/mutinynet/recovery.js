@@ -188,7 +188,7 @@ function Chi(a, b, c) {
 function Maj(a, b, c) {
   return a & b ^ a & c ^ b & c;
 }
-var HashMD, SHA256_IV, SHA224_IV, SHA384_IV, SHA512_IV;
+var HashMD, SHA256_IV, SHA512_IV;
 var init_md = __esm({
   "node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/_md.js"() {
     init_define_import_meta_env();
@@ -298,34 +298,6 @@ var init_md = __esm({
       528734635,
       1541459225
     ]);
-    SHA224_IV = /* @__PURE__ */ Uint32Array.from([
-      3238371032,
-      914150663,
-      812702999,
-      4144912697,
-      4290775857,
-      1750603025,
-      1694076839,
-      3204075428
-    ]);
-    SHA384_IV = /* @__PURE__ */ Uint32Array.from([
-      3418070365,
-      3238371032,
-      1654270250,
-      914150663,
-      2438529370,
-      812702999,
-      355462360,
-      4144912697,
-      1731405415,
-      4290775857,
-      2394180231,
-      1750603025,
-      3675008525,
-      1694076839,
-      1203062813,
-      3204075428
-    ]);
     SHA512_IV = /* @__PURE__ */ Uint32Array.from([
       1779033703,
       4089235720,
@@ -389,22 +361,7 @@ var init_u64 = __esm({
 });
 
 // node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/sha2.js
-var sha2_exports = {};
-__export(sha2_exports, {
-  _SHA224: () => _SHA224,
-  _SHA256: () => _SHA256,
-  _SHA384: () => _SHA384,
-  _SHA512: () => _SHA512,
-  _SHA512_224: () => _SHA512_224,
-  _SHA512_256: () => _SHA512_256,
-  sha224: () => sha224,
-  sha256: () => sha256,
-  sha384: () => sha384,
-  sha512: () => sha512,
-  sha512_224: () => sha512_224,
-  sha512_256: () => sha512_256
-});
-var SHA256_K, SHA256_W, SHA2_32B, _SHA256, _SHA224, K512, SHA512_Kh, SHA512_Kl, SHA512_W_H, SHA512_W_L, SHA2_64B, _SHA512, _SHA384, T224_IV, T256_IV, _SHA512_224, _SHA512_256, sha256, sha224, sha512, sha384, sha512_256, sha512_224;
+var SHA256_K, SHA256_W, SHA2_32B, _SHA256, K512, SHA512_Kh, SHA512_Kl, SHA512_W_H, SHA512_W_L, SHA2_64B, _SHA512, sha256, sha512;
 var init_sha2 = __esm({
   "node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/sha2.js"() {
     init_define_import_meta_env();
@@ -553,19 +510,6 @@ var init_sha2 = __esm({
       H = SHA256_IV[7] | 0;
       constructor() {
         super(32);
-      }
-    };
-    _SHA224 = class extends SHA2_32B {
-      A = SHA224_IV[0] | 0;
-      B = SHA224_IV[1] | 0;
-      C = SHA224_IV[2] | 0;
-      D = SHA224_IV[3] | 0;
-      E = SHA224_IV[4] | 0;
-      F = SHA224_IV[5] | 0;
-      G = SHA224_IV[6] | 0;
-      H = SHA224_IV[7] | 0;
-      constructor() {
-        super(28);
       }
     };
     K512 = /* @__PURE__ */ (() => split([
@@ -770,128 +714,13 @@ var init_sha2 = __esm({
         super(64);
       }
     };
-    _SHA384 = class extends SHA2_64B {
-      Ah = SHA384_IV[0] | 0;
-      Al = SHA384_IV[1] | 0;
-      Bh = SHA384_IV[2] | 0;
-      Bl = SHA384_IV[3] | 0;
-      Ch = SHA384_IV[4] | 0;
-      Cl = SHA384_IV[5] | 0;
-      Dh = SHA384_IV[6] | 0;
-      Dl = SHA384_IV[7] | 0;
-      Eh = SHA384_IV[8] | 0;
-      El = SHA384_IV[9] | 0;
-      Fh = SHA384_IV[10] | 0;
-      Fl = SHA384_IV[11] | 0;
-      Gh = SHA384_IV[12] | 0;
-      Gl = SHA384_IV[13] | 0;
-      Hh = SHA384_IV[14] | 0;
-      Hl = SHA384_IV[15] | 0;
-      constructor() {
-        super(48);
-      }
-    };
-    T224_IV = /* @__PURE__ */ Uint32Array.from([
-      2352822216,
-      424955298,
-      1944164710,
-      2312950998,
-      502970286,
-      855612546,
-      1738396948,
-      1479516111,
-      258812777,
-      2077511080,
-      2011393907,
-      79989058,
-      1067287976,
-      1780299464,
-      286451373,
-      2446758561
-    ]);
-    T256_IV = /* @__PURE__ */ Uint32Array.from([
-      573645204,
-      4230739756,
-      2673172387,
-      3360449730,
-      596883563,
-      1867755857,
-      2520282905,
-      1497426621,
-      2519219938,
-      2827943907,
-      3193839141,
-      1401305490,
-      721525244,
-      746961066,
-      246885852,
-      2177182882
-    ]);
-    _SHA512_224 = class extends SHA2_64B {
-      Ah = T224_IV[0] | 0;
-      Al = T224_IV[1] | 0;
-      Bh = T224_IV[2] | 0;
-      Bl = T224_IV[3] | 0;
-      Ch = T224_IV[4] | 0;
-      Cl = T224_IV[5] | 0;
-      Dh = T224_IV[6] | 0;
-      Dl = T224_IV[7] | 0;
-      Eh = T224_IV[8] | 0;
-      El = T224_IV[9] | 0;
-      Fh = T224_IV[10] | 0;
-      Fl = T224_IV[11] | 0;
-      Gh = T224_IV[12] | 0;
-      Gl = T224_IV[13] | 0;
-      Hh = T224_IV[14] | 0;
-      Hl = T224_IV[15] | 0;
-      constructor() {
-        super(28);
-      }
-    };
-    _SHA512_256 = class extends SHA2_64B {
-      Ah = T256_IV[0] | 0;
-      Al = T256_IV[1] | 0;
-      Bh = T256_IV[2] | 0;
-      Bl = T256_IV[3] | 0;
-      Ch = T256_IV[4] | 0;
-      Cl = T256_IV[5] | 0;
-      Dh = T256_IV[6] | 0;
-      Dl = T256_IV[7] | 0;
-      Eh = T256_IV[8] | 0;
-      El = T256_IV[9] | 0;
-      Fh = T256_IV[10] | 0;
-      Fl = T256_IV[11] | 0;
-      Gh = T256_IV[12] | 0;
-      Gl = T256_IV[13] | 0;
-      Hh = T256_IV[14] | 0;
-      Hl = T256_IV[15] | 0;
-      constructor() {
-        super(32);
-      }
-    };
     sha256 = /* @__PURE__ */ createHasher(
       () => new _SHA256(),
       /* @__PURE__ */ oidNist(1)
     );
-    sha224 = /* @__PURE__ */ createHasher(
-      () => new _SHA224(),
-      /* @__PURE__ */ oidNist(4)
-    );
     sha512 = /* @__PURE__ */ createHasher(
       () => new _SHA512(),
       /* @__PURE__ */ oidNist(3)
-    );
-    sha384 = /* @__PURE__ */ createHasher(
-      () => new _SHA384(),
-      /* @__PURE__ */ oidNist(2)
-    );
-    sha512_256 = /* @__PURE__ */ createHasher(
-      () => new _SHA512_256(),
-      /* @__PURE__ */ oidNist(6)
-    );
-    sha512_224 = /* @__PURE__ */ createHasher(
-      () => new _SHA512_224(),
-      /* @__PURE__ */ oidNist(5)
     );
   }
 });
@@ -1139,8 +968,8 @@ function invert(number, modulo) {
     const n = y - v * q;
     b = a, a = r, x = u, y = v, u = m, v = n;
   }
-  const gcd2 = b;
-  if (gcd2 !== _1n2)
+  const gcd3 = b;
+  if (gcd3 !== _1n2)
     throw new Error("invert: does not exist");
   return mod(x, modulo);
 }
@@ -1805,14 +1634,14 @@ function expand_message_xof(msg, DST, lenInBytes, k, H) {
     throw new Error("expand_message_xof: invalid lenInBytes");
   return H.create({ dkLen: lenInBytes }).update(msg).update(i2osp(lenInBytes, 2)).update(DST).update(i2osp(DST.length, 1)).digest();
 }
-function hash_to_field(msg, count, options) {
-  validateObject(options, {
+function hash_to_field(msg, count, options2) {
+  validateObject(options2, {
     p: "bigint",
     m: "number",
     k: "number",
     hash: "function"
   });
-  const { p, k, m, hash, expand: expand3, DST } = options;
+  const { p, k, m, hash, expand: expand3, DST } = options2;
   asafenumber(hash.outputLen, "valid hash");
   abytes(msg);
   asafenumber(count);
@@ -1867,16 +1696,16 @@ function createHasher2(Point5, mapToCurve, defaults) {
   return {
     defaults: Object.freeze(defaults),
     Point: Point5,
-    hashToCurve(msg, options) {
-      const opts = Object.assign({}, defaults, options);
+    hashToCurve(msg, options2) {
+      const opts = Object.assign({}, defaults, options2);
       const u = hash_to_field(msg, 2, opts);
       const u0 = map(u[0]);
       const u1 = map(u[1]);
       return clear(u0.add(u1));
     },
-    encodeToCurve(msg, options) {
+    encodeToCurve(msg, options2) {
       const optsDst = defaults.encodeDST ? { DST: defaults.encodeDST } : {};
-      const opts = Object.assign({}, defaults, optsDst, options);
+      const opts = Object.assign({}, defaults, optsDst, options2);
       const u = hash_to_field(msg, 1, opts);
       const u0 = map(u[0]);
       return clear(u0);
@@ -1897,9 +1726,9 @@ function createHasher2(Point5, mapToCurve, defaults) {
     },
     // hash_to_scalar can produce 0: https://www.rfc-editor.org/errata/eid8393
     // RFC 9380, draft-irtf-cfrg-bbs-signatures-08
-    hashToScalar(msg, options) {
+    hashToScalar(msg, options2) {
       const N2 = Point5.Fn.ORDER;
-      const opts = Object.assign({}, defaults, { p: N2, m: 1, DST: _DST_scalar }, options);
+      const opts = Object.assign({}, defaults, { p: N2, m: 1, DST: _DST_scalar }, options2);
       return hash_to_field(msg, 1, opts)[0][0];
     }
   };
@@ -2577,15 +2406,15 @@ function ecdh(Point5, ecdhOpts = {}) {
       return false;
     }
   }
-  function isValidPublicKey(publicKey, isCompressed) {
+  function isValidPublicKey(publicKey2, isCompressed) {
     const { publicKey: comp, publicKeyUncompressed } = lengths2;
     try {
-      const l = publicKey.length;
+      const l = publicKey2.length;
       if (isCompressed === true && l !== comp)
         return false;
       if (isCompressed === false && l !== publicKeyUncompressed)
         return false;
-      return !!Point5.fromBytes(publicKey);
+      return !!Point5.fromBytes(publicKey2);
     } catch (error) {
       return false;
     }
@@ -2597,13 +2426,13 @@ function ecdh(Point5, ecdhOpts = {}) {
     return Point5.BASE.multiply(Fn4.fromBytes(secretKey)).toBytes(isCompressed);
   }
   function isProbPub(item) {
-    const { secretKey, publicKey, publicKeyUncompressed } = lengths2;
+    const { secretKey, publicKey: publicKey2, publicKeyUncompressed } = lengths2;
     if (!isBytes(item))
       return void 0;
-    if ("_lengths" in Fn4 && Fn4._lengths || secretKey === publicKey)
+    if ("_lengths" in Fn4 && Fn4._lengths || secretKey === publicKey2)
       return void 0;
     const l = abytes(item, void 0, "key").length;
-    return l === publicKey || l === publicKeyUncompressed;
+    return l === publicKey2 || l === publicKeyUncompressed;
   }
   function getSharedSecret(secretKeyA, publicKeyB, isCompressed = true) {
     if (isProbPub(secretKeyA) === true)
@@ -2807,9 +2636,9 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
     const sig = drbg(seed, k2sig);
     return sig.toBytes(opts.format);
   }
-  function verify(signature, message, publicKey, opts = {}) {
+  function verify(signature, message, publicKey2, opts = {}) {
     const { lowS, prehash, format } = validateSigOpts(opts, defaultSigOpts);
-    publicKey = abytes(publicKey, void 0, "publicKey");
+    publicKey2 = abytes(publicKey2, void 0, "publicKey");
     message = validateMsgAndHash(message, prehash);
     if (!isBytes(signature)) {
       const end = signature instanceof Signature2 ? ", use sig.toBytes()" : "";
@@ -2818,7 +2647,7 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
     validateSigLength(signature, format);
     try {
       const sig = Signature2.fromBytes(signature, format);
-      const P3 = Point5.fromBytes(publicKey);
+      const P3 = Point5.fromBytes(publicKey2);
       if (lowS && sig.hasHighS())
         return false;
       const { r, s } = sig;
@@ -3057,11 +2886,11 @@ function schnorrSign(message, secretKey, auxRand = randomBytes(32)) {
     throw new Error("sign: Invalid signature produced");
   return sig;
 }
-function schnorrVerify(signature, message, publicKey) {
+function schnorrVerify(signature, message, publicKey2) {
   const { Fp, Fn: Fn4, BASE } = Pointk1;
   const sig = abytes(signature, 64, "signature");
   const m = abytes(message, void 0, "message");
-  const pub = abytes(publicKey, 32, "publicKey");
+  const pub = abytes(publicKey2, 32, "publicKey");
   try {
     const P3 = lift_x(num(pub));
     const r = num(sig.subarray(0, 32));
@@ -3198,15 +3027,6 @@ var init_secp256k1 = __esm({
 });
 
 // node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/legacy.js
-var legacy_exports = {};
-__export(legacy_exports, {
-  _MD5: () => _MD5,
-  _RIPEMD160: () => _RIPEMD160,
-  _SHA1: () => _SHA1,
-  md5: () => md5,
-  ripemd160: () => ripemd160,
-  sha1: () => sha1
-});
 function ripemd_f(group, x, y, z) {
   if (group === 0)
     return x ^ y ^ z;
@@ -3218,150 +3038,12 @@ function ripemd_f(group, x, y, z) {
     return x & z | y & ~z;
   return x ^ (y | ~z);
 }
-var SHA1_IV, SHA1_W, _SHA1, sha1, p32, K, MD5_IV, MD5_W, _MD5, md5, Rho160, Id160, Pi160, idxLR, idxL, idxR, shifts160, shiftsL160, shiftsR160, Kl160, Kr160, BUF_160, _RIPEMD160, ripemd160;
+var Rho160, Id160, Pi160, idxLR, idxL, idxR, shifts160, shiftsL160, shiftsR160, Kl160, Kr160, BUF_160, _RIPEMD160, ripemd160;
 var init_legacy = __esm({
   "node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/legacy.js"() {
     init_define_import_meta_env();
     init_md();
     init_utils();
-    SHA1_IV = /* @__PURE__ */ Uint32Array.from([
-      1732584193,
-      4023233417,
-      2562383102,
-      271733878,
-      3285377520
-    ]);
-    SHA1_W = /* @__PURE__ */ new Uint32Array(80);
-    _SHA1 = class extends HashMD {
-      A = SHA1_IV[0] | 0;
-      B = SHA1_IV[1] | 0;
-      C = SHA1_IV[2] | 0;
-      D = SHA1_IV[3] | 0;
-      E = SHA1_IV[4] | 0;
-      constructor() {
-        super(64, 20, 8, false);
-      }
-      get() {
-        const { A, B, C: C2, D, E } = this;
-        return [A, B, C2, D, E];
-      }
-      set(A, B, C2, D, E) {
-        this.A = A | 0;
-        this.B = B | 0;
-        this.C = C2 | 0;
-        this.D = D | 0;
-        this.E = E | 0;
-      }
-      process(view3, offset) {
-        for (let i = 0; i < 16; i++, offset += 4)
-          SHA1_W[i] = view3.getUint32(offset, false);
-        for (let i = 16; i < 80; i++)
-          SHA1_W[i] = rotl(SHA1_W[i - 3] ^ SHA1_W[i - 8] ^ SHA1_W[i - 14] ^ SHA1_W[i - 16], 1);
-        let { A, B, C: C2, D, E } = this;
-        for (let i = 0; i < 80; i++) {
-          let F, K2;
-          if (i < 20) {
-            F = Chi(B, C2, D);
-            K2 = 1518500249;
-          } else if (i < 40) {
-            F = B ^ C2 ^ D;
-            K2 = 1859775393;
-          } else if (i < 60) {
-            F = Maj(B, C2, D);
-            K2 = 2400959708;
-          } else {
-            F = B ^ C2 ^ D;
-            K2 = 3395469782;
-          }
-          const T = rotl(A, 5) + F + E + K2 + SHA1_W[i] | 0;
-          E = D;
-          D = C2;
-          C2 = rotl(B, 30);
-          B = A;
-          A = T;
-        }
-        A = A + this.A | 0;
-        B = B + this.B | 0;
-        C2 = C2 + this.C | 0;
-        D = D + this.D | 0;
-        E = E + this.E | 0;
-        this.set(A, B, C2, D, E);
-      }
-      roundClean() {
-        clean(SHA1_W);
-      }
-      destroy() {
-        this.set(0, 0, 0, 0, 0);
-        clean(this.buffer);
-      }
-    };
-    sha1 = /* @__PURE__ */ createHasher(() => new _SHA1());
-    p32 = /* @__PURE__ */ Math.pow(2, 32);
-    K = /* @__PURE__ */ Array.from({ length: 64 }, (_, i) => Math.floor(p32 * Math.abs(Math.sin(i + 1))));
-    MD5_IV = /* @__PURE__ */ SHA1_IV.slice(0, 4);
-    MD5_W = /* @__PURE__ */ new Uint32Array(16);
-    _MD5 = class extends HashMD {
-      A = MD5_IV[0] | 0;
-      B = MD5_IV[1] | 0;
-      C = MD5_IV[2] | 0;
-      D = MD5_IV[3] | 0;
-      constructor() {
-        super(64, 16, 8, true);
-      }
-      get() {
-        const { A, B, C: C2, D } = this;
-        return [A, B, C2, D];
-      }
-      set(A, B, C2, D) {
-        this.A = A | 0;
-        this.B = B | 0;
-        this.C = C2 | 0;
-        this.D = D | 0;
-      }
-      process(view3, offset) {
-        for (let i = 0; i < 16; i++, offset += 4)
-          MD5_W[i] = view3.getUint32(offset, true);
-        let { A, B, C: C2, D } = this;
-        for (let i = 0; i < 64; i++) {
-          let F, g, s;
-          if (i < 16) {
-            F = Chi(B, C2, D);
-            g = i;
-            s = [7, 12, 17, 22];
-          } else if (i < 32) {
-            F = Chi(D, B, C2);
-            g = (5 * i + 1) % 16;
-            s = [5, 9, 14, 20];
-          } else if (i < 48) {
-            F = B ^ C2 ^ D;
-            g = (3 * i + 5) % 16;
-            s = [4, 11, 16, 23];
-          } else {
-            F = C2 ^ (B | ~D);
-            g = 7 * i % 16;
-            s = [6, 10, 15, 21];
-          }
-          F = F + A + K[i] + MD5_W[g];
-          A = D;
-          D = C2;
-          C2 = B;
-          B = B + rotl(F, s[i % 4]);
-        }
-        A = A + this.A | 0;
-        B = B + this.B | 0;
-        C2 = C2 + this.C | 0;
-        D = D + this.D | 0;
-        this.set(A, B, C2, D);
-      }
-      roundClean() {
-        clean(MD5_W);
-      }
-      destroy() {
-        this.set(0, 0, 0, 0);
-        clean(this.buffer);
-      }
-    };
-    md5 = /* @__PURE__ */ createHasher(() => new _MD5());
     Rho160 = /* @__PURE__ */ Uint8Array.from([
       7,
       4,
@@ -3956,7 +3638,7 @@ var init_base = __esm({
         return Uint8Array.from(res);
       }
     };
-    createBase58check = (sha2562) => /* @__PURE__ */ chain(checksum(4, (data) => sha2562(sha2562(data))), base58);
+    createBase58check = (sha2563) => /* @__PURE__ */ chain(checksum(4, (data) => sha2563(sha2563(data))), base58);
     base58check = createBase58check;
     BECH_ALPHABET = /* @__PURE__ */ chain(/* @__PURE__ */ alphabet("qpzry9x8gf2tvdw0s3jn54khce6mua7l"), /* @__PURE__ */ join(""));
     POLYMOD_GENERATORS = [996825010, 642813549, 513874426, 1027748829, 705979059];
@@ -4850,7 +4532,7 @@ var init_micro_packed = __esm({
         this.buffers.push(new Uint8Array([b]));
         this.pos++;
       }
-      finish(clean2 = true) {
+      finish(clean3 = true) {
         if (this.finished)
           throw this.err("buffer: finished");
         if (this.bitPos)
@@ -4868,7 +4550,7 @@ var init_micro_packed = __esm({
           buf.set(ptr.ptr.encode(pos), ptr.pos);
           pos += ptr.buffer.length;
         }
-        if (clean2) {
+        if (clean3) {
           this.buffers = [];
           for (const p of this.ptrs)
             p.buffer.fill(0);
@@ -5070,9 +4752,9 @@ var init_micro_packed = __esm({
         throw new Error(`expected string, got ${typeof value}`);
       return value;
     });
-    createHex = (len, options = { isLE: false, with0x: false }) => {
-      let inner = apply(createBytes(len, options.isLE), hex);
-      const prefix2 = options.with0x;
+    createHex = (len, options2 = { isLE: false, with0x: false }) => {
+      let inner = apply(createBytes(len, options2.isLE), hex);
+      const prefix2 = options2.with0x;
       if (typeof prefix2 !== "boolean")
         throw new Error(`hex/with0x: expected boolean, got ${typeof prefix2}`);
       if (prefix2) {
@@ -5741,7 +5423,7 @@ function mergeKeyMap(psbtEnum, val, cur, allowedFields, allowUnknown) {
           ];
         });
         const map = {};
-        const add2 = (kStr, k2, v) => {
+        const add3 = (kStr, k2, v) => {
           if (map[kStr] === void 0) {
             map[kStr] = [k2, v];
             return;
@@ -5753,7 +5435,7 @@ function mergeKeyMap(psbtEnum, val, cur, allowedFields, allowUnknown) {
         };
         for (const [k2, v] of oldKV) {
           const kStr = hex.encode(kC.encode(k2));
-          add2(kStr, k2, v);
+          add3(kStr, k2, v);
         }
         for (const [k2, v] of newKV) {
           const kStr = hex.encode(kC.encode(k2));
@@ -5762,7 +5444,7 @@ function mergeKeyMap(psbtEnum, val, cur, allowedFields, allowUnknown) {
               throw new Error(`Cannot remove signed field=${key}/${k2}`);
             delete map[kStr];
           } else
-            add2(kStr, k2, v);
+            add3(kStr, k2, v);
         }
         res[key] = Object.values(map);
       }
@@ -6230,8 +5912,8 @@ function formatKey(hashed, prefix2) {
 function WIF(network = NETWORK) {
   return {
     encode(privKey) {
-      const compressed2 = concatBytes3(privKey, new Uint8Array([1]));
-      return formatKey(compressed2.subarray(0, 33), [network.wif]);
+      const compressed3 = concatBytes3(privKey, new Uint8Array([1]));
+      return formatKey(compressed3.subarray(0, 33), [network.wif]);
     },
     decode(wif) {
       let parsed = base58check2.decode(wif);
@@ -6520,10 +6202,10 @@ var init_payment = __esm({
         throw new Error("P2PK: invalid publicKey");
       return { type: "pk", script: OutScript.encode({ type: "pk", pubkey }) };
     };
-    p2pkh = (publicKey, network = NETWORK) => {
-      if (!isValidPubkey(publicKey, PubT.ecdsa))
+    p2pkh = (publicKey2, network = NETWORK) => {
+      if (!isValidPubkey(publicKey2, PubT.ecdsa))
         throw new Error("P2PKH: invalid publicKey");
-      const hash = hash160(publicKey);
+      const hash = hash160(publicKey2);
       return {
         type: "pkh",
         script: OutScript.encode({ type: "pkh", hash }),
@@ -6572,12 +6254,12 @@ var init_payment = __esm({
         hash
       };
     };
-    p2wpkh = (publicKey, network = NETWORK) => {
-      if (!isValidPubkey(publicKey, PubT.ecdsa))
+    p2wpkh = (publicKey2, network = NETWORK) => {
+      if (!isValidPubkey(publicKey2, PubT.ecdsa))
         throw new Error("P2WPKH: invalid publicKey");
-      if (publicKey.length === 65)
+      if (publicKey2.length === 65)
         throw new Error("P2WPKH: uncompressed public key");
-      const hash = hash160(publicKey);
+      const hash = hash160(publicKey2);
       return {
         type: "wpkh",
         script: OutScript.encode({ type: "wpkh", hash }),
@@ -7202,16 +6884,16 @@ var init_transaction = __esm({
         return this.outputs.length;
       }
       normalizeOutput(o, cur, allowedFields) {
-        let { amount, script } = o;
-        if (amount === void 0)
-          amount = cur?.amount;
-        if (typeof amount !== "bigint")
-          throw new Error(`Wrong amount type, should be of type bigint in sats, but got ${amount} of type ${typeof amount}`);
+        let { amount: amount2, script } = o;
+        if (amount2 === void 0)
+          amount2 = cur?.amount;
+        if (typeof amount2 !== "bigint")
+          throw new Error(`Wrong amount type, should be of type bigint in sats, but got ${amount2} of type ${typeof amount2}`);
         if (typeof script === "string")
           script = hex.decode(script);
         if (script === void 0)
           script = cur?.script;
-        let res = { ...cur, ...o, amount, script };
+        let res = { ...cur, ...o, amount: amount2, script };
         if (res.amount === void 0)
           delete res.amount;
         res = mergeKeyMap(PSBTOutput, res, cur, allowedFields, this.opts.allowUnknown);
@@ -7239,8 +6921,8 @@ var init_transaction = __esm({
         }
         this.outputs[idx] = this.normalizeOutput(output, this.outputs[idx], allowedFields);
       }
-      addOutputAddress(address, amount, network = NETWORK) {
-        return this.addOutput({ script: OutScript.encode(Address(network).decode(address)), amount });
+      addOutputAddress(address, amount2, network = NETWORK) {
+        return this.addOutput({ script: OutScript.encode(Address(network).decode(address)), amount: amount2 });
       }
       // Utils
       get fee() {
@@ -7294,7 +6976,7 @@ var init_transaction = __esm({
         });
         return sha256x2(tmpTx, I32LE.encode(hashType));
       }
-      preimageWitnessV0(idx, prevOutScript, hashType, amount) {
+      preimageWitnessV0(idx, prevOutScript, hashType, amount2) {
         const { isAny, isNone, isSingle } = unpackSighash(hashType);
         let inputHash = EMPTY32;
         let sequenceHash = EMPTY32;
@@ -7310,11 +6992,11 @@ var init_transaction = __esm({
         } else if (isSingle && idx < outputs.length)
           outputHash = sha256x2(RawOutput.encode(outputs[idx]));
         const input = inputs[idx];
-        return sha256x2(I32LE.encode(this.version), inputHash, sequenceHash, createBytes(32, true).encode(input.txid), U32LE.encode(input.index), VarBytes.encode(prevOutScript), U64LE.encode(amount), U32LE.encode(input.sequence), outputHash, U32LE.encode(this.lockTime), U32LE.encode(hashType));
+        return sha256x2(I32LE.encode(this.version), inputHash, sequenceHash, createBytes(32, true).encode(input.txid), U32LE.encode(input.index), VarBytes.encode(prevOutScript), U64LE.encode(amount2), U32LE.encode(input.sequence), outputHash, U32LE.encode(this.lockTime), U32LE.encode(hashType));
       }
-      preimageWitnessV1(idx, prevOutScript, hashType, amount, codeSeparator = -1, leafScript, leafVer = 192, annex) {
-        if (!Array.isArray(amount) || this.inputs.length !== amount.length)
-          throw new Error(`Invalid amounts array=${amount}`);
+      preimageWitnessV1(idx, prevOutScript, hashType, amount2, codeSeparator = -1, leafScript, leafVer = 192, annex) {
+        if (!Array.isArray(amount2) || this.inputs.length !== amount2.length)
+          throw new Error(`Invalid amounts array=${amount2}`);
         if (!Array.isArray(prevOutScript) || this.inputs.length !== prevOutScript.length)
           throw new Error(`Invalid prevOutScript array=${prevOutScript}`);
         const out = [
@@ -7331,7 +7013,7 @@ var init_transaction = __esm({
         if (inType !== SignatureHash.ANYONECANPAY) {
           out.push(...[
             inputs.map(TxHashIdx.encode),
-            amount.map(U64LE.encode),
+            amount2.map(U64LE.encode),
             prevOutScript.map(VarBytes.encode),
             inputs.map((i) => U32LE.encode(i.sequence))
           ].map((i) => sha256(concatBytes3(...i))));
@@ -7343,7 +7025,7 @@ var init_transaction = __esm({
         out.push(new Uint8Array([spendType]));
         if (inType === SignatureHash.ANYONECANPAY) {
           const inp = inputs[idx];
-          out.push(TxHashIdx.encode(inp), U64LE.encode(amount[idx]), VarBytes.encode(prevOutScript[idx]), U32LE.encode(inp.sequence));
+          out.push(TxHashIdx.encode(inp), U64LE.encode(amount2[idx]), VarBytes.encode(prevOutScript[idx]), U32LE.encode(inp.sequence));
         } else
           out.push(U32LE.encode(idx));
         if (spendType & 1)
@@ -7396,7 +7078,7 @@ var init_transaction = __esm({
         if (inputType.txType === "taproot") {
           const prevOuts = this.inputs.map(getPrevOut);
           const prevOutScript = prevOuts.map((i) => i.script);
-          const amount = prevOuts.map((i) => i.amount);
+          const amount2 = prevOuts.map((i) => i.amount);
           let signed = false;
           let schnorrPub = pubSchnorr(privateKey);
           let merkleRoot = input.tapMerkleRoot || EMPTY;
@@ -7404,7 +7086,7 @@ var init_transaction = __esm({
             const { pubKey, privKey } = getTaprootKeys(privateKey, schnorrPub, input.tapInternalKey, merkleRoot);
             const [taprootPubKey, _] = taprootTweakPubkey(input.tapInternalKey, merkleRoot);
             if (equalBytes3(taprootPubKey, pubKey)) {
-              const hash = this.preimageWitnessV1(idx, prevOutScript, sighash, amount);
+              const hash = this.preimageWitnessV1(idx, prevOutScript, sighash, amount2);
               const sig = concatBytes3(signSchnorr(hash, privKey, _auxRand), sighash !== SignatureHash.DEFAULT ? new Uint8Array([sighash]) : EMPTY);
               this.updateInput(idx, { tapKeySig: sig }, true);
               signed = true;
@@ -7420,7 +7102,7 @@ var init_transaction = __esm({
               const pos = scriptDecoded.findIndex((i) => isBytes4(i) && equalBytes3(i, schnorrPub));
               if (pos === -1)
                 continue;
-              const msg = this.preimageWitnessV1(idx, prevOutScript, sighash, amount, void 0, script, ver);
+              const msg = this.preimageWitnessV1(idx, prevOutScript, sighash, amount2, void 0, script, ver);
               const sig = concatBytes3(signSchnorr(msg, privateKey, _auxRand), sighash !== SignatureHash.DEFAULT ? new Uint8Array([sighash]) : EMPTY);
               this.updateInput(idx, { tapScriptSig: [[{ pubKey: schnorrPub, leafHash: hash }, sig]] }, true);
               signed = true;
@@ -7853,12 +7535,12 @@ var init_utxo = __esm({
         if (opts.requiredInputs !== void 0 && !Array.isArray(opts.requiredInputs))
           throw new Error(`Estimator: wrong required inputs=${opts.requiredInputs}`);
         const network = opts.network || NETWORK;
-        let amount = 0n;
+        let amount2 = 0n;
         let baseWeight = 32;
         for (const o of outputs) {
           const script = getScript(o, opts, opts.network);
           baseWeight += 32 + 4 * VarBytes.encode(script).length;
-          amount += o.amount;
+          amount2 += o.amount;
         }
         if (typeof opts.changeAddress !== "string")
           throw new Error(`Estimator: wrong change address=${opts.changeAddress}`);
@@ -7867,7 +7549,7 @@ var init_utxo = __esm({
         changeWeight += 4 * CompactSizeLen.encode(outputs.length + 1).length;
         this.baseWeight = baseWeight;
         this.changeWeight = changeWeight;
-        this.amount = amount;
+        this.amount = amount2;
         const allInputs = Array.from(inputs);
         if (opts.requiredInputs) {
           for (let i = 0; i < opts.requiredInputs.length; i++)
@@ -7937,7 +7619,7 @@ var init_utxo = __esm({
       // exact - like blackjack from coinselect.
       // exact(biggest) will select one big utxo which is closer to targetValue+dust, if possible.
       // If not, it will accumulate largest utxo until value is close to targetValue+dust.
-      accumulate(indices, exact = false, skipNegative = true, all = false) {
+      accumulate(indices, exact2 = false, skipNegative = true, all = false) {
         let weight = this.opts.alwaysChange ? this.changeWeight : this.baseWeight;
         let hasWitnesses = false;
         let num2 = 0;
@@ -7949,7 +7631,7 @@ var init_utxo = __esm({
           this.checkInputIdx(idx);
           if (res.has(idx))
             throw new Error("required input encountered multiple times");
-          const { estimate: estimate2, amount } = this.normalizedInputs[idx];
+          const { estimate: estimate2, amount: amount2 } = this.normalizedInputs[idx];
           let newWeight = weight + estimate2.weight;
           if (!hasWitnesses && estimate2.hasWitnesses)
             newWeight += 2;
@@ -7959,7 +7641,7 @@ var init_utxo = __esm({
           if (estimate2.hasWitnesses)
             hasWitnesses = true;
           num2++;
-          inputsAmount += amount;
+          inputsAmount += amount2;
           res.add(idx);
           if (!all && targetAmount + fee <= inputsAmount && num2 >= this.requiredIndices.length)
             return { indices: Array.from(res), fee, weight: totalWeight, total: inputsAmount };
@@ -7968,13 +7650,13 @@ var init_utxo = __esm({
           this.checkInputIdx(idx);
           if (res.has(idx))
             continue;
-          const { estimate: estimate2, amount, value } = this.normalizedInputs[idx];
+          const { estimate: estimate2, amount: amount2, value } = this.normalizedInputs[idx];
           let newWeight = weight + estimate2.weight;
           if (!hasWitnesses && estimate2.hasWitnesses)
             newWeight += 2;
           const totalWeight = newWeight + 4 * CompactSizeLen.encode(num2).length;
           fee = this.getSatoshi(totalWeight);
-          if (exact && amount + inputsAmount > targetAmount + fee + this.dust)
+          if (exact2 && amount2 + inputsAmount > targetAmount + fee + this.dust)
             continue;
           if (skipNegative && value <= 0n)
             continue;
@@ -7982,7 +7664,7 @@ var init_utxo = __esm({
           if (estimate2.hasWitnesses)
             hasWitnesses = true;
           num2++;
-          inputsAmount += amount;
+          inputsAmount += amount2;
           res.add(idx);
           if (!all && targetAmount + fee <= inputsAmount)
             return { indices: Array.from(res), fee, weight: totalWeight, total: inputsAmount };
@@ -7996,9 +7678,9 @@ var init_utxo = __esm({
       // Works like coinselect default method
       default() {
         const { biggest } = this;
-        const exact = this.accumulate(biggest, true, false);
-        if (exact)
-          return exact;
+        const exact2 = this.accumulate(biggest, true, false);
+        if (exact2)
+          return exact2;
         return this.accumulate(biggest);
       }
       select(strategy) {
@@ -8018,9 +7700,9 @@ var init_utxo = __esm({
           if (!data[exactData])
             throw new Error(`Estimator.select: wrong strategy=${strategy}`);
           strategy = left;
-          const exact = this.accumulate(data[exactData](), true, true);
-          if (exact)
-            return exact;
+          const exact2 = this.accumulate(data[exactData](), true, true);
+          if (exact2)
+            return exact2;
         }
         if (strategy.startsWith("accum")) {
           const accumData = strategy.slice(5);
@@ -8187,9 +7869,9 @@ var require_bip68 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/networks.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/networks.js
 var require_networks = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/networks.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/networks.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -8456,9 +8138,9 @@ var require_lodash = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinLib.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinLib.js
 var require_bitcoinLib = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinLib.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinLib.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -8469,12 +8151,12 @@ var require_bitcoinLib = __commonJS({
     exports.setBitcoinLib = setBitcoinLib;
     exports.getBitcoinLibOrThrow = getBitcoinLibOrThrow;
     function isScureTransaction(psbt) {
-      const candidate = psbt;
-      return "inputsLength" in candidate && "outputsLength" in candidate && "toPSBT" in candidate && typeof candidate.toPSBT === "function" && "lockTime" in candidate;
+      const candidate2 = psbt;
+      return "inputsLength" in candidate2 && "outputsLength" in candidate2 && "toPSBT" in candidate2 && typeof candidate2.toPSBT === "function" && "lockTime" in candidate2;
     }
     function isScureHDKey(node) {
-      const candidate = node;
-      return typeof candidate.fingerprint === "number" && typeof candidate.derive === "function" && typeof candidate.deriveChild === "function" && typeof candidate.publicExtendedKey === "string" && typeof candidate.privateExtendedKey === "string";
+      const candidate2 = node;
+      return typeof candidate2.fingerprint === "number" && typeof candidate2.derive === "function" && typeof candidate2.deriveChild === "function" && typeof candidate2.publicExtendedKey === "string" && typeof candidate2.privateExtendedKey === "string";
     }
     function toECPairInterface(ecpair) {
       if (ecpair instanceof Uint8Array) {
@@ -9293,9 +8975,9 @@ var init_browser2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinjs-lib-internals.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinjs-lib-internals.js
 var require_bitcoinjs_lib_internals = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinjs-lib-internals.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinjs-lib-internals.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -9346,9 +9028,9 @@ var require_bitcoinjs_lib_internals = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/psbt.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/psbt.js
 var require_psbt = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/psbt.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/psbt.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -9529,9 +9211,9 @@ var require_psbt = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/checksum.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/checksum.js
 var require_checksum = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/checksum.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/checksum.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -9587,9 +9269,9 @@ var require_checksum = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/re.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/re.js
 var require_re = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/re.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/re.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -9651,9 +9333,9 @@ var require_re = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/keyExpressions.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/keyExpressions.js
 var require_keyExpressions = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/keyExpressions.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/keyExpressions.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -9838,9 +9520,9 @@ var require_keyExpressions = __commonJS({
       masterNode = (0, bitcoinLib_1.toBIP32Interface)(masterNode);
       assertChangeIndexKeyPath({ change, index, keyPath });
       const masterFingerprint = masterNode.fingerprint;
-      const origin = `[${(0, uint8array_tools_1.toHex)(masterFingerprint)}${originPath}]`;
+      const origin2 = `[${(0, uint8array_tools_1.toHex)(masterFingerprint)}${originPath}]`;
       const xpub = isPublic ? masterNode.derivePath(`m${originPath}`).neutered().toBase58().toString() : masterNode.derivePath(`m${originPath}`).toBase58().toString();
-      const keyRoot = `${origin}${xpub}`;
+      const keyRoot = `${origin2}${xpub}`;
       if (keyPath !== void 0)
         return `${keyRoot}${keyPath}`;
       else
@@ -12075,12 +11757,12 @@ var require_satisfier = __commonJS({
       }
       return satisfier2(...satisfactionMakerArgs);
     };
-    var satisfier = (miniscript, options = {}) => {
-      let { unknowns } = options;
-      const { knowns } = options;
-      const { maxSolutions: rawMaxSolutions } = options;
-      const tapscript = Boolean(options.tapscript);
-      const computeUnknowns = options.computeUnknowns === true;
+    var satisfier = (miniscript, options2 = {}) => {
+      let { unknowns } = options2;
+      const { knowns } = options2;
+      const { maxSolutions: rawMaxSolutions } = options2;
+      const tapscript = Boolean(options2.tapscript);
+      const computeUnknowns = options2.computeUnknowns === true;
       let analysis;
       try {
         analysis = (0, compiler_1.analyzeMiniscript)(miniscript, { tapscript });
@@ -12185,9 +11867,9 @@ var require_dist = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/miniscript.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/miniscript.js
 var require_miniscript = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/miniscript.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/miniscript.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -12363,9 +12045,9 @@ var require_miniscript = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/parseUtils.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/parseUtils.js
 var require_parseUtils = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/parseUtils.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/parseUtils.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -12411,9 +12093,9 @@ var require_parseUtils = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/tapTree.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/tapTree.js
 var require_tapTree = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/tapTree.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/tapTree.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -12517,9 +12199,9 @@ var require_tapTree = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/resourceLimits.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/resourceLimits.js
 var require_resourceLimits = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/resourceLimits.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/resourceLimits.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -12588,9 +12270,9 @@ var require_resourceLimits = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/tapMiniscript.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/tapMiniscript.js
 var require_tapMiniscript = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/tapMiniscript.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/tapMiniscript.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -12839,8 +12521,8 @@ var require_tapMiniscript = __commonJS({
         })).filter((sig) => leafPubkeySet.has((0, uint8array_tools_1.toHex)(sig.pubkey)));
       };
       const satisfactions = [];
-      for (const candidate of candidates) {
-        const { leaf } = candidate;
+      for (const candidate2 of candidates) {
+        const { leaf } = candidate2;
         const leafSignatures = resolveLeafSignatures(leaf);
         try {
           let satisfierMiniscript = leaf.expandedMiniscript;
@@ -12867,12 +12549,12 @@ var require_tapMiniscript = __commonJS({
           const totalWitnessSize = estimateTaprootWitnessSize({
             stackItems: satisfactionStackItems,
             tapScript: leaf.tapScript,
-            depth: candidate.depth
+            depth: candidate2.depth
           });
           satisfactions.push({
             leaf,
-            depth: candidate.depth,
-            tapLeafHash: candidate.tapLeafHash,
+            depth: candidate2.depth,
+            tapLeafHash: candidate2.tapLeafHash,
             scriptSatisfaction,
             stackItems: satisfactionStackItems,
             nLockTime,
@@ -12928,9 +12610,9 @@ var require_tapMiniscript = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/multipath.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/multipath.js
 var require_multipath = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/multipath.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/multipath.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -12991,9 +12673,9 @@ var require_multipath = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/descriptors.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/descriptors.js
 var require_descriptors = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/descriptors.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/descriptors.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -13752,10 +13434,10 @@ var require_descriptors = __commonJS({
           this.inputWeight = (0, lodash_memoize_1.default)(
             this.inputWeight,
             // resolver function:
-            (isSegwitTx, signatures, options) => {
+            (isSegwitTx, signatures, options2) => {
               const segwitKey = isSegwitTx ? "segwit" : "non-segwit";
               const signaturesKey = getSignaturesKey(signatures);
-              const taprootSighashKey = options?.taprootSighash ?? "SIGHASH_DEFAULT";
+              const taprootSighashKey = options2?.taprootSighash ?? "SIGHASH_DEFAULT";
               return `${segwitKey}-${signaturesKey}-taprootSighash:${taprootSighashKey}`;
             }
           );
@@ -14010,10 +13692,10 @@ var require_descriptors = __commonJS({
         // - After PSBT taproot script-path fields are fully populated, add regtest
         //   integration fixtures comparing real tx vsize with inputWeight/outputWeight
         //   estimates for taproot key-path and script-path spends.
-        inputWeight(isSegwitTx, signatures, options = {
+        inputWeight(isSegwitTx, signatures, options2 = {
           taprootSighash: "SIGHASH_DEFAULT"
         }) {
-          const taprootSighash = options.taprootSighash ?? "SIGHASH_DEFAULT";
+          const taprootSighash = options2.taprootSighash ?? "SIGHASH_DEFAULT";
           if (this.isSegwit() && !isSegwitTx)
             throw new Error(`a tx is segwit if at least one input is segwit`);
           const expansion = this.expand().expandedExpression;
@@ -14547,9 +14229,9 @@ var require_descriptors = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bip174.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/bip174.js
 var require_bip174 = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bip174.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/bip174.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -14563,9 +14245,9 @@ var require_bip174 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinjsHdPatch.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinjsHdPatch.js
 var require_bitcoinjsHdPatch = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinjsHdPatch.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/bitcoinjsHdPatch.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -14705,9 +14387,9 @@ var require_bitcoinjsHdPatch = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/signers.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/signers.js
 var require_signers = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/signers.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/signers.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -14797,9 +14479,9 @@ var require_signers = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/networkUtils.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/networkUtils.js
 var require_networkUtils = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/networkUtils.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/networkUtils.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -14815,9 +14497,9 @@ var require_networkUtils = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/scriptExpressions.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/scriptExpressions.js
 var require_scriptExpressions = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/scriptExpressions.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/scriptExpressions.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -14856,9 +14538,9 @@ var require_scriptExpressions = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/index.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/index.js
 var require_dist2 = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/index.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/index.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -14932,9 +14614,9 @@ Learn more: https://github.com/bitcoinerlab/descriptors/blob/main/src/index.ts#L
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/common.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/common.js
 var require_common = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/common.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/common.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -14972,9 +14654,9 @@ var require_common = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/script.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/script.js
 var require_script = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/script.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/script.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -15135,9 +14817,9 @@ var require_script = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/payments.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/payments.js
 var require_payments = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/payments.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/payments.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -15353,16 +15035,821 @@ var require_payments = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/transaction.js
+// node_modules/.pnpm/@noble+hashes@2.4.0/node_modules/@noble/hashes/_u64.js
+function fromBig2(n, le = false) {
+  if (le)
+    return { h: Number(n & U32_MASK642), l: Number(n >> _32n2 & U32_MASK642) };
+  return { h: Number(n >> _32n2 & U32_MASK642) | 0, l: Number(n & U32_MASK642) | 0 };
+}
+function split2(lst, le = false) {
+  const len = lst.length;
+  let Ah = new Uint32Array(len);
+  let Al = new Uint32Array(len);
+  for (let i = 0; i < len; i++) {
+    const { h, l } = fromBig2(lst[i], le);
+    [Ah[i], Al[i]] = [h, l];
+  }
+  return [Ah, Al];
+}
+function setU64FromNum(view3, byteOffset, n, isLE) {
+  const h = fromNumH(n);
+  const l = fromNumL(n);
+  view3.setUint32(byteOffset, isLE ? l : h, isLE);
+  view3.setUint32(byteOffset + 4, isLE ? h : l, isLE);
+}
+function add2(Ah, Al, Bh, Bl) {
+  const l = (Al >>> 0) + (Bl >>> 0);
+  return { h: Ah + Bh + (l / 2 ** 32 | 0) | 0, l: l | 0 };
+}
+var U32_MASK642, _32n2, fromNumH, fromNumL, shrSH2, shrSL2, rotrSH2, rotrSL2, rotrBH2, rotrBL2, add3L2, add3H2, add4L2, add4H2, add5L2, add5H2;
+var init_u642 = __esm({
+  "node_modules/.pnpm/@noble+hashes@2.4.0/node_modules/@noble/hashes/_u64.js"() {
+    init_define_import_meta_env();
+    U32_MASK642 = /* @__PURE__ */ (() => BigInt(2 ** 32 - 1))();
+    _32n2 = /* @__PURE__ */ BigInt(32);
+    fromNumH = (n) => n / 2 ** 32 | 0;
+    fromNumL = (n) => n >>> 0;
+    shrSH2 = (h, _l, s) => h >>> s;
+    shrSL2 = (h, l, s) => h << 32 - s | l >>> s;
+    rotrSH2 = (h, l, s) => h >>> s | l << 32 - s;
+    rotrSL2 = (h, l, s) => h << 32 - s | l >>> s;
+    rotrBH2 = (h, l, s) => h << 64 - s | l >>> s - 32;
+    rotrBL2 = (h, l, s) => h >>> s - 32 | l << 64 - s;
+    add3L2 = (Al, Bl, Cl) => (Al >>> 0) + (Bl >>> 0) + (Cl >>> 0);
+    add3H2 = (low, Ah, Bh, Ch) => Ah + Bh + Ch + (low / 2 ** 32 | 0) | 0;
+    add4L2 = (Al, Bl, Cl, Dl) => (Al >>> 0) + (Bl >>> 0) + (Cl >>> 0) + (Dl >>> 0);
+    add4H2 = (low, Ah, Bh, Ch, Dh) => Ah + Bh + Ch + Dh + (low / 2 ** 32 | 0) | 0;
+    add5L2 = (Al, Bl, Cl, Dl, El) => (Al >>> 0) + (Bl >>> 0) + (Cl >>> 0) + (Dl >>> 0) + (El >>> 0);
+    add5H2 = (low, Ah, Bh, Ch, Dh, Eh) => Ah + Bh + Ch + Dh + Eh + (low / 2 ** 32 | 0) | 0;
+  }
+});
+
+// node_modules/.pnpm/@noble+hashes@2.4.0/node_modules/@noble/hashes/utils.js
+function isBytes5(a) {
+  return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array" && "BYTES_PER_ELEMENT" in a && a.BYTES_PER_ELEMENT === 1;
+}
+function anumber3(n, title = "") {
+  if (typeof n !== "number")
+    throw new TypeError(atitle(title) + "expected number, got " + typeof n);
+  if (!Number.isSafeInteger(n) || n < 0)
+    throw new RangeError(atitle(title) + "expected integer >= 0, got " + n);
+  return n;
+}
+function abytes3(value, length, title = "") {
+  if (isBytes5(value) && (length === void 0 || value.length === length))
+    return value;
+  if (length !== void 0)
+    anumber3(length, "length");
+  const bytes2 = isBytes5(value);
+  const ofLen = length !== void 0 ? ` of length ${length}` : "";
+  const got = bytes2 ? `length=${value.length}` : `type=${typeof value}`;
+  const message = atitle(title) + "expected Uint8Array" + ofLen + ", got " + got;
+  if (!bytes2)
+    throw new TypeError(message);
+  throw new RangeError(message);
+}
+function aexists2(instance, checkFinished = true) {
+  if (instance.destroyed)
+    throw new Error("hash was destroyed");
+  if (checkFinished && instance.finished)
+    throw new Error("digest() was already called");
+}
+function aoutput2(out, instance) {
+  abytes3(out, void 0, "output");
+  const min = instance.outputLen;
+  if (!(out.length >= min)) {
+    throw new RangeError('"output" expected length >= ' + min);
+  }
+}
+function clean2(...arrays) {
+  for (let i = 0; i < arrays.length; i++) {
+    arrays[i].fill(0);
+  }
+}
+function createView3(arr) {
+  return new DataView(arr.buffer, arr.byteOffset, arr.byteLength);
+}
+function rotr2(word, shift) {
+  return word << 32 - shift | word >>> shift;
+}
+function rotl2(word, shift) {
+  return word << shift | word >>> 32 - shift >>> 0;
+}
+function checkOpts(defaults, opts, title = "opts") {
+  aopts(defaults, "defaults");
+  if (opts !== void 0)
+    aopts(opts, title);
+  const merged = Object.assign(/* @__PURE__ */ Object.create(null), defaults, opts);
+  return merged;
+}
+function createHasher3(hashCons, info = {}) {
+  if (typeof hashCons !== "function")
+    throw new TypeError('"hashCons" expected function, got type=' + typeof hashCons);
+  info = checkOpts({}, info, "info");
+  const hashC = (msg, opts) => hashCons(opts).update(msg).digest();
+  const tmp = hashCons(void 0);
+  hashC.outputLen = tmp.outputLen;
+  hashC.blockLen = tmp.blockLen;
+  hashC.canXOF = tmp.canXOF;
+  hashC.create = (opts) => hashCons(opts);
+  Object.assign(hashC, info);
+  return Object.freeze(hashC);
+}
+var atitle, aobject, aopts, oidNist2;
+var init_utils4 = __esm({
+  "node_modules/.pnpm/@noble+hashes@2.4.0/node_modules/@noble/hashes/utils.js"() {
+    init_define_import_meta_env();
+    atitle = (title) => title ? `"${title}" ` : "";
+    aobject = (value, label) => {
+      if (value === null || typeof value !== "object" || Array.isArray(value))
+        throw new TypeError((label === "object" ? "" : `"${label}" `) + "expected object, got type=" + typeof value);
+    };
+    aopts = (value, label) => {
+      aobject(value, label);
+      const proto = Object.getPrototypeOf(value);
+      if (proto !== Object.prototype && proto !== null)
+        throw new TypeError(`"${label}" expected plain object`);
+      if (Object.hasOwn(value, "__proto__"))
+        throw new TypeError(`"${label}.__proto__" is not allowed`);
+    };
+    oidNist2 = (suffix) => ({
+      // Current NIST hashAlgs suffixes used here fit in one DER subidentifier octet.
+      // Larger suffix values would need base-128 OID encoding and a different length byte.
+      oid: Uint8Array.from([6, 9, 96, 134, 72, 1, 101, 3, 4, 2, suffix])
+    });
+  }
+});
+
+// node_modules/.pnpm/@noble+hashes@2.4.0/node_modules/@noble/hashes/_md.js
+function Chi2(a, b, c) {
+  return a & b ^ ~a & c;
+}
+function Maj2(a, b, c) {
+  return a & b ^ a & c ^ b & c;
+}
+var HashMD2, SHA256_IV2, SHA224_IV2, SHA384_IV2, SHA512_IV2;
+var init_md2 = __esm({
+  "node_modules/.pnpm/@noble+hashes@2.4.0/node_modules/@noble/hashes/_md.js"() {
+    init_define_import_meta_env();
+    init_u642();
+    init_utils4();
+    HashMD2 = class {
+      blockLen;
+      outputLen;
+      canXOF = false;
+      padOffset;
+      isLE;
+      // For partial updates less than block size
+      buffer;
+      view;
+      finished = false;
+      length = 0;
+      pos = 0;
+      destroyed = false;
+      constructor(blockLen, outputLen, padOffset, isLE) {
+        this.blockLen = blockLen;
+        this.outputLen = outputLen;
+        this.padOffset = padOffset;
+        this.isLE = isLE;
+        this.buffer = new Uint8Array(blockLen);
+        this.view = createView3(this.buffer);
+      }
+      update(data) {
+        aexists2(this);
+        abytes3(data);
+        const { view: view3, buffer, blockLen } = this;
+        const len = data.length;
+        let processed = false;
+        for (let pos = 0; pos < len; ) {
+          const take = Math.min(blockLen - this.pos, len - pos);
+          if (take === blockLen) {
+            const dataView = createView3(data);
+            for (; blockLen <= len - pos; pos += blockLen)
+              this.process(dataView, pos);
+            processed = true;
+            continue;
+          }
+          buffer.set(pos === 0 && take === len ? data : data.subarray(pos, pos + take), this.pos);
+          this.pos += take;
+          pos += take;
+          if (this.pos === blockLen) {
+            this.process(view3, 0);
+            this.pos = 0;
+            processed = true;
+          }
+        }
+        this.length += data.length;
+        if (processed)
+          this.roundClean();
+        return this;
+      }
+      digestInto(out) {
+        aexists2(this);
+        aoutput2(out, this);
+        this.finished = true;
+        const { buffer, view: view3, blockLen, isLE } = this;
+        let { pos } = this;
+        buffer[pos++] = 128;
+        buffer.fill(0, pos);
+        if (this.padOffset > blockLen - pos) {
+          this.process(view3, 0);
+          buffer.fill(0);
+        }
+        setU64FromNum(view3, blockLen - 8, this.length * 8, isLE);
+        this.process(view3, 0);
+        this.roundClean();
+        const oview = out === buffer ? view3 : createView3(out);
+        const len = this.outputLen;
+        const outLen = len / 4;
+        const state = this.get();
+        if (len % 4 || outLen > state.length)
+          throw new Error("invalid outputLen");
+        for (let i = 0; i < outLen; i++)
+          oview.setUint32(4 * i, state[i], isLE);
+      }
+      digest() {
+        const { buffer, outputLen } = this;
+        this.digestInto(buffer);
+        const res = buffer.slice(0, outputLen);
+        this.destroy();
+        return res;
+      }
+      _cloneIntoMeta(to) {
+        const { buffer, length, finished, destroyed, pos } = this;
+        to.destroyed = destroyed;
+        to.finished = finished;
+        to.length = length;
+        to.pos = pos;
+        if (pos)
+          to.buffer.set(buffer);
+        return to;
+      }
+      clone() {
+        return this._cloneInto();
+      }
+    };
+    SHA256_IV2 = /* @__PURE__ */ Uint32Array.from([
+      1779033703,
+      3144134277,
+      1013904242,
+      2773480762,
+      1359893119,
+      2600822924,
+      528734635,
+      1541459225
+    ]);
+    SHA224_IV2 = /* @__PURE__ */ Uint32Array.from([
+      3238371032,
+      914150663,
+      812702999,
+      4144912697,
+      4290775857,
+      1750603025,
+      1694076839,
+      3204075428
+    ]);
+    SHA384_IV2 = /* @__PURE__ */ Uint32Array.from([
+      3418070365,
+      3238371032,
+      1654270250,
+      914150663,
+      2438529370,
+      812702999,
+      355462360,
+      4144912697,
+      1731405415,
+      4290775857,
+      2394180231,
+      1750603025,
+      3675008525,
+      1694076839,
+      1203062813,
+      3204075428
+    ]);
+    SHA512_IV2 = /* @__PURE__ */ Uint32Array.from([
+      1779033703,
+      4089235720,
+      3144134277,
+      2227873595,
+      1013904242,
+      4271175723,
+      2773480762,
+      1595750129,
+      1359893119,
+      2917565137,
+      2600822924,
+      725511199,
+      528734635,
+      4215389547,
+      1541459225,
+      327033209
+    ]);
+  }
+});
+
+// node_modules/.pnpm/@noble+hashes@2.4.0/node_modules/@noble/hashes/sha2.js
+var sha2_exports = {};
+__export(sha2_exports, {
+  _SHA224: () => _SHA224,
+  _SHA256: () => _SHA2562,
+  _SHA384: () => _SHA384,
+  _SHA512: () => _SHA5122,
+  _SHA512_224: () => _SHA512_224,
+  _SHA512_256: () => _SHA512_256,
+  sha224: () => sha224,
+  sha256: () => sha2562,
+  sha384: () => sha384,
+  sha512: () => sha5122,
+  sha512_224: () => sha512_224,
+  sha512_256: () => sha512_256
+});
+var SHA256_K2, SHA256_W2, SHA2_32B2, _SHA2562, _SHA224, K5122, SHA512_Kh2, SHA512_Kl2, SHA512_W_H2, SHA512_W_L2, SHA2_64B2, _SHA5122, _SHA384, T224_IV, T256_IV, _SHA512_224, _SHA512_256, sha2562, sha224, sha5122, sha384, sha512_256, sha512_224;
+var init_sha22 = __esm({
+  "node_modules/.pnpm/@noble+hashes@2.4.0/node_modules/@noble/hashes/sha2.js"() {
+    init_define_import_meta_env();
+    init_md2();
+    init_u642();
+    init_utils4();
+    SHA256_K2 = /* @__PURE__ */ Uint32Array.from([
+      1116352408,
+      1899447441,
+      3049323471,
+      3921009573,
+      961987163,
+      1508970993,
+      2453635748,
+      2870763221,
+      3624381080,
+      310598401,
+      607225278,
+      1426881987,
+      1925078388,
+      2162078206,
+      2614888103,
+      3248222580,
+      3835390401,
+      4022224774,
+      264347078,
+      604807628,
+      770255983,
+      1249150122,
+      1555081692,
+      1996064986,
+      2554220882,
+      2821834349,
+      2952996808,
+      3210313671,
+      3336571891,
+      3584528711,
+      113926993,
+      338241895,
+      666307205,
+      773529912,
+      1294757372,
+      1396182291,
+      1695183700,
+      1986661051,
+      2177026350,
+      2456956037,
+      2730485921,
+      2820302411,
+      3259730800,
+      3345764771,
+      3516065817,
+      3600352804,
+      4094571909,
+      275423344,
+      430227734,
+      506948616,
+      659060556,
+      883997877,
+      958139571,
+      1322822218,
+      1537002063,
+      1747873779,
+      1955562222,
+      2024104815,
+      2227730452,
+      2361852424,
+      2428436474,
+      2756734187,
+      3204031479,
+      3329325298
+    ]);
+    SHA256_W2 = /* @__PURE__ */ new Uint32Array(64);
+    SHA2_32B2 = class extends HashMD2 {
+      // We cannot use array here since array allows indexing by variable
+      // which means optimizer/compiler cannot use registers.
+      // Numeric initializers matter: starting the fields as `undefined` changes
+      // V8's field representation and makes sha256 3x slower (measured).
+      A = 0;
+      B = 0;
+      C = 0;
+      D = 0;
+      E = 0;
+      F = 0;
+      G = 0;
+      H = 0;
+      constructor(outputLen, IV) {
+        super(64, outputLen, 8, false);
+        this.A = IV[0] | 0;
+        this.B = IV[1] | 0;
+        this.C = IV[2] | 0;
+        this.D = IV[3] | 0;
+        this.E = IV[4] | 0;
+        this.F = IV[5] | 0;
+        this.G = IV[6] | 0;
+        this.H = IV[7] | 0;
+      }
+      get() {
+        const { A, B, C: C2, D, E, F, G: G2, H } = this;
+        return [A, B, C2, D, E, F, G2, H];
+      }
+      // prettier-ignore
+      set(A, B, C2, D, E, F, G2, H) {
+        this.A = A | 0;
+        this.B = B | 0;
+        this.C = C2 | 0;
+        this.D = D | 0;
+        this.E = E | 0;
+        this.F = F | 0;
+        this.G = G2 | 0;
+        this.H = H | 0;
+      }
+      _cloneInto(to) {
+        (to ||= new this.constructor()).set(...this.get());
+        return this._cloneIntoMeta(to);
+      }
+      process(view3, offset) {
+        for (let i = 0; i < 16; i++, offset += 4)
+          SHA256_W2[i] = view3.getUint32(offset, false);
+        for (let i = 16; i < 64; i++) {
+          const W15 = SHA256_W2[i - 15];
+          const W2 = SHA256_W2[i - 2];
+          const s0 = rotr2(W15, 7) ^ rotr2(W15, 18) ^ W15 >>> 3;
+          const s1 = rotr2(W2, 17) ^ rotr2(W2, 19) ^ W2 >>> 10;
+          SHA256_W2[i] = s1 + SHA256_W2[i - 7] + s0 + SHA256_W2[i - 16] | 0;
+        }
+        let { A, B, C: C2, D, E, F, G: G2, H } = this;
+        for (let i = 0; i < 64; i++) {
+          const sigma1 = rotr2(E, 6) ^ rotr2(E, 11) ^ rotr2(E, 25);
+          const T1 = H + sigma1 + Chi2(E, F, G2) + SHA256_K2[i] + SHA256_W2[i] | 0;
+          const sigma0 = rotr2(A, 2) ^ rotr2(A, 13) ^ rotr2(A, 22);
+          const T2 = sigma0 + Maj2(A, B, C2) | 0;
+          H = G2;
+          G2 = F;
+          F = E;
+          E = D + T1 | 0;
+          D = C2;
+          C2 = B;
+          B = A;
+          A = T1 + T2 | 0;
+        }
+        A = A + this.A | 0;
+        B = B + this.B | 0;
+        C2 = C2 + this.C | 0;
+        D = D + this.D | 0;
+        E = E + this.E | 0;
+        F = F + this.F | 0;
+        G2 = G2 + this.G | 0;
+        H = H + this.H | 0;
+        this.set(A, B, C2, D, E, F, G2, H);
+      }
+      roundClean() {
+        clean2(SHA256_W2);
+      }
+      destroy() {
+        this.destroyed = true;
+        this.set(0, 0, 0, 0, 0, 0, 0, 0);
+        clean2(this.buffer);
+      }
+    };
+    _SHA2562 = class extends SHA2_32B2 {
+      constructor() {
+        super(32, SHA256_IV2);
+      }
+    };
+    _SHA224 = class extends SHA2_32B2 {
+      constructor() {
+        super(28, SHA224_IV2);
+      }
+    };
+    K5122 = /* @__PURE__ */ (() => split2([
+      "0x428a2f98d728ae22",
+      "0x7137449123ef65cd",
+      "0xb5c0fbcfec4d3b2f",
+      "0xe9b5dba58189dbbc",
+      "0x3956c25bf348b538",
+      "0x59f111f1b605d019",
+      "0x923f82a4af194f9b",
+      "0xab1c5ed5da6d8118",
+      "0xd807aa98a3030242",
+      "0x12835b0145706fbe",
+      "0x243185be4ee4b28c",
+      "0x550c7dc3d5ffb4e2",
+      "0x72be5d74f27b896f",
+      "0x80deb1fe3b1696b1",
+      "0x9bdc06a725c71235",
+      "0xc19bf174cf692694",
+      "0xe49b69c19ef14ad2",
+      "0xefbe4786384f25e3",
+      "0x0fc19dc68b8cd5b5",
+      "0x240ca1cc77ac9c65",
+      "0x2de92c6f592b0275",
+      "0x4a7484aa6ea6e483",
+      "0x5cb0a9dcbd41fbd4",
+      "0x76f988da831153b5",
+      "0x983e5152ee66dfab",
+      "0xa831c66d2db43210",
+      "0xb00327c898fb213f",
+      "0xbf597fc7beef0ee4",
+      "0xc6e00bf33da88fc2",
+      "0xd5a79147930aa725",
+      "0x06ca6351e003826f",
+      "0x142929670a0e6e70",
+      "0x27b70a8546d22ffc",
+      "0x2e1b21385c26c926",
+      "0x4d2c6dfc5ac42aed",
+      "0x53380d139d95b3df",
+      "0x650a73548baf63de",
+      "0x766a0abb3c77b2a8",
+      "0x81c2c92e47edaee6",
+      "0x92722c851482353b",
+      "0xa2bfe8a14cf10364",
+      "0xa81a664bbc423001",
+      "0xc24b8b70d0f89791",
+      "0xc76c51a30654be30",
+      "0xd192e819d6ef5218",
+      "0xd69906245565a910",
+      "0xf40e35855771202a",
+      "0x106aa07032bbd1b8",
+      "0x19a4c116b8d2d0c8",
+      "0x1e376c085141ab53",
+      "0x2748774cdf8eeb99",
+      "0x34b0bcb5e19b48a8",
+      "0x391c0cb3c5c95a63",
+      "0x4ed8aa4ae3418acb",
+      "0x5b9cca4f7763e373",
+      "0x682e6ff3d6b2b8a3",
+      "0x748f82ee5defb2fc",
+      "0x78a5636f43172f60",
+      "0x84c87814a1f0ab72",
+      "0x8cc702081a6439ec",
+      "0x90befffa23631e28",
+      "0xa4506cebde82bde9",
+      "0xbef9a3f7b2c67915",
+      "0xc67178f2e372532b",
+      "0xca273eceea26619c",
+      "0xd186b8c721c0c207",
+      "0xeada7dd6cde0eb1e",
+      "0xf57d4f7fee6ed178",
+      "0x06f067aa72176fba",
+      "0x0a637dc5a2c898a6",
+      "0x113f9804bef90dae",
+      "0x1b710b35131c471b",
+      "0x28db77f523047d84",
+      "0x32caab7b40c72493",
+      "0x3c9ebe0a15c9bebc",
+      "0x431d67c49c100d4c",
+      "0x4cc5d4becb3e42b6",
+      "0x597f299cfc657e2a",
+      "0x5fcb6fab3ad6faec",
+      "0x6c44198c4a475817"
+    ].map((n) => BigInt(n))))();
+    SHA512_Kh2 = /* @__PURE__ */ (() => K5122[0])();
+    SHA512_Kl2 = /* @__PURE__ */ (() => K5122[1])();
+    SHA512_W_H2 = /* @__PURE__ */ new Uint32Array(80);
+    SHA512_W_L2 = /* @__PURE__ */ new Uint32Array(80);
+    SHA2_64B2 = class extends HashMD2 {
+      // We cannot use array here since array allows indexing by variable
+      // which means optimizer/compiler cannot use registers.
+      // h -- high 32 bits, l -- low 32 bits
+      // Numeric initializers matter: starting the fields as `undefined` changes
+      // V8's field representation and slows hashing down (measured on sha256).
+      Ah = 0;
+      Al = 0;
+      Bh = 0;
+      Bl = 0;
+      Ch = 0;
+      Cl = 0;
+      Dh = 0;
+      Dl = 0;
+      Eh = 0;
+      El = 0;
+      Fh = 0;
+      Fl = 0;
+      Gh = 0;
+      Gl = 0;
+      Hh = 0;
+      Hl = 0;
+      constructor(outputLen, IV) {
+        super(128, outputLen, 16, false);
+        this.Ah = IV[0] | 0;
+        this.Al = IV[1] | 0;
+        this.Bh = IV[2] | 0;
+        this.Bl = IV[3] | 0;
+        this.Ch = IV[4] | 0;
+        this.Cl = IV[5] | 0;
+        this.Dh = IV[6] | 0;
+        this.Dl = IV[7] | 0;
+        this.Eh = IV[8] | 0;
+        this.El = IV[9] | 0;
+        this.Fh = IV[10] | 0;
+        this.Fl = IV[11] | 0;
+        this.Gh = IV[12] | 0;
+        this.Gl = IV[13] | 0;
+        this.Hh = IV[14] | 0;
+        this.Hl = IV[15] | 0;
+      }
+      // prettier-ignore
+      get() {
+        const { Ah, Al, Bh, Bl, Ch, Cl, Dh, Dl, Eh, El, Fh, Fl, Gh, Gl, Hh, Hl } = this;
+        return [Ah, Al, Bh, Bl, Ch, Cl, Dh, Dl, Eh, El, Fh, Fl, Gh, Gl, Hh, Hl];
+      }
+      // prettier-ignore
+      set(Ah, Al, Bh, Bl, Ch, Cl, Dh, Dl, Eh, El, Fh, Fl, Gh, Gl, Hh, Hl) {
+        this.Ah = Ah | 0;
+        this.Al = Al | 0;
+        this.Bh = Bh | 0;
+        this.Bl = Bl | 0;
+        this.Ch = Ch | 0;
+        this.Cl = Cl | 0;
+        this.Dh = Dh | 0;
+        this.Dl = Dl | 0;
+        this.Eh = Eh | 0;
+        this.El = El | 0;
+        this.Fh = Fh | 0;
+        this.Fl = Fl | 0;
+        this.Gh = Gh | 0;
+        this.Gl = Gl | 0;
+        this.Hh = Hh | 0;
+        this.Hl = Hl | 0;
+      }
+      _cloneInto(to) {
+        (to ||= new this.constructor()).set(...this.get());
+        return this._cloneIntoMeta(to);
+      }
+      process(view3, offset) {
+        for (let i = 0; i < 16; i++, offset += 4) {
+          SHA512_W_H2[i] = view3.getUint32(offset);
+          SHA512_W_L2[i] = view3.getUint32(offset += 4);
+        }
+        for (let i = 16; i < 80; i++) {
+          const W15h = SHA512_W_H2[i - 15] | 0;
+          const W15l = SHA512_W_L2[i - 15] | 0;
+          const s0h = rotrSH2(W15h, W15l, 1) ^ rotrSH2(W15h, W15l, 8) ^ shrSH2(W15h, W15l, 7);
+          const s0l = rotrSL2(W15h, W15l, 1) ^ rotrSL2(W15h, W15l, 8) ^ shrSL2(W15h, W15l, 7);
+          const W2h = SHA512_W_H2[i - 2] | 0;
+          const W2l = SHA512_W_L2[i - 2] | 0;
+          const s1h = rotrSH2(W2h, W2l, 19) ^ rotrBH2(W2h, W2l, 61) ^ shrSH2(W2h, W2l, 6);
+          const s1l = rotrSL2(W2h, W2l, 19) ^ rotrBL2(W2h, W2l, 61) ^ shrSL2(W2h, W2l, 6);
+          const SUMl = add4L2(s0l, s1l, SHA512_W_L2[i - 7], SHA512_W_L2[i - 16]);
+          const SUMh = add4H2(SUMl, s0h, s1h, SHA512_W_H2[i - 7], SHA512_W_H2[i - 16]);
+          SHA512_W_H2[i] = SUMh | 0;
+          SHA512_W_L2[i] = SUMl | 0;
+        }
+        let { Ah, Al, Bh, Bl, Ch, Cl, Dh, Dl, Eh, El, Fh, Fl, Gh, Gl, Hh, Hl } = this;
+        for (let i = 0; i < 80; i++) {
+          const sigma1h = rotrSH2(Eh, El, 14) ^ rotrSH2(Eh, El, 18) ^ rotrBH2(Eh, El, 41);
+          const sigma1l = rotrSL2(Eh, El, 14) ^ rotrSL2(Eh, El, 18) ^ rotrBL2(Eh, El, 41);
+          const CHIh = Eh & Fh ^ ~Eh & Gh;
+          const CHIl = El & Fl ^ ~El & Gl;
+          const T1ll = add5L2(Hl, sigma1l, CHIl, SHA512_Kl2[i], SHA512_W_L2[i]);
+          const T1h = add5H2(T1ll, Hh, sigma1h, CHIh, SHA512_Kh2[i], SHA512_W_H2[i]);
+          const T1l = T1ll | 0;
+          const sigma0h = rotrSH2(Ah, Al, 28) ^ rotrBH2(Ah, Al, 34) ^ rotrBH2(Ah, Al, 39);
+          const sigma0l = rotrSL2(Ah, Al, 28) ^ rotrBL2(Ah, Al, 34) ^ rotrBL2(Ah, Al, 39);
+          const MAJh = Ah & Bh ^ Ah & Ch ^ Bh & Ch;
+          const MAJl = Al & Bl ^ Al & Cl ^ Bl & Cl;
+          Hh = Gh | 0;
+          Hl = Gl | 0;
+          Gh = Fh | 0;
+          Gl = Fl | 0;
+          Fh = Eh | 0;
+          Fl = El | 0;
+          ({ h: Eh, l: El } = add2(Dh | 0, Dl | 0, T1h | 0, T1l | 0));
+          Dh = Ch | 0;
+          Dl = Cl | 0;
+          Ch = Bh | 0;
+          Cl = Bl | 0;
+          Bh = Ah | 0;
+          Bl = Al | 0;
+          const All = add3L2(T1l, sigma0l, MAJl);
+          Ah = add3H2(All, T1h, sigma0h, MAJh);
+          Al = All | 0;
+        }
+        ({ h: Ah, l: Al } = add2(this.Ah | 0, this.Al | 0, Ah | 0, Al | 0));
+        ({ h: Bh, l: Bl } = add2(this.Bh | 0, this.Bl | 0, Bh | 0, Bl | 0));
+        ({ h: Ch, l: Cl } = add2(this.Ch | 0, this.Cl | 0, Ch | 0, Cl | 0));
+        ({ h: Dh, l: Dl } = add2(this.Dh | 0, this.Dl | 0, Dh | 0, Dl | 0));
+        ({ h: Eh, l: El } = add2(this.Eh | 0, this.El | 0, Eh | 0, El | 0));
+        ({ h: Fh, l: Fl } = add2(this.Fh | 0, this.Fl | 0, Fh | 0, Fl | 0));
+        ({ h: Gh, l: Gl } = add2(this.Gh | 0, this.Gl | 0, Gh | 0, Gl | 0));
+        ({ h: Hh, l: Hl } = add2(this.Hh | 0, this.Hl | 0, Hh | 0, Hl | 0));
+        this.set(Ah, Al, Bh, Bl, Ch, Cl, Dh, Dl, Eh, El, Fh, Fl, Gh, Gl, Hh, Hl);
+      }
+      roundClean() {
+        clean2(SHA512_W_H2, SHA512_W_L2);
+      }
+      destroy() {
+        this.destroyed = true;
+        clean2(this.buffer);
+        this.set(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+      }
+    };
+    _SHA5122 = class extends SHA2_64B2 {
+      constructor() {
+        super(64, SHA512_IV2);
+      }
+    };
+    _SHA384 = class extends SHA2_64B2 {
+      constructor() {
+        super(48, SHA384_IV2);
+      }
+    };
+    T224_IV = /* @__PURE__ */ Uint32Array.from([
+      2352822216,
+      424955298,
+      1944164710,
+      2312950998,
+      502970286,
+      855612546,
+      1738396948,
+      1479516111,
+      258812777,
+      2077511080,
+      2011393907,
+      79989058,
+      1067287976,
+      1780299464,
+      286451373,
+      2446758561
+    ]);
+    T256_IV = /* @__PURE__ */ Uint32Array.from([
+      573645204,
+      4230739756,
+      2673172387,
+      3360449730,
+      596883563,
+      1867755857,
+      2520282905,
+      1497426621,
+      2519219938,
+      2827943907,
+      3193839141,
+      1401305490,
+      721525244,
+      746961066,
+      246885852,
+      2177182882
+    ]);
+    _SHA512_224 = class extends SHA2_64B2 {
+      constructor() {
+        super(28, T224_IV);
+      }
+    };
+    _SHA512_256 = class extends SHA2_64B2 {
+      constructor() {
+        super(32, T256_IV);
+      }
+    };
+    sha2562 = /* @__PURE__ */ createHasher3(
+      () => new _SHA2562(),
+      /* @__PURE__ */ oidNist2(1)
+    );
+    sha224 = /* @__PURE__ */ createHasher3(
+      () => new _SHA224(),
+      /* @__PURE__ */ oidNist2(4)
+    );
+    sha5122 = /* @__PURE__ */ createHasher3(
+      () => new _SHA5122(),
+      /* @__PURE__ */ oidNist2(3)
+    );
+    sha384 = /* @__PURE__ */ createHasher3(
+      () => new _SHA384(),
+      /* @__PURE__ */ oidNist2(2)
+    );
+    sha512_256 = /* @__PURE__ */ createHasher3(
+      () => new _SHA512_256(),
+      /* @__PURE__ */ oidNist2(6)
+    );
+    sha512_224 = /* @__PURE__ */ createHasher3(
+      () => new _SHA512_224(),
+      /* @__PURE__ */ oidNist2(5)
+    );
+  }
+});
+
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/transaction.js
 var require_transaction = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/transaction.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/transaction.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.createScureTransactionAdapter = createScureTransactionAdapter;
     var base_1 = (init_base(), __toCommonJS(base_exports));
     var script_js_1 = (init_script(), __toCommonJS(script_exports));
-    var sha2_js_1 = (init_sha2(), __toCommonJS(sha2_exports));
+    var sha2_js_1 = (init_sha22(), __toCommonJS(sha2_exports));
     function parseRawTx(rawBytes) {
       const parsed = script_js_1.RawTx.decode(rawBytes);
       const nonWitnessSerialization = script_js_1.RawOldTx.encode(parsed);
@@ -15390,9 +15877,9 @@ var require_transaction = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/address.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/address.js
 var require_address = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/address.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/address.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -15699,9 +16186,9 @@ var init_bip32 = __esm({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scureKeys.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scureKeys.js
 var require_scureKeys = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scureKeys.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scureKeys.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -15718,28 +16205,28 @@ var require_scureKeys = __commonJS({
       const result = a % n;
       return result >= 0n ? result : result + n;
     }
-    function tweakPrivateKey(privateKey, tweak, publicKey) {
+    function tweakPrivateKey(privateKey, tweak, publicKey2) {
       if (tweak.length !== 32)
         throw new Error("Error: invalid tweak value");
       const tweakNum = (0, utils_js_1.bytesToNumberBE)(tweak);
       if (tweakNum <= 0n || tweakNum >= CURVE_N)
         throw new Error("Error: invalid tweak value");
       let d = (0, utils_js_1.bytesToNumberBE)(privateKey);
-      if (publicKey[0] === 3)
+      if (publicKey2[0] === 3)
         d = mod2(-d, CURVE_N);
       const tweaked = mod2(d + tweakNum, CURVE_N);
       if (tweaked === 0n)
         throw new Error("Error: invalid tweak value");
       return (0, utils_js_1.numberToBytesBE)(tweaked, 32);
     }
-    function wrapScurePrivateKey(privateKey, compressed2 = true) {
+    function wrapScurePrivateKey(privateKey, compressed3 = true) {
       if (!secp256k1_js_1.secp256k1.utils.isValidSecretKey(privateKey))
         throw new Error("Error: invalid private key");
       const compressedPublicKey = secp256k1_js_1.secp256k1.getPublicKey(privateKey, true);
-      const publicKey = compressed2 ? compressedPublicKey : secp256k1_js_1.secp256k1.getPublicKey(privateKey, false);
+      const publicKey2 = compressed3 ? compressedPublicKey : secp256k1_js_1.secp256k1.getPublicKey(privateKey, false);
       const xOnlyPubkey = compressedPublicKey.slice(1, 33);
       return {
-        publicKey,
+        publicKey: publicKey2,
         privateKey,
         sign(hash) {
           return secp256k1_js_1.secp256k1.sign(hash, privateKey, {
@@ -15749,14 +16236,14 @@ var require_scureKeys = __commonJS({
           });
         },
         verify(hash, signature) {
-          return secp256k1_js_1.secp256k1.verify(signature, hash, publicKey, {
+          return secp256k1_js_1.secp256k1.verify(signature, hash, publicKey2, {
             prehash: false,
             lowS: true,
             format: "compact"
           });
         },
         tweak(t) {
-          return wrapScurePrivateKey(tweakPrivateKey(privateKey, t, compressedPublicKey), compressed2);
+          return wrapScurePrivateKey(tweakPrivateKey(privateKey, t, compressedPublicKey), compressed3);
         },
         signSchnorr(hash) {
           return secp256k1_js_1.schnorr.sign(hash, privateKey);
@@ -15766,18 +16253,18 @@ var require_scureKeys = __commonJS({
         }
       };
     }
-    function wrapScurePublicKey(publicKey) {
-      if (!secp256k1_js_1.secp256k1.utils.isValidPublicKey(publicKey))
+    function wrapScurePublicKey(publicKey2) {
+      if (!secp256k1_js_1.secp256k1.utils.isValidPublicKey(publicKey2))
         throw new Error("Error: invalid public key point");
-      const compressedPubkey = publicKey.length === 33 ? publicKey : secp256k1_js_1.secp256k1.Point.fromHex(base_1.hex.encode(publicKey)).toBytes(true);
+      const compressedPubkey = publicKey2.length === 33 ? publicKey2 : secp256k1_js_1.secp256k1.Point.fromHex(base_1.hex.encode(publicKey2)).toBytes(true);
       const xOnlyPubkey = compressedPubkey.slice(1, 33);
       return {
-        publicKey,
+        publicKey: publicKey2,
         sign() {
           throw new Error("Error: private key is required for signing");
         },
         verify(hash, signature) {
-          return secp256k1_js_1.secp256k1.verify(signature, hash, publicKey, {
+          return secp256k1_js_1.secp256k1.verify(signature, hash, publicKey2, {
             prehash: false,
             lowS: true,
             format: "compact"
@@ -15835,9 +16322,9 @@ var require_scureKeys = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/ecpair.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/ecpair.js
 var require_ecpair = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/ecpair.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/ecpair.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -15845,7 +16332,7 @@ var require_ecpair = __commonJS({
     var base_1 = (init_base(), __toCommonJS(base_exports));
     var secp256k1_js_1 = (init_secp256k1(), __toCommonJS(secp256k1_exports));
     var uint8array_tools_1 = (init_browser2(), __toCommonJS(browser_exports2));
-    var sha2_js_1 = (init_sha2(), __toCommonJS(sha2_exports));
+    var sha2_js_1 = (init_sha22(), __toCommonJS(sha2_exports));
     var scureKeys_1 = require_scureKeys();
     function decodeWIF(wifString, network) {
       const raw2 = base_1.base58.decode(wifString);
@@ -15888,17 +16375,17 @@ var require_ecpair = __commonJS({
           return (0, scureKeys_1.wrapScurePublicKey)(buffer);
         },
         fromWIF(wifString, network) {
-          const { privateKey, compressed: compressed2 } = decodeWIF(wifString, network);
-          return (0, scureKeys_1.wrapScurePrivateKey)(privateKey, compressed2);
+          const { privateKey, compressed: compressed3 } = decodeWIF(wifString, network);
+          return (0, scureKeys_1.wrapScurePrivateKey)(privateKey, compressed3);
         }
       };
     }
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/bip32.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/bip32.js
 var require_bip32 = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/bip32.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/bip32.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -15917,15 +16404,307 @@ var require_bip32 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/crypto.js
+// node_modules/.pnpm/@noble+hashes@2.4.0/node_modules/@noble/hashes/legacy.js
+var legacy_exports = {};
+__export(legacy_exports, {
+  _MD5: () => _MD5,
+  _RIPEMD160: () => _RIPEMD1602,
+  _SHA1: () => _SHA1,
+  md5: () => md5,
+  ripemd160: () => ripemd1602,
+  sha1: () => sha1
+});
+function ripemd_f2(group, x, y, z) {
+  if (group === 0)
+    return x ^ y ^ z;
+  if (group === 1)
+    return x & y | ~x & z;
+  if (group === 2)
+    return (x | ~y) ^ z;
+  if (group === 3)
+    return x & z | y & ~z;
+  return x ^ (y | ~z);
+}
+var SHA1_IV, SHA1_W, _SHA1, sha1, p32, K, MD5_IV, MD5_W, MD5_SHIFTS, _MD5, md5, Rho1602, Id1602, Pi1602, idxLR2, idxL2, idxR2, shifts1602, shiftsL1602, shiftsR1602, Kl1602, Kr1602, BUF_1602, _RIPEMD1602, ripemd1602;
+var init_legacy2 = __esm({
+  "node_modules/.pnpm/@noble+hashes@2.4.0/node_modules/@noble/hashes/legacy.js"() {
+    init_define_import_meta_env();
+    init_md2();
+    init_utils4();
+    SHA1_IV = /* @__PURE__ */ Uint32Array.from([
+      1732584193,
+      4023233417,
+      2562383102,
+      271733878,
+      3285377520
+    ]);
+    SHA1_W = /* @__PURE__ */ new Uint32Array(80);
+    _SHA1 = class extends HashMD2 {
+      A = SHA1_IV[0] | 0;
+      B = SHA1_IV[1] | 0;
+      C = SHA1_IV[2] | 0;
+      D = SHA1_IV[3] | 0;
+      E = SHA1_IV[4] | 0;
+      constructor() {
+        super(64, 20, 8, false);
+      }
+      get() {
+        const { A, B, C: C2, D, E } = this;
+        return [A, B, C2, D, E];
+      }
+      set(A, B, C2, D, E) {
+        this.A = A | 0;
+        this.B = B | 0;
+        this.C = C2 | 0;
+        this.D = D | 0;
+        this.E = E | 0;
+      }
+      _cloneInto(to) {
+        (to ||= new this.constructor()).set(...this.get());
+        return this._cloneIntoMeta(to);
+      }
+      process(view3, offset) {
+        for (let i = 0; i < 16; i++, offset += 4)
+          SHA1_W[i] = view3.getUint32(offset, false);
+        for (let i = 16; i < 80; i++)
+          SHA1_W[i] = rotl2(SHA1_W[i - 3] ^ SHA1_W[i - 8] ^ SHA1_W[i - 14] ^ SHA1_W[i - 16], 1);
+        let { A, B, C: C2, D, E } = this;
+        for (let i = 0; i < 80; i++) {
+          let F, K2;
+          if (i < 20) {
+            F = Chi2(B, C2, D);
+            K2 = 1518500249;
+          } else if (i < 40) {
+            F = B ^ C2 ^ D;
+            K2 = 1859775393;
+          } else if (i < 60) {
+            F = Maj2(B, C2, D);
+            K2 = 2400959708;
+          } else {
+            F = B ^ C2 ^ D;
+            K2 = 3395469782;
+          }
+          const T = rotl2(A, 5) + F + E + K2 + SHA1_W[i] | 0;
+          E = D;
+          D = C2;
+          C2 = rotl2(B, 30);
+          B = A;
+          A = T;
+        }
+        A = A + this.A | 0;
+        B = B + this.B | 0;
+        C2 = C2 + this.C | 0;
+        D = D + this.D | 0;
+        E = E + this.E | 0;
+        this.set(A, B, C2, D, E);
+      }
+      roundClean() {
+        clean2(SHA1_W);
+      }
+      destroy() {
+        this.destroyed = true;
+        this.set(0, 0, 0, 0, 0);
+        clean2(this.buffer);
+      }
+    };
+    sha1 = /* @__PURE__ */ createHasher3(() => new _SHA1());
+    p32 = /* @__PURE__ */ Math.pow(2, 32);
+    K = /* @__PURE__ */ Array.from({ length: 64 }, (_, i) => Math.floor(p32 * Math.abs(Math.sin(i + 1))));
+    MD5_IV = /* @__PURE__ */ SHA1_IV.slice(0, 4);
+    MD5_W = /* @__PURE__ */ new Uint32Array(16);
+    MD5_SHIFTS = /* @__PURE__ */ (() => {
+      const S = [
+        [7, 12, 17, 22],
+        [5, 9, 14, 20],
+        [4, 11, 16, 23],
+        [6, 10, 15, 21]
+      ];
+      return Uint8Array.from({ length: 64 }, (_, i) => S[Math.floor(i / 16)][i % 4]);
+    })();
+    _MD5 = class extends HashMD2 {
+      A = MD5_IV[0] | 0;
+      B = MD5_IV[1] | 0;
+      C = MD5_IV[2] | 0;
+      D = MD5_IV[3] | 0;
+      constructor() {
+        super(64, 16, 8, true);
+      }
+      get() {
+        const { A, B, C: C2, D } = this;
+        return [A, B, C2, D];
+      }
+      set(A, B, C2, D) {
+        this.A = A | 0;
+        this.B = B | 0;
+        this.C = C2 | 0;
+        this.D = D | 0;
+      }
+      _cloneInto(to) {
+        (to ||= new this.constructor()).set(...this.get());
+        return this._cloneIntoMeta(to);
+      }
+      process(view3, offset) {
+        for (let i = 0; i < 16; i++, offset += 4)
+          MD5_W[i] = view3.getUint32(offset, true);
+        let { A, B, C: C2, D } = this;
+        for (let i = 0; i < 64; i++) {
+          let F, g;
+          if (i < 16) {
+            F = Chi2(B, C2, D);
+            g = i;
+          } else if (i < 32) {
+            F = Chi2(D, B, C2);
+            g = (5 * i + 1) % 16;
+          } else if (i < 48) {
+            F = B ^ C2 ^ D;
+            g = (3 * i + 5) % 16;
+          } else {
+            F = C2 ^ (B | ~D);
+            g = 7 * i % 16;
+          }
+          F = F + A + K[i] + MD5_W[g];
+          A = D;
+          D = C2;
+          C2 = B;
+          B = B + rotl2(F, MD5_SHIFTS[i]);
+        }
+        A = A + this.A | 0;
+        B = B + this.B | 0;
+        C2 = C2 + this.C | 0;
+        D = D + this.D | 0;
+        this.set(A, B, C2, D);
+      }
+      roundClean() {
+        clean2(MD5_W);
+      }
+      destroy() {
+        this.destroyed = true;
+        this.set(0, 0, 0, 0);
+        clean2(this.buffer);
+      }
+    };
+    md5 = /* @__PURE__ */ createHasher3(() => new _MD5());
+    Rho1602 = /* @__PURE__ */ Uint8Array.from([
+      7,
+      4,
+      13,
+      1,
+      10,
+      6,
+      15,
+      3,
+      12,
+      0,
+      9,
+      5,
+      2,
+      14,
+      11,
+      8
+    ]);
+    Id1602 = /* @__PURE__ */ (() => Uint8Array.from(new Array(16).fill(0).map((_, i) => i)))();
+    Pi1602 = /* @__PURE__ */ (() => Id1602.map((i) => (9 * i + 5) % 16))();
+    idxLR2 = /* @__PURE__ */ (() => {
+      const L3 = [Id1602];
+      const R = [Pi1602];
+      const res = [L3, R];
+      for (let i = 0; i < 4; i++)
+        for (let j of res)
+          j.push(j[i].map((k) => Rho1602[k]));
+      return res;
+    })();
+    idxL2 = /* @__PURE__ */ (() => idxLR2[0])();
+    idxR2 = /* @__PURE__ */ (() => idxLR2[1])();
+    shifts1602 = /* @__PURE__ */ [
+      [11, 14, 15, 12, 5, 8, 7, 9, 11, 13, 14, 15, 6, 7, 9, 8],
+      [12, 13, 11, 15, 6, 9, 9, 7, 12, 15, 11, 13, 7, 8, 7, 7],
+      [13, 15, 14, 11, 7, 7, 6, 8, 13, 14, 13, 12, 5, 5, 6, 9],
+      [14, 11, 12, 14, 8, 6, 5, 5, 15, 12, 15, 14, 9, 9, 8, 6],
+      [15, 12, 13, 13, 9, 5, 8, 6, 14, 11, 12, 11, 8, 6, 5, 5]
+    ].map((i) => Uint8Array.from(i));
+    shiftsL1602 = /* @__PURE__ */ idxL2.map((idx, i) => idx.map((j) => shifts1602[i][j]));
+    shiftsR1602 = /* @__PURE__ */ idxR2.map((idx, i) => idx.map((j) => shifts1602[i][j]));
+    Kl1602 = /* @__PURE__ */ Uint32Array.from([
+      0,
+      1518500249,
+      1859775393,
+      2400959708,
+      2840853838
+    ]);
+    Kr1602 = /* @__PURE__ */ Uint32Array.from([
+      1352829926,
+      1548603684,
+      1836072691,
+      2053994217,
+      0
+    ]);
+    BUF_1602 = /* @__PURE__ */ new Uint32Array(16);
+    _RIPEMD1602 = class extends HashMD2 {
+      h0 = 1732584193 | 0;
+      h1 = 4023233417 | 0;
+      h2 = 2562383102 | 0;
+      h3 = 271733878 | 0;
+      h4 = 3285377520 | 0;
+      constructor() {
+        super(64, 20, 8, true);
+      }
+      get() {
+        const { h0, h1, h2, h3, h4 } = this;
+        return [h0, h1, h2, h3, h4];
+      }
+      set(h0, h1, h2, h3, h4) {
+        this.h0 = h0 | 0;
+        this.h1 = h1 | 0;
+        this.h2 = h2 | 0;
+        this.h3 = h3 | 0;
+        this.h4 = h4 | 0;
+      }
+      _cloneInto(to) {
+        (to ||= new this.constructor()).set(...this.get());
+        return this._cloneIntoMeta(to);
+      }
+      process(view3, offset) {
+        for (let i = 0; i < 16; i++, offset += 4)
+          BUF_1602[i] = view3.getUint32(offset, true);
+        let al = this.h0 | 0, ar = al, bl = this.h1 | 0, br = bl, cl = this.h2 | 0, cr2 = cl, dl = this.h3 | 0, dr = dl, el2 = this.h4 | 0, er = el2;
+        for (let group = 0; group < 5; group++) {
+          const rGroup = 4 - group;
+          const hbl = Kl1602[group], hbr = Kr1602[group];
+          const rl = idxL2[group], rr = idxR2[group];
+          const sl = shiftsL1602[group], sr = shiftsR1602[group];
+          for (let i = 0; i < 16; i++) {
+            const tl = rotl2(al + ripemd_f2(group, bl, cl, dl) + BUF_1602[rl[i]] + hbl, sl[i]) + el2 | 0;
+            al = el2, el2 = dl, dl = rotl2(cl, 10) | 0, cl = bl, bl = tl;
+          }
+          for (let i = 0; i < 16; i++) {
+            const tr = rotl2(ar + ripemd_f2(rGroup, br, cr2, dr) + BUF_1602[rr[i]] + hbr, sr[i]) + er | 0;
+            ar = er, er = dr, dr = rotl2(cr2, 10) | 0, cr2 = br, br = tr;
+          }
+        }
+        this.set(this.h1 + cl + dr | 0, this.h2 + dl + er | 0, this.h3 + el2 + ar | 0, this.h4 + al + br | 0, this.h0 + bl + cr2 | 0);
+      }
+      roundClean() {
+        clean2(BUF_1602);
+      }
+      destroy() {
+        this.destroyed = true;
+        clean2(this.buffer);
+        this.set(0, 0, 0, 0, 0);
+      }
+    };
+    ripemd1602 = /* @__PURE__ */ createHasher3(() => new _RIPEMD1602());
+  }
+});
+
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/crypto.js
 var require_crypto = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/crypto.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/crypto.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.createScureCryptoAdapter = createScureCryptoAdapter;
-    var legacy_js_1 = (init_legacy(), __toCommonJS(legacy_exports));
-    var sha2_js_1 = (init_sha2(), __toCommonJS(sha2_exports));
+    var legacy_js_1 = (init_legacy2(), __toCommonJS(legacy_exports));
+    var sha2_js_1 = (init_sha22(), __toCommonJS(sha2_exports));
     var uint8array_tools_1 = (init_browser2(), __toCommonJS(browser_exports2));
     var TAGGED_HASH_PREFIXES2 = {
       "BIP0340/challenge": Uint8Array.from([
@@ -16542,9 +17321,9 @@ var require_crypto = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/psbt.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/psbt.js
 var require_psbt2 = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/psbt.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure/psbt.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -16920,9 +17699,9 @@ var require_psbt2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure.js
 var require_scure = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/adapters/scure.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -16970,9 +17749,9 @@ var require_scure = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/scure.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/scure.js
 var require_scure2 = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@noble+curves@2.0.1_@noble+hashes@2.0.1_@scure+bas_3eccb80a743e53c872f16cc4b9194be8/node_modules/@bitcoinerlab/descriptors-core/dist/scure.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-core@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_5d2c41b3246ace063a82f11b1e63eb6a/node_modules/@bitcoinerlab/descriptors-core/dist/scure.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -16984,9 +17763,9 @@ var require_scure2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@bitcoinerlab+descriptors-scure@3.1.7/node_modules/@bitcoinerlab/descriptors-scure/dist/index.js
+// node_modules/.pnpm/@bitcoinerlab+descriptors-scure@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0._990daca2ee85adf2f8bfa63d229d338b/node_modules/@bitcoinerlab/descriptors-scure/dist/index.js
 var require_dist3 = __commonJS({
-  "node_modules/.pnpm/@bitcoinerlab+descriptors-scure@3.1.7/node_modules/@bitcoinerlab/descriptors-scure/dist/index.js"(exports) {
+  "node_modules/.pnpm/@bitcoinerlab+descriptors-scure@3.1.7_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0._990daca2ee85adf2f8bfa63d229d338b/node_modules/@bitcoinerlab/descriptors-scure/dist/index.js"(exports) {
     "use strict";
     init_define_import_meta_env();
     var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -17058,6 +17837,1785 @@ var require_dist3 = __commonJS({
     } });
     var bound = core.DescriptorsFactory((0, scure_1.createScureLib)());
     exports.Output = bound.Output, exports.parseKeyExpression = bound.parseKeyExpression, exports.expand = bound.expand;
+  }
+});
+
+// node_modules/.pnpm/base64-js@1.5.1/node_modules/base64-js/index.js
+var require_base64_js = __commonJS({
+  "node_modules/.pnpm/base64-js@1.5.1/node_modules/base64-js/index.js"(exports) {
+    "use strict";
+    init_define_import_meta_env();
+    exports.byteLength = byteLength;
+    exports.toByteArray = toByteArray;
+    exports.fromByteArray = fromByteArray;
+    var lookup = [];
+    var revLookup = [];
+    var Arr = typeof Uint8Array !== "undefined" ? Uint8Array : Array;
+    var code = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    for (i = 0, len = code.length; i < len; ++i) {
+      lookup[i] = code[i];
+      revLookup[code.charCodeAt(i)] = i;
+    }
+    var i;
+    var len;
+    revLookup["-".charCodeAt(0)] = 62;
+    revLookup["_".charCodeAt(0)] = 63;
+    function getLens(b64) {
+      var len2 = b64.length;
+      if (len2 % 4 > 0) {
+        throw new Error("Invalid string. Length must be a multiple of 4");
+      }
+      var validLen = b64.indexOf("=");
+      if (validLen === -1) validLen = len2;
+      var placeHoldersLen = validLen === len2 ? 0 : 4 - validLen % 4;
+      return [validLen, placeHoldersLen];
+    }
+    function byteLength(b64) {
+      var lens = getLens(b64);
+      var validLen = lens[0];
+      var placeHoldersLen = lens[1];
+      return (validLen + placeHoldersLen) * 3 / 4 - placeHoldersLen;
+    }
+    function _byteLength(b64, validLen, placeHoldersLen) {
+      return (validLen + placeHoldersLen) * 3 / 4 - placeHoldersLen;
+    }
+    function toByteArray(b64) {
+      var tmp;
+      var lens = getLens(b64);
+      var validLen = lens[0];
+      var placeHoldersLen = lens[1];
+      var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen));
+      var curByte = 0;
+      var len2 = placeHoldersLen > 0 ? validLen - 4 : validLen;
+      var i2;
+      for (i2 = 0; i2 < len2; i2 += 4) {
+        tmp = revLookup[b64.charCodeAt(i2)] << 18 | revLookup[b64.charCodeAt(i2 + 1)] << 12 | revLookup[b64.charCodeAt(i2 + 2)] << 6 | revLookup[b64.charCodeAt(i2 + 3)];
+        arr[curByte++] = tmp >> 16 & 255;
+        arr[curByte++] = tmp >> 8 & 255;
+        arr[curByte++] = tmp & 255;
+      }
+      if (placeHoldersLen === 2) {
+        tmp = revLookup[b64.charCodeAt(i2)] << 2 | revLookup[b64.charCodeAt(i2 + 1)] >> 4;
+        arr[curByte++] = tmp & 255;
+      }
+      if (placeHoldersLen === 1) {
+        tmp = revLookup[b64.charCodeAt(i2)] << 10 | revLookup[b64.charCodeAt(i2 + 1)] << 4 | revLookup[b64.charCodeAt(i2 + 2)] >> 2;
+        arr[curByte++] = tmp >> 8 & 255;
+        arr[curByte++] = tmp & 255;
+      }
+      return arr;
+    }
+    function tripletToBase64(num2) {
+      return lookup[num2 >> 18 & 63] + lookup[num2 >> 12 & 63] + lookup[num2 >> 6 & 63] + lookup[num2 & 63];
+    }
+    function encodeChunk(uint8, start, end) {
+      var tmp;
+      var output = [];
+      for (var i2 = start; i2 < end; i2 += 3) {
+        tmp = (uint8[i2] << 16 & 16711680) + (uint8[i2 + 1] << 8 & 65280) + (uint8[i2 + 2] & 255);
+        output.push(tripletToBase64(tmp));
+      }
+      return output.join("");
+    }
+    function fromByteArray(uint8) {
+      var tmp;
+      var len2 = uint8.length;
+      var extraBytes = len2 % 3;
+      var parts = [];
+      var maxChunkLength = 16383;
+      for (var i2 = 0, len22 = len2 - extraBytes; i2 < len22; i2 += maxChunkLength) {
+        parts.push(encodeChunk(uint8, i2, i2 + maxChunkLength > len22 ? len22 : i2 + maxChunkLength));
+      }
+      if (extraBytes === 1) {
+        tmp = uint8[len2 - 1];
+        parts.push(
+          lookup[tmp >> 2] + lookup[tmp << 4 & 63] + "=="
+        );
+      } else if (extraBytes === 2) {
+        tmp = (uint8[len2 - 2] << 8) + uint8[len2 - 1];
+        parts.push(
+          lookup[tmp >> 10] + lookup[tmp >> 4 & 63] + lookup[tmp << 2 & 63] + "="
+        );
+      }
+      return parts.join("");
+    }
+  }
+});
+
+// node_modules/.pnpm/ieee754@1.2.1/node_modules/ieee754/index.js
+var require_ieee754 = __commonJS({
+  "node_modules/.pnpm/ieee754@1.2.1/node_modules/ieee754/index.js"(exports) {
+    init_define_import_meta_env();
+    exports.read = function(buffer, offset, isLE, mLen, nBytes) {
+      var e, m;
+      var eLen = nBytes * 8 - mLen - 1;
+      var eMax = (1 << eLen) - 1;
+      var eBias = eMax >> 1;
+      var nBits = -7;
+      var i = isLE ? nBytes - 1 : 0;
+      var d = isLE ? -1 : 1;
+      var s = buffer[offset + i];
+      i += d;
+      e = s & (1 << -nBits) - 1;
+      s >>= -nBits;
+      nBits += eLen;
+      for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {
+      }
+      m = e & (1 << -nBits) - 1;
+      e >>= -nBits;
+      nBits += mLen;
+      for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {
+      }
+      if (e === 0) {
+        e = 1 - eBias;
+      } else if (e === eMax) {
+        return m ? NaN : (s ? -1 : 1) * Infinity;
+      } else {
+        m = m + Math.pow(2, mLen);
+        e = e - eBias;
+      }
+      return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
+    };
+    exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
+      var e, m, c;
+      var eLen = nBytes * 8 - mLen - 1;
+      var eMax = (1 << eLen) - 1;
+      var eBias = eMax >> 1;
+      var rt = mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0;
+      var i = isLE ? 0 : nBytes - 1;
+      var d = isLE ? 1 : -1;
+      var s = value < 0 || value === 0 && 1 / value < 0 ? 1 : 0;
+      value = Math.abs(value);
+      if (isNaN(value) || value === Infinity) {
+        m = isNaN(value) ? 1 : 0;
+        e = eMax;
+      } else {
+        e = Math.floor(Math.log(value) / Math.LN2);
+        if (value * (c = Math.pow(2, -e)) < 1) {
+          e--;
+          c *= 2;
+        }
+        if (e + eBias >= 1) {
+          value += rt / c;
+        } else {
+          value += rt * Math.pow(2, 1 - eBias);
+        }
+        if (value * c >= 2) {
+          e++;
+          c /= 2;
+        }
+        if (e + eBias >= eMax) {
+          m = 0;
+          e = eMax;
+        } else if (e + eBias >= 1) {
+          m = (value * c - 1) * Math.pow(2, mLen);
+          e = e + eBias;
+        } else {
+          m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
+          e = 0;
+        }
+      }
+      for (; mLen >= 8; buffer[offset + i] = m & 255, i += d, m /= 256, mLen -= 8) {
+      }
+      e = e << mLen | m;
+      eLen += mLen;
+      for (; eLen > 0; buffer[offset + i] = e & 255, i += d, e /= 256, eLen -= 8) {
+      }
+      buffer[offset + i - d] |= s * 128;
+    };
+  }
+});
+
+// node_modules/.pnpm/buffer@6.0.3/node_modules/buffer/index.js
+var require_buffer = __commonJS({
+  "node_modules/.pnpm/buffer@6.0.3/node_modules/buffer/index.js"(exports) {
+    "use strict";
+    init_define_import_meta_env();
+    var base642 = require_base64_js();
+    var ieee754 = require_ieee754();
+    var customInspectSymbol = typeof Symbol === "function" && typeof Symbol["for"] === "function" ? Symbol["for"]("nodejs.util.inspect.custom") : null;
+    exports.Buffer = Buffer4;
+    exports.SlowBuffer = SlowBuffer;
+    exports.INSPECT_MAX_BYTES = 50;
+    var K_MAX_LENGTH = 2147483647;
+    exports.kMaxLength = K_MAX_LENGTH;
+    Buffer4.TYPED_ARRAY_SUPPORT = typedArraySupport();
+    if (!Buffer4.TYPED_ARRAY_SUPPORT && typeof console !== "undefined" && typeof console.error === "function") {
+      console.error(
+        "This browser lacks typed array (Uint8Array) support which is required by `buffer` v5.x. Use `buffer` v4.x if you require old browser support."
+      );
+    }
+    function typedArraySupport() {
+      try {
+        const arr = new Uint8Array(1);
+        const proto = { foo: function() {
+          return 42;
+        } };
+        Object.setPrototypeOf(proto, Uint8Array.prototype);
+        Object.setPrototypeOf(arr, proto);
+        return arr.foo() === 42;
+      } catch (e) {
+        return false;
+      }
+    }
+    Object.defineProperty(Buffer4.prototype, "parent", {
+      enumerable: true,
+      get: function() {
+        if (!Buffer4.isBuffer(this)) return void 0;
+        return this.buffer;
+      }
+    });
+    Object.defineProperty(Buffer4.prototype, "offset", {
+      enumerable: true,
+      get: function() {
+        if (!Buffer4.isBuffer(this)) return void 0;
+        return this.byteOffset;
+      }
+    });
+    function createBuffer(length) {
+      if (length > K_MAX_LENGTH) {
+        throw new RangeError('The value "' + length + '" is invalid for option "size"');
+      }
+      const buf = new Uint8Array(length);
+      Object.setPrototypeOf(buf, Buffer4.prototype);
+      return buf;
+    }
+    function Buffer4(arg, encodingOrOffset, length) {
+      if (typeof arg === "number") {
+        if (typeof encodingOrOffset === "string") {
+          throw new TypeError(
+            'The "string" argument must be of type string. Received type number'
+          );
+        }
+        return allocUnsafe(arg);
+      }
+      return from(arg, encodingOrOffset, length);
+    }
+    Buffer4.poolSize = 8192;
+    function from(value, encodingOrOffset, length) {
+      if (typeof value === "string") {
+        return fromString(value, encodingOrOffset);
+      }
+      if (ArrayBuffer.isView(value)) {
+        return fromArrayView(value);
+      }
+      if (value == null) {
+        throw new TypeError(
+          "The first argument must be one of type string, Buffer, ArrayBuffer, Array, or Array-like Object. Received type " + typeof value
+        );
+      }
+      if (isInstance(value, ArrayBuffer) || value && isInstance(value.buffer, ArrayBuffer)) {
+        return fromArrayBuffer(value, encodingOrOffset, length);
+      }
+      if (typeof SharedArrayBuffer !== "undefined" && (isInstance(value, SharedArrayBuffer) || value && isInstance(value.buffer, SharedArrayBuffer))) {
+        return fromArrayBuffer(value, encodingOrOffset, length);
+      }
+      if (typeof value === "number") {
+        throw new TypeError(
+          'The "value" argument must not be of type number. Received type number'
+        );
+      }
+      const valueOf = value.valueOf && value.valueOf();
+      if (valueOf != null && valueOf !== value) {
+        return Buffer4.from(valueOf, encodingOrOffset, length);
+      }
+      const b = fromObject(value);
+      if (b) return b;
+      if (typeof Symbol !== "undefined" && Symbol.toPrimitive != null && typeof value[Symbol.toPrimitive] === "function") {
+        return Buffer4.from(value[Symbol.toPrimitive]("string"), encodingOrOffset, length);
+      }
+      throw new TypeError(
+        "The first argument must be one of type string, Buffer, ArrayBuffer, Array, or Array-like Object. Received type " + typeof value
+      );
+    }
+    Buffer4.from = function(value, encodingOrOffset, length) {
+      return from(value, encodingOrOffset, length);
+    };
+    Object.setPrototypeOf(Buffer4.prototype, Uint8Array.prototype);
+    Object.setPrototypeOf(Buffer4, Uint8Array);
+    function assertSize(size) {
+      if (typeof size !== "number") {
+        throw new TypeError('"size" argument must be of type number');
+      } else if (size < 0) {
+        throw new RangeError('The value "' + size + '" is invalid for option "size"');
+      }
+    }
+    function alloc(size, fill, encoding) {
+      assertSize(size);
+      if (size <= 0) {
+        return createBuffer(size);
+      }
+      if (fill !== void 0) {
+        return typeof encoding === "string" ? createBuffer(size).fill(fill, encoding) : createBuffer(size).fill(fill);
+      }
+      return createBuffer(size);
+    }
+    Buffer4.alloc = function(size, fill, encoding) {
+      return alloc(size, fill, encoding);
+    };
+    function allocUnsafe(size) {
+      assertSize(size);
+      return createBuffer(size < 0 ? 0 : checked(size) | 0);
+    }
+    Buffer4.allocUnsafe = function(size) {
+      return allocUnsafe(size);
+    };
+    Buffer4.allocUnsafeSlow = function(size) {
+      return allocUnsafe(size);
+    };
+    function fromString(string2, encoding) {
+      if (typeof encoding !== "string" || encoding === "") {
+        encoding = "utf8";
+      }
+      if (!Buffer4.isEncoding(encoding)) {
+        throw new TypeError("Unknown encoding: " + encoding);
+      }
+      const length = byteLength(string2, encoding) | 0;
+      let buf = createBuffer(length);
+      const actual = buf.write(string2, encoding);
+      if (actual !== length) {
+        buf = buf.slice(0, actual);
+      }
+      return buf;
+    }
+    function fromArrayLike(array2) {
+      const length = array2.length < 0 ? 0 : checked(array2.length) | 0;
+      const buf = createBuffer(length);
+      for (let i = 0; i < length; i += 1) {
+        buf[i] = array2[i] & 255;
+      }
+      return buf;
+    }
+    function fromArrayView(arrayView) {
+      if (isInstance(arrayView, Uint8Array)) {
+        const copy = new Uint8Array(arrayView);
+        return fromArrayBuffer(copy.buffer, copy.byteOffset, copy.byteLength);
+      }
+      return fromArrayLike(arrayView);
+    }
+    function fromArrayBuffer(array2, byteOffset, length) {
+      if (byteOffset < 0 || array2.byteLength < byteOffset) {
+        throw new RangeError('"offset" is outside of buffer bounds');
+      }
+      if (array2.byteLength < byteOffset + (length || 0)) {
+        throw new RangeError('"length" is outside of buffer bounds');
+      }
+      let buf;
+      if (byteOffset === void 0 && length === void 0) {
+        buf = new Uint8Array(array2);
+      } else if (length === void 0) {
+        buf = new Uint8Array(array2, byteOffset);
+      } else {
+        buf = new Uint8Array(array2, byteOffset, length);
+      }
+      Object.setPrototypeOf(buf, Buffer4.prototype);
+      return buf;
+    }
+    function fromObject(obj) {
+      if (Buffer4.isBuffer(obj)) {
+        const len = checked(obj.length) | 0;
+        const buf = createBuffer(len);
+        if (buf.length === 0) {
+          return buf;
+        }
+        obj.copy(buf, 0, 0, len);
+        return buf;
+      }
+      if (obj.length !== void 0) {
+        if (typeof obj.length !== "number" || numberIsNaN(obj.length)) {
+          return createBuffer(0);
+        }
+        return fromArrayLike(obj);
+      }
+      if (obj.type === "Buffer" && Array.isArray(obj.data)) {
+        return fromArrayLike(obj.data);
+      }
+    }
+    function checked(length) {
+      if (length >= K_MAX_LENGTH) {
+        throw new RangeError("Attempt to allocate Buffer larger than maximum size: 0x" + K_MAX_LENGTH.toString(16) + " bytes");
+      }
+      return length | 0;
+    }
+    function SlowBuffer(length) {
+      if (+length != length) {
+        length = 0;
+      }
+      return Buffer4.alloc(+length);
+    }
+    Buffer4.isBuffer = function isBuffer(b) {
+      return b != null && b._isBuffer === true && b !== Buffer4.prototype;
+    };
+    Buffer4.compare = function compare3(a, b) {
+      if (isInstance(a, Uint8Array)) a = Buffer4.from(a, a.offset, a.byteLength);
+      if (isInstance(b, Uint8Array)) b = Buffer4.from(b, b.offset, b.byteLength);
+      if (!Buffer4.isBuffer(a) || !Buffer4.isBuffer(b)) {
+        throw new TypeError(
+          'The "buf1", "buf2" arguments must be one of type Buffer or Uint8Array'
+        );
+      }
+      if (a === b) return 0;
+      let x = a.length;
+      let y = b.length;
+      for (let i = 0, len = Math.min(x, y); i < len; ++i) {
+        if (a[i] !== b[i]) {
+          x = a[i];
+          y = b[i];
+          break;
+        }
+      }
+      if (x < y) return -1;
+      if (y < x) return 1;
+      return 0;
+    };
+    Buffer4.isEncoding = function isEncoding(encoding) {
+      switch (String(encoding).toLowerCase()) {
+        case "hex":
+        case "utf8":
+        case "utf-8":
+        case "ascii":
+        case "latin1":
+        case "binary":
+        case "base64":
+        case "ucs2":
+        case "ucs-2":
+        case "utf16le":
+        case "utf-16le":
+          return true;
+        default:
+          return false;
+      }
+    };
+    Buffer4.concat = function concat7(list, length) {
+      if (!Array.isArray(list)) {
+        throw new TypeError('"list" argument must be an Array of Buffers');
+      }
+      if (list.length === 0) {
+        return Buffer4.alloc(0);
+      }
+      let i;
+      if (length === void 0) {
+        length = 0;
+        for (i = 0; i < list.length; ++i) {
+          length += list[i].length;
+        }
+      }
+      const buffer = Buffer4.allocUnsafe(length);
+      let pos = 0;
+      for (i = 0; i < list.length; ++i) {
+        let buf = list[i];
+        if (isInstance(buf, Uint8Array)) {
+          if (pos + buf.length > buffer.length) {
+            if (!Buffer4.isBuffer(buf)) buf = Buffer4.from(buf);
+            buf.copy(buffer, pos);
+          } else {
+            Uint8Array.prototype.set.call(
+              buffer,
+              buf,
+              pos
+            );
+          }
+        } else if (!Buffer4.isBuffer(buf)) {
+          throw new TypeError('"list" argument must be an Array of Buffers');
+        } else {
+          buf.copy(buffer, pos);
+        }
+        pos += buf.length;
+      }
+      return buffer;
+    };
+    function byteLength(string2, encoding) {
+      if (Buffer4.isBuffer(string2)) {
+        return string2.length;
+      }
+      if (ArrayBuffer.isView(string2) || isInstance(string2, ArrayBuffer)) {
+        return string2.byteLength;
+      }
+      if (typeof string2 !== "string") {
+        throw new TypeError(
+          'The "string" argument must be one of type string, Buffer, or ArrayBuffer. Received type ' + typeof string2
+        );
+      }
+      const len = string2.length;
+      const mustMatch = arguments.length > 2 && arguments[2] === true;
+      if (!mustMatch && len === 0) return 0;
+      let loweredCase = false;
+      for (; ; ) {
+        switch (encoding) {
+          case "ascii":
+          case "latin1":
+          case "binary":
+            return len;
+          case "utf8":
+          case "utf-8":
+            return utf8ToBytes(string2).length;
+          case "ucs2":
+          case "ucs-2":
+          case "utf16le":
+          case "utf-16le":
+            return len * 2;
+          case "hex":
+            return len >>> 1;
+          case "base64":
+            return base64ToBytes(string2).length;
+          default:
+            if (loweredCase) {
+              return mustMatch ? -1 : utf8ToBytes(string2).length;
+            }
+            encoding = ("" + encoding).toLowerCase();
+            loweredCase = true;
+        }
+      }
+    }
+    Buffer4.byteLength = byteLength;
+    function slowToString(encoding, start, end) {
+      let loweredCase = false;
+      if (start === void 0 || start < 0) {
+        start = 0;
+      }
+      if (start > this.length) {
+        return "";
+      }
+      if (end === void 0 || end > this.length) {
+        end = this.length;
+      }
+      if (end <= 0) {
+        return "";
+      }
+      end >>>= 0;
+      start >>>= 0;
+      if (end <= start) {
+        return "";
+      }
+      if (!encoding) encoding = "utf8";
+      while (true) {
+        switch (encoding) {
+          case "hex":
+            return hexSlice(this, start, end);
+          case "utf8":
+          case "utf-8":
+            return utf8Slice(this, start, end);
+          case "ascii":
+            return asciiSlice(this, start, end);
+          case "latin1":
+          case "binary":
+            return latin1Slice(this, start, end);
+          case "base64":
+            return base64Slice(this, start, end);
+          case "ucs2":
+          case "ucs-2":
+          case "utf16le":
+          case "utf-16le":
+            return utf16leSlice(this, start, end);
+          default:
+            if (loweredCase) throw new TypeError("Unknown encoding: " + encoding);
+            encoding = (encoding + "").toLowerCase();
+            loweredCase = true;
+        }
+      }
+    }
+    Buffer4.prototype._isBuffer = true;
+    function swap(b, n, m) {
+      const i = b[n];
+      b[n] = b[m];
+      b[m] = i;
+    }
+    Buffer4.prototype.swap16 = function swap16() {
+      const len = this.length;
+      if (len % 2 !== 0) {
+        throw new RangeError("Buffer size must be a multiple of 16-bits");
+      }
+      for (let i = 0; i < len; i += 2) {
+        swap(this, i, i + 1);
+      }
+      return this;
+    };
+    Buffer4.prototype.swap32 = function swap32() {
+      const len = this.length;
+      if (len % 4 !== 0) {
+        throw new RangeError("Buffer size must be a multiple of 32-bits");
+      }
+      for (let i = 0; i < len; i += 4) {
+        swap(this, i, i + 3);
+        swap(this, i + 1, i + 2);
+      }
+      return this;
+    };
+    Buffer4.prototype.swap64 = function swap64() {
+      const len = this.length;
+      if (len % 8 !== 0) {
+        throw new RangeError("Buffer size must be a multiple of 64-bits");
+      }
+      for (let i = 0; i < len; i += 8) {
+        swap(this, i, i + 7);
+        swap(this, i + 1, i + 6);
+        swap(this, i + 2, i + 5);
+        swap(this, i + 3, i + 4);
+      }
+      return this;
+    };
+    Buffer4.prototype.toString = function toString() {
+      const length = this.length;
+      if (length === 0) return "";
+      if (arguments.length === 0) return utf8Slice(this, 0, length);
+      return slowToString.apply(this, arguments);
+    };
+    Buffer4.prototype.toLocaleString = Buffer4.prototype.toString;
+    Buffer4.prototype.equals = function equals(b) {
+      if (!Buffer4.isBuffer(b)) throw new TypeError("Argument must be a Buffer");
+      if (this === b) return true;
+      return Buffer4.compare(this, b) === 0;
+    };
+    Buffer4.prototype.inspect = function inspect() {
+      let str2 = "";
+      const max = exports.INSPECT_MAX_BYTES;
+      str2 = this.toString("hex", 0, max).replace(/(.{2})/g, "$1 ").trim();
+      if (this.length > max) str2 += " ... ";
+      return "<Buffer " + str2 + ">";
+    };
+    if (customInspectSymbol) {
+      Buffer4.prototype[customInspectSymbol] = Buffer4.prototype.inspect;
+    }
+    Buffer4.prototype.compare = function compare3(target, start, end, thisStart, thisEnd) {
+      if (isInstance(target, Uint8Array)) {
+        target = Buffer4.from(target, target.offset, target.byteLength);
+      }
+      if (!Buffer4.isBuffer(target)) {
+        throw new TypeError(
+          'The "target" argument must be one of type Buffer or Uint8Array. Received type ' + typeof target
+        );
+      }
+      if (start === void 0) {
+        start = 0;
+      }
+      if (end === void 0) {
+        end = target ? target.length : 0;
+      }
+      if (thisStart === void 0) {
+        thisStart = 0;
+      }
+      if (thisEnd === void 0) {
+        thisEnd = this.length;
+      }
+      if (start < 0 || end > target.length || thisStart < 0 || thisEnd > this.length) {
+        throw new RangeError("out of range index");
+      }
+      if (thisStart >= thisEnd && start >= end) {
+        return 0;
+      }
+      if (thisStart >= thisEnd) {
+        return -1;
+      }
+      if (start >= end) {
+        return 1;
+      }
+      start >>>= 0;
+      end >>>= 0;
+      thisStart >>>= 0;
+      thisEnd >>>= 0;
+      if (this === target) return 0;
+      let x = thisEnd - thisStart;
+      let y = end - start;
+      const len = Math.min(x, y);
+      const thisCopy = this.slice(thisStart, thisEnd);
+      const targetCopy = target.slice(start, end);
+      for (let i = 0; i < len; ++i) {
+        if (thisCopy[i] !== targetCopy[i]) {
+          x = thisCopy[i];
+          y = targetCopy[i];
+          break;
+        }
+      }
+      if (x < y) return -1;
+      if (y < x) return 1;
+      return 0;
+    };
+    function bidirectionalIndexOf(buffer, val, byteOffset, encoding, dir) {
+      if (buffer.length === 0) return -1;
+      if (typeof byteOffset === "string") {
+        encoding = byteOffset;
+        byteOffset = 0;
+      } else if (byteOffset > 2147483647) {
+        byteOffset = 2147483647;
+      } else if (byteOffset < -2147483648) {
+        byteOffset = -2147483648;
+      }
+      byteOffset = +byteOffset;
+      if (numberIsNaN(byteOffset)) {
+        byteOffset = dir ? 0 : buffer.length - 1;
+      }
+      if (byteOffset < 0) byteOffset = buffer.length + byteOffset;
+      if (byteOffset >= buffer.length) {
+        if (dir) return -1;
+        else byteOffset = buffer.length - 1;
+      } else if (byteOffset < 0) {
+        if (dir) byteOffset = 0;
+        else return -1;
+      }
+      if (typeof val === "string") {
+        val = Buffer4.from(val, encoding);
+      }
+      if (Buffer4.isBuffer(val)) {
+        if (val.length === 0) {
+          return -1;
+        }
+        return arrayIndexOf(buffer, val, byteOffset, encoding, dir);
+      } else if (typeof val === "number") {
+        val = val & 255;
+        if (typeof Uint8Array.prototype.indexOf === "function") {
+          if (dir) {
+            return Uint8Array.prototype.indexOf.call(buffer, val, byteOffset);
+          } else {
+            return Uint8Array.prototype.lastIndexOf.call(buffer, val, byteOffset);
+          }
+        }
+        return arrayIndexOf(buffer, [val], byteOffset, encoding, dir);
+      }
+      throw new TypeError("val must be string, number or Buffer");
+    }
+    function arrayIndexOf(arr, val, byteOffset, encoding, dir) {
+      let indexSize = 1;
+      let arrLength = arr.length;
+      let valLength = val.length;
+      if (encoding !== void 0) {
+        encoding = String(encoding).toLowerCase();
+        if (encoding === "ucs2" || encoding === "ucs-2" || encoding === "utf16le" || encoding === "utf-16le") {
+          if (arr.length < 2 || val.length < 2) {
+            return -1;
+          }
+          indexSize = 2;
+          arrLength /= 2;
+          valLength /= 2;
+          byteOffset /= 2;
+        }
+      }
+      function read(buf, i2) {
+        if (indexSize === 1) {
+          return buf[i2];
+        } else {
+          return buf.readUInt16BE(i2 * indexSize);
+        }
+      }
+      let i;
+      if (dir) {
+        let foundIndex = -1;
+        for (i = byteOffset; i < arrLength; i++) {
+          if (read(arr, i) === read(val, foundIndex === -1 ? 0 : i - foundIndex)) {
+            if (foundIndex === -1) foundIndex = i;
+            if (i - foundIndex + 1 === valLength) return foundIndex * indexSize;
+          } else {
+            if (foundIndex !== -1) i -= i - foundIndex;
+            foundIndex = -1;
+          }
+        }
+      } else {
+        if (byteOffset + valLength > arrLength) byteOffset = arrLength - valLength;
+        for (i = byteOffset; i >= 0; i--) {
+          let found = true;
+          for (let j = 0; j < valLength; j++) {
+            if (read(arr, i + j) !== read(val, j)) {
+              found = false;
+              break;
+            }
+          }
+          if (found) return i;
+        }
+      }
+      return -1;
+    }
+    Buffer4.prototype.includes = function includes(val, byteOffset, encoding) {
+      return this.indexOf(val, byteOffset, encoding) !== -1;
+    };
+    Buffer4.prototype.indexOf = function indexOf(val, byteOffset, encoding) {
+      return bidirectionalIndexOf(this, val, byteOffset, encoding, true);
+    };
+    Buffer4.prototype.lastIndexOf = function lastIndexOf(val, byteOffset, encoding) {
+      return bidirectionalIndexOf(this, val, byteOffset, encoding, false);
+    };
+    function hexWrite(buf, string2, offset, length) {
+      offset = Number(offset) || 0;
+      const remaining = buf.length - offset;
+      if (!length) {
+        length = remaining;
+      } else {
+        length = Number(length);
+        if (length > remaining) {
+          length = remaining;
+        }
+      }
+      const strLen = string2.length;
+      if (length > strLen / 2) {
+        length = strLen / 2;
+      }
+      let i;
+      for (i = 0; i < length; ++i) {
+        const parsed = parseInt(string2.substr(i * 2, 2), 16);
+        if (numberIsNaN(parsed)) return i;
+        buf[offset + i] = parsed;
+      }
+      return i;
+    }
+    function utf8Write(buf, string2, offset, length) {
+      return blitBuffer(utf8ToBytes(string2, buf.length - offset), buf, offset, length);
+    }
+    function asciiWrite(buf, string2, offset, length) {
+      return blitBuffer(asciiToBytes2(string2), buf, offset, length);
+    }
+    function base64Write(buf, string2, offset, length) {
+      return blitBuffer(base64ToBytes(string2), buf, offset, length);
+    }
+    function ucs2Write(buf, string2, offset, length) {
+      return blitBuffer(utf16leToBytes(string2, buf.length - offset), buf, offset, length);
+    }
+    Buffer4.prototype.write = function write(string2, offset, length, encoding) {
+      if (offset === void 0) {
+        encoding = "utf8";
+        length = this.length;
+        offset = 0;
+      } else if (length === void 0 && typeof offset === "string") {
+        encoding = offset;
+        length = this.length;
+        offset = 0;
+      } else if (isFinite(offset)) {
+        offset = offset >>> 0;
+        if (isFinite(length)) {
+          length = length >>> 0;
+          if (encoding === void 0) encoding = "utf8";
+        } else {
+          encoding = length;
+          length = void 0;
+        }
+      } else {
+        throw new Error(
+          "Buffer.write(string, encoding, offset[, length]) is no longer supported"
+        );
+      }
+      const remaining = this.length - offset;
+      if (length === void 0 || length > remaining) length = remaining;
+      if (string2.length > 0 && (length < 0 || offset < 0) || offset > this.length) {
+        throw new RangeError("Attempt to write outside buffer bounds");
+      }
+      if (!encoding) encoding = "utf8";
+      let loweredCase = false;
+      for (; ; ) {
+        switch (encoding) {
+          case "hex":
+            return hexWrite(this, string2, offset, length);
+          case "utf8":
+          case "utf-8":
+            return utf8Write(this, string2, offset, length);
+          case "ascii":
+          case "latin1":
+          case "binary":
+            return asciiWrite(this, string2, offset, length);
+          case "base64":
+            return base64Write(this, string2, offset, length);
+          case "ucs2":
+          case "ucs-2":
+          case "utf16le":
+          case "utf-16le":
+            return ucs2Write(this, string2, offset, length);
+          default:
+            if (loweredCase) throw new TypeError("Unknown encoding: " + encoding);
+            encoding = ("" + encoding).toLowerCase();
+            loweredCase = true;
+        }
+      }
+    };
+    Buffer4.prototype.toJSON = function toJSON() {
+      return {
+        type: "Buffer",
+        data: Array.prototype.slice.call(this._arr || this, 0)
+      };
+    };
+    function base64Slice(buf, start, end) {
+      if (start === 0 && end === buf.length) {
+        return base642.fromByteArray(buf);
+      } else {
+        return base642.fromByteArray(buf.slice(start, end));
+      }
+    }
+    function utf8Slice(buf, start, end) {
+      end = Math.min(buf.length, end);
+      const res = [];
+      let i = start;
+      while (i < end) {
+        const firstByte = buf[i];
+        let codePoint = null;
+        let bytesPerSequence = firstByte > 239 ? 4 : firstByte > 223 ? 3 : firstByte > 191 ? 2 : 1;
+        if (i + bytesPerSequence <= end) {
+          let secondByte, thirdByte, fourthByte, tempCodePoint;
+          switch (bytesPerSequence) {
+            case 1:
+              if (firstByte < 128) {
+                codePoint = firstByte;
+              }
+              break;
+            case 2:
+              secondByte = buf[i + 1];
+              if ((secondByte & 192) === 128) {
+                tempCodePoint = (firstByte & 31) << 6 | secondByte & 63;
+                if (tempCodePoint > 127) {
+                  codePoint = tempCodePoint;
+                }
+              }
+              break;
+            case 3:
+              secondByte = buf[i + 1];
+              thirdByte = buf[i + 2];
+              if ((secondByte & 192) === 128 && (thirdByte & 192) === 128) {
+                tempCodePoint = (firstByte & 15) << 12 | (secondByte & 63) << 6 | thirdByte & 63;
+                if (tempCodePoint > 2047 && (tempCodePoint < 55296 || tempCodePoint > 57343)) {
+                  codePoint = tempCodePoint;
+                }
+              }
+              break;
+            case 4:
+              secondByte = buf[i + 1];
+              thirdByte = buf[i + 2];
+              fourthByte = buf[i + 3];
+              if ((secondByte & 192) === 128 && (thirdByte & 192) === 128 && (fourthByte & 192) === 128) {
+                tempCodePoint = (firstByte & 15) << 18 | (secondByte & 63) << 12 | (thirdByte & 63) << 6 | fourthByte & 63;
+                if (tempCodePoint > 65535 && tempCodePoint < 1114112) {
+                  codePoint = tempCodePoint;
+                }
+              }
+          }
+        }
+        if (codePoint === null) {
+          codePoint = 65533;
+          bytesPerSequence = 1;
+        } else if (codePoint > 65535) {
+          codePoint -= 65536;
+          res.push(codePoint >>> 10 & 1023 | 55296);
+          codePoint = 56320 | codePoint & 1023;
+        }
+        res.push(codePoint);
+        i += bytesPerSequence;
+      }
+      return decodeCodePointsArray(res);
+    }
+    var MAX_ARGUMENTS_LENGTH = 4096;
+    function decodeCodePointsArray(codePoints) {
+      const len = codePoints.length;
+      if (len <= MAX_ARGUMENTS_LENGTH) {
+        return String.fromCharCode.apply(String, codePoints);
+      }
+      let res = "";
+      let i = 0;
+      while (i < len) {
+        res += String.fromCharCode.apply(
+          String,
+          codePoints.slice(i, i += MAX_ARGUMENTS_LENGTH)
+        );
+      }
+      return res;
+    }
+    function asciiSlice(buf, start, end) {
+      let ret = "";
+      end = Math.min(buf.length, end);
+      for (let i = start; i < end; ++i) {
+        ret += String.fromCharCode(buf[i] & 127);
+      }
+      return ret;
+    }
+    function latin1Slice(buf, start, end) {
+      let ret = "";
+      end = Math.min(buf.length, end);
+      for (let i = start; i < end; ++i) {
+        ret += String.fromCharCode(buf[i]);
+      }
+      return ret;
+    }
+    function hexSlice(buf, start, end) {
+      const len = buf.length;
+      if (!start || start < 0) start = 0;
+      if (!end || end < 0 || end > len) end = len;
+      let out = "";
+      for (let i = start; i < end; ++i) {
+        out += hexSliceLookupTable[buf[i]];
+      }
+      return out;
+    }
+    function utf16leSlice(buf, start, end) {
+      const bytes2 = buf.slice(start, end);
+      let res = "";
+      for (let i = 0; i < bytes2.length - 1; i += 2) {
+        res += String.fromCharCode(bytes2[i] + bytes2[i + 1] * 256);
+      }
+      return res;
+    }
+    Buffer4.prototype.slice = function slice(start, end) {
+      const len = this.length;
+      start = ~~start;
+      end = end === void 0 ? len : ~~end;
+      if (start < 0) {
+        start += len;
+        if (start < 0) start = 0;
+      } else if (start > len) {
+        start = len;
+      }
+      if (end < 0) {
+        end += len;
+        if (end < 0) end = 0;
+      } else if (end > len) {
+        end = len;
+      }
+      if (end < start) end = start;
+      const newBuf = this.subarray(start, end);
+      Object.setPrototypeOf(newBuf, Buffer4.prototype);
+      return newBuf;
+    };
+    function checkOffset(offset, ext, length) {
+      if (offset % 1 !== 0 || offset < 0) throw new RangeError("offset is not uint");
+      if (offset + ext > length) throw new RangeError("Trying to access beyond buffer length");
+    }
+    Buffer4.prototype.readUintLE = Buffer4.prototype.readUIntLE = function readUIntLE(offset, byteLength2, noAssert) {
+      offset = offset >>> 0;
+      byteLength2 = byteLength2 >>> 0;
+      if (!noAssert) checkOffset(offset, byteLength2, this.length);
+      let val = this[offset];
+      let mul = 1;
+      let i = 0;
+      while (++i < byteLength2 && (mul *= 256)) {
+        val += this[offset + i] * mul;
+      }
+      return val;
+    };
+    Buffer4.prototype.readUintBE = Buffer4.prototype.readUIntBE = function readUIntBE(offset, byteLength2, noAssert) {
+      offset = offset >>> 0;
+      byteLength2 = byteLength2 >>> 0;
+      if (!noAssert) {
+        checkOffset(offset, byteLength2, this.length);
+      }
+      let val = this[offset + --byteLength2];
+      let mul = 1;
+      while (byteLength2 > 0 && (mul *= 256)) {
+        val += this[offset + --byteLength2] * mul;
+      }
+      return val;
+    };
+    Buffer4.prototype.readUint8 = Buffer4.prototype.readUInt8 = function readUInt83(offset, noAssert) {
+      offset = offset >>> 0;
+      if (!noAssert) checkOffset(offset, 1, this.length);
+      return this[offset];
+    };
+    Buffer4.prototype.readUint16LE = Buffer4.prototype.readUInt16LE = function readUInt16LE(offset, noAssert) {
+      offset = offset >>> 0;
+      if (!noAssert) checkOffset(offset, 2, this.length);
+      return this[offset] | this[offset + 1] << 8;
+    };
+    Buffer4.prototype.readUint16BE = Buffer4.prototype.readUInt16BE = function readUInt16BE(offset, noAssert) {
+      offset = offset >>> 0;
+      if (!noAssert) checkOffset(offset, 2, this.length);
+      return this[offset] << 8 | this[offset + 1];
+    };
+    Buffer4.prototype.readUint32LE = Buffer4.prototype.readUInt32LE = function readUInt32LE(offset, noAssert) {
+      offset = offset >>> 0;
+      if (!noAssert) checkOffset(offset, 4, this.length);
+      return (this[offset] | this[offset + 1] << 8 | this[offset + 2] << 16) + this[offset + 3] * 16777216;
+    };
+    Buffer4.prototype.readUint32BE = Buffer4.prototype.readUInt32BE = function readUInt32BE2(offset, noAssert) {
+      offset = offset >>> 0;
+      if (!noAssert) checkOffset(offset, 4, this.length);
+      return this[offset] * 16777216 + (this[offset + 1] << 16 | this[offset + 2] << 8 | this[offset + 3]);
+    };
+    Buffer4.prototype.readBigUInt64LE = defineBigIntMethod(function readBigUInt64LE(offset) {
+      offset = offset >>> 0;
+      validateNumber(offset, "offset");
+      const first = this[offset];
+      const last = this[offset + 7];
+      if (first === void 0 || last === void 0) {
+        boundsError(offset, this.length - 8);
+      }
+      const lo = first + this[++offset] * 2 ** 8 + this[++offset] * 2 ** 16 + this[++offset] * 2 ** 24;
+      const hi = this[++offset] + this[++offset] * 2 ** 8 + this[++offset] * 2 ** 16 + last * 2 ** 24;
+      return BigInt(lo) + (BigInt(hi) << BigInt(32));
+    });
+    Buffer4.prototype.readBigUInt64BE = defineBigIntMethod(function readBigUInt64BE(offset) {
+      offset = offset >>> 0;
+      validateNumber(offset, "offset");
+      const first = this[offset];
+      const last = this[offset + 7];
+      if (first === void 0 || last === void 0) {
+        boundsError(offset, this.length - 8);
+      }
+      const hi = first * 2 ** 24 + this[++offset] * 2 ** 16 + this[++offset] * 2 ** 8 + this[++offset];
+      const lo = this[++offset] * 2 ** 24 + this[++offset] * 2 ** 16 + this[++offset] * 2 ** 8 + last;
+      return (BigInt(hi) << BigInt(32)) + BigInt(lo);
+    });
+    Buffer4.prototype.readIntLE = function readIntLE(offset, byteLength2, noAssert) {
+      offset = offset >>> 0;
+      byteLength2 = byteLength2 >>> 0;
+      if (!noAssert) checkOffset(offset, byteLength2, this.length);
+      let val = this[offset];
+      let mul = 1;
+      let i = 0;
+      while (++i < byteLength2 && (mul *= 256)) {
+        val += this[offset + i] * mul;
+      }
+      mul *= 128;
+      if (val >= mul) val -= Math.pow(2, 8 * byteLength2);
+      return val;
+    };
+    Buffer4.prototype.readIntBE = function readIntBE(offset, byteLength2, noAssert) {
+      offset = offset >>> 0;
+      byteLength2 = byteLength2 >>> 0;
+      if (!noAssert) checkOffset(offset, byteLength2, this.length);
+      let i = byteLength2;
+      let mul = 1;
+      let val = this[offset + --i];
+      while (i > 0 && (mul *= 256)) {
+        val += this[offset + --i] * mul;
+      }
+      mul *= 128;
+      if (val >= mul) val -= Math.pow(2, 8 * byteLength2);
+      return val;
+    };
+    Buffer4.prototype.readInt8 = function readInt82(offset, noAssert) {
+      offset = offset >>> 0;
+      if (!noAssert) checkOffset(offset, 1, this.length);
+      if (!(this[offset] & 128)) return this[offset];
+      return (255 - this[offset] + 1) * -1;
+    };
+    Buffer4.prototype.readInt16LE = function readInt16LE(offset, noAssert) {
+      offset = offset >>> 0;
+      if (!noAssert) checkOffset(offset, 2, this.length);
+      const val = this[offset] | this[offset + 1] << 8;
+      return val & 32768 ? val | 4294901760 : val;
+    };
+    Buffer4.prototype.readInt16BE = function readInt16BE(offset, noAssert) {
+      offset = offset >>> 0;
+      if (!noAssert) checkOffset(offset, 2, this.length);
+      const val = this[offset + 1] | this[offset] << 8;
+      return val & 32768 ? val | 4294901760 : val;
+    };
+    Buffer4.prototype.readInt32LE = function readInt32LE(offset, noAssert) {
+      offset = offset >>> 0;
+      if (!noAssert) checkOffset(offset, 4, this.length);
+      return this[offset] | this[offset + 1] << 8 | this[offset + 2] << 16 | this[offset + 3] << 24;
+    };
+    Buffer4.prototype.readInt32BE = function readInt32BE(offset, noAssert) {
+      offset = offset >>> 0;
+      if (!noAssert) checkOffset(offset, 4, this.length);
+      return this[offset] << 24 | this[offset + 1] << 16 | this[offset + 2] << 8 | this[offset + 3];
+    };
+    Buffer4.prototype.readBigInt64LE = defineBigIntMethod(function readBigInt64LE(offset) {
+      offset = offset >>> 0;
+      validateNumber(offset, "offset");
+      const first = this[offset];
+      const last = this[offset + 7];
+      if (first === void 0 || last === void 0) {
+        boundsError(offset, this.length - 8);
+      }
+      const val = this[offset + 4] + this[offset + 5] * 2 ** 8 + this[offset + 6] * 2 ** 16 + (last << 24);
+      return (BigInt(val) << BigInt(32)) + BigInt(first + this[++offset] * 2 ** 8 + this[++offset] * 2 ** 16 + this[++offset] * 2 ** 24);
+    });
+    Buffer4.prototype.readBigInt64BE = defineBigIntMethod(function readBigInt64BE(offset) {
+      offset = offset >>> 0;
+      validateNumber(offset, "offset");
+      const first = this[offset];
+      const last = this[offset + 7];
+      if (first === void 0 || last === void 0) {
+        boundsError(offset, this.length - 8);
+      }
+      const val = (first << 24) + // Overflow
+      this[++offset] * 2 ** 16 + this[++offset] * 2 ** 8 + this[++offset];
+      return (BigInt(val) << BigInt(32)) + BigInt(this[++offset] * 2 ** 24 + this[++offset] * 2 ** 16 + this[++offset] * 2 ** 8 + last);
+    });
+    Buffer4.prototype.readFloatLE = function readFloatLE(offset, noAssert) {
+      offset = offset >>> 0;
+      if (!noAssert) checkOffset(offset, 4, this.length);
+      return ieee754.read(this, offset, true, 23, 4);
+    };
+    Buffer4.prototype.readFloatBE = function readFloatBE(offset, noAssert) {
+      offset = offset >>> 0;
+      if (!noAssert) checkOffset(offset, 4, this.length);
+      return ieee754.read(this, offset, false, 23, 4);
+    };
+    Buffer4.prototype.readDoubleLE = function readDoubleLE(offset, noAssert) {
+      offset = offset >>> 0;
+      if (!noAssert) checkOffset(offset, 8, this.length);
+      return ieee754.read(this, offset, true, 52, 8);
+    };
+    Buffer4.prototype.readDoubleBE = function readDoubleBE(offset, noAssert) {
+      offset = offset >>> 0;
+      if (!noAssert) checkOffset(offset, 8, this.length);
+      return ieee754.read(this, offset, false, 52, 8);
+    };
+    function checkInt(buf, value, offset, ext, max, min) {
+      if (!Buffer4.isBuffer(buf)) throw new TypeError('"buffer" argument must be a Buffer instance');
+      if (value > max || value < min) throw new RangeError('"value" argument is out of bounds');
+      if (offset + ext > buf.length) throw new RangeError("Index out of range");
+    }
+    Buffer4.prototype.writeUintLE = Buffer4.prototype.writeUIntLE = function writeUIntLE(value, offset, byteLength2, noAssert) {
+      value = +value;
+      offset = offset >>> 0;
+      byteLength2 = byteLength2 >>> 0;
+      if (!noAssert) {
+        const maxBytes = Math.pow(2, 8 * byteLength2) - 1;
+        checkInt(this, value, offset, byteLength2, maxBytes, 0);
+      }
+      let mul = 1;
+      let i = 0;
+      this[offset] = value & 255;
+      while (++i < byteLength2 && (mul *= 256)) {
+        this[offset + i] = value / mul & 255;
+      }
+      return offset + byteLength2;
+    };
+    Buffer4.prototype.writeUintBE = Buffer4.prototype.writeUIntBE = function writeUIntBE(value, offset, byteLength2, noAssert) {
+      value = +value;
+      offset = offset >>> 0;
+      byteLength2 = byteLength2 >>> 0;
+      if (!noAssert) {
+        const maxBytes = Math.pow(2, 8 * byteLength2) - 1;
+        checkInt(this, value, offset, byteLength2, maxBytes, 0);
+      }
+      let i = byteLength2 - 1;
+      let mul = 1;
+      this[offset + i] = value & 255;
+      while (--i >= 0 && (mul *= 256)) {
+        this[offset + i] = value / mul & 255;
+      }
+      return offset + byteLength2;
+    };
+    Buffer4.prototype.writeUint8 = Buffer4.prototype.writeUInt8 = function writeUInt83(value, offset, noAssert) {
+      value = +value;
+      offset = offset >>> 0;
+      if (!noAssert) checkInt(this, value, offset, 1, 255, 0);
+      this[offset] = value & 255;
+      return offset + 1;
+    };
+    Buffer4.prototype.writeUint16LE = Buffer4.prototype.writeUInt16LE = function writeUInt16LE(value, offset, noAssert) {
+      value = +value;
+      offset = offset >>> 0;
+      if (!noAssert) checkInt(this, value, offset, 2, 65535, 0);
+      this[offset] = value & 255;
+      this[offset + 1] = value >>> 8;
+      return offset + 2;
+    };
+    Buffer4.prototype.writeUint16BE = Buffer4.prototype.writeUInt16BE = function writeUInt16BE(value, offset, noAssert) {
+      value = +value;
+      offset = offset >>> 0;
+      if (!noAssert) checkInt(this, value, offset, 2, 65535, 0);
+      this[offset] = value >>> 8;
+      this[offset + 1] = value & 255;
+      return offset + 2;
+    };
+    Buffer4.prototype.writeUint32LE = Buffer4.prototype.writeUInt32LE = function writeUInt32LE(value, offset, noAssert) {
+      value = +value;
+      offset = offset >>> 0;
+      if (!noAssert) checkInt(this, value, offset, 4, 4294967295, 0);
+      this[offset + 3] = value >>> 24;
+      this[offset + 2] = value >>> 16;
+      this[offset + 1] = value >>> 8;
+      this[offset] = value & 255;
+      return offset + 4;
+    };
+    Buffer4.prototype.writeUint32BE = Buffer4.prototype.writeUInt32BE = function writeUInt32BE2(value, offset, noAssert) {
+      value = +value;
+      offset = offset >>> 0;
+      if (!noAssert) checkInt(this, value, offset, 4, 4294967295, 0);
+      this[offset] = value >>> 24;
+      this[offset + 1] = value >>> 16;
+      this[offset + 2] = value >>> 8;
+      this[offset + 3] = value & 255;
+      return offset + 4;
+    };
+    function wrtBigUInt64LE(buf, value, offset, min, max) {
+      checkIntBI(value, min, max, buf, offset, 7);
+      let lo = Number(value & BigInt(4294967295));
+      buf[offset++] = lo;
+      lo = lo >> 8;
+      buf[offset++] = lo;
+      lo = lo >> 8;
+      buf[offset++] = lo;
+      lo = lo >> 8;
+      buf[offset++] = lo;
+      let hi = Number(value >> BigInt(32) & BigInt(4294967295));
+      buf[offset++] = hi;
+      hi = hi >> 8;
+      buf[offset++] = hi;
+      hi = hi >> 8;
+      buf[offset++] = hi;
+      hi = hi >> 8;
+      buf[offset++] = hi;
+      return offset;
+    }
+    function wrtBigUInt64BE(buf, value, offset, min, max) {
+      checkIntBI(value, min, max, buf, offset, 7);
+      let lo = Number(value & BigInt(4294967295));
+      buf[offset + 7] = lo;
+      lo = lo >> 8;
+      buf[offset + 6] = lo;
+      lo = lo >> 8;
+      buf[offset + 5] = lo;
+      lo = lo >> 8;
+      buf[offset + 4] = lo;
+      let hi = Number(value >> BigInt(32) & BigInt(4294967295));
+      buf[offset + 3] = hi;
+      hi = hi >> 8;
+      buf[offset + 2] = hi;
+      hi = hi >> 8;
+      buf[offset + 1] = hi;
+      hi = hi >> 8;
+      buf[offset] = hi;
+      return offset + 8;
+    }
+    Buffer4.prototype.writeBigUInt64LE = defineBigIntMethod(function writeBigUInt64LE(value, offset = 0) {
+      return wrtBigUInt64LE(this, value, offset, BigInt(0), BigInt("0xffffffffffffffff"));
+    });
+    Buffer4.prototype.writeBigUInt64BE = defineBigIntMethod(function writeBigUInt64BE(value, offset = 0) {
+      return wrtBigUInt64BE(this, value, offset, BigInt(0), BigInt("0xffffffffffffffff"));
+    });
+    Buffer4.prototype.writeIntLE = function writeIntLE(value, offset, byteLength2, noAssert) {
+      value = +value;
+      offset = offset >>> 0;
+      if (!noAssert) {
+        const limit = Math.pow(2, 8 * byteLength2 - 1);
+        checkInt(this, value, offset, byteLength2, limit - 1, -limit);
+      }
+      let i = 0;
+      let mul = 1;
+      let sub = 0;
+      this[offset] = value & 255;
+      while (++i < byteLength2 && (mul *= 256)) {
+        if (value < 0 && sub === 0 && this[offset + i - 1] !== 0) {
+          sub = 1;
+        }
+        this[offset + i] = (value / mul >> 0) - sub & 255;
+      }
+      return offset + byteLength2;
+    };
+    Buffer4.prototype.writeIntBE = function writeIntBE(value, offset, byteLength2, noAssert) {
+      value = +value;
+      offset = offset >>> 0;
+      if (!noAssert) {
+        const limit = Math.pow(2, 8 * byteLength2 - 1);
+        checkInt(this, value, offset, byteLength2, limit - 1, -limit);
+      }
+      let i = byteLength2 - 1;
+      let mul = 1;
+      let sub = 0;
+      this[offset + i] = value & 255;
+      while (--i >= 0 && (mul *= 256)) {
+        if (value < 0 && sub === 0 && this[offset + i + 1] !== 0) {
+          sub = 1;
+        }
+        this[offset + i] = (value / mul >> 0) - sub & 255;
+      }
+      return offset + byteLength2;
+    };
+    Buffer4.prototype.writeInt8 = function writeInt82(value, offset, noAssert) {
+      value = +value;
+      offset = offset >>> 0;
+      if (!noAssert) checkInt(this, value, offset, 1, 127, -128);
+      if (value < 0) value = 255 + value + 1;
+      this[offset] = value & 255;
+      return offset + 1;
+    };
+    Buffer4.prototype.writeInt16LE = function writeInt16LE(value, offset, noAssert) {
+      value = +value;
+      offset = offset >>> 0;
+      if (!noAssert) checkInt(this, value, offset, 2, 32767, -32768);
+      this[offset] = value & 255;
+      this[offset + 1] = value >>> 8;
+      return offset + 2;
+    };
+    Buffer4.prototype.writeInt16BE = function writeInt16BE(value, offset, noAssert) {
+      value = +value;
+      offset = offset >>> 0;
+      if (!noAssert) checkInt(this, value, offset, 2, 32767, -32768);
+      this[offset] = value >>> 8;
+      this[offset + 1] = value & 255;
+      return offset + 2;
+    };
+    Buffer4.prototype.writeInt32LE = function writeInt32LE(value, offset, noAssert) {
+      value = +value;
+      offset = offset >>> 0;
+      if (!noAssert) checkInt(this, value, offset, 4, 2147483647, -2147483648);
+      this[offset] = value & 255;
+      this[offset + 1] = value >>> 8;
+      this[offset + 2] = value >>> 16;
+      this[offset + 3] = value >>> 24;
+      return offset + 4;
+    };
+    Buffer4.prototype.writeInt32BE = function writeInt32BE(value, offset, noAssert) {
+      value = +value;
+      offset = offset >>> 0;
+      if (!noAssert) checkInt(this, value, offset, 4, 2147483647, -2147483648);
+      if (value < 0) value = 4294967295 + value + 1;
+      this[offset] = value >>> 24;
+      this[offset + 1] = value >>> 16;
+      this[offset + 2] = value >>> 8;
+      this[offset + 3] = value & 255;
+      return offset + 4;
+    };
+    Buffer4.prototype.writeBigInt64LE = defineBigIntMethod(function writeBigInt64LE(value, offset = 0) {
+      return wrtBigUInt64LE(this, value, offset, -BigInt("0x8000000000000000"), BigInt("0x7fffffffffffffff"));
+    });
+    Buffer4.prototype.writeBigInt64BE = defineBigIntMethod(function writeBigInt64BE(value, offset = 0) {
+      return wrtBigUInt64BE(this, value, offset, -BigInt("0x8000000000000000"), BigInt("0x7fffffffffffffff"));
+    });
+    function checkIEEE754(buf, value, offset, ext, max, min) {
+      if (offset + ext > buf.length) throw new RangeError("Index out of range");
+      if (offset < 0) throw new RangeError("Index out of range");
+    }
+    function writeFloat(buf, value, offset, littleEndian, noAssert) {
+      value = +value;
+      offset = offset >>> 0;
+      if (!noAssert) {
+        checkIEEE754(buf, value, offset, 4, 34028234663852886e22, -34028234663852886e22);
+      }
+      ieee754.write(buf, value, offset, littleEndian, 23, 4);
+      return offset + 4;
+    }
+    Buffer4.prototype.writeFloatLE = function writeFloatLE(value, offset, noAssert) {
+      return writeFloat(this, value, offset, true, noAssert);
+    };
+    Buffer4.prototype.writeFloatBE = function writeFloatBE(value, offset, noAssert) {
+      return writeFloat(this, value, offset, false, noAssert);
+    };
+    function writeDouble(buf, value, offset, littleEndian, noAssert) {
+      value = +value;
+      offset = offset >>> 0;
+      if (!noAssert) {
+        checkIEEE754(buf, value, offset, 8, 17976931348623157e292, -17976931348623157e292);
+      }
+      ieee754.write(buf, value, offset, littleEndian, 52, 8);
+      return offset + 8;
+    }
+    Buffer4.prototype.writeDoubleLE = function writeDoubleLE(value, offset, noAssert) {
+      return writeDouble(this, value, offset, true, noAssert);
+    };
+    Buffer4.prototype.writeDoubleBE = function writeDoubleBE(value, offset, noAssert) {
+      return writeDouble(this, value, offset, false, noAssert);
+    };
+    Buffer4.prototype.copy = function copy(target, targetStart, start, end) {
+      if (!Buffer4.isBuffer(target)) throw new TypeError("argument should be a Buffer");
+      if (!start) start = 0;
+      if (!end && end !== 0) end = this.length;
+      if (targetStart >= target.length) targetStart = target.length;
+      if (!targetStart) targetStart = 0;
+      if (end > 0 && end < start) end = start;
+      if (end === start) return 0;
+      if (target.length === 0 || this.length === 0) return 0;
+      if (targetStart < 0) {
+        throw new RangeError("targetStart out of bounds");
+      }
+      if (start < 0 || start >= this.length) throw new RangeError("Index out of range");
+      if (end < 0) throw new RangeError("sourceEnd out of bounds");
+      if (end > this.length) end = this.length;
+      if (target.length - targetStart < end - start) {
+        end = target.length - targetStart + start;
+      }
+      const len = end - start;
+      if (this === target && typeof Uint8Array.prototype.copyWithin === "function") {
+        this.copyWithin(targetStart, start, end);
+      } else {
+        Uint8Array.prototype.set.call(
+          target,
+          this.subarray(start, end),
+          targetStart
+        );
+      }
+      return len;
+    };
+    Buffer4.prototype.fill = function fill(val, start, end, encoding) {
+      if (typeof val === "string") {
+        if (typeof start === "string") {
+          encoding = start;
+          start = 0;
+          end = this.length;
+        } else if (typeof end === "string") {
+          encoding = end;
+          end = this.length;
+        }
+        if (encoding !== void 0 && typeof encoding !== "string") {
+          throw new TypeError("encoding must be a string");
+        }
+        if (typeof encoding === "string" && !Buffer4.isEncoding(encoding)) {
+          throw new TypeError("Unknown encoding: " + encoding);
+        }
+        if (val.length === 1) {
+          const code = val.charCodeAt(0);
+          if (encoding === "utf8" && code < 128 || encoding === "latin1") {
+            val = code;
+          }
+        }
+      } else if (typeof val === "number") {
+        val = val & 255;
+      } else if (typeof val === "boolean") {
+        val = Number(val);
+      }
+      if (start < 0 || this.length < start || this.length < end) {
+        throw new RangeError("Out of range index");
+      }
+      if (end <= start) {
+        return this;
+      }
+      start = start >>> 0;
+      end = end === void 0 ? this.length : end >>> 0;
+      if (!val) val = 0;
+      let i;
+      if (typeof val === "number") {
+        for (i = start; i < end; ++i) {
+          this[i] = val;
+        }
+      } else {
+        const bytes2 = Buffer4.isBuffer(val) ? val : Buffer4.from(val, encoding);
+        const len = bytes2.length;
+        if (len === 0) {
+          throw new TypeError('The value "' + val + '" is invalid for argument "value"');
+        }
+        for (i = 0; i < end - start; ++i) {
+          this[i + start] = bytes2[i % len];
+        }
+      }
+      return this;
+    };
+    var errors = {};
+    function E(sym, getMessage, Base2) {
+      errors[sym] = class NodeError extends Base2 {
+        constructor() {
+          super();
+          Object.defineProperty(this, "message", {
+            value: getMessage.apply(this, arguments),
+            writable: true,
+            configurable: true
+          });
+          this.name = `${this.name} [${sym}]`;
+          this.stack;
+          delete this.name;
+        }
+        get code() {
+          return sym;
+        }
+        set code(value) {
+          Object.defineProperty(this, "code", {
+            configurable: true,
+            enumerable: true,
+            value,
+            writable: true
+          });
+        }
+        toString() {
+          return `${this.name} [${sym}]: ${this.message}`;
+        }
+      };
+    }
+    E(
+      "ERR_BUFFER_OUT_OF_BOUNDS",
+      function(name) {
+        if (name) {
+          return `${name} is outside of buffer bounds`;
+        }
+        return "Attempt to access memory outside buffer bounds";
+      },
+      RangeError
+    );
+    E(
+      "ERR_INVALID_ARG_TYPE",
+      function(name, actual) {
+        return `The "${name}" argument must be of type number. Received type ${typeof actual}`;
+      },
+      TypeError
+    );
+    E(
+      "ERR_OUT_OF_RANGE",
+      function(str2, range, input) {
+        let msg = `The value of "${str2}" is out of range.`;
+        let received = input;
+        if (Number.isInteger(input) && Math.abs(input) > 2 ** 32) {
+          received = addNumericalSeparator(String(input));
+        } else if (typeof input === "bigint") {
+          received = String(input);
+          if (input > BigInt(2) ** BigInt(32) || input < -(BigInt(2) ** BigInt(32))) {
+            received = addNumericalSeparator(received);
+          }
+          received += "n";
+        }
+        msg += ` It must be ${range}. Received ${received}`;
+        return msg;
+      },
+      RangeError
+    );
+    function addNumericalSeparator(val) {
+      let res = "";
+      let i = val.length;
+      const start = val[0] === "-" ? 1 : 0;
+      for (; i >= start + 4; i -= 3) {
+        res = `_${val.slice(i - 3, i)}${res}`;
+      }
+      return `${val.slice(0, i)}${res}`;
+    }
+    function checkBounds2(buf, offset, byteLength2) {
+      validateNumber(offset, "offset");
+      if (buf[offset] === void 0 || buf[offset + byteLength2] === void 0) {
+        boundsError(offset, buf.length - (byteLength2 + 1));
+      }
+    }
+    function checkIntBI(value, min, max, buf, offset, byteLength2) {
+      if (value > max || value < min) {
+        const n = typeof min === "bigint" ? "n" : "";
+        let range;
+        if (byteLength2 > 3) {
+          if (min === 0 || min === BigInt(0)) {
+            range = `>= 0${n} and < 2${n} ** ${(byteLength2 + 1) * 8}${n}`;
+          } else {
+            range = `>= -(2${n} ** ${(byteLength2 + 1) * 8 - 1}${n}) and < 2 ** ${(byteLength2 + 1) * 8 - 1}${n}`;
+          }
+        } else {
+          range = `>= ${min}${n} and <= ${max}${n}`;
+        }
+        throw new errors.ERR_OUT_OF_RANGE("value", range, value);
+      }
+      checkBounds2(buf, offset, byteLength2);
+    }
+    function validateNumber(value, name) {
+      if (typeof value !== "number") {
+        throw new errors.ERR_INVALID_ARG_TYPE(name, "number", value);
+      }
+    }
+    function boundsError(value, length, type) {
+      if (Math.floor(value) !== value) {
+        validateNumber(value, type);
+        throw new errors.ERR_OUT_OF_RANGE(type || "offset", "an integer", value);
+      }
+      if (length < 0) {
+        throw new errors.ERR_BUFFER_OUT_OF_BOUNDS();
+      }
+      throw new errors.ERR_OUT_OF_RANGE(
+        type || "offset",
+        `>= ${type ? 1 : 0} and <= ${length}`,
+        value
+      );
+    }
+    var INVALID_BASE64_RE = /[^+/0-9A-Za-z-_]/g;
+    function base64clean(str2) {
+      str2 = str2.split("=")[0];
+      str2 = str2.trim().replace(INVALID_BASE64_RE, "");
+      if (str2.length < 2) return "";
+      while (str2.length % 4 !== 0) {
+        str2 = str2 + "=";
+      }
+      return str2;
+    }
+    function utf8ToBytes(string2, units) {
+      units = units || Infinity;
+      let codePoint;
+      const length = string2.length;
+      let leadSurrogate = null;
+      const bytes2 = [];
+      for (let i = 0; i < length; ++i) {
+        codePoint = string2.charCodeAt(i);
+        if (codePoint > 55295 && codePoint < 57344) {
+          if (!leadSurrogate) {
+            if (codePoint > 56319) {
+              if ((units -= 3) > -1) bytes2.push(239, 191, 189);
+              continue;
+            } else if (i + 1 === length) {
+              if ((units -= 3) > -1) bytes2.push(239, 191, 189);
+              continue;
+            }
+            leadSurrogate = codePoint;
+            continue;
+          }
+          if (codePoint < 56320) {
+            if ((units -= 3) > -1) bytes2.push(239, 191, 189);
+            leadSurrogate = codePoint;
+            continue;
+          }
+          codePoint = (leadSurrogate - 55296 << 10 | codePoint - 56320) + 65536;
+        } else if (leadSurrogate) {
+          if ((units -= 3) > -1) bytes2.push(239, 191, 189);
+        }
+        leadSurrogate = null;
+        if (codePoint < 128) {
+          if ((units -= 1) < 0) break;
+          bytes2.push(codePoint);
+        } else if (codePoint < 2048) {
+          if ((units -= 2) < 0) break;
+          bytes2.push(
+            codePoint >> 6 | 192,
+            codePoint & 63 | 128
+          );
+        } else if (codePoint < 65536) {
+          if ((units -= 3) < 0) break;
+          bytes2.push(
+            codePoint >> 12 | 224,
+            codePoint >> 6 & 63 | 128,
+            codePoint & 63 | 128
+          );
+        } else if (codePoint < 1114112) {
+          if ((units -= 4) < 0) break;
+          bytes2.push(
+            codePoint >> 18 | 240,
+            codePoint >> 12 & 63 | 128,
+            codePoint >> 6 & 63 | 128,
+            codePoint & 63 | 128
+          );
+        } else {
+          throw new Error("Invalid code point");
+        }
+      }
+      return bytes2;
+    }
+    function asciiToBytes2(str2) {
+      const byteArray = [];
+      for (let i = 0; i < str2.length; ++i) {
+        byteArray.push(str2.charCodeAt(i) & 255);
+      }
+      return byteArray;
+    }
+    function utf16leToBytes(str2, units) {
+      let c, hi, lo;
+      const byteArray = [];
+      for (let i = 0; i < str2.length; ++i) {
+        if ((units -= 2) < 0) break;
+        c = str2.charCodeAt(i);
+        hi = c >> 8;
+        lo = c % 256;
+        byteArray.push(lo);
+        byteArray.push(hi);
+      }
+      return byteArray;
+    }
+    function base64ToBytes(str2) {
+      return base642.toByteArray(base64clean(str2));
+    }
+    function blitBuffer(src, dst, offset, length) {
+      let i;
+      for (i = 0; i < length; ++i) {
+        if (i + offset >= dst.length || i >= src.length) break;
+        dst[i + offset] = src[i];
+      }
+      return i;
+    }
+    function isInstance(obj, type) {
+      return obj instanceof type || obj != null && obj.constructor != null && obj.constructor.name != null && obj.constructor.name === type.name;
+    }
+    function numberIsNaN(obj) {
+      return obj !== obj;
+    }
+    var hexSliceLookupTable = (function() {
+      const alphabet2 = "0123456789abcdef";
+      const table = new Array(256);
+      for (let i = 0; i < 16; ++i) {
+        const i16 = i * 16;
+        for (let j = 0; j < 16; ++j) {
+          table[i16 + j] = alphabet2[i] + alphabet2[j];
+        }
+      }
+      return table;
+    })();
+    function defineBigIntMethod(fn) {
+      return typeof BigInt === "undefined" ? BufferBigIntNotDefined : fn;
+    }
+    function BufferBigIntNotDefined() {
+      throw new Error("BigInt not supported");
+    }
   }
 });
 
@@ -17156,7 +19714,7 @@ var require_lib = __commonJS({
         }
       };
     }
-    function normalize2(fn) {
+    function normalize3(fn) {
       if (typeof fn !== "function")
         throw new Error("normalize fn should be function");
       return { encode: (from) => from, decode: (to) => fn(to) };
@@ -17206,8 +19764,8 @@ var require_lib = __commonJS({
         res.push(0);
       return res.reverse();
     }
-    var gcd2 = (a, b) => !b ? a : gcd2(b, a % b);
-    var radix2carry2 = (from, to) => from + (to - gcd2(from, to));
+    var gcd3 = (a, b) => !b ? a : gcd3(b, a % b);
+    var radix2carry2 = (from, to) => from + (to - gcd3(from, to));
     function convertRadix22(data, from, to, padding3) {
       if (!Array.isArray(data))
         throw new Error("convertRadix2: data should be array");
@@ -17318,7 +19876,7 @@ var require_lib = __commonJS({
     exports.base16 = chain2(radix22(4), alphabet2("0123456789ABCDEF"), join2(""));
     exports.base32 = chain2(radix22(5), alphabet2("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"), padding2(5), join2(""));
     exports.base32hex = chain2(radix22(5), alphabet2("0123456789ABCDEFGHIJKLMNOPQRSTUV"), padding2(5), join2(""));
-    exports.base32crockford = chain2(radix22(5), alphabet2("0123456789ABCDEFGHJKMNPQRSTVWXYZ"), join2(""), normalize2((s) => s.toUpperCase().replace(/O/g, "0").replace(/[IL]/g, "1")));
+    exports.base32crockford = chain2(radix22(5), alphabet2("0123456789ABCDEFGHJKMNPQRSTVWXYZ"), join2(""), normalize3((s) => s.toUpperCase().replace(/O/g, "0").replace(/[IL]/g, "1")));
     exports.base64 = chain2(radix22(6), alphabet2("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"), padding2(6), join2(""));
     exports.base64url = chain2(radix22(6), alphabet2("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"), padding2(6), join2(""));
     var genBase582 = (abc) => chain2(radix3(58), alphabet2(abc), join2(""));
@@ -17350,7 +19908,7 @@ var require_lib = __commonJS({
         return Uint8Array.from(res);
       }
     };
-    var base58check4 = (sha2562) => chain2(checksum2(4, (data) => sha2562(sha2562(data))), exports.base58);
+    var base58check4 = (sha2563) => chain2(checksum2(4, (data) => sha2563(sha2563(data))), exports.base58);
     exports.base58check = base58check4;
     var BECH_ALPHABET2 = chain2(alphabet2("qpzry9x8gf2tvdw0s3jn54khce6mua7l"), join2(""));
     var POLYMOD_GENERATORS2 = [996825010, 642813549, 513874426, 1027748829, 705979059];
@@ -17434,7 +19992,7 @@ var require_lib = __commonJS({
       encode: (data) => new TextDecoder().decode(data),
       decode: (str2) => new TextEncoder().encode(str2)
     };
-    exports.hex = chain2(radix22(4), alphabet2("0123456789abcdef"), join2(""), normalize2((s) => {
+    exports.hex = chain2(radix22(4), alphabet2("0123456789abcdef"), join2(""), normalize3((s) => {
       if (typeof s !== "string" || s.length % 2)
         throw new TypeError(`hex.decode: expected string, got ${typeof s} with length ${s.length}`);
       return s.toLowerCase();
@@ -17807,16 +20365,16 @@ var require_bolt11 = __commonJS({
 // tools/light-emergency/recover.ts
 init_define_import_meta_env();
 
-// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/index.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curv_fc4df9b2eb0e18173aae9c0c7b63d969/node_modules/@arkade-os/sdk/dist/index.js
 init_define_import_meta_env();
 
-// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-MJ2M4DEH.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curv_fc4df9b2eb0e18173aae9c0c7b63d969/node_modules/@arkade-os/sdk/dist/chunk-MJ2M4DEH.js
 init_define_import_meta_env();
 
-// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-GOKJNT7E.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curv_fc4df9b2eb0e18173aae9c0c7b63d969/node_modules/@arkade-os/sdk/dist/chunk-GOKJNT7E.js
 init_define_import_meta_env();
 
-// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-XNQCPSBL.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curv_fc4df9b2eb0e18173aae9c0c7b63d969/node_modules/@arkade-os/sdk/dist/chunk-XNQCPSBL.js
 init_define_import_meta_env();
 init_btc_signer();
 var bip68 = __toESM(require_bip68(), 1);
@@ -18833,11 +21391,11 @@ var FetchError = class extends Error {
   url;
   /** The HTTP method of the failed request (defaults to `"GET"`). */
   method;
-  constructor(message, options) {
-    super(message, { cause: options.cause });
+  constructor(message, options2) {
+    super(message, { cause: options2.cause });
     this.name = "FetchError";
-    this.url = options.url;
-    this.method = options.method;
+    this.url = options2.url;
+    this.method = options2.method;
   }
 };
 function baseFetch(input, init) {
@@ -18909,15 +21467,15 @@ function isArkError(error, name) {
 var ProviderUnavailableError = class extends Error {
   /** Always `true`: this error type only ever wraps retryable conditions. */
   retryable = true;
-  constructor(message, options) {
-    super(message, { cause: options?.cause });
+  constructor(message, options2) {
+    super(message, { cause: options2?.cause });
     this.name = "ProviderUnavailableError";
   }
 };
 var ServerResponseMismatchError = class extends Error {
   retryable = false;
-  constructor(message, options) {
-    super(message, { cause: options?.cause });
+  constructor(message, options2) {
+    super(message, { cause: options2?.cause });
     this.name = "ServerResponseMismatchError";
   }
 };
@@ -19284,11 +21842,11 @@ var OriginRateGate = class {
   defaultCooldownMs;
   maxCooldownMs;
   jitterMs;
-  constructor(options) {
-    this.maxConcurrent = options?.maxConcurrent ?? DEFAULT_MAX_CONCURRENT;
-    this.defaultCooldownMs = options?.defaultCooldownMs ?? DEFAULT_COOLDOWN_MS;
-    this.maxCooldownMs = options?.maxCooldownMs ?? MAX_COOLDOWN_MS;
-    this.jitterMs = options?.jitterMs ?? DEFAULT_JITTER_MS;
+  constructor(options2) {
+    this.maxConcurrent = options2?.maxConcurrent ?? DEFAULT_MAX_CONCURRENT;
+    this.defaultCooldownMs = options2?.defaultCooldownMs ?? DEFAULT_COOLDOWN_MS;
+    this.maxCooldownMs = options2?.maxCooldownMs ?? MAX_COOLDOWN_MS;
+    this.jitterMs = options2?.jitterMs ?? DEFAULT_JITTER_MS;
   }
   /**
    * Run `fn` under the origin's concurrency cap and behind any active
@@ -19351,11 +21909,11 @@ var OriginRateGate = class {
   reset() {
     this.states.clear();
   }
-  stateFor(origin) {
-    let state = this.states.get(origin);
+  stateFor(origin2) {
+    let state = this.states.get(origin2);
     if (!state) {
       state = { blockedUntil: 0, active: 0, queue: [] };
-      this.states.set(origin, state);
+      this.states.set(origin2, state);
     }
     return state;
   }
@@ -19390,9 +21948,9 @@ function advertisedLimit(fromServer) {
   return limit > 0n ? limit : void 0;
 }
 var RestArkProvider = class {
-  constructor(serverUrl = DEFAULT_ARKADE_SERVER_URL, options = {}) {
+  constructor(serverUrl = DEFAULT_ARKADE_SERVER_URL, options2 = {}) {
     this.serverUrl = serverUrl;
-    this.eventSource = options.eventSource;
+    this.eventSource = options2.eventSource;
   }
   serverUrl;
   /** Overrides {@link configureEventSource} for this provider's streams. */
@@ -19436,11 +21994,11 @@ var RestArkProvider = class {
    * routes through here: it is the refresh path and must not be digest-gated.
    */
   async authedFetch(url, init) {
-    const digest = this._digest;
+    const digest2 = this._digest;
     const headers = {
       ...init.headers
     };
-    if (digest) headers["X-Digest"] = digest;
+    if (digest2) headers["X-Digest"] = digest2;
     let response;
     try {
       response = await fetch2(url, { ...init, headers });
@@ -20173,7 +22731,7 @@ function isRecoverable(vtxo) {
   return n.isSwept && !hasTerminalSpend(n);
 }
 
-// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-NSBPE2FW.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curv_fc4df9b2eb0e18173aae9c0c7b63d969/node_modules/@arkade-os/sdk/dist/chunk-NSBPE2FW.js
 init_define_import_meta_env();
 var __defProp2 = Object.defineProperty;
 var __export2 = (target, all) => {
@@ -20181,7 +22739,7 @@ var __export2 = (target, all) => {
     __defProp2(target, name, { get: all[name], enumerable: true });
 };
 
-// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-GOKJNT7E.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curv_fc4df9b2eb0e18173aae9c0c7b63d969/node_modules/@arkade-os/sdk/dist/chunk-GOKJNT7E.js
 init_base();
 init_secp256k1();
 init_utils3();
@@ -20625,17 +23183,17 @@ var AssetInput = class _AssetInput {
     return this.input.amount;
   }
   /** Create a local asset input that points at a transaction input index. */
-  static create(vin, amount) {
+  static create(vin, amount2) {
     const input = new _AssetInput({
       type: 1,
       vin,
-      amount: typeof amount === "number" ? BigInt(amount) : amount
+      amount: typeof amount2 === "number" ? BigInt(amount2) : amount2
     });
     input.validate();
     return input;
   }
   /** Create an intent-backed asset input referencing an external intent transaction. */
-  static createIntent(txid, vin, amount) {
+  static createIntent(txid, vin, amount2) {
     if (!txid || txid.length === 0) {
       throw new Error("missing input intent txid");
     }
@@ -20652,7 +23210,7 @@ var AssetInput = class _AssetInput {
       type: 2,
       txid: buf,
       vin,
-      amount: typeof amount === "number" ? BigInt(amount) : amount
+      amount: typeof amount2 === "number" ? BigInt(amount2) : amount2
     });
     input.validate();
     return input;
@@ -20701,11 +23259,11 @@ var AssetInput = class _AssetInput {
     switch (type) {
       case 1: {
         const vin = reader.readUint16LE();
-        const amount = reader.readVarUint();
+        const amount2 = reader.readVarUint();
         input = new _AssetInput({
           type: 1,
           vin,
-          amount
+          amount: amount2
         });
         break;
       }
@@ -20715,12 +23273,12 @@ var AssetInput = class _AssetInput {
         }
         const txid = reader.readSlice(TX_HASH_SIZE);
         const vin = reader.readUint16LE();
-        const amount = reader.readVarUint();
+        const amount2 = reader.readVarUint();
         input = new _AssetInput({
           type: 2,
           txid: new Uint8Array(txid),
           vin,
-          amount
+          amount: amount2
         });
         break;
       }
@@ -20815,9 +23373,9 @@ var AssetInputs = class _AssetInputs {
   }
 };
 var AssetOutput = class _AssetOutput {
-  constructor(vout, amount) {
+  constructor(vout, amount2) {
     this.vout = vout;
-    this.amount = amount;
+    this.amount = amount2;
   }
   vout;
   amount;
@@ -20825,8 +23383,8 @@ var AssetOutput = class _AssetOutput {
   // however we serialize it for future upgrades
   static TYPE_LOCAL = 1;
   /** Create a local asset output referencing a transaction output index. */
-  static create(vout, amount) {
-    const output = new _AssetOutput(vout, typeof amount === "number" ? BigInt(amount) : amount);
+  static create(vout, amount2) {
+    const output = new _AssetOutput(vout, typeof amount2 === "number" ? BigInt(amount2) : amount2);
     output.validate();
     return output;
   }
@@ -20887,8 +23445,8 @@ var AssetOutput = class _AssetOutput {
     } catch {
       throw new Error("invalid asset output vout length");
     }
-    const amount = reader.readVarUint();
-    return new _AssetOutput(vout, amount);
+    const amount2 = reader.readVarUint();
+    return new _AssetOutput(vout, amount2);
   }
   /** Serialize the asset output into an existing buffer writer. */
   serializeTo(writer) {
@@ -21213,7 +23771,7 @@ var AssetGroup = class _AssetGroup {
    * Only local inputs contribute to the comparison; intent-backed inputs contribute `0` here.
    */
   isReissuance() {
-    const sumReducer = (s, { amount }) => s + amount;
+    const sumReducer = (s, { amount: amount2 }) => s + amount2;
     const sumOutputs = this.outputs.reduce(sumReducer, 0n);
     const sumInputs = this.inputs.map((i) => ({
       amount: i.input.type === 1 ? i.input.amount : 0n
@@ -21630,9 +24188,9 @@ var ChainTxType = /* @__PURE__ */ ((ChainTxType2) => {
   return ChainTxType2;
 })(ChainTxType || {});
 var RestIndexerProvider = class {
-  constructor(serverUrl = DEFAULT_ARKADE_SERVER_URL, options = {}) {
+  constructor(serverUrl = DEFAULT_ARKADE_SERVER_URL, options2 = {}) {
     this.serverUrl = serverUrl;
-    this.eventSource = options.eventSource;
+    this.eventSource = options2.eventSource;
   }
   serverUrl;
   /** Overrides {@link configureEventSource} for this provider's subscription. */
@@ -22121,7 +24679,7 @@ var Response2;
   Response22.isGetAssetResponse = isGetAssetResponse;
 })(Response2 || (Response2 = {}));
 
-// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-ULWK4QGH.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curv_fc4df9b2eb0e18173aae9c0c7b63d969/node_modules/@arkade-os/sdk/dist/chunk-ULWK4QGH.js
 init_define_import_meta_env();
 init_base();
 var import_descriptors_scure = __toESM(require_dist3(), 1);
@@ -22197,8 +24755,8 @@ var DefaultVtxo;
 ((DefaultVtxo2) => {
   class Script3 extends VtxoScript {
     /** Create the default virtual output script with one forfeit path and one exit path. */
-    constructor(options) {
-      const { pubKey, serverPubKey, csvTimelock } = options;
+    constructor(options2) {
+      const { pubKey, serverPubKey, csvTimelock } = options2;
       const forfeitScript = MultisigTapscript.encode({
         pubkeys: [pubKey, serverPubKey]
       }).script;
@@ -22207,7 +24765,7 @@ var DefaultVtxo;
         pubkeys: [pubKey]
       }).script;
       super([forfeitScript, exitScript]);
-      this.options = options;
+      this.options = options2;
       this.forfeitScript = hex.encode(forfeitScript);
       this.exitScript = hex.encode(exitScript);
     }
@@ -22603,14 +25161,14 @@ var DelegateVtxo;
 ((DelegateVtxo2) => {
   class Script3 extends VtxoScript {
     /** Create a delegated virtual output script with forfeit, exit, and delegate paths. */
-    constructor(options) {
-      const defaultVtxo = new DefaultVtxo.Script(options);
-      const { delegatePubKey, pubKey, serverPubKey } = options;
+    constructor(options2) {
+      const defaultVtxo = new DefaultVtxo.Script(options2);
+      const { delegatePubKey, pubKey, serverPubKey } = options2;
       const delegateScript = MultisigTapscript.encode({
         pubkeys: [pubKey, delegatePubKey, serverPubKey]
       }).script;
       super([...defaultVtxo.scripts, delegateScript]);
-      this.options = options;
+      this.options = options2;
       this.defaultVtxo = defaultVtxo;
       this.delegateScript = hex.encode(delegateScript);
     }
@@ -22712,10 +25270,10 @@ function equalBytes4(a, b) {
       return false;
   return true;
 }
-function isBytes5(a) {
+function isBytes6(a) {
   return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
 }
-var createView3 = (arr) => new DataView(arr.buffer, arr.byteOffset, arr.byteLength);
+var createView4 = (arr) => new DataView(arr.buffer, arr.byteOffset, arr.byteLength);
 function isPlainObject2(obj) {
   return Object.prototype.toString.call(obj) === "[object Object]";
 }
@@ -22878,7 +25436,7 @@ var _Reader2 = class __Reader {
     this.stack = stack;
     this.parent = parent;
     this.parentOffset = parentOffset;
-    this.view = createView3(data);
+    this.view = createView4(data);
   }
   /** Internal method for pointers. */
   _enablePointers() {
@@ -23001,7 +25559,7 @@ var _Reader2 = class __Reader {
     return out >>> 0;
   }
   find(needle, pos = this.pos) {
-    if (!isBytes5(needle))
+    if (!isBytes6(needle))
       throw this.err(`find: needle is not bytes! ${needle}`);
     if (this.bitPos)
       throw this.err("findByte: bitPos not empty");
@@ -23034,7 +25592,7 @@ var _Writer2 = class {
   finished = false;
   constructor(stack = []) {
     this.stack = stack;
-    this.view = createView3(this.viewBuf);
+    this.view = createView4(this.viewBuf);
   }
   pushObj(obj, objFn) {
     return Path2.pushObj(this.stack, obj, objFn);
@@ -23070,7 +25628,7 @@ var _Writer2 = class {
     this.buffers.push(new Uint8Array([b]));
     this.pos++;
   }
-  finish(clean2 = true) {
+  finish(clean3 = true) {
     if (this.finished)
       throw this.err("buffer: finished");
     if (this.bitPos)
@@ -23088,7 +25646,7 @@ var _Writer2 = class {
       buf.set(ptr.ptr.encode(pos), ptr.pos);
       pos += ptr.buffer.length;
     }
-    if (clean2) {
+    if (clean3) {
       this.buffers = [];
       for (const p of this.ptrs)
         p.buffer.fill(0);
@@ -23534,8 +26092,8 @@ var VHTLC;
     nonInteractiveRefundArkadeScript;
     nonInteractiveRefundWithoutReceiverScript;
     nonInteractiveRefundWithoutReceiverArkadeScript;
-    constructor(options, preimageCondition) {
-      validateOptions(options);
+    constructor(options2, preimageCondition) {
+      validateOptions(options2);
       const {
         sender,
         receiver,
@@ -23545,7 +26103,7 @@ var VHTLC;
         unilateralClaimDelay: unilateralClaimDelay2,
         unilateralRefundDelay: unilateralRefundDelay2,
         unilateralRefundWithoutReceiverDelay: unilateralRefundWithoutReceiverDelay2
-      } = options;
+      } = options2;
       const conditionScript = preimageCondition(preimageHash);
       const claimScript = ConditionMultisigTapscript.encode({
         conditionScript,
@@ -23581,18 +26139,18 @@ var VHTLC;
       ];
       let arkadeScriptNic;
       let nonInteractiveClaimScript;
-      if (options.nonInteractiveClaim) {
+      if (options2.nonInteractiveClaim) {
         arkadeScriptNic = enforcePayToMaybeAsset(
-          options.nonInteractiveClaim.receiverPkScript,
-          options.asset,
-          options.nonInteractiveClaim.strict
+          options2.nonInteractiveClaim.receiverPkScript,
+          options2.asset,
+          options2.nonInteractiveClaim.strict
         );
         nonInteractiveClaimScript = ConditionMultisigTapscript.encode({
           conditionScript,
           pubkeys: [
             server,
             computeArkadeScriptPublicKey(
-              options.nonInteractiveClaim.emulatorPubkey,
+              options2.nonInteractiveClaim.emulatorPubkey,
               arkadeScriptNic
             )
           ]
@@ -23602,20 +26160,20 @@ var VHTLC;
       let arkadeScriptNir;
       let nonInteractiveRefundScript;
       let nonInteractiveRefundWithoutReceiverScript;
-      if (options.nonInteractiveRefund) {
+      if (options2.nonInteractiveRefund) {
         arkadeScriptNir = enforcePayToMaybeAsset(
-          options.nonInteractiveRefund.senderPkScript,
-          options.asset
+          options2.nonInteractiveRefund.senderPkScript,
+          options2.asset
         );
         const nirCosigner = computeArkadeScriptPublicKey(
-          options.nonInteractiveRefund.emulatorPubkey,
+          options2.nonInteractiveRefund.emulatorPubkey,
           arkadeScriptNir
         );
         nonInteractiveRefundScript = MultisigTapscript.encode({
           pubkeys: [server, receiver, nirCosigner]
         }).script;
         scripts.push(nonInteractiveRefundScript);
-        if (options.nonInteractiveRefund.withoutReceiver) {
+        if (options2.nonInteractiveRefund.withoutReceiver) {
           nonInteractiveRefundWithoutReceiverScript = CLTVMultisigTapscript.encode({
             absoluteTimelock: refundLocktime,
             pubkeys: [server, nirCosigner]
@@ -23624,7 +26182,7 @@ var VHTLC;
         }
       }
       super(scripts);
-      this.options = options;
+      this.options = options2;
       this.claimScript = hex.encode(claimScript);
       this.refundScript = hex.encode(refundScript);
       this.refundWithoutReceiverScript = hex.encode(refundWithoutReceiverScript);
@@ -23755,18 +26313,18 @@ var VHTLC;
     }
   }
   class Script3 extends BaseScript {
-    constructor(options) {
-      super(options, preimageConditionScript);
+    constructor(options2) {
+      super(options2, preimageConditionScript);
     }
   }
   VHTLC2.Script = Script3;
   class ScriptV2 extends BaseScript {
-    constructor(options) {
-      super(options, preimageConditionScriptV2);
+    constructor(options2) {
+      super(options2, preimageConditionScriptV2);
     }
   }
   VHTLC2.ScriptV2 = ScriptV2;
-  function validateOptions(options) {
+  function validateOptions(options2) {
     const {
       sender,
       receiver,
@@ -23776,26 +26334,26 @@ var VHTLC;
       unilateralClaimDelay: unilateralClaimDelay2,
       unilateralRefundDelay: unilateralRefundDelay2,
       unilateralRefundWithoutReceiverDelay: unilateralRefundWithoutReceiverDelay2
-    } = options;
+    } = options2;
     if (!preimageHash || preimageHash.length !== 20) {
       throw new Error("preimage hash must be 20 bytes");
     }
-    if (options.asset !== void 0 && !options.nonInteractiveClaim && !options.nonInteractiveRefund) {
+    if (options2.asset !== void 0 && !options2.nonInteractiveClaim && !options2.nonInteractiveRefund) {
       throw new Error(
         "asset has no effect without nonInteractiveClaim or nonInteractiveRefund"
       );
     }
-    const strict = options.nonInteractiveClaim?.strict;
+    const strict = options2.nonInteractiveClaim?.strict;
     if (strict !== void 0) {
       if (strict.amount <= 0n) {
         throw new Error(`strict claim amount must be positive, got ${strict.amount}`);
       }
-      if (options.asset !== void 0 && strict.assetAmount === void 0) {
+      if (options2.asset !== void 0 && strict.assetAmount === void 0) {
         throw new Error(
           "strict claim needs assetAmount when the contract is denominated in an asset: bounding only the sats would leave the asset amount unenforced"
         );
       }
-      if (options.asset === void 0 && strict.assetAmount !== void 0) {
+      if (options2.asset === void 0 && strict.assetAmount !== void 0) {
         throw new Error("strict claim assetAmount has no effect without asset");
       }
       if (strict.assetAmount !== void 0 && strict.assetAmount <= 0n) {
@@ -23804,8 +26362,8 @@ var VHTLC;
         );
       }
     }
-    if (options.nonInteractiveClaim) {
-      const { emulatorPubkey, receiverPkScript } = options.nonInteractiveClaim;
+    if (options2.nonInteractiveClaim) {
+      const { emulatorPubkey, receiverPkScript } = options2.nonInteractiveClaim;
       if (!emulatorPubkey || emulatorPubkey.length !== 32 && emulatorPubkey.length !== 33) {
         throw new Error("Invalid public key length (emulator)");
       }
@@ -23813,8 +26371,8 @@ var VHTLC;
         throw new Error("Invalid P2TR script");
       }
     }
-    if (options.nonInteractiveRefund) {
-      const { emulatorPubkey, senderPkScript } = options.nonInteractiveRefund;
+    if (options2.nonInteractiveRefund) {
+      const { emulatorPubkey, senderPkScript } = options2.nonInteractiveRefund;
       if (!emulatorPubkey || emulatorPubkey.length !== 32 && emulatorPubkey.length !== 33) {
         throw new Error("Invalid public key length (emulator)");
       }
@@ -25106,7 +27664,7 @@ contractHandlers.register(VHTLCV2ContractHandler);
 contractHandlers.register(BoardingContractHandler);
 contractHandlers.register(ArkadeContractHandler);
 
-// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-MJ2M4DEH.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curv_fc4df9b2eb0e18173aae9c0c7b63d969/node_modules/@arkade-os/sdk/dist/chunk-MJ2M4DEH.js
 init_utils3();
 init_btc_signer();
 init_base();
@@ -25227,9 +27785,9 @@ function aux(secret, rand) {
     res[i] = secret[i] ^ rand2[i];
   return res;
 }
-var nonceHash = (rand, publicKey, aggPublicKey, i, msgPrefixed, extraIn) => taggedInt("MuSig/nonce", rand, new Uint8Array([publicKey.length]), publicKey, new Uint8Array([aggPublicKey.length]), aggPublicKey, msgPrefixed, numberToBytesBE(extraIn.length, 4), extraIn, new Uint8Array([i]));
-function nonceGen(publicKey, secretKey, aggPublicKey = new Uint8Array(0), msg, extraIn = new Uint8Array(0), rand = randomBytes(32)) {
-  abytes(publicKey, PUBKEY_LEN);
+var nonceHash = (rand, publicKey2, aggPublicKey, i, msgPrefixed, extraIn) => taggedInt("MuSig/nonce", rand, new Uint8Array([publicKey2.length]), publicKey2, new Uint8Array([aggPublicKey.length]), aggPublicKey, msgPrefixed, numberToBytesBE(extraIn.length, 4), extraIn, new Uint8Array([i]));
+function nonceGen(publicKey2, secretKey, aggPublicKey = new Uint8Array(0), msg, extraIn = new Uint8Array(0), rand = randomBytes(32)) {
+  abytes(publicKey2, PUBKEY_LEN);
   abytesOptional(secretKey, 32);
   abytes(aggPublicKey);
   if (![0, 32].includes(aggPublicKey.length))
@@ -25240,10 +27798,10 @@ function nonceGen(publicKey, secretKey, aggPublicKey = new Uint8Array(0), msg, e
   if (secretKey !== void 0)
     rand = aux(secretKey, rand);
   const msgPrefixed = msg !== void 0 ? concatBytes(Uint8Array.of(1), numberToBytesBE(msg.length, 8), msg) : Uint8Array.of(0);
-  const k1 = nonceHash(rand, publicKey, aggPublicKey, 0, msgPrefixed, extraIn);
-  const k2 = nonceHash(rand, publicKey, aggPublicKey, 1, msgPrefixed, extraIn);
+  const k1 = nonceHash(rand, publicKey2, aggPublicKey, 0, msgPrefixed, extraIn);
+  const k2 = nonceHash(rand, publicKey2, aggPublicKey, 1, msgPrefixed, extraIn);
   return {
-    secret: SecretNonce.encode({ k1, k2, publicKey }),
+    secret: SecretNonce.encode({ k1, k2, publicKey: publicKey2 }),
     public: PubNonce.encode({ R1: mulBase(k1), R2: mulBase(k2) })
   };
 }
@@ -25325,7 +27883,7 @@ var Session = class {
       throw new Error("The signer's pubkey must be included in the list of pubkeys");
     return keyAggCoeffInternal(pk, this.secondKey, this.L);
   }
-  partialSigVerifyInternal(partialSig, publicNonce, publicKey) {
+  partialSigVerifyInternal(partialSig, publicNonce, publicKey2) {
     const { Q, gAcc, b, R, e } = this;
     const s = Fn3.fromBytes(partialSig, true);
     if (!Fn3.isValid(s))
@@ -25333,7 +27891,7 @@ var Session = class {
     const { R1, R2 } = PubNonce.decode(publicNonce);
     const Re_s_ = R1.add(R2.multiply(b));
     const Re_s = hasEven2(R.y) ? Re_s_ : Re_s_.negate();
-    const P3 = Point3.fromBytes(publicKey);
+    const P3 = Point3.fromBytes(publicKey2);
     const a = this.getSessionKeyAggCoeff(P3);
     const g = Fn3.mul(evenScalar(Q, 1n), gAcc);
     const left = mulBase(s);
@@ -25435,7 +27993,7 @@ var Session = class {
   }
 };
 
-// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-MJ2M4DEH.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curv_fc4df9b2eb0e18173aae9c0c7b63d969/node_modules/@arkade-os/sdk/dist/chunk-MJ2M4DEH.js
 init_utils2();
 
 // node_modules/.pnpm/@noble+secp256k1@3.0.0/node_modules/@noble/secp256k1/index.js
@@ -25470,9 +28028,9 @@ var err = (message = "") => {
 };
 var isBig = (n) => typeof n === "bigint";
 var isStr = (s) => typeof s === "string";
-var isBytes6 = (a) => a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
-var abytes3 = (value, length, title = "") => {
-  const bytes2 = isBytes6(value);
+var isBytes7 = (a) => a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
+var abytes4 = (value, length, title = "") => {
+  const bytes2 = isBytes7(value);
   const len = value?.length;
   const needsLen = length !== void 0;
   if (!bytes2 || needsLen && len !== length) {
@@ -25485,7 +28043,7 @@ var abytes3 = (value, length, title = "") => {
 };
 var u8n = (len) => new Uint8Array(len);
 var padh = (n, pad) => n.toString(16).padStart(pad, "0");
-var bytesToHex2 = (b) => Array.from(abytes3(b)).map((e) => padh(e, 2)).join("");
+var bytesToHex2 = (b) => Array.from(abytes4(b)).map((e) => padh(e, 2)).join("");
 var C = { _0: 48, _9: 57, A: 65, F: 70, a: 97, f: 102 };
 var _ch = (ch) => {
   if (ch >= C._0 && ch <= C._9)
@@ -25517,7 +28075,7 @@ var hexToBytes2 = (hex2) => {
 var cr = () => globalThis?.crypto;
 var subtle = () => cr()?.subtle ?? err("crypto.subtle must be defined, consider polyfill");
 var concatBytes4 = (...arrs) => {
-  const r = u8n(arrs.reduce((sum, a) => sum + abytes3(a).length, 0));
+  const r = u8n(arrs.reduce((sum, a) => sum + abytes4(a).length, 0));
   let pad = 0;
   arrs.forEach((a) => {
     r.set(a, pad);
@@ -25593,7 +28151,7 @@ var Point4 = class _Point {
   }
   /** Convert Uint8Array or hex string to Point. */
   static fromBytes(bytes2) {
-    abytes3(bytes2);
+    abytes4(bytes2);
     const { publicKey: comp, publicKeyUncompressed: uncomp } = lengths;
     let p = void 0;
     const length = bytes2.length;
@@ -25768,7 +28326,7 @@ var sliceBytesNumBE = (b, from, to) => bytesToNumBE(b.subarray(from, to));
 var B256 = 2n ** 256n;
 var numTo32b = (num2) => hexToBytes2(padh(arange(num2, 0n, B256), L2));
 var secretKeyToScalar = (secretKey) => {
-  const num2 = bytesToNumBE(abytes3(secretKey, L, "secret key"));
+  const num2 = bytesToNumBE(abytes4(secretKey, L, "secret key"));
   return arange(num2, 1n, N, "invalid secret key: outside of range");
 };
 var highS = (n) => n > N >> 1n;
@@ -25840,7 +28398,7 @@ var bits2int = (bytes2) => {
   const num2 = bytesToNumBE(bytes2);
   return delta > 0 ? num2 >> big(delta) : num2;
 };
-var bits2int_modN = (bytes2) => modN(bits2int(abytes3(bytes2)));
+var bits2int_modN = (bytes2) => modN(bits2int(abytes4(bytes2)));
 var SIG_COMPACT = "compact";
 var SIG_RECOVERED = "recovered";
 var SIG_DER = "der";
@@ -25864,7 +28422,7 @@ var hashes = {
   sha256: void 0
 };
 var prepMsg = (msg, opts, async_) => {
-  abytes3(msg, void 0, "message");
+  abytes4(msg, void 0, "message");
   if (!opts.prehash)
     return msg;
   return async_ ? hashes.sha256Async(msg) : callHash("sha256")(msg);
@@ -25914,7 +28472,7 @@ var _sign = (messageHash, secretKey, opts, hmacDrbg) => {
   const seedArgs = [int2octets(d), h1o];
   if (extraEntropy != null && extraEntropy !== false) {
     const e = extraEntropy === true ? randomBytes2(L) : extraEntropy;
-    seedArgs.push(abytes3(e, void 0, "extraEntropy"));
+    seedArgs.push(abytes4(e, void 0, "extraEntropy"));
   }
   const seed = concatBytes4(...seedArgs);
   const m = h1i;
@@ -25954,7 +28512,7 @@ var signAsync = async (message, secretKey, opts = {}) => {
   return _sign(message, secretKey, opts, hmacDrbgAsync);
 };
 var randomSecretKey = (seed = randomBytes2(lengths.seed)) => {
-  abytes3(seed);
+  abytes4(seed);
   if (seed.length < lengths.seed || seed.length > 1024)
     err("expected 40-1024b");
   const num2 = M(bytesToNumBE(seed), N - 1n);
@@ -25996,7 +28554,7 @@ var pubSchnorr2 = (secretKey) => {
 var keygenSchnorr = createKeygen2(pubSchnorr2);
 var prepSigSchnorr = (message, secretKey, auxRand) => {
   const { px, d } = extpubSchnorr(secretKey);
-  return { m: abytes3(message), px, d, a: abytes3(auxRand, L) };
+  return { m: abytes4(message), px, d, a: abytes4(auxRand, L) };
 };
 var extractK = (rand) => {
   const k_ = bytesModN(rand);
@@ -26036,10 +28594,10 @@ var signSchnorrAsync = async (message, secretKey, auxRand = randomBytes2(L)) => 
 var callSyncAsyncFn = (res, later) => {
   return res instanceof Promise ? res.then(later) : later(res);
 };
-var _verifSchnorr = (signature, message, publicKey, challengeFn) => {
-  const sig = abytes3(signature, L2, "signature");
-  const msg = abytes3(message, void 0, "message");
-  const pub = abytes3(publicKey, L, "publicKey");
+var _verifSchnorr = (signature, message, publicKey2, challengeFn) => {
+  const sig = abytes4(signature, L2, "signature");
+  const msg = abytes4(message, void 0, "message");
+  const pub = abytes4(publicKey2, L, "publicKey");
   try {
     const x = bytesToNumBE(pub);
     const y = lift_x2(x);
@@ -26126,7 +28684,7 @@ var wNAF2 = (n) => {
   return { p, f };
 };
 
-// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-MJ2M4DEH.js
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curv_fc4df9b2eb0e18173aae9c0c7b63d969/node_modules/@arkade-os/sdk/dist/chunk-MJ2M4DEH.js
 init_secp256k1();
 init_script();
 init_transaction();
@@ -29775,7 +32333,7 @@ var Lexer = class {
       end: Math.min(start + chars, offset + len)
     });
   }
-  processEscapes(offset, str2, isBytes7) {
+  processEscapes(offset, str2, isBytes8) {
     if (!str2.includes("\\")) return str2;
     const len = str2.length;
     let result = "";
@@ -29790,7 +32348,7 @@ var Lexer = class {
         result += STRING_ESCAPES[next];
         i += 2;
       } else if (next === "u" || next === "U") {
-        if (isBytes7) throw this.#escapeErr("bytes_unicode_escape", offset, len, i, 2, next);
+        if (isBytes8) throw this.#escapeErr("bytes_unicode_escape", offset, len, i, 2, next);
         const hexLen = next === "u" ? 4 : 8;
         const hex2 = str2.substring(i + 2, i + 2 + hexLen);
         const c = Number.parseInt(hex2, 16);
@@ -30345,20 +32903,20 @@ var globalEnvironment = new Environment({
 // node_modules/.pnpm/@marcbachmann+cel-js@8.0.0/node_modules/@marcbachmann/cel-js/lib/serialize.js
 init_define_import_meta_env();
 
-// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz/node_modules/@arkade-os/sdk/dist/chunk-MJ2M4DEH.js
-function generateNonces(publicKey) {
-  const nonces = nonceGen(publicKey);
+// node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curv_fc4df9b2eb0e18173aae9c0c7b63d969/node_modules/@arkade-os/sdk/dist/chunk-MJ2M4DEH.js
+function generateNonces(publicKey2) {
+  const nonces = nonceGen(publicKey2);
   return { secNonce: nonces.secret, pubNonce: nonces.public };
 }
 function aggregateNonces(pubNonces) {
   return nonceAggregate(pubNonces);
 }
-function aggregateKeys(publicKeys, sort, options = {}) {
+function aggregateKeys(publicKeys, sort, options2 = {}) {
   if (sort) {
     publicKeys = sortKeys([...publicKeys]);
   }
   const { aggPublicKey: preTweakedKey } = keyAggregate(publicKeys);
-  if (!options.taprootTweak) {
+  if (!options2.taprootTweak) {
     return {
       preTweakedKey: preTweakedKey.toBytes(true),
       finalKey: preTweakedKey.toBytes(true)
@@ -30367,7 +32925,7 @@ function aggregateKeys(publicKeys, sort, options = {}) {
   const tweakBytes = schnorr.utils.taggedHash(
     "TapTweak",
     preTweakedKey.toBytes(true).subarray(1),
-    options.taprootTweak ?? new Uint8Array(0)
+    options2.taprootTweak ?? new Uint8Array(0)
   );
   const { aggPublicKey: finalKey } = keyAggregate(publicKeys, [tweakBytes], [true]);
   return {
@@ -30417,15 +32975,15 @@ var PartialSig = class _PartialSig {
     return new _PartialSig(bytes2, R);
   }
 };
-function createSession(combinedNonce, publicKeys, message, options) {
+function createSession(combinedNonce, publicKeys, message, options2) {
   const keys = sortKeys([...publicKeys]);
   let tweakBytes;
-  if (options?.taprootTweak !== void 0) {
+  if (options2?.taprootTweak !== void 0) {
     const { preTweakedKey } = aggregateKeys(keys, false);
     tweakBytes = schnorr.utils.taggedHash(
       "TapTweak",
       preTweakedKey.subarray(1),
-      options.taprootTweak
+      options2.taprootTweak
     );
   }
   return new Session(
@@ -30436,8 +32994,8 @@ function createSession(combinedNonce, publicKeys, message, options) {
     tweakBytes ? [true] : void 0
   );
 }
-function sign(secNonce, privateKey, combinedNonce, publicKeys, message, options) {
-  const session = createSession(combinedNonce, publicKeys, message, options);
+function sign(secNonce, privateKey, combinedNonce, publicKeys, message, options2) {
+  const session = createSession(combinedNonce, publicKeys, message, options2);
   const partialSig = session.sign(secNonce, privateKey);
   return PartialSig.decode(partialSig);
 }
@@ -30527,9 +33085,9 @@ var TreeSignerSession = class _TreeSignerSession {
   generateNonces() {
     if (!this.graph) throw ErrMissingVtxoGraph;
     const myNonces = /* @__PURE__ */ new Map();
-    const publicKey = secp256k1.getPublicKey(this.secretKey);
+    const publicKey2 = secp256k1.getPublicKey(this.secretKey);
     for (const g of this.graph.iterator()) {
-      const nonces = generateNonces(publicKey);
+      const nonces = generateNonces(publicKey2);
       myNonces.set(g.txid, nonces);
     }
     return myNonces;
@@ -30681,9 +33239,9 @@ var SingleKey = class _SingleKey {
 };
 var ReadonlySingleKey = class _ReadonlySingleKey {
   /** Create a readonly identity from a compressed public key. */
-  constructor(publicKey) {
-    this.publicKey = publicKey;
-    if (publicKey.length !== 33) {
+  constructor(publicKey2) {
+    this.publicKey = publicKey2;
+    if (publicKey2.length !== 33) {
       throw new Error("Invalid public key length");
     }
   }
@@ -30699,8 +33257,8 @@ var ReadonlySingleKey = class _ReadonlySingleKey {
    * const readonlyKey = ReadonlySingleKey.fromPublicKey(pubkey);
    * ```
    */
-  static fromPublicKey(publicKey) {
-    return new _ReadonlySingleKey(publicKey);
+  static fromPublicKey(publicKey2) {
+    return new _ReadonlySingleKey(publicKey2);
   }
   xOnlyPublicKey() {
     return Promise.resolve(this.publicKey.slice(1));
@@ -30770,8 +33328,8 @@ function isBatchSignable(identity2) {
   return "signMultiple" in identity2 && typeof identity2.signMultiple === "function";
 }
 var ForeignDescriptorError = class extends Error {
-  constructor(descriptor, options) {
-    super(`this wallet holds no key for descriptor: ${descriptor}`, options);
+  constructor(descriptor, options2) {
+    super(`this wallet holds no key for descriptor: ${descriptor}`, options2);
     this.descriptor = descriptor;
   }
   descriptor;
@@ -31166,18 +33724,18 @@ function buildAnchorChild(params) {
   return { child, fee };
 }
 function buildForfeitTx(inputs, forfeitPkScript, txLocktime) {
-  let amount = 0n;
+  let amount2 = 0n;
   for (const input of inputs) {
     if (!input.witnessUtxo) {
       throw new Error("input needs witness utxo");
     }
-    amount += input.witnessUtxo.amount;
+    amount2 += input.witnessUtxo.amount;
   }
   return buildForfeitTxWithOutput(
     inputs,
     {
       script: forfeitPkScript,
-      amount
+      amount: amount2
     },
     txLocktime
   );
@@ -31696,8 +34254,8 @@ function validateAssetOutputs(leafTx, outputIndex, expectedAssets) {
   if (!assetPacket) {
     throw new Error("no asset packet found in extension");
   }
-  for (const { assetId, amount } of expectedAssets) {
-    validateAssetGroupOutput(assetPacket, outputIndex, assetId, amount);
+  for (const { assetId, amount: amount2 } of expectedAssets) {
+    validateAssetGroupOutput(assetPacket, outputIndex, assetId, amount2);
   }
 }
 function validateAssetGroupOutput(packet, outputIndex, assetId, expectedAmount) {
@@ -31737,8 +34295,8 @@ async function buildActivities(txs, resolvers) {
     amount: a.amount ?? b.amount
   });
   const isSent = (tx) => tx.type === "SENT";
-  const signedAmount = (tx, amount = tx.amount) => {
-    const magnitude = Math.abs(amount);
+  const signedAmount = (tx, amount2 = tx.amount) => {
+    const magnitude = Math.abs(amount2);
     return isSent(tx) ? -magnitude : magnitude;
   };
   const buckets = /* @__PURE__ */ new Map();
@@ -31873,10 +34431,10 @@ function createDefaultActivityRegistry() {
   return registry;
 }
 var BoardingProgramScript = class extends VtxoScript {
-  constructor(program, options, collaborativeScript, exitScript) {
+  constructor(program, options2, collaborativeScript, exitScript) {
     super([collaborativeScript, exitScript]);
     this.program = program;
-    this.options = options;
+    this.options = options2;
     this.forfeitScript = hex.encode(collaborativeScript);
     this.exitScript = hex.encode(exitScript);
   }
@@ -32247,7 +34805,7 @@ function assertCheckpointsMatchInputs(checkpoints, inputs, unrollCandidates, con
     }
   }
 }
-async function submitOffchainTx(provider, offchainTx, signer, hooks, options) {
+async function submitOffchainTx(provider, offchainTx, signer, hooks, options2) {
   const { arkTx: signedArkTx, userSignedCheckpoints } = await signer.signArkTx(
     offchainTx.arkTx,
     offchainTx.checkpoints
@@ -32265,7 +34823,7 @@ async function submitOffchainTx(provider, offchainTx, signer, hooks, options) {
   assertSubmittedArkTxid(response, signedArkTx, "submitTx");
   const { arkTxid, signedCheckpointTxs } = response;
   const matched = matchServerCheckpoints(signedCheckpointTxs, offchainTx.checkpoints, "submitTx");
-  const verify = options?.verifyServerSignatures;
+  const verify = options2?.verifyServerSignatures;
   if (verify) {
     if (response.finalArkTx === void 0) {
       throw new ServerResponseMismatchError(
@@ -32449,22 +35007,22 @@ var toTimelock = (value) => ({
   type: value >= 512n ? "seconds" : "blocks"
 });
 var toSeconds = (t) => t.type === "seconds" ? t.value : t.value * NOMINAL_BLOCK_SECONDS;
-function assertTimelockInPolicy(timelock, policy, label, overrideOption) {
-  if (policy.requireSeconds && timelock.type === "blocks") {
+function assertTimelockInPolicy(timelock, policy2, label, overrideOption) {
+  if (policy2.requireSeconds && timelock.type === "blocks") {
     throw new ServerResponseMismatchError(
       `${label} rejected: block-typed timelocks are not accepted (got ${timelock.value})`
     );
   }
   const seconds = toSeconds(timelock);
-  if (seconds < policy.minSeconds) {
+  if (seconds < policy2.minSeconds) {
     throw new ServerResponseMismatchError(
-      `${label} rejected: ${timelock.value} ${timelock.type} is below the ${policy.minSeconds}s floor; pass ${overrideOption}: ${seconds}n to Wallet.create to lower it`
+      `${label} rejected: ${timelock.value} ${timelock.type} is below the ${policy2.minSeconds}s floor; pass ${overrideOption}: ${seconds}n to Wallet.create to lower it`
     );
   }
   return timelock;
 }
-function assertTimelockWithinFloor(value, policy, label, overrideOption) {
-  return assertTimelockInPolicy(toTimelock(value), policy, label, overrideOption);
+function assertTimelockWithinFloor(value, policy2, label, overrideOption) {
+  return assertTimelockInPolicy(toTimelock(value), policy2, label, overrideOption);
 }
 var DEFAULT_MIN_BATCH_EXPIRY_SECONDS = 86400n;
 var REGTEST_MIN_BATCH_EXPIRY_SECONDS = 6000n;
@@ -32474,13 +35032,13 @@ function defaultBatchExpiryPolicy(network) {
 function resolveBatchExpiryPolicy(network, overrides) {
   return { ...defaultBatchExpiryPolicy(network), ...overrides };
 }
-function assertValidBatchExpiry(batchExpiry, policy) {
-  if (policy.advertisedVtxoTreeExpiry !== void 0 && batchExpiry !== policy.advertisedVtxoTreeExpiry) {
+function assertValidBatchExpiry(batchExpiry, policy2) {
+  if (policy2.advertisedVtxoTreeExpiry !== void 0 && batchExpiry !== policy2.advertisedVtxoTreeExpiry) {
     throw new ServerResponseMismatchError(
-      `batch expiry rejected: ${batchExpiry} does not match the advertised vtxoTreeExpiry ${policy.advertisedVtxoTreeExpiry}`
+      `batch expiry rejected: ${batchExpiry} does not match the advertised vtxoTreeExpiry ${policy2.advertisedVtxoTreeExpiry}`
     );
   }
-  return assertTimelockWithinFloor(batchExpiry, policy, "batch expiry", "minBatchExpirySeconds");
+  return assertTimelockWithinFloor(batchExpiry, policy2, "batch expiry", "minBatchExpirySeconds");
 }
 var DEFAULT_MIN_CHECKPOINT_EXIT_DELAY_SECONDS = 86400n;
 var REGTEST_MIN_CHECKPOINT_EXIT_DELAY_SECONDS = 1200n;
@@ -32503,7 +35061,7 @@ function defaultCheckpointExitDelayPolicy(network) {
 function resolveCheckpointExitDelayPolicy(network, overrides) {
   return { ...defaultCheckpointExitDelayPolicy(network), ...overrides };
 }
-function assertValidServerUnrollScript(checkpointTapscript, policy) {
+function assertValidServerUnrollScript(checkpointTapscript, policy2) {
   let script;
   try {
     script = CSVMultisigTapscript.decode(hex.decode(checkpointTapscript));
@@ -32512,22 +35070,22 @@ function assertValidServerUnrollScript(checkpointTapscript, policy) {
       `checkpoint exit delay rejected: invalid checkpointTapscript from server (${e instanceof Error ? e.message : String(e)})`
     );
   }
-  if (policy.advertisedForfeitPubkey !== void 0) {
+  if (policy2.advertisedForfeitPubkey !== void 0) {
     const { pubkeys } = script.params;
     if (pubkeys.length !== 1) {
       throw new ServerResponseMismatchError(
         `checkpoint exit delay rejected: checkpointTapscript must commit to exactly one pubkey, got ${pubkeys.length} [${pubkeys.map(hex.encode).join(", ")}]`
       );
     }
-    if (!equalBytes3(pubkeys[0], policy.advertisedForfeitPubkey)) {
+    if (!equalBytes3(pubkeys[0], policy2.advertisedForfeitPubkey)) {
       throw new ServerResponseMismatchError(
-        `checkpoint exit delay rejected: checkpointTapscript pubkey ${hex.encode(pubkeys[0])} does not match the advertised forfeitPubkey ${hex.encode(policy.advertisedForfeitPubkey)}`
+        `checkpoint exit delay rejected: checkpointTapscript pubkey ${hex.encode(pubkeys[0])} does not match the advertised forfeitPubkey ${hex.encode(policy2.advertisedForfeitPubkey)}`
       );
     }
   }
   assertTimelockInPolicy(
     script.params.timelock,
-    policy,
+    policy2,
     "checkpoint exit delay",
     "minCheckpointExitDelaySeconds"
   );
@@ -32822,8 +35380,8 @@ function validateRecipients(recipients, dustAmount, context) {
       throw new Error(`Invalid Arkade address: ${recipient.address}`);
     }
     assertRecipientArkAddress(recipient.address, address, context);
-    const amount = recipient.amount || dustAmount;
-    if (amount <= 0) {
+    const amount2 = recipient.amount || dustAmount;
+    if (amount2 <= 0) {
       throw new Error("Amount must be positive");
     }
     if (recipient.tapTree) {
@@ -32832,8 +35390,8 @@ function validateRecipients(recipients, dustAmount, context) {
     validatedRecipients.push({
       address: recipient.address,
       assets: recipient.assets ?? [],
-      amount,
-      script: amount < dustAmount ? address.subdustPkScript : address.pkScript,
+      amount: amount2,
+      script: amount2 < dustAmount ? address.subdustPkScript : address.pkScript,
       tapTree: recipient.tapTree
     });
   }
@@ -33456,9 +36014,9 @@ var VtxoManager = class _VtxoManager {
    * const txid = await manager.renewVtxos(undefined, { thresholdSeconds: 6 * 60 * 60 });
    * ```
    */
-  async renewVtxos(eventCallback, options) {
-    if (options?.thresholdSeconds !== void 0) {
-      const { thresholdSeconds } = options;
+  async renewVtxos(eventCallback, options2) {
+    if (options2?.thresholdSeconds !== void 0) {
+      const { thresholdSeconds } = options2;
       if (typeof thresholdSeconds !== "number" || !Number.isFinite(thresholdSeconds) || thresholdSeconds <= 0) {
         throw new TypeError(
           `Invalid thresholdSeconds: expected a positive finite number, got ${String(thresholdSeconds)}`
@@ -33471,8 +36029,8 @@ var VtxoManager = class _VtxoManager {
     this.renewalInProgress = true;
     try {
       let threshold;
-      if (options?.thresholdSeconds !== void 0) {
-        threshold = options.thresholdSeconds * 1e3;
+      if (options2?.thresholdSeconds !== void 0) {
+        threshold = options2.thresholdSeconds * 1e3;
       } else if (this.settlementConfig !== false && this.settlementConfig?.vtxoThreshold !== void 0) {
         threshold = this.settlementConfig.vtxoThreshold * 1e3;
       } else {
@@ -33683,8 +36241,8 @@ var VtxoManager = class _VtxoManager {
    * Cooperatively migrate VTXOs minted under a now-deprecated server signer
    * to the wallet's active-signer address. See {@link IVtxoManager}.
    */
-  async migrateDeprecatedSignerVtxos(options) {
-    return this.migrateCore(options);
+  async migrateDeprecatedSignerVtxos(options2) {
+    return this.migrateCore(options2);
   }
   /**
    * Machine-readable status of every deprecated server signer the wallet
@@ -33709,7 +36267,7 @@ var VtxoManager = class _VtxoManager {
    * selects spendable VTXOs under deprecated-signer contracts (cutoff-first),
    * and settles them to the active-signer Ark address.
    */
-  async migrateCore(options) {
+  async migrateCore(options2) {
     const wallet = this.requireMigrationCapableWallet();
     const info = await wallet.arkProvider.getInfo();
     wallet.refreshDeprecatedSigners(info);
@@ -33793,7 +36351,7 @@ var VtxoManager = class _VtxoManager {
               inputs: capped.map((c) => c.coin),
               outputs: [{ address: arkAddress, amount: totalAmount }]
             },
-            options?.eventCallback
+            options2?.eventCallback
           );
         }
       );
@@ -34881,6 +37439,14 @@ function wrapHandlerWithIntentPersistence(base, deps) {
     }
   };
 }
+var ChainedTxType = /* @__PURE__ */ ((ChainedTxType2) => {
+  ChainedTxType2[ChainedTxType2["Unspecified"] = 0] = "Unspecified";
+  ChainedTxType2[ChainedTxType2["Commitment"] = 1] = "Commitment";
+  ChainedTxType2[ChainedTxType2["Ark"] = 2] = "Ark";
+  ChainedTxType2[ChainedTxType2["Tree"] = 3] = "Tree";
+  ChainedTxType2[ChainedTxType2["Checkpoint"] = 4] = "Checkpoint";
+  return ChainedTxType2;
+})(ChainedTxType || {});
 function mergeChainedTxType(incoming, prev) {
   if (incoming !== 0) return incoming;
   return prev ?? 0;
@@ -35249,8 +37815,8 @@ function cursorCutoff(requestStartedAt) {
 }
 var ARK_INFO_SNAPSHOT_KEY = "arkInfoSnapshot";
 var MalformedArkInfoSnapshotError = class extends Error {
-  constructor(message, options) {
-    super(message, { cause: options?.cause });
+  constructor(message, options2) {
+    super(message, { cause: options2?.cause });
     this.name = "MalformedArkInfoSnapshotError";
   }
 };
@@ -35648,8 +38214,8 @@ var Batch;
     Step2["TreeNoncesAggregated"] = "tree_nonces_aggregated";
     Step2["BatchFinalization"] = "batch_finalization";
   })(Step || (Step = {}));
-  async function join2(eventIterator, handler, options = {}) {
-    const { abortController, skipVtxoTreeSigning = false, eventCallback } = options;
+  async function join2(eventIterator, handler, options2 = {}) {
+    const { abortController, skipVtxoTreeSigning = false, eventCallback } = options2;
     let step = "start";
     const flatVtxoTree = [];
     const flatConnectorTree = [];
@@ -35793,7 +38359,7 @@ function collectAssets(vtxos) {
     }
   }
   if (map.size === 0) return void 0;
-  return Array.from(map, ([assetId, amount]) => ({ assetId, amount }));
+  return Array.from(map, ([assetId, amount2]) => ({ assetId, amount: amount2 }));
 }
 function subtractAssets(spent, change) {
   const map = /* @__PURE__ */ new Map();
@@ -35818,7 +38384,7 @@ function subtractAssets(spent, change) {
     }
   }
   if (map.size === 0) return void 0;
-  return Array.from(map, ([assetId, amount]) => ({ assetId, amount }));
+  return Array.from(map, ([assetId, amount2]) => ({ assetId, amount: amount2 }));
 }
 function collectArkTxidsNeedingCreatedAt(vtxos) {
   const ownTxids = new Set(vtxos.map((v) => v.txid));
@@ -36000,9 +38566,9 @@ var AssetManager = class extends ReadonlyAssetManager {
     for (const coin of coinSelection.inputs) {
       totalBtcSelected += BigInt(coin.value);
       if (!coin.assets) continue;
-      for (const { assetId, amount } of coin.assets) {
+      for (const { assetId, amount: amount2 } of coin.assets) {
         const existing = assetChanges.get(assetId) ?? 0n;
-        assetChanges.set(assetId, existing + amount);
+        assetChanges.set(assetId, existing + amount2);
       }
     }
     const groups = [];
@@ -36017,7 +38583,7 @@ var AssetManager = class extends ReadonlyAssetManager {
     groups.push(issuedAssetGroup);
     if (assetChanges.size > 0) {
       const assetInputs = selectedCoinsToAssetInputs(coinSelection.inputs);
-      for (const [assetId, amount] of assetChanges) {
+      for (const [assetId, amount2] of assetChanges) {
         const changeInputs = [];
         for (const [inputIndex, assets] of assetInputs) {
           for (const asset of assets) {
@@ -36030,7 +38596,7 @@ var AssetManager = class extends ReadonlyAssetManager {
             AssetId.fromString(assetId),
             null,
             changeInputs,
-            [AssetOutput.create(0, amount)],
+            [AssetOutput.create(0, amount2)],
             []
           )
         );
@@ -36088,13 +38654,13 @@ var AssetManager = class extends ReadonlyAssetManager {
     let assetToReissueAmount = 0n;
     for (const coin of controlCoins) {
       if (!coin.assets) continue;
-      for (const { assetId, amount } of coin.assets) {
+      for (const { assetId, amount: amount2 } of coin.assets) {
         if (assetId === params.assetId) {
-          assetToReissueAmount += amount;
+          assetToReissueAmount += amount2;
           continue;
         }
         const existing = assetChanges.get(assetId) ?? 0n;
-        assetChanges.set(assetId, existing + amount);
+        assetChanges.set(assetId, existing + amount2);
       }
     }
     const minBtcNeeded = Number(this.wallet.dustAmount);
@@ -36106,13 +38672,13 @@ var AssetManager = class extends ReadonlyAssetManager {
       const additional = selectVirtualCoins(remainingCoins, minBtcNeeded - totalBtcSelected);
       for (const coin of additional.inputs) {
         if (!coin.assets) continue;
-        for (const { assetId, amount } of coin.assets) {
+        for (const { assetId, amount: amount2 } of coin.assets) {
           if (assetId === params.assetId) {
-            assetToReissueAmount += amount;
+            assetToReissueAmount += amount2;
             continue;
           }
           const existing = assetChanges.get(assetId) ?? 0n;
-          assetChanges.set(assetId, existing + amount);
+          assetChanges.set(assetId, existing + amount2);
         }
       }
       selectedCoins = [...selectedCoins, ...additional.inputs];
@@ -36136,7 +38702,7 @@ var AssetManager = class extends ReadonlyAssetManager {
       []
     );
     const groups = [reissueAssetGroup];
-    for (const [assetId, amount] of assetChanges) {
+    for (const [assetId, amount2] of assetChanges) {
       const changeInputs = [];
       for (const [inputIndex, assets] of assetInputs) {
         for (const asset of assets) {
@@ -36149,7 +38715,7 @@ var AssetManager = class extends ReadonlyAssetManager {
           AssetId.fromString(assetId),
           null,
           changeInputs,
-          [AssetOutput.create(0, amount)],
+          [AssetOutput.create(0, amount2)],
           []
         )
       );
@@ -36199,9 +38765,9 @@ var AssetManager = class extends ReadonlyAssetManager {
     for (const coin of assetCoins) {
       totalBtcSelected += coin.value;
       if (!coin.assets) continue;
-      for (const { assetId, amount } of coin.assets) {
+      for (const { assetId, amount: amount2 } of coin.assets) {
         const existing = assetChanges.get(assetId) ?? 0n;
-        assetChanges.set(assetId, existing + amount);
+        assetChanges.set(assetId, existing + amount2);
       }
     }
     assetChanges.set(params.assetId, (assetChanges.get(params.assetId) ?? 0n) - params.amount);
@@ -36214,16 +38780,16 @@ var AssetManager = class extends ReadonlyAssetManager {
       for (const coin of additional.inputs) {
         totalBtcSelected += coin.value;
         if (!coin.assets) continue;
-        for (const { assetId, amount } of coin.assets) {
+        for (const { assetId, amount: amount2 } of coin.assets) {
           const existing = assetChanges.get(assetId) ?? 0n;
-          assetChanges.set(assetId, existing + amount);
+          assetChanges.set(assetId, existing + amount2);
         }
       }
       selectedCoins.push(...additional.inputs);
     }
     const groups = [];
     const assetInputs = selectedCoinsToAssetInputs(selectedCoins);
-    for (const [assetId, amount] of assetChanges) {
+    for (const [assetId, amount2] of assetChanges) {
       const changeInputs = [];
       for (const [inputIndex, assets] of assetInputs) {
         for (const asset of assets) {
@@ -36236,7 +38802,7 @@ var AssetManager = class extends ReadonlyAssetManager {
           AssetId.fromString(assetId),
           null,
           changeInputs,
-          amount > 0n ? [AssetOutput.create(0, amount)] : [],
+          amount2 > 0n ? [AssetOutput.create(0, amount2)] : [],
           []
         )
       );
@@ -36420,7 +38986,7 @@ async function delegate(identity2, delegateProvider, arkInfo, delegateInfo, vtxo
       `double(${delegateAtSeconds})`
     )
   });
-  let amount = 0n;
+  let amount2 = 0n;
   for (const coin of vtxos) {
     const inputFee = estimator.evalOffchainInput({
       ...toOffchainInputFeeParams(coin),
@@ -36429,7 +38995,7 @@ async function delegate(identity2, delegateProvider, arkInfo, delegateInfo, vtxo
     if (inputFee.value >= coin.value) {
       continue;
     }
-    amount += BigInt(coin.value) - BigInt(inputFee.value);
+    amount2 += BigInt(coin.value) - BigInt(inputFee.value);
   }
   const { pubkey, fee } = delegateInfo;
   const delegateAddress = delegateInfo.delegateAddress;
@@ -36448,17 +39014,17 @@ async function delegate(identity2, delegateProvider, arkInfo, delegateInfo, vtxo
       script: hex.encode(output.script)
     }).satoshis;
   }, 0);
-  if (isSubdust(amount - BigInt(outputFee), dust)) {
+  if (isSubdust(amount2 - BigInt(outputFee), dust)) {
     throw new Error("Amount is below dust limit, cannot delegate");
   }
-  amount -= BigInt(outputFee);
-  amount -= delegateFee;
-  if (isSubdust(amount, dust)) {
+  amount2 -= BigInt(outputFee);
+  amount2 -= delegateFee;
+  if (isSubdust(amount2, dust)) {
     throw new Error("Amount is below dust limit, cannot delegate");
   }
   outputs.push({
     script: destinationScript,
-    amount
+    amount: amount2
   });
   const registerIntent = await makeSignedDelegateIntent(
     identity2,
@@ -36535,8 +39101,8 @@ async function makeSignedDelegateIntent(identity2, coins, outputs, onchainOutput
       }
     }
     outputAssets = [];
-    for (const [assetId, amount] of allAssets) {
-      outputAssets.push({ assetId, amount });
+    for (const [assetId, amount2] of allAssets) {
+      outputAssets.push({ assetId, amount: amount2 });
     }
   }
   const recipients = outputs.map((output, i) => ({
@@ -36593,8 +39159,8 @@ var awaitTransaction = (transaction) => new Promise((resolve, reject) => {
   transaction.onerror = () => reject(transaction.error);
   transaction.onabort = () => reject(transaction.error ?? new Error("transaction aborted"));
 });
-var deleteByIndex = (store, indexName, value) => {
-  const request = store.index(indexName).openCursor(IDBKeyRange.only(value));
+var deleteByIndex = (store2, indexName, value) => {
+  const request = store2.index(indexName).openCursor(IDBKeyRange.only(value));
   request.onsuccess = () => {
     const cursor = request.result;
     if (!cursor) return;
@@ -36602,9 +39168,9 @@ var deleteByIndex = (store, indexName, value) => {
     cursor.continue();
   };
 };
-var getAllByIndexValues = (store, indexName, values) => {
+var getAllByIndexValues = (store2, indexName, values) => {
   if (values.length === 0) return Promise.resolve([]);
-  const index = store.index(indexName);
+  const index = store2.index(indexName);
   return Promise.all(values.map((value) => promisifyRequest(index.getAll(value)))).then(
     (results) => results.flat()
   );
@@ -36952,9 +39518,9 @@ function initDatabaseWithIntents(db, oldVersion, transaction) {
     });
   }
 }
-function dedupeIntentIds(store, onComplete) {
+function dedupeIntentIds(store2, onComplete) {
   const seen = /* @__PURE__ */ new Set();
-  const cursorRequest = store.openCursor();
+  const cursorRequest = store2.openCursor();
   cursorRequest.onsuccess = () => {
     const cursor = cursorRequest.result;
     if (!cursor) {
@@ -36973,8 +39539,8 @@ function dedupeIntentIds(store, onComplete) {
   };
 }
 function backfillVtxoScripts(transaction) {
-  const store = transaction.objectStore(STORE_VTXOS);
-  const cursorRequest = store.openCursor();
+  const store2 = transaction.objectStore(STORE_VTXOS);
+  const cursorRequest = store2.openCursor();
   cursorRequest.onsuccess = () => {
     const cursor = cursorRequest.result;
     if (!cursor) return;
@@ -37024,12 +39590,12 @@ var IndexedDBVirtualTxRepository = class {
       );
     }
     const transaction = db.transaction([STORE_VIRTUAL_TXS], "readwrite");
-    const store = transaction.objectStore(STORE_VIRTUAL_TXS);
+    const store2 = transaction.objectStore(STORE_VIRTUAL_TXS);
     for (const tx of merged.values()) {
-      const getReq = store.get(tx.txid);
+      const getReq = store2.get(tx.txid);
       getReq.onsuccess = () => {
         const prev = getReq.result;
-        store.put({
+        store2.put({
           txid: tx.txid,
           psbt: tx.psbt ?? prev?.psbt ?? null,
           expiresAt: tx.expiresAt ?? prev?.expiresAt ?? null,
@@ -37041,19 +39607,19 @@ var IndexedDBVirtualTxRepository = class {
   }
   async getVirtualTx(txid) {
     const db = await this.getDB();
-    const store = db.transaction([STORE_VIRTUAL_TXS], "readonly").objectStore(STORE_VIRTUAL_TXS);
-    const r = await promisifyRequest(store.get(txid));
+    const store2 = db.transaction([STORE_VIRTUAL_TXS], "readonly").objectStore(STORE_VIRTUAL_TXS);
+    const r = await promisifyRequest(store2.get(txid));
     return r ?? null;
   }
   async setBranch(vtxo, branch) {
     const db = await this.getDB();
     const transaction = db.transaction([STORE_VTXO_BRANCHES], "readwrite");
-    const store = transaction.objectStore(STORE_VTXO_BRANCHES);
-    const getAllReq = store.index("vtxo").getAll(IDBKeyRange.only([vtxo.txid, vtxo.vout]));
+    const store2 = transaction.objectStore(STORE_VTXO_BRANCHES);
+    const getAllReq = store2.index("vtxo").getAll(IDBKeyRange.only([vtxo.txid, vtxo.vout]));
     getAllReq.onsuccess = () => {
       const existing = getAllReq.result;
-      for (const e of existing) store.delete([e.vtxoTxid, e.vtxoVout, e.position]);
-      for (const b of branch) store.put(b);
+      for (const e of existing) store2.delete([e.vtxoTxid, e.vtxoVout, e.position]);
+      for (const b of branch) store2.put(b);
     };
     await awaitTransaction(transaction);
   }
@@ -37402,8 +39968,8 @@ var ContractWatcher = class {
    * Get virtual outputs for contracts, grouped by contract script.
    * @see WalletRepository for `repo`
    */
-  async getContractVtxos(options) {
-    const { contractScripts, includeSpent } = options;
+  async getContractVtxos(options2) {
+    const { contractScripts, includeSpent } = options2;
     const repo = this.config.walletRepository;
     const contractsToQuery = Array.from(this.contracts.values());
     const asyncResults = contractsToQuery.filter((_) => {
@@ -38203,12 +40769,12 @@ var ContractManager = class _ContractManager {
     for (let index = from; index <= to; index++) {
       const descriptor = lookAhead.materialize(index);
       for (const handler of handlers) {
-        for (const candidate of handler.candidatesAt(index, descriptor, deps)) {
-          if (band.has(candidate.script)) continue;
-          band.set(candidate.script, {
+        for (const candidate2 of handler.candidatesAt(index, descriptor, deps)) {
+          if (band.has(candidate2.script)) continue;
+          band.set(candidate2.script, {
             index,
             params: {
-              ...candidate,
+              ...candidate2,
               ...speculativeReceiveMetadata(descriptor)
             }
           });
@@ -38832,8 +41398,8 @@ var ContractManager = class _ContractManager {
    *
    * @param options - Options for getting spendable paths
    */
-  async getSpendablePaths(options) {
-    const { contractScript, collaborative = true, walletPubKey, vtxo } = options;
+  async getSpendablePaths(options2) {
+    const { contractScript, collaborative = true, walletPubKey, vtxo } = options2;
     const [contract] = await this.getContracts({ script: contractScript });
     if (!contract) return [];
     const handler = contractHandlers.get(contract.type);
@@ -38860,8 +41426,8 @@ var ContractManager = class _ContractManager {
    *
    * @param options - Options for getting spending paths
    */
-  async getAllSpendingPaths(options) {
-    const { contractScript, collaborative = true, walletPubKey } = options;
+  async getAllSpendingPaths(options2) {
+    const { contractScript, collaborative = true, walletPubKey } = options2;
     const [contract] = await this.getContracts({ script: contractScript });
     if (!contract) return [];
     const handler = contractHandlers.get(contract.type);
@@ -39028,13 +41594,13 @@ var ContractManager = class _ContractManager {
    * leaves the cursor alone so a narrow poll can't hide data that
    * other contracts still need to pick up.
    */
-  async syncContracts(options) {
+  async syncContracts(options2) {
     const cursor = await getSyncCursor(this.config.walletRepository);
-    const window2 = options.window ?? computeSyncWindow(cursor);
-    const mustUpdateCursor = options.contracts === void 0 && options.window === void 0 && (window2.after ?? 0) <= cursor;
-    const contracts = options.contracts ?? (options.includeInactive ? await this.config.contractRepository.getContracts({}) : this.watcher.getWatchedContracts());
+    const window2 = options2.window ?? computeSyncWindow(cursor);
+    const mustUpdateCursor = options2.contracts === void 0 && options2.window === void 0 && (window2.after ?? 0) <= cursor;
+    const contracts = options2.contracts ?? (options2.includeInactive ? await this.config.contractRepository.getContracts({}) : this.watcher.getWatchedContracts());
     const requestStartedAt = Date.now();
-    const result = await this.fetchContractVxosFromIndexer(contracts, options.pageSize, window2);
+    const result = await this.fetchContractVxosFromIndexer(contracts, options2.pageSize, window2);
     if (mustUpdateCursor) {
       const cutoff = cursorCutoff(requestStartedAt);
       await advanceSyncCursor(this.config.walletRepository, cutoff);
@@ -39352,23 +41918,23 @@ var IndexedDBContractRepository = class {
   async getContracts(filter) {
     try {
       const db = await this.getDB();
-      const store = db.transaction([STORE_CONTRACTS], "readonly").objectStore(STORE_CONTRACTS);
+      const store2 = db.transaction([STORE_CONTRACTS], "readonly").objectStore(STORE_CONTRACTS);
       if (!filter || Object.keys(filter).length === 0) {
-        return await promisifyRequest(store.getAll()) ?? [];
+        return await promisifyRequest(store2.getAll()) ?? [];
       }
       const normalizedFilter = normalizeFilter(filter);
       if (normalizedFilter.has("script")) {
         const scripts = normalizedFilter.get("script");
         const contracts = await Promise.all(
           scripts.map(
-            (script) => promisifyRequest(store.get(script))
+            (script) => promisifyRequest(store2.get(script))
           )
         );
         return this.applyContractFilter(contracts, normalizedFilter);
       }
       if (normalizedFilter.has("state")) {
         const contracts = await getAllByIndexValues(
-          store,
+          store2,
           "state",
           normalizedFilter.get("state")
         );
@@ -39376,13 +41942,13 @@ var IndexedDBContractRepository = class {
       }
       if (normalizedFilter.has("type")) {
         const contracts = await getAllByIndexValues(
-          store,
+          store2,
           "type",
           normalizedFilter.get("type")
         );
         return this.applyContractFilter(contracts, normalizedFilter);
       }
-      const allContracts = await promisifyRequest(store.getAll()) ?? [];
+      const allContracts = await promisifyRequest(store2.getAll()) ?? [];
       return this.applyContractFilter(allContracts, normalizedFilter);
     } catch (error) {
       console.error("Failed to get contracts:", error);
@@ -39467,9 +42033,9 @@ var IndexedDBWalletRepository = class {
   async getVtxos(address) {
     try {
       const db = await this.getDB();
-      const store = db.transaction([STORE_VTXOS], "readonly").objectStore(STORE_VTXOS);
+      const store2 = db.transaction([STORE_VTXOS], "readonly").objectStore(STORE_VTXOS);
       const results = await promisifyRequest(
-        store.index("address").getAll(address)
+        store2.index("address").getAll(address)
       );
       return (results || []).map(deserializeVtxoWithBackfill);
     } catch (error) {
@@ -39481,10 +42047,10 @@ var IndexedDBWalletRepository = class {
     try {
       const db = await this.getDB();
       const transaction = db.transaction([STORE_VTXOS], "readwrite");
-      const store = transaction.objectStore(STORE_VTXOS);
+      const store2 = transaction.objectStore(STORE_VTXOS);
       for (const vtxo of vtxos) {
         const serialized = serializeVtxo(vtxo);
-        store.put({ address, ...serialized });
+        store2.put({ address, ...serialized });
       }
       await awaitTransaction(transaction);
     } catch (error) {
@@ -39506,9 +42072,9 @@ var IndexedDBWalletRepository = class {
   async getVtxosForScript(script) {
     try {
       const db = await this.getDB();
-      const store = db.transaction([STORE_VTXOS], "readonly").objectStore(STORE_VTXOS);
+      const store2 = db.transaction([STORE_VTXOS], "readonly").objectStore(STORE_VTXOS);
       const results = await promisifyRequest(
-        store.index("script").getAll(script)
+        store2.index("script").getAll(script)
       );
       const matching = (results || []).filter((r) => r.script === script);
       const byOutpoint = /* @__PURE__ */ new Map();
@@ -39556,8 +42122,8 @@ var IndexedDBWalletRepository = class {
   async getUtxos(address) {
     try {
       const db = await this.getDB();
-      const store = db.transaction([STORE_UTXOS], "readonly").objectStore(STORE_UTXOS);
-      const results = await promisifyRequest(store.index("address").getAll(address));
+      const store2 = db.transaction([STORE_UTXOS], "readonly").objectStore(STORE_UTXOS);
+      const results = await promisifyRequest(store2.index("address").getAll(address));
       return (results || []).map(deserializeUtxo);
     } catch (error) {
       console.error(`Failed to get UTXOs for address ${address}:`, error);
@@ -39568,8 +42134,8 @@ var IndexedDBWalletRepository = class {
     try {
       const db = await this.getDB();
       const transaction = db.transaction([STORE_UTXOS], "readwrite");
-      const store = transaction.objectStore(STORE_UTXOS);
-      for (const utxo of utxos) store.put({ address, ...serializeUtxo(utxo) });
+      const store2 = transaction.objectStore(STORE_UTXOS);
+      for (const utxo of utxos) store2.put({ address, ...serializeUtxo(utxo) });
       await awaitTransaction(transaction);
     } catch (error) {
       console.error(`Failed to save UTXOs for address ${address}:`, error);
@@ -39590,9 +42156,9 @@ var IndexedDBWalletRepository = class {
   async getTransactionHistory(address) {
     try {
       const db = await this.getDB();
-      const store = db.transaction([STORE_TRANSACTIONS], "readonly").objectStore(STORE_TRANSACTIONS);
+      const store2 = db.transaction([STORE_TRANSACTIONS], "readonly").objectStore(STORE_TRANSACTIONS);
       const results = await promisifyRequest(
-        store.index("address").getAll(address)
+        store2.index("address").getAll(address)
       );
       return (results || []).sort((a, b) => a.createdAt - b.createdAt);
     } catch (error) {
@@ -39604,9 +42170,9 @@ var IndexedDBWalletRepository = class {
     try {
       const db = await this.getDB();
       const transaction = db.transaction([STORE_TRANSACTIONS], "readwrite");
-      const store = transaction.objectStore(STORE_TRANSACTIONS);
+      const store2 = transaction.objectStore(STORE_TRANSACTIONS);
       for (const tx of txs) {
-        store.put({
+        store2.put({
           address,
           ...tx,
           keyBoardingTxid: tx.key.boardingTxid,
@@ -39634,9 +42200,9 @@ var IndexedDBWalletRepository = class {
   async getWalletState() {
     try {
       const db = await this.getDB();
-      const store = db.transaction([STORE_WALLET_STATE], "readonly").objectStore(STORE_WALLET_STATE);
+      const store2 = db.transaction([STORE_WALLET_STATE], "readonly").objectStore(STORE_WALLET_STATE);
       const result = await promisifyRequest(
-        store.get("state")
+        store2.get("state")
       );
       return result?.data ?? null;
     } catch (error) {
@@ -39894,8 +42460,8 @@ function strictSigningDescriptorIndex(descriptor) {
   return Number.isSafeInteger(n) && n >= 0 ? n : void 0;
 }
 var NonRangeableDescriptorError = class extends Error {
-  constructor(message, options) {
-    super(message, options);
+  constructor(message, options2) {
+    super(message, options2);
     this.name = "NonRangeableDescriptorError";
   }
 };
@@ -40298,7 +42864,7 @@ function computeOffchainBalance(vtxos, caps) {
       addAssets(spendable, vtxo);
     }
   }
-  const toAssets = (from) => Array.from(from.entries()).map(([assetId, amount]) => ({ assetId, amount }));
+  const toAssets = (from) => Array.from(from.entries()).map(([assetId, amount2]) => ({ assetId, amount: amount2 }));
   return {
     settled,
     preconfirmed,
@@ -41433,10 +43999,10 @@ var ReadonlyWallet = class _ReadonlyWallet {
    */
   async getBoardingTapscripts(allowedSigners) {
     const byScript = /* @__PURE__ */ new Map();
-    const add2 = (s) => byScript.set(hex.encode(s.pkScript), s);
+    const add3 = (s) => byScript.set(hex.encode(s.pkScript), s);
     const boardingCsv = this.boardingTapscript.options.csvTimelock ?? DefaultVtxo.Script.DEFAULT_TIMELOCK;
     if (!(this.boardingTapscript instanceof BoardingProgramScript)) {
-      add2(
+      add3(
         new DefaultVtxo.Script({
           pubKey: await this.identity.xOnlyPublicKey(),
           serverPubKey: this.boardingTapscript.options.serverPubKey,
@@ -41444,7 +44010,7 @@ var ReadonlyWallet = class _ReadonlyWallet {
         })
       );
     }
-    add2(this.boardingTapscript);
+    add3(this.boardingTapscript);
     if (this.boardingTapscript instanceof BoardingProgramScript) {
       return [...byScript.values()];
     }
@@ -41456,7 +44022,7 @@ var ReadonlyWallet = class _ReadonlyWallet {
     for (const c of boardingContracts) {
       if (!allowed.has(toXOnlySignerHex(c.params.serverPubKey))) continue;
       try {
-        add2(BoardingContractHandler.createScript(c.params));
+        add3(BoardingContractHandler.createScript(c.params));
       } catch (e) {
         console.warn("Skipping malformed boarding contract", c.script, e);
       }
@@ -42838,7 +45404,7 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
     if (!params) {
       const { fees, vtxoMaxAmount } = await this.arkProvider.getInfo();
       const estimator = new Estimator(fees.intentFee);
-      let amount = 0;
+      let amount2 = 0;
       const exitScript = CSVMultisigTapscript.decode(
         hex.decode(this.boardingTapscript.exitScript)
       );
@@ -42860,7 +45426,7 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
           continue;
         }
         filteredBoardingUtxos.push(utxo);
-        amount += utxo.value - inputFee.satoshis;
+        amount2 += utxo.value - inputFee.satoshis;
       }
       const vtxos = await this.getSpendableVtxos({ withRecoverable: true });
       const filteredVtxos = [];
@@ -42874,7 +45440,7 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
         }
         const net = vtxo.value - inputFee.satoshis;
         if (vtxoMaxAmount >= 0n) {
-          const projectedAmount = BigInt(amount + net);
+          const projectedAmount = BigInt(amount2 + net);
           const projectedOutputFee = estimator.evalOffchainOutput({
             amount: projectedAmount,
             script: offchainOutputScript
@@ -42884,7 +45450,7 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
           }
         }
         filteredVtxos.push(vtxo);
-        amount += net;
+        amount2 += net;
       }
       const inputs = [...filteredBoardingUtxos, ...filteredVtxos];
       if (inputs.length === 0) {
@@ -42892,7 +45458,7 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
       }
       const output = {
         address: offchainAddress,
-        amount: BigInt(amount)
+        amount: BigInt(amount2)
       };
       const outputFee = estimator.evalOffchainOutput({
         amount: output.amount,
@@ -42957,8 +45523,8 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
         }
       }
       outputAssets = [];
-      for (const [assetId, amount] of allAssets) {
-        outputAssets.push({ assetId, amount });
+      for (const [assetId, amount2] of allAssets) {
+        outputAssets.push({ assetId, amount: amount2 });
       }
     }
     const recipients = params.outputs.map((output, i) => ({
@@ -43773,8 +46339,8 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
       );
     }
     const seen = /* @__PURE__ */ new Set();
-    return candidates.filter((candidate) => {
-      const script = hex.encode(candidate.script);
+    return candidates.filter((candidate2) => {
+      const script = hex.encode(candidate2.script);
       if (seen.has(script)) return false;
       seen.add(script);
       return true;
@@ -43808,10 +46374,10 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
    * OP_RETURN output that is unspendable as cash.
    * @returns The encoded arkadeCash string (e.g., "arkadecash1...")
    */
-  async createCash(amount) {
-    if (!Number.isSafeInteger(amount) || amount < Number(this.dustAmount)) {
+  async createCash(amount2) {
+    if (!Number.isSafeInteger(amount2) || amount2 < Number(this.dustAmount)) {
       throw new Error(
-        `Invalid ArkadeCash amount ${amount}: must be a whole number of sats >= dust (${this.dustAmount})`
+        `Invalid ArkadeCash amount ${amount2}: must be a whole number of sats >= dust (${this.dustAmount})`
       );
     }
     const cashHrp = this.network.hrp.replace(/ark$/, "arkadecash");
@@ -43823,7 +46389,7 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
     const address = cash.address(this.network.hrp).encode();
     const cashStr = cash.toString();
     try {
-      await this.send({ address, amount });
+      await this.send({ address, amount: amount2 });
     } catch (error) {
       throw new ArkadeCashCreateError(cashStr, error);
     }
@@ -44255,9 +46821,9 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
     let changeIndex = 0;
     if (changeAmount > 0) {
       const changeAssets = [];
-      for (const [assetId, amount] of assetChanges) {
-        if (amount > 0n) {
-          changeAssets.push({ assetId, amount });
+      for (const [assetId, amount2] of assetChanges) {
+        if (amount2 > 0n) {
+          changeAssets.push({ assetId, amount: amount2 });
         }
       }
       changeIndex = outputs.length;
@@ -44391,7 +46957,7 @@ var Wallet2 = class _Wallet extends ReadonlyWallet {
             totals.set(a.assetId, (totals.get(a.assetId) ?? 0n) + a.amount);
           }
         }
-        selfAssets = [...totals].map(([assetId, amount]) => ({ assetId, amount }));
+        selfAssets = [...totals].map(([assetId, amount2]) => ({ assetId, amount: amount2 }));
         const selfReceiver = {
           address: arkAddress.encode(),
           assets: selfAssets
@@ -44812,11 +47378,11 @@ var OnchainWallet = class _OnchainWallet {
    * @returns Selected inputs, change amount, and calculated fee
    * @throws Error if fee estimation fails to converge within max iterations
    */
-  estimateFeesAndSelectCoins(coins, amount, feeRate, recipientAddress) {
+  estimateFeesAndSelectCoins(coins, amount2, feeRate, recipientAddress) {
     const MAX_ITERATIONS = 10;
     let fee = 0;
     for (let i = 0; i < MAX_ITERATIONS; i++) {
-      const totalNeeded = amount + fee;
+      const totalNeeded = amount2 + fee;
       const selected = selectCoins(coins, totalNeeded);
       const estimator = TxWeightEstimator.create();
       for (const _ of selected.inputs) {
@@ -45098,14 +47664,14 @@ function verifyLegacy(message, sigBytes, addressHash) {
   if (flag2 < 27 || flag2 > 34) {
     return false;
   }
-  const compressed2 = flag2 >= 31;
-  const recoveryId = compressed2 ? flag2 - 31 : flag2 - 27;
+  const compressed3 = flag2 >= 31;
+  const recoveryId = compressed3 ? flag2 - 31 : flag2 - 27;
   const compactSig = sigBytes.subarray(1, 65);
   const msgHash = bitcoinMessageHash(message);
   try {
     const sig = secp256k1.Signature.fromBytes(compactSig, "compact").addRecoveryBit(recoveryId);
     const point2 = sig.recoverPublicKey(msgHash);
-    const pubkeyBytes = point2.toBytes(compressed2);
+    const pubkeyBytes = point2.toBytes(compressed3);
     return equalBytes(hash160(pubkeyBytes), addressHash);
   } catch {
     return false;
@@ -46617,7 +49183,7 @@ var ArkadeContract = class _ArkadeContract {
    * balances, and re-derivable offline via the `"arkade"` contract handler.
    * Idempotent — re-registering the same script is a no-op.
    */
-  async register(options) {
+  async register(options2) {
     const manager = this.client.contractManager;
     if (!manager) {
       throw new Error(
@@ -46626,8 +49192,8 @@ var ArkadeContract = class _ArkadeContract {
     }
     return manager.createContract({
       ...this.toContractParams(),
-      label: options?.label,
-      metadata: options?.metadata
+      label: options2?.label,
+      metadata: options2?.metadata
     });
   }
   /**
@@ -46699,7 +49265,7 @@ var ArkadeTransactionBuilder = class {
     this.changeScript = script;
     return this;
   }
-  to(scriptOrOutputs, amount) {
+  to(scriptOrOutputs, amount2) {
     if (Array.isArray(scriptOrOutputs)) {
       for (const [i, out] of scriptOrOutputs.entries()) {
         if (out.amount === void 0) {
@@ -46708,8 +49274,8 @@ var ArkadeTransactionBuilder = class {
       }
       this.outputs.push(...scriptOrOutputs);
     } else {
-      if (amount === void 0) throw new Error("to(script, amount): amount is required");
-      this.outputs.push({ script: scriptOrOutputs, amount });
+      if (amount2 === void 0) throw new Error("to(script, amount): amount is required");
+      this.outputs.push({ script: scriptOrOutputs, amount: amount2 });
     }
     return this;
   }
@@ -46846,10 +49412,10 @@ var ArkadeTransactionBuilder = class {
     }
     return idxs;
   }
-  async selectCoin(amount) {
+  async selectCoin(amount2) {
     const utxos = await this.contract.getUtxos();
     if (utxos.length === 0) throw new Error("no spendable coins for this contract");
-    const covering = utxos.filter((u) => BigInt(u.value) >= amount).sort((a, b) => a.value - b.value);
+    const covering = utxos.filter((u) => BigInt(u.value) >= amount2).sort((a, b) => a.value - b.value);
     if (covering.length > 0) return covering[0];
     return [...utxos].sort((a, b) => b.value - a.value)[0];
   }
@@ -47000,6 +49566,7 @@ var PINS = {
     checkpointForfeitPub: "02dfcaec558c7e78cf3e38b898ba8a43cfb5727266bae32c5c5b3aeb32c558aa0b",
     checkpointTapscript: "03080040b27520dfcaec558c7e78cf3e38b898ba8a43cfb5727266bae32c5c5b3aeb32c558aa0bac",
     checkpointDelaySeconds: 4096,
+    emulatorOrigin: "https://emulator.mutinynet.arkade.sh",
     emulatorSignerPub: "03f823b9b2febc81f4af967e77aed2f541cbd3397c6d8f5a72e32eb7b471af889a",
     policyExitDelay: 4608,
     boardExitDelay: 604672,
@@ -47020,6 +49587,7 @@ var PINS = {
     checkpointForfeitPub: "03b43a8363118c084a04d4f6a50ebfa58e81957f8cceceb2aee0ab64c9fd2d9977",
     checkpointTapscript: "039e0440b27520b43a8363118c084a04d4f6a50ebfa58e81957f8cceceb2aee0ab64c9fd2d9977ac",
     checkpointDelaySeconds: 605184,
+    emulatorOrigin: "https://emulator.arkade.computer",
     emulatorSignerPub: "0239c196415da47b26456a101daaa12ba9e445bfe153197f1e2b750bf40e52092e",
     policyExitDelay: 605184,
     boardExitDelay: 7776256,
@@ -47148,7 +49716,7 @@ function validateSpendingPolicy(value, network) {
   if (p.program !== SPENDING_POLICY_PROGRAM) throw new Error("unsupported spending policy program");
   if (p.schema !== POLICY_VERSION) throw new Error("unsupported spending policy schema");
   if (p.period !== SPENDING_POLICY_PERIOD) throw new Error("unsupported spending policy period");
-  const policy = {
+  const policy2 = {
     program: SPENDING_POLICY_PROGRAM,
     schema: POLICY_VERSION,
     period: SPENDING_POLICY_PERIOD,
@@ -47157,16 +49725,16 @@ function validateSpendingPolicy(value, network) {
     absoluteFeeCapSats: requireBound(p.absoluteFeeCapSats, bounds.absoluteFeeCapSats, "absolute fee cap"),
     feerateCapSatPerV: requireBound(p.feerateCapSatPerV, bounds.feerateCapSatPerV, "feerate cap")
   };
-  if (policy.periodAllowanceSats < policy.txRecipientCapSats) {
+  if (policy2.periodAllowanceSats < policy2.txRecipientCapSats) {
     throw new Error("period allowance must be at least the transaction recipient cap");
   }
-  return policy;
+  return policy2;
 }
-function canonicalSpendingPolicy(policy, network) {
-  return JSON.stringify(validateSpendingPolicy(policy, network));
+function canonicalSpendingPolicy(policy2, network) {
+  return JSON.stringify(validateSpendingPolicy(policy2, network));
 }
-function spendingPolicyDigest(policy, network) {
-  return bytesToHex3(sha256(encodeUtf8(canonicalSpendingPolicy(policy, network))));
+function spendingPolicyDigest(policy2, network) {
+  return bytesToHex3(sha256(encodeUtf8(canonicalSpendingPolicy(policy2, network))));
 }
 
 // src/lib/vault/light/contract.ts
@@ -47176,12 +49744,12 @@ var LIGHT_POLICY_SCHEMA = "vault-light-spending-policy-v1";
 var LIGHT_DESCRIPTOR_SCHEMA = "vaulted-light/descriptor-v1";
 function validateLightPolicy(value, network) {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Light policy required");
-  const policy = value;
-  if (policy.program !== LIGHT_PROGRAM || policy.schema !== LIGHT_POLICY_SCHEMA) {
+  const policy2 = value;
+  if (policy2.program !== LIGHT_PROGRAM || policy2.schema !== LIGHT_POLICY_SCHEMA) {
     throw new Error("unsupported Light policy");
   }
   const base = defaultSpendingPolicy(network);
-  const validated = validateSpendingPolicy({ ...policy, program: base.program, schema: base.schema }, network);
+  const validated = validateSpendingPolicy({ ...policy2, program: base.program, schema: base.schema }, network);
   return { ...validated, program: LIGHT_PROGRAM, schema: LIGHT_POLICY_SCHEMA };
 }
 function lightPolicyDigest(value, network) {
@@ -47231,7 +49799,7 @@ var LightScript = class extends VtxoScript {
 function buildLightDescriptor(input) {
   if (!/^[0-9a-f]{64}$/.test(input.vaultId)) throw new Error("Light vault ID must be 32-byte hex");
   const params = validateLightScriptParams(input);
-  const policy = validateLightPolicy(input.spendingPolicy, params.network);
+  const policy2 = validateLightPolicy(input.spendingPolicy, params.network);
   const script = new LightScript(params);
   return {
     schema: LIGHT_DESCRIPTOR_SCHEMA,
@@ -47239,8 +49807,8 @@ function buildLightDescriptor(input) {
     program: LIGHT_PROGRAM,
     vaultId: input.vaultId,
     ...params,
-    spendingPolicy: policy,
-    spendingPolicyDigest: lightPolicyDigest(policy, params.network),
+    spendingPolicy: policy2,
+    spendingPolicyDigest: lightPolicyDigest(policy2, params.network),
     scriptPubKey: hex.encode(script.pkScript)
   };
 }
@@ -47282,6 +49850,332 @@ var p256 = /* @__PURE__ */ ecdsa(p256_Point, sha256);
 // src/lib/vault/status.ts
 init_define_import_meta_env();
 
+// src/lib/vault/spendingEnrollment.ts
+init_define_import_meta_env();
+init_secp256k1();
+init_sha2();
+init_base();
+
+// src/lib/vault/vtxo/board.ts
+init_define_import_meta_env();
+init_secp256k1();
+init_sha2();
+init_base();
+
+// src/lib/vault/vtxo/walletWorkerNames.ts
+init_define_import_meta_env();
+init_sha2();
+init_base();
+function vaultId(value) {
+  const id = String(value || "").trim();
+  if (!id) throw new Error("Vault ID required for wallet storage");
+  return id;
+}
+function vaultWalletNamespace(value) {
+  return hex.encode(sha256(new TextEncoder().encode(vaultId(value)))).slice(0, 32);
+}
+function vaultWalletDatabase(value) {
+  return vaultWalletDatabaseForNamespace(vaultWalletNamespace(value));
+}
+function requireNamespace(value) {
+  if (!/^[0-9a-f]{32}$/.test(value)) throw new Error("Invalid Vault wallet namespace");
+  return value;
+}
+function vaultWalletDatabaseForNamespace(value) {
+  return `arkade-vault-wallet:${requireNamespace(value)}:wallet`;
+}
+
+// src/lib/vault/vtxo/board.ts
+var BOARDING_PROGRAM = "vault-board-v1";
+var BOARDING_SCHEMA = "arkade-vault/board-v1";
+var BOARDING_TEMPLATE = "vault-board-v1-boarding-vault-and-operator";
+var BOARDING_EXIT_DELAY = networkPins("mutinynet").boardExitDelay;
+var BOARDING_EXIT_DELAY_UNIT = "seconds";
+var MUTINYNET_OPERATOR_SIGNER_PUB = networkPins("mutinynet").operatorSignerPub;
+var BOARDING_KEY_SALT = sha256(encodeUtf8("arkade-vault/vault-board-v1/boarding-key/hkdf-sha256-v1"));
+var SECP256K1_ORDER = BigInt("0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141");
+function boardingProgramDigestFor(network) {
+  const pins = networkPins(network);
+  return bytesToHex3(
+    sha256(
+      encodeUtf8(
+        JSON.stringify({
+          schema: BOARDING_SCHEMA,
+          program: BOARDING_PROGRAM,
+          template: BOARDING_TEMPLATE,
+          exitDelay: pins.boardExitDelay,
+          exitDelayUnit: BOARDING_EXIT_DELAY_UNIT
+        })
+      )
+    )
+  );
+}
+var BOARDING_PROGRAM_DIGEST = boardingProgramDigestFor("mutinynet");
+function requireCompressedKey(value, name) {
+  const key = requireLowerHex(value, name, 33);
+  const bytes2 = hexToBytes3(key);
+  if (bytes2[0] !== 2 && bytes2[0] !== 3 || !secp256k1.utils.isValidPublicKey(bytes2, true)) {
+    throw new Error(`${name} is not a compressed secp256k1 key`);
+  }
+  return key;
+}
+function requireBoardingDescriptor(raw2, expected) {
+  if (!raw2 || typeof raw2 !== "object") throw new Error("vault-board-v1 descriptor required");
+  const pins = networkPins(expected.network);
+  const descriptor = raw2;
+  if (descriptor.schema !== BOARDING_SCHEMA || descriptor.program !== BOARDING_PROGRAM || descriptor.template !== BOARDING_TEMPLATE || descriptor.network !== expected.network || descriptor.exitDelay !== pins.boardExitDelay || descriptor.exitDelayUnit !== BOARDING_EXIT_DELAY_UNIT) {
+    throw new Error("vault-board-v1 descriptor does not match this release");
+  }
+  const boardingPub = requireCompressedKey(descriptor.boardingPub, "boardingPub");
+  const recoveryPub = requireCompressedKey(descriptor.recoveryPhonePub, "recoveryPhonePub");
+  const cosignerPub = requireCompressedKey(descriptor.vaultBoardCosignerPub, "vaultBoardCosignerPub");
+  const operatorPub = requireCompressedKey(descriptor.operatorPub, "operatorPub");
+  if (operatorPub !== pins.operatorSignerPub) {
+    throw new Error("vault-board-v1 Operator does not match this release");
+  }
+  if (boardingPub !== expected.boardingPub || recoveryPub !== requireCompressedKey(expected.phonePub, "phoneBip340Pub")) {
+    throw new Error("vault-board-v1 descriptor keys do not match this wallet");
+  }
+  const xOnly3 = [boardingPub, recoveryPub, cosignerPub, operatorPub].map((key) => key.slice(2));
+  if (new Set(xOnly3).size !== xOnly3.length) throw new Error("vault-board-v1 roles must use distinct keys");
+  const program = createBoardingProgramScript(
+    {
+      name: BOARDING_PROGRAM,
+      boardingPubKey: hexToBytes3(boardingPub).slice(1),
+      cosignerPubKey: hexToBytes3(cosignerPub).slice(1),
+      recoveryPubKey: hexToBytes3(recoveryPub).slice(1)
+    },
+    hexToBytes3(pins.operatorSignerPub).slice(1),
+    { type: "seconds", value: BigInt(pins.boardExitDelay) }
+  );
+  const script = requireLowerHex(descriptor.script, "vault-board-v1 script", 34);
+  const address = program.onchainAddress(getNetwork(pins.sdkNetwork));
+  if (hex.encode(program.pkScript) !== script || descriptor.address !== address) {
+    throw new Error("vault-board-v1 script or address does not match its exact program");
+  }
+  return descriptor;
+}
+function requireBoardingStatus(status, expectedBoardingPub) {
+  if (status.vtxoBoardingProgram !== BOARDING_PROGRAM || !status.vtxoBoardingActive) {
+    throw new Error("vault is not enrolled for vault-board-v1");
+  }
+  const descriptor = requireBoardingDescriptor(status.vtxoBoardingDescriptor, {
+    vaultId: status.vaultId,
+    phonePub: String(status.phoneBip340Pub || ""),
+    boardingPub: expectedBoardingPub,
+    network: status.network
+  });
+  if (descriptor.script !== String(status.vtxoBoardingScript || "").toLowerCase() || descriptor.address !== status.vtxoBoardingAddress || descriptor.exitDelay !== status.vtxoBoardingExitDelay || descriptor.exitDelayUnit !== status.vtxoBoardingExitDelayUnit) {
+    throw new Error("vault-board-v1 status descriptor changed");
+  }
+  if (!status.vtxoBoardingDescriptorHash || !/^[0-9a-f]{64}$/.test(status.vtxoBoardingDescriptorHash)) {
+    throw new Error("vault-board-v1 descriptor hash required");
+  }
+  return descriptor;
+}
+
+// src/lib/vault/vtxo/script.ts
+init_define_import_meta_env();
+init_base();
+var VAULT_POLICY_V1_EXIT_DELAY_UNIT = "seconds";
+var VAULT_POLICY_V1_BIP68_SECONDS_MOD = 512n;
+function requireXOnly(value, name) {
+  if (!(value instanceof Uint8Array) || value.length !== 32) {
+    throw new Error(`${name} must be a 32-byte x-only pubkey`);
+  }
+  return value;
+}
+function policyPins(params) {
+  if (params.network) return networkPins(params.network);
+  const matches = SUPPORTED_NETWORKS.filter(
+    (network) => BigInt(networkPins(network).policyExitDelay) === params.exitDelay
+  );
+  if (matches.length === 1) return networkPins(matches[0]);
+  throw new Error(
+    `vault-policy-v1 exit delay is frozen at ${networkPins("mutinynet").policyExitDelay} or ${networkPins("mainnet").policyExitDelay} seconds`
+  );
+}
+function assertVaultPolicyV1Params(params) {
+  const userPub = requireXOnly(params.userPub, "userPub");
+  const vtxoVaultCosignerPub = requireXOnly(params.vtxoVaultCosignerPub, "vtxoVaultCosignerPub");
+  const arkdServerPub = requireXOnly(params.arkdServerPub, "arkdServerPub");
+  const delegatePub = requireXOnly(params.delegatePub, "delegatePub");
+  const exitDevicePub = requireXOnly(params.exitDevicePub, "exitDevicePub");
+  if (params.exitMode !== void 0 && params.exitMode !== "hardware" && params.exitMode !== "device") {
+    throw new Error("unsupported Spending recovery mode");
+  }
+  const exitHardwarePub = params.exitMode === "device" ? void 0 : requireXOnly(params.exitHardwarePub, "exitHardwarePub");
+  if (params.exitMode === "device" && (params.exitHardwarePub || params.exitRecoveryPub || !exitDevicePub.every((b, i) => b === userPub[i]))) {
+    throw new Error("device recovery requires only the enrolled Spending owner");
+  }
+  const exitRecoveryPub = params.exitRecoveryPub ? requireXOnly(params.exitRecoveryPub, "exitRecoveryPub") : void 0;
+  if (params.exitDelayUnit !== VAULT_POLICY_V1_EXIT_DELAY_UNIT) {
+    throw new Error("vault-policy-v1 exit delay unit must be seconds");
+  }
+  if (params.exitDelay % VAULT_POLICY_V1_BIP68_SECONDS_MOD !== 0n) {
+    throw new Error("vault-policy-v1 exit delay must be a BIP68 seconds multiple of 512");
+  }
+  const pins = policyPins(params);
+  if (params.exitDelay < BigInt(pins.arkdMinExitDelay)) {
+    throw new Error("vault-policy-v1 exit delay is below the arkd minimum");
+  }
+  if (params.exitDelay !== BigInt(pins.policyExitDelay)) {
+    throw new Error(`vault-policy-v1 exit delay is frozen at ${pins.policyExitDelay} seconds`);
+  }
+  const pinned = hex.decode(pins.delegatePub.slice(2));
+  if (delegatePub.length !== pinned.length || !delegatePub.every((b, i) => b === pinned[i])) {
+    throw new Error("delegatePub must be the pinned public delegate");
+  }
+  return {
+    userPub,
+    vtxoVaultCosignerPub,
+    arkdServerPub,
+    delegatePub,
+    network: pins.network,
+    exitDelay: BigInt(pins.policyExitDelay),
+    exitDelayUnit: VAULT_POLICY_V1_EXIT_DELAY_UNIT,
+    exitDevicePub,
+    ...params.exitMode ? { exitMode: params.exitMode } : {},
+    ...exitHardwarePub ? { exitHardwarePub } : {},
+    ...exitRecoveryPub ? { exitRecoveryPub } : {}
+  };
+}
+var VaultPolicyV1Script = class extends VtxoScript {
+  params;
+  forfeitScript;
+  exitScript;
+  delegateScript;
+  constructor(params) {
+    const typed = assertVaultPolicyV1Params(params);
+    const forfeit = MultisigTapscript.encode({
+      pubkeys: [typed.userPub, typed.vtxoVaultCosignerPub, typed.arkdServerPub]
+    });
+    const exit = CSVMultisigTapscript.encode({
+      timelock: { type: typed.exitDelayUnit, value: typed.exitDelay },
+      pubkeys: typed.exitMode === "device" ? [typed.exitDevicePub] : typed.exitRecoveryPub ? [typed.exitHardwarePub, typed.exitRecoveryPub] : [typed.exitDevicePub, typed.exitHardwarePub]
+    });
+    const delegate2 = MultisigTapscript.encode({
+      pubkeys: [typed.userPub, typed.vtxoVaultCosignerPub, typed.delegatePub, typed.arkdServerPub]
+    });
+    super([forfeit.script, exit.script, delegate2.script]);
+    this.params = typed;
+    this.forfeitScript = hex.encode(forfeit.script);
+    this.exitScript = hex.encode(exit.script);
+    this.delegateScript = hex.encode(delegate2.script);
+  }
+  /** Collaborative spend/intent leaf. SDK-native name matches DefaultVtxo.forfeit(). */
+  forfeit() {
+    return this.findLeaf(this.forfeitScript);
+  }
+  exit() {
+    return this.findLeaf(this.exitScript);
+  }
+  delegate() {
+    return this.findLeaf(this.delegateScript);
+  }
+};
+
+// src/lib/vault/spendingEnrollment.ts
+var SPENDING_ONLY_TEMPLATE = "vaulted-spending-v1";
+var SPENDING_ENROLLMENT_SCHEMA = "arkade-vault/spending-enrollment-v1";
+function publicKey(value, curve = secp256k1) {
+  if (typeof value !== "string" || !/^(02|03)[0-9a-f]{64}$/.test(value) || !curve.utils.isValidPublicKey(hex.decode(value))) {
+    throw new Error("Spending enrollment requires canonical compressed public keys");
+  }
+  return value;
+}
+function exactKeys(input, canonical2) {
+  if (Object.keys(input).length !== Object.keys(canonical2).length || Object.keys(canonical2).some((key) => !Object.hasOwn(input, key))) {
+    throw new Error("Spending enrollment contains unsupported fields");
+  }
+}
+function validateSpendingEnrollment(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    throw new Error("Spending enrollment descriptor required");
+  const d = value;
+  const network = requireSupportedVaultNetwork(d.network);
+  const pins = networkPins(network);
+  if (d.schema !== SPENDING_ENROLLMENT_SCHEMA || d.template !== SPENDING_ONLY_TEMPLATE || d.protectionTier !== "light" || d.exitMode !== "device" || d.exitDelayUnit !== "seconds" || d.exitDelay !== pins.policyExitDelay || !/^[0-9a-f]{32}$/.test(d.vaultId)) {
+    throw new Error("Spending enrollment configuration does not match this release");
+  }
+  const phonePub = publicKey(d.phonePub), phoneDirectP256 = publicKey(d.phoneDirectP256, p256);
+  const cosignerPub = publicKey(d.cosignerPub), operatorPub = publicKey(d.operatorPub), delegatePub = publicKey(d.delegatePub);
+  if (operatorPub !== pins.operatorSignerPub || delegatePub !== pins.delegatePub || new Set([phonePub, cosignerPub, operatorPub, delegatePub].map((key) => key.slice(2))).size !== 4) {
+    throw new Error("Spending enrollment signer configuration changed");
+  }
+  const policy2 = validateSpendingPolicy(d.spendingPolicy, network);
+  const digest2 = spendingPolicyDigest(policy2, network);
+  if (d.spendingPolicyDigest !== digest2) throw new Error("Spending enrollment policy digest changed");
+  const script = new VaultPolicyV1Script({
+    userPub: hex.decode(phonePub.slice(2)),
+    vtxoVaultCosignerPub: hex.decode(cosignerPub.slice(2)),
+    arkdServerPub: hex.decode(operatorPub.slice(2)),
+    delegatePub: hex.decode(delegatePub.slice(2)),
+    exitDevicePub: hex.decode(phonePub.slice(2)),
+    exitMode: "device",
+    network,
+    exitDelay: BigInt(d.exitDelay),
+    exitDelayUnit: "seconds"
+  });
+  const address = new ArkAddress(hex.decode(operatorPub.slice(2)), script.tweakedPublicKey, pins.arkHrp).encode();
+  if (hex.encode(script.pkScript) !== d.script || address !== d.address)
+    throw new Error("Spending enrollment script or address changed");
+  const b = requireBoardingDescriptor(d.boarding, {
+    vaultId: d.vaultId,
+    network,
+    phonePub,
+    boardingPub: d.boarding?.boardingPub
+  });
+  const boarding = {
+    schema: b.schema,
+    program: b.program,
+    template: b.template,
+    network: b.network,
+    boardingPub: b.boardingPub,
+    recoveryPhonePub: b.recoveryPhonePub,
+    vaultBoardCosignerPub: b.vaultBoardCosignerPub,
+    operatorPub: b.operatorPub,
+    exitDelay: b.exitDelay,
+    exitDelayUnit: b.exitDelayUnit,
+    script: b.script,
+    address: b.address
+  };
+  exactKeys(b, boarding);
+  const canonical2 = {
+    schema: d.schema,
+    template: d.template,
+    vaultId: d.vaultId,
+    network,
+    protectionTier: "light",
+    phonePub,
+    phoneDirectP256,
+    cosignerPub,
+    operatorPub,
+    delegatePub,
+    exitMode: "device",
+    exitDelay: d.exitDelay,
+    exitDelayUnit: "seconds",
+    spendingPolicy: policy2,
+    spendingPolicyDigest: digest2,
+    script: d.script,
+    address,
+    boarding
+  };
+  exactKeys(d, canonical2);
+  return canonical2;
+}
+function spendingEnrollmentHash(value) {
+  return hex.encode(sha256(new TextEncoder().encode(JSON.stringify(validateSpendingEnrollment(value)))));
+}
+function requireSpendingEnrollmentStatus(status) {
+  const d = validateSpendingEnrollment(status.spendingDescriptor);
+  if (!status.enrolled || status.templateVersion !== d.template || status.protectionTier !== d.protectionTier || status.vaultId !== d.vaultId || status.network !== d.network || status.phoneBip340Pub !== d.phonePub || status.phoneDirectP256 !== d.phoneDirectP256 || status.vtxoVaultCosignerPub !== d.cosignerPub || status.vtxoDelegatePub !== d.delegatePub || status.spendingArkScript !== d.script || status.spendingArkAddress !== d.address || status.spendingPolicyDigest !== d.spendingPolicyDigest || spendingPolicyDigest(validateSpendingPolicy(status.spendingPolicy, d.network), d.network) !== d.spendingPolicyDigest || status.externalOwnerWalletPub || status.recoveryKeyPub || status.recoveryPub || status.savingsAddress || status.savingsScript || status.vtxoExitDelay !== d.exitDelay || status.vtxoExitDelayUnit !== d.exitDelayUnit || status.vtxoBoardingDescriptorHash !== spendingEnrollmentHash(d)) {
+    throw new Error("Spending status does not match its enrollment");
+  }
+  requireBoardingStatus(status, d.boarding.boardingPub);
+  return d;
+}
+
 // src/lib/vault/light/status.ts
 init_define_import_meta_env();
 init_base();
@@ -47292,10 +50186,10 @@ function requireLightStatus(status) {
     throw new Error("Light status identity mismatch");
   if (status.lightDescriptorHash !== lightDescriptorDigest(descriptor))
     throw new Error("Light descriptor digest mismatch");
-  const policy = validateLightPolicy(status.spendingPolicy, descriptor.network);
-  if (lightPolicyDigest(policy, descriptor.network) !== descriptor.spendingPolicyDigest || status.spendingPolicyDigest !== descriptor.spendingPolicyDigest)
+  const policy2 = validateLightPolicy(status.spendingPolicy, descriptor.network);
+  if (lightPolicyDigest(policy2, descriptor.network) !== descriptor.spendingPolicyDigest || status.spendingPolicyDigest !== descriptor.spendingPolicyDigest)
     throw new Error("Light policy mismatch");
-  if (policy.txRecipientCapSats !== status.txCap || policy.periodAllowanceSats !== status.periodAllowance || policy.absoluteFeeCapSats !== status.absoluteFeeCap || policy.feerateCapSatPerV !== status.feerateCapSatVb)
+  if (policy2.txRecipientCapSats !== status.txCap || policy2.periodAllowanceSats !== status.periodAllowance || policy2.absoluteFeeCapSats !== status.absoluteFeeCap || policy2.feerateCapSatPerV !== status.feerateCapSatVb)
     throw new Error("Light limit fields mismatch");
   if (![status.periodSpent, status.periodRemaining].every((v) => Number.isSafeInteger(v) && v >= 0) || status.periodRemaining !== Math.max(0, status.periodAllowance - status.periodSpent))
     throw new Error("Light allowance state invalid");
@@ -48141,13 +51035,14 @@ init_sha2();
 // src/lib/vault/protectionTier.ts
 init_define_import_meta_env();
 function requireProtectionTier(value) {
-  if (value !== "standard" && value !== "advanced") throw new Error("unsupported protection tier");
+  if (value !== "light" && value !== "standard" && value !== "advanced") throw new Error("unsupported protection tier");
   return value;
 }
 function requireProtectionTierMatchesRecovery(tier, recoveryPub) {
   const selected = requireProtectionTier(tier);
   const hasRecovery = typeof recoveryPub === "string" && recoveryPub.trim().length > 0;
-  if (selected === "standard" && hasRecovery) throw new Error("Standard protection must not include a recovery key");
+  if ((selected === "standard" || selected === "light") && hasRecovery)
+    throw new Error("Standard protection must not include a recovery key");
   if (selected === "advanced" && !hasRecovery) throw new Error("Advanced protection requires a recovery key");
   return selected;
 }
@@ -48222,6 +51117,182 @@ init_define_import_meta_env();
 
 // src/lib/vault/program/connectorOrigin.ts
 init_define_import_meta_env();
+
+// src/lib/vault/ledgerSetup.ts
+init_define_import_meta_env();
+
+// src/lib/vault/program/ledgerNativeKeys.ts
+init_define_import_meta_env();
+init_secp256k1();
+init_base();
+init_bip32();
+var LEDGER_NATIVE_TEMPLATE = "phone-ledger-guardian-savings-v1";
+var DOMAIN = "vaulted/ledger-guardian-savings-v1";
+var HARDENED = 2147483648;
+function ledgerBip32Versions(network) {
+  requireSupportedVaultNetwork(network);
+  return network === "mainnet" ? { public: 76067358, private: 76066276 } : { public: 70617039, private: 70615956 };
+}
+function lowerHex(value, bytes2, label) {
+  if (typeof value !== "string" || !new RegExp(`^[0-9a-f]{${bytes2 * 2}}$`).test(value)) {
+    throw new Error(`${label} must be canonical hex`);
+  }
+  return hex.decode(value);
+}
+function ledgerAccountKey(origin2, network) {
+  if (!origin2) throw new Error("Ledger account origin required");
+  lowerHex(origin2.fingerprint, 4, "account fingerprint");
+  const coinType = network === "mainnet" ? 0 : 1;
+  if (!Array.isArray(origin2.path) || origin2.path.length !== 3 || origin2.path[0] !== HARDENED + 86 || origin2.path[1] !== HARDENED + coinType || !Number.isInteger(origin2.path[2]) || origin2.path[2] < HARDENED || origin2.path[2] > HARDENED + 100)
+    throw new Error("Ledger Savings requires a BIP86 account origin");
+  const key = HDKey.fromExtendedKey(origin2.xpub, ledgerBip32Versions(network));
+  if (key.privateKey || key.publicExtendedKey !== origin2.xpub || key.depth !== 3 || key.index !== origin2.path[2]) {
+    throw new Error("Ledger Savings requires the matching public account xpub");
+  }
+  return key;
+}
+function ledgerAccountExpression(origin2, network) {
+  ledgerAccountKey(origin2, network);
+  return `[${origin2.fingerprint}/${origin2.path.map((i) => `${i - HARDENED}'`).join("/")}]${origin2.xpub}`;
+}
+function encodeFields(fields) {
+  const encoder7 = new TextEncoder();
+  const parts = fields.map((field2) => encoder7.encode(field2));
+  const bytes2 = new Uint8Array(parts.reduce((n, p) => n + 4 + p.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    new DataView(bytes2.buffer).setUint32(offset, part.length, false);
+    bytes2.set(part, offset + 4);
+    offset += 4 + part.length;
+  }
+  return bytes2;
+}
+function ledgerSavingsContextDigest(input) {
+  if (input.templateVersion !== LEDGER_NATIVE_TEMPLATE) throw new Error("Ledger Savings template mismatch");
+  requireSupportedVaultNetwork(input.network);
+  lowerHex(input.vaultId, 16, "vault ID");
+  lowerHex(input.policyDigest, 32, "policy digest");
+  const direct = lowerHex(input.phoneDirectP256, 33, "phone direct key");
+  if (!p256.utils.isValidPublicKey(direct, true)) throw new Error("invalid phone direct key");
+  const accounts = [input.phone, input.hardware, ...input.recovery ? [input.recovery] : []];
+  const baseKeys = [input.vaultCosignerBase];
+  const pubs = accounts.map((origin2) => hex.encode(ledgerAccountKey(origin2, input.network).publicKey));
+  for (const base of baseKeys) {
+    const pub = lowerHex(base, 33, "cosigner base");
+    if (!secp256k1.utils.isValidPublicKey(pub, true)) throw new Error("invalid cosigner base");
+    pubs.push(base);
+  }
+  const xonlys = pubs.map((pub) => hex.encode(xOnlyFromCompressed(pub)));
+  const forbidden = [
+    TAPROOT_NUMS_XONLY,
+    hex.encode(secp256k1.Point.BASE.toBytes(true).slice(1)),
+    hex.encode(secp256k1.Point.BASE.multiply(2n).toBytes(true).slice(1))
+  ];
+  if (new Set(xonlys).size !== xonlys.length || xonlys.some((pub) => forbidden.includes(pub))) {
+    throw new Error("Ledger Savings authorities must be distinct non-fixture points");
+  }
+  return taggedHash4(
+    `${DOMAIN}/context`,
+    encodeFields([
+      input.templateVersion,
+      input.network,
+      input.vaultId,
+      input.recovery ? "advanced" : "standard",
+      input.policyDigest,
+      ...accounts.map((origin2) => ledgerAccountExpression(origin2, input.network)),
+      input.phoneDirectP256,
+      ...baseKeys
+    ])
+  );
+}
+function ledgerSavingsChild(parent, branch, index = 0) {
+  if (!Number.isInteger(branch) || branch < 0 || branch > 3 || index !== 0) {
+    throw new Error("unenrolled Ledger Savings coordinate");
+  }
+  return exactChild(parent, branch, index);
+}
+function exactChild(parent, branch, index) {
+  const step = parent.deriveChild(branch);
+  let child;
+  try {
+    child = step.deriveChild(index);
+    if (step.index !== branch || child.index !== index) throw new Error("invalid Ledger Savings child");
+    return child;
+  } catch (error) {
+    child?.wipePrivateData();
+    throw error;
+  } finally {
+    step.wipePrivateData();
+  }
+}
+function ledgerSavingsInternalParent(input) {
+  return new HDKey({
+    publicKey: hex.decode(`02${TAPROOT_NUMS_XONLY}`),
+    chainCode: taggedHash4(`${DOMAIN}/internal`, ledgerSavingsContextDigest(input)),
+    versions: ledgerBip32Versions(input.network)
+  });
+}
+function ledgerSavingsGuardianParent(input) {
+  return new HDKey({
+    publicKey: hex.decode(input.vaultCosignerBase),
+    chainCode: taggedHash4(`${DOMAIN}/guardian`, ledgerSavingsContextDigest(input)),
+    versions: ledgerBip32Versions(input.network)
+  });
+}
+function ledgerGuardianInitiateBranch(input, claimant, change) {
+  if (!familyClaimants(Boolean(input.recovery)).includes(claimant)) throw new Error("unenrolled recovery claimant");
+  if (change !== 0 && change !== 1) throw new Error("unenrolled Guardian initiation coordinate");
+  return { phone: 0, hardware: 2, recovery: 4 }[claimant] + change;
+}
+function ledgerGuardianClawbackBranch(input, claimant, guardian) {
+  const claimants = familyClaimants(Boolean(input.recovery));
+  if (!claimants.includes(claimant) || !claimants.includes(guardian) || guardian === claimant)
+    throw new Error("unenrolled Guardian cancellation authority");
+  const branches = {
+    phone: { hardware: 6, recovery: 8 },
+    hardware: { phone: 10, recovery: 12 },
+    recovery: { phone: 14, hardware: 16 }
+  };
+  return branches[claimant][guardian];
+}
+function requireGuardianParent(input, parent) {
+  if (parent.publicExtendedKey !== ledgerSavingsGuardianParent(input).publicExtendedKey)
+    throw new Error("Guardian parent does not match enrollment");
+}
+function ledgerGuardianInitiateChild(input, parent, claimant, change) {
+  const branch = ledgerGuardianInitiateBranch(input, claimant, change);
+  requireGuardianParent(input, parent);
+  return exactChild(parent, branch, 0);
+}
+function ledgerGuardianClawbackChild(input, parent, claimant, guardian) {
+  const branch = ledgerGuardianClawbackBranch(input, claimant, guardian);
+  requireGuardianParent(input, parent);
+  return exactChild(parent, branch, 0);
+}
+var LEDGER_RECOVERY_BRANCH = {
+  claim: 4,
+  clawback: 6,
+  cancel: 8,
+  quarantine: 10
+};
+function ledgerRecoveryChild(parent, role) {
+  if (!Object.prototype.hasOwnProperty.call(LEDGER_RECOVERY_BRANCH, role))
+    throw new Error("unknown Ledger recovery key role");
+  return exactChild(parent, LEDGER_RECOVERY_BRANCH[role], 0);
+}
+function ledgerRecoveryInternalParent(input, claimant, stage) {
+  if (!familyClaimants(Boolean(input.recovery)).includes(claimant)) throw new Error("unenrolled recovery claimant");
+  if (stage !== "pending" && stage !== "quarantine") throw new Error("unknown recovery stage");
+  return new HDKey({
+    publicKey: hex.decode(`02${TAPROOT_NUMS_XONLY}`),
+    chainCode: taggedHash4(
+      `${DOMAIN}/recovery-internal`,
+      ledgerSavingsContextDigest(input),
+      encodeFields([claimant, stage])
+    ),
+    versions: ledgerBip32Versions(input.network)
+  });
+}
 
 // src/lib/vault/setupPlan.ts
 var FORBIDDEN_PUBLIC_KEY_G = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
@@ -48378,6 +51449,9 @@ function buildPending(input) {
   };
 }
 function buildNormal(input) {
+  return buildNormalWithKeys(input);
+}
+function buildNormalWithKeys(input, derived) {
   const phone = xOnlyFromCompressed(input.phonePub);
   const hardware = xOnlyFromCompressed(input.hardwarePub);
   const recovery = input.recoveryPub ? xOnlyFromCompressed(input.recoveryPub) : void 0;
@@ -48391,6 +51465,13 @@ function buildNormal(input) {
   requireDistinct([phone, hardware, ...recovery ? [recovery] : [], ...tweaks], "normal");
   const admin = checksigScript([phone, hardware]);
   const role = { phone, hardware, recovery };
+  if (derived) {
+    if (Object.keys(derived.initiateUserPubs).sort().join() !== [...claimants].sort().join()) {
+      throw new Error("initiate user keys must match the claimants");
+    }
+    for (const claimant of claimants) role[claimant] = xOnlyFromCompressed(derived.initiateUserPubs[claimant]);
+    requireDistinct([phone, hardware, ...claimants.map((c) => role[c]), ...tweaks], "normal derived");
+  }
   const initiate = claimants.map((claimant) => {
     const pair = input.initiate[claimant];
     const pub = role[claimant];
@@ -48398,7 +51479,7 @@ function buildNormal(input) {
     return checksigScript([pub, xOnlyFromCompressed(pair.vault), xOnlyFromCompressed(pair.arkade)]);
   });
   const scripts = [admin, ...initiate];
-  const internal = contextInternalKey({
+  const internal = derived?.internalKey ?? contextInternalKey({
     vaultId: input.vaultId,
     claimant: "",
     templateVersion: input.templateVersion
@@ -48670,20 +51751,20 @@ function buildConnectorFamily(input) {
     normalTweaks: pair
   };
 }
-function connectorEnrollmentDigest(input, origin) {
+function connectorEnrollmentDigest(input, origin2) {
   if (input.network !== "mainnet" && input.network !== "mutinynet") throw new Error("unsupported connector network");
   requireProtectionTierMatchesRecovery(input.protectionTier, input.recoveryPub);
-  const policy = validateSpendingPolicy(input.spendingPolicy, input.network);
-  if (policy.absoluteFeeCapSats !== input.absoluteFeeCapSats || policy.feerateCapSatPerV !== input.feerateCapSatPerV)
+  const policy2 = validateSpendingPolicy(input.spendingPolicy, input.network);
+  if (policy2.absoluteFeeCapSats !== input.absoluteFeeCapSats || policy2.feerateCapSatPerV !== input.feerateCapSatPerV)
     throw new Error("connector fee policy mismatch");
   const f = buildConnectorFamily(input);
-  if (hex.encode(origin.publicKey) !== hex.encode(hex.decode(input.hardwarePub)))
+  if (hex.encode(origin2.publicKey) !== hex.encode(hex.decode(input.hardwarePub)))
     throw new Error("hardware origin mismatch");
-  const path = origin.path;
+  const path = origin2.path;
   const coin = input.network === "mainnet" ? 2147483648 : 2147483649;
   const standardPurpose = path[0] === 2147483732 || path[0] === 2147483734;
   const standardPath = path.length === 5 && path[0] === (input.connectorType === "p2wpkh" ? 2147483732 : 2147483734) && path[1] === coin && path[2] >= 2147483648 && path[3] <= 1 && path[4] < 2147483648;
-  if (!Number.isInteger(origin.fingerprint) || origin.fingerprint < 0 || origin.fingerprint > 4294967295 || path.length < 1 || path.length > 255 || path.some((n) => !Number.isInteger(n) || n < 0 || n > 4294967295) || standardPurpose && !standardPath)
+  if (!Number.isInteger(origin2.fingerprint) || origin2.fingerprint < 0 || origin2.fingerprint > 4294967295 || path.length < 1 || path.length > 255 || path.some((n) => !Number.isInteger(n) || n < 0 || n > 4294967295) || standardPurpose && !standardPath)
     throw new Error("hardware origin network or path mismatch");
   const canonical2 = (s) => hex.encode(hex.decode(s));
   const fields = [
@@ -48698,11 +51779,11 @@ function connectorEnrollmentDigest(input, origin) {
     canonical2(input.phoneDirectP256),
     canonical2(input.vaultCosignerBase),
     canonical2(input.arkadeCosignerBase),
-    spendingPolicyDigest(policy, input.network),
+    spendingPolicyDigest(policy2, input.network),
     hex.encode(f.program),
     hex.encode(f.savings.script),
     hex.encode(f.connector.script),
-    origin.fingerprint.toString(16).padStart(8, "0"),
+    origin2.fingerprint.toString(16).padStart(8, "0"),
     path.join("/")
   ];
   for (const role of input.recoveryPub ? ["phone", "hardware", "recovery"] : ["phone", "hardware"]) {
@@ -48749,6 +51830,470 @@ var PIN_FIELD_NAMES = [
 ];
 var STORED_PIN_FIELD_NAMES = [...PIN_FIELD_NAMES, "pinHash"];
 
+// src/lib/vault/program/ledgerRecoveryDescriptor.ts
+init_define_import_meta_env();
+init_secp256k1();
+init_sha2();
+init_base();
+
+// src/lib/vault/program/ledgerEnrollment.ts
+init_define_import_meta_env();
+
+// src/lib/vault/ledgerPhoneBackup.ts
+init_define_import_meta_env();
+
+// src/lib/vault/program/ledgerNativeFamily.ts
+init_define_import_meta_env();
+init_btc_signer();
+
+// src/lib/vault/program/ledgerNativePolicy.ts
+init_define_import_meta_env();
+init_base();
+init_btc_signer();
+function buildLedgerNativeSavings(input) {
+  const claimants = familyClaimants(Boolean(input.recovery));
+  const internal = ledgerSavingsInternalParent(input);
+  const phone = ledgerAccountKey(input.phone, input.network);
+  const hardware = ledgerAccountKey(input.hardware, input.network);
+  const recovery = input.recovery ? ledgerAccountKey(input.recovery, input.network) : void 0;
+  const guardian = ledgerSavingsGuardianParent(input);
+  const keysInfo = [
+    internal.publicExtendedKey,
+    ledgerAccountExpression(input.phone, input.network),
+    ledgerAccountExpression(input.hardware, input.network),
+    guardian.publicExtendedKey,
+    ...input.recovery ? [ledgerAccountExpression(input.recovery, input.network)] : []
+  ];
+  const and = (keys) => keys.reduceRight((rest, key) => rest ? `and_v(v:pk(${key}),${rest})` : `pk(${key})`, "");
+  const leaves = [
+    and(["@1/**", "@2/**"]),
+    ...claimants.map((claimant) => {
+      const branch = ledgerGuardianInitiateBranch(input, claimant, 0);
+      return and([
+        claimant === "phone" ? "@1/<2;3>/*" : claimant === "hardware" ? "@2/<2;3>/*" : "@4/**",
+        `@3/<${branch};${branch + 1}>/*`
+      ]);
+    })
+  ];
+  const tree = input.recovery ? `{{${leaves[0]},${leaves[1]}},{${leaves[2]},${leaves[3]}}}` : `{{${leaves[0]},${leaves[1]}},${leaves[2]}}`;
+  const descriptorTemplate = `tr(@0/**,${tree})`;
+  if (keysInfo.length > 15 || descriptorTemplate.length > 512)
+    throw new Error("Ledger wallet policy exceeds device limits");
+  const at = (change) => {
+    const phonePub = ledgerSavingsChild(phone, change).publicKey.slice(1);
+    const hardwarePub = ledgerSavingsChild(hardware, change).publicKey.slice(1);
+    const initiateKeys = claimants.map((claimant) => [
+      ledgerSavingsChild(
+        claimant === "phone" ? phone : claimant === "hardware" ? hardware : recovery,
+        claimant === "recovery" ? change : 2 + change
+      ).publicKey.slice(1),
+      ledgerGuardianInitiateChild(input, guardian, claimant, change).publicKey.slice(1)
+    ]);
+    const pubs = [phonePub, hardwarePub, ...initiateKeys.flat()].map((key) => hex.encode(key));
+    if (new Set(pubs).size !== pubs.length) throw new Error("Ledger Savings derived authorities must be distinct");
+    const admin = checksigScript([phonePub, hardwarePub]);
+    const initiate = initiateKeys.map(checksigScript);
+    const payment = p2tr(
+      ledgerSavingsChild(internal, change).publicKey.slice(1),
+      tapTreeFromScripts([admin, ...initiate]),
+      vaultAddressNetwork(input.network),
+      true
+    );
+    if (!payment.address) throw new Error("Ledger Savings address required");
+    return {
+      role: "normal",
+      address: payment.address,
+      script: payment.script,
+      tapInternalKey: payment.tapInternalKey,
+      tapLeafScript: payment.tapLeafScript,
+      leaves: payment.leaves,
+      admin,
+      initiate
+    };
+  };
+  return { walletPolicy: { name: "Vaulted Savings", descriptorTemplate, keysInfo }, receive: at(0), change: at(1) };
+}
+
+// src/lib/vault/program/ledgerNativeFamily.ts
+var andKeys = (keys) => keys.reduceRight((rest, key) => rest ? `and_v(v:pk(${key}),${rest})` : `pk(${key})`, "");
+function policy(name, leaves, keysInfo) {
+  const tree = leaves.length === 1 ? leaves[0] : leaves.length === 3 ? `{{${leaves[0]},${leaves[1]}},${leaves[2]}}` : `{{${leaves[0]},${leaves[1]}},{${leaves[2]},${leaves[3]}}}`;
+  if (![1, 3, 4].includes(leaves.length)) throw new Error("unexpected Ledger recovery leaf count");
+  const descriptorTemplate = `tr(@0/**,${tree})`;
+  if (keysInfo.length > 15 || descriptorTemplate.length > 512) throw new Error("Ledger recovery policy exceeds limits");
+  return { name, descriptorTemplate, keysInfo };
+}
+function buildLedgerNativeFamily(context, rawPolicy) {
+  const spendingPolicy = validateSpendingPolicy(rawPolicy, context.network);
+  if (spendingPolicyDigest(spendingPolicy, context.network) !== context.policyDigest)
+    throw new Error("Ledger Savings policy digest mismatch");
+  const claimants = familyClaimants(Boolean(context.recovery));
+  const guardianParent = ledgerSavingsGuardianParent(context);
+  const account = (role) => ledgerAccountKey(context[role], context.network);
+  const pub = (role, use) => ledgerRecoveryChild(account(role), use).publicKey.slice(1);
+  const recovery = Object.fromEntries(
+    claimants.map((claimant) => {
+      const guardians = pendingGuardians(claimant, Boolean(context.recovery));
+      const quarantineInternal = ledgerRecoveryInternalParent(context, claimant, "quarantine");
+      const quarantineScript = checksigScript(guardians.map((role) => pub(role, "quarantine")));
+      const quarantinePayment = p2tr(
+        ledgerSavingsChild(quarantineInternal, 0).publicKey.slice(1),
+        { script: quarantineScript },
+        vaultAddressNetwork(context.network),
+        true
+      );
+      const quarantinePolicy = policy(
+        `Vaulted ${claimant} safe`,
+        [andKeys(guardians.map((_, i) => `@${i + 1}/<10;11>/*`))],
+        [
+          quarantineInternal.publicExtendedKey,
+          ...guardians.map((r) => ledgerAccountExpression(context[r], context.network))
+        ]
+      );
+      const pendingInternal = ledgerRecoveryInternalParent(context, claimant, "pending");
+      const claimKey = pub(claimant, "claim");
+      const claim = new Uint8Array([32, ...claimKey, 173, ...pushInt(pendingDelay(claimant)), 178]);
+      const clawbacks = guardians.map(
+        (guardian) => checksigScript([
+          pub(guardian, "clawback"),
+          ledgerGuardianClawbackChild(context, guardianParent, claimant, guardian).publicKey.slice(1)
+        ])
+      );
+      const cancel = checksigScript(guardians.map((role) => pub(role, "cancel")));
+      const pendingPayment = p2tr(
+        ledgerSavingsChild(pendingInternal, 0).publicKey.slice(1),
+        tapTreeFromScripts([claim, ...clawbacks, cancel]),
+        vaultAddressNetwork(context.network),
+        true
+      );
+      const userIndex = (role) => 1 + claimants.indexOf(role);
+      const guardianIndex = claimants.length + 1;
+      const pendingPolicy = policy(
+        `Vaulted ${claimant} wait`,
+        [
+          `and_v(v:pk(@${userIndex(claimant)}/<4;5>/*),older(${pendingDelay(claimant)}))`,
+          ...guardians.map((guardian) => {
+            const branch = ledgerGuardianClawbackBranch(context, claimant, guardian);
+            return andKeys([`@${userIndex(guardian)}/<6;7>/*`, `@${guardianIndex}/<${branch};${branch + 1}>/*`]);
+          }),
+          andKeys(guardians.map((guardian) => `@${userIndex(guardian)}/<8;9>/*`))
+        ],
+        [
+          pendingInternal.publicExtendedKey,
+          ...claimants.map((role) => ledgerAccountExpression(context[role], context.network)),
+          guardianParent.publicExtendedKey
+        ]
+      );
+      return [
+        claimant,
+        {
+          claimant,
+          guardians,
+          delay: pendingDelay(claimant),
+          pending: { ...pendingPayment, walletPolicy: pendingPolicy, claim, clawbacks, cancel },
+          quarantine: { ...quarantinePayment, walletPolicy: quarantinePolicy, admin: quarantineScript }
+        }
+      ];
+    })
+  );
+  const normal = buildLedgerNativeSavings(context);
+  return { ...normal, recovery, spendingPolicy };
+}
+
+// src/lib/vault/program/ledgerEnrollment.ts
+function canonicalLedgerValue(value) {
+  return JSON.stringify(
+    value,
+    (_, item) => item && typeof item === "object" && !Array.isArray(item) ? Object.fromEntries(
+      Object.keys(item).sort().map((key) => [key, item[key]])
+    ) : item
+  );
+}
+function exact(value, rebuilt, label) {
+  if (canonicalLedgerValue(value) !== canonicalLedgerValue(rebuilt))
+    throw new Error(`${label} contains changed or unsupported fields`);
+}
+function origin(value) {
+  if (!value || !Array.isArray(value.path)) throw new Error("Ledger account origin required");
+  return { xpub: value.xpub, fingerprint: value.fingerprint, path: [...value.path] };
+}
+var familyCache = /* @__PURE__ */ new Map();
+function ledgerRecoveryFamily(contract) {
+  const key = canonicalLedgerValue(contract);
+  const cached = familyCache.get(key);
+  if (cached) return structuredClone(cached);
+  const family = buildLedgerNativeFamily(contract.context, contract.spendingPolicy);
+  if (familyCache.size >= 8) familyCache.delete(familyCache.keys().next().value);
+  familyCache.set(key, structuredClone(family));
+  return family;
+}
+function validateLedgerSavingsContract(raw2) {
+  const value = raw2;
+  if (!value?.context) throw new Error("Ledger Savings contract required");
+  const c = value.context;
+  const context = {
+    templateVersion: c.templateVersion,
+    network: c.network,
+    vaultId: c.vaultId,
+    policyDigest: c.policyDigest,
+    phone: origin(c.phone),
+    hardware: origin(c.hardware),
+    ...c.recovery ? { recovery: origin(c.recovery) } : {},
+    phoneDirectP256: c.phoneDirectP256,
+    vaultCosignerBase: c.vaultCosignerBase
+  };
+  const spendingPolicy = validateSpendingPolicy(value.spendingPolicy, c.network);
+  const built = { context, spendingPolicy };
+  ledgerRecoveryFamily(built);
+  exact(value, built, "Ledger Savings contract");
+  return built;
+}
+
+// src/lib/vault/program/ledgerRecoveryDescriptor.ts
+var LEDGER_ENROLLMENT_SCHEMA = "arkade-vault/ledger-savings-enrollment-v1";
+var LEDGER_RECOVERY_SCHEMA = "arkade-vault/ledger-savings-recovery-v1";
+function compressed2(value, label, direct = false) {
+  if (typeof value !== "string" || !/^(02|03)[0-9a-f]{64}$/.test(value) || !(direct ? p256 : secp256k1).utils.isValidPublicKey(hex.decode(value), true))
+    throw new Error(`Invalid Ledger enrollment ${label}`);
+  return value;
+}
+function validateLedgerSavingsEnrollmentDescriptor(raw2) {
+  const value = raw2;
+  if (!value || value.schema !== LEDGER_ENROLLMENT_SCHEMA || !value.spendingAuthorities || !value.boarding)
+    throw new Error("Ledger Savings enrollment descriptor required");
+  const savings = validateLedgerSavingsContract(value.savings);
+  const context = savings.context;
+  if (value.vaultId !== context.vaultId) throw new Error("Ledger Savings enrollment vault changed");
+  const a = value.spendingAuthorities, pins = networkPins(context.network);
+  const authorities = {
+    phoneBip340Pub: compressed2(a.phoneBip340Pub, "Spending phone"),
+    externalOwnerWalletPub: compressed2(a.externalOwnerWalletPub, "Spending hardware"),
+    recoveryKeyPub: a.recoveryKeyPub ? compressed2(a.recoveryKeyPub, "Spending recovery") : "",
+    vaultCosignerBasePub: compressed2(a.vaultCosignerBasePub, "Spending Guardian root"),
+    arkadeCosignerBasePub: compressed2(a.arkadeCosignerBasePub, "Spending cosigner root"),
+    phoneDirectP256: compressed2(a.phoneDirectP256, "phone authentication", true),
+    vtxoVaultCosignerPub: compressed2(a.vtxoVaultCosignerPub, "Spending Guardian"),
+    operatorPub: compressed2(a.operatorPub, "Operator"),
+    vtxoDelegatePub: compressed2(a.vtxoDelegatePub, "delegate"),
+    vtxoExitDelay: a.vtxoExitDelay,
+    vtxoExitDelayUnit: a.vtxoExitDelayUnit,
+    spendingArkAddress: a.spendingArkAddress,
+    spendingArkScript: a.spendingArkScript
+  };
+  if (Boolean(authorities.recoveryKeyPub) !== Boolean(context.recovery) || authorities.phoneDirectP256 !== context.phoneDirectP256 || authorities.operatorPub !== pins.operatorSignerPub || authorities.vtxoExitDelay !== pins.policyExitDelay || authorities.vtxoExitDelayUnit !== "seconds")
+    throw new Error("Ledger Spending identities do not match enrollment");
+  for (const role of ["hardware", ...context.recovery ? ["recovery"] : []]) {
+    const origin2 = role === "hardware" ? context.hardware : context.recovery;
+    const parent = ledgerAccountKey(origin2, context.network), branch = parent.deriveChild(12), child = branch.deriveChild(0);
+    const expected = role === "hardware" ? authorities.externalOwnerWalletPub : authorities.recoveryKeyPub;
+    if (branch.index !== 12 || child.index !== 0 || `02${hex.encode(child.publicKey.slice(1))}` !== expected)
+      throw new Error("Ledger Spending authority must match the enrolled account /12/0");
+  }
+  const xonly = (pub) => hex.decode(pub.slice(2));
+  const script = new VaultPolicyV1Script({
+    userPub: xonly(authorities.phoneBip340Pub),
+    exitDevicePub: xonly(authorities.phoneBip340Pub),
+    exitHardwarePub: xonly(authorities.externalOwnerWalletPub),
+    ...authorities.recoveryKeyPub ? { exitRecoveryPub: xonly(authorities.recoveryKeyPub) } : {},
+    vtxoVaultCosignerPub: xonly(authorities.vtxoVaultCosignerPub),
+    arkdServerPub: xonly(authorities.operatorPub),
+    delegatePub: xonly(authorities.vtxoDelegatePub),
+    exitDelay: BigInt(authorities.vtxoExitDelay),
+    exitDelayUnit: "seconds",
+    network: context.network
+  });
+  const address = ArkAddress.decode(authorities.spendingArkAddress);
+  if (address.hrp !== pins.arkHrp || hex.encode(address.serverPubKey) !== authorities.operatorPub.slice(2) || hex.encode(address.pkScript) !== authorities.spendingArkScript || hex.encode(script.pkScript) !== authorities.spendingArkScript)
+    throw new Error("Ledger enrollment changed the Spending script");
+  const verifiedBoard = requireBoardingDescriptor(value.boarding, {
+    vaultId: value.vaultId,
+    network: context.network,
+    phonePub: authorities.phoneBip340Pub,
+    boardingPub: value.boarding.boardingPub
+  });
+  const {
+    schema,
+    program,
+    template,
+    network,
+    boardingPub,
+    recoveryPhonePub,
+    vaultBoardCosignerPub,
+    operatorPub,
+    exitDelay,
+    exitDelayUnit,
+    script: boardScript,
+    address: boardAddress
+  } = verifiedBoard;
+  const boarding = {
+    schema,
+    program,
+    template,
+    network,
+    boardingPub,
+    recoveryPhonePub,
+    vaultBoardCosignerPub,
+    operatorPub,
+    exitDelay,
+    exitDelayUnit,
+    script: boardScript,
+    address: boardAddress
+  };
+  const built = {
+    schema: LEDGER_ENROLLMENT_SCHEMA,
+    vaultId: value.vaultId,
+    savings,
+    spendingAuthorities: authorities,
+    boarding
+  };
+  if (canonicalLedgerValue(raw2) !== canonicalLedgerValue(built))
+    throw new Error("Ledger enrollment descriptor contains unsupported fields");
+  return built;
+}
+function hashLedgerSavingsEnrollment(raw2) {
+  const d = validateLedgerSavingsEnrollmentDescriptor(raw2), a = d.spendingAuthorities, b = d.boarding;
+  const fields = [
+    d.schema,
+    d.vaultId,
+    hex.encode(ledgerSavingsContextDigest(d.savings.context)),
+    a.phoneBip340Pub,
+    a.externalOwnerWalletPub,
+    a.recoveryKeyPub,
+    a.vaultCosignerBasePub,
+    a.arkadeCosignerBasePub,
+    a.phoneDirectP256,
+    a.vtxoVaultCosignerPub,
+    a.operatorPub,
+    a.vtxoDelegatePub,
+    a.vtxoExitDelayUnit,
+    a.spendingArkAddress,
+    a.spendingArkScript,
+    b.schema,
+    b.program,
+    b.template,
+    b.network,
+    b.boardingPub,
+    b.recoveryPhonePub,
+    b.vaultBoardCosignerPub,
+    b.operatorPub,
+    b.exitDelayUnit,
+    b.script,
+    b.address
+  ];
+  const parts = [];
+  const u32 = (n) => {
+    const bytes3 = new Uint8Array(4);
+    new DataView(bytes3.buffer).setUint32(0, n, true);
+    return bytes3;
+  };
+  for (const field2 of fields) {
+    const bytes3 = new TextEncoder().encode(field2);
+    parts.push(u32(bytes3.length), bytes3);
+  }
+  parts.push(u32(a.vtxoExitDelay), u32(b.exitDelay));
+  const bytes2 = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    bytes2.set(part, offset);
+    offset += part.length;
+  }
+  return hex.encode(sha256(bytes2));
+}
+function ledgerEnrollmentFromStatus(status) {
+  if (status.templateVersion !== LEDGER_NATIVE_TEMPLATE || !status.ledgerSavings || !status.vtxoBoardingDescriptor)
+    throw new Error("Ledger Savings status required");
+  const value = validateLedgerSavingsEnrollmentDescriptor({
+    schema: LEDGER_ENROLLMENT_SCHEMA,
+    vaultId: status.vaultId,
+    savings: { context: status.ledgerSavings.context, spendingPolicy: status.ledgerSavings.spendingPolicy },
+    spendingAuthorities: {
+      phoneBip340Pub: status.phoneBip340Pub,
+      externalOwnerWalletPub: status.externalOwnerWalletPub,
+      recoveryKeyPub: status.recoveryKeyPub || status.recoveryPub || "",
+      vaultCosignerBasePub: status.vaultCosignerBasePub,
+      arkadeCosignerBasePub: status.arkadeCosignerBasePub,
+      phoneDirectP256: status.phoneDirectP256,
+      vtxoVaultCosignerPub: status.vtxoVaultCosignerPub,
+      operatorPub: networkPins(status.network).operatorSignerPub,
+      vtxoDelegatePub: status.vtxoDelegatePub,
+      vtxoExitDelay: status.vtxoExitDelay,
+      vtxoExitDelayUnit: status.vtxoExitDelayUnit,
+      spendingArkAddress: status.spendingArkAddress,
+      spendingArkScript: status.spendingArkScript
+    },
+    boarding: status.vtxoBoardingDescriptor
+  });
+  const family = ledgerRecoveryFamily(value.savings);
+  if (value.savings.context.network !== status.network || status.savingsAddress !== family.receive.address || status.savingsScript !== hex.encode(family.receive.script) || status.spendingPolicyDigest !== value.savings.context.policyDigest || canonicalLedgerValue(status.spendingPolicy) !== canonicalLedgerValue(value.savings.spendingPolicy) || hashLedgerSavingsEnrollment(value) !== status.ledgerSavings.descriptorHash || status.vtxoBoardingDescriptorHash !== void 0 && status.vtxoBoardingDescriptorHash !== status.ledgerSavings.descriptorHash)
+    throw new Error("Ledger Savings status differs from immutable enrollment");
+  requireProtectionTierMatchesRecovery(status.protectionTier, value.spendingAuthorities.recoveryKeyPub);
+  return value;
+}
+function buildLedgerRecoveryDescriptor(raw2) {
+  const d = validateLedgerSavingsEnrollmentDescriptor(raw2), a = d.spendingAuthorities, p = d.savings.spendingPolicy;
+  const c = d.savings.context, family = ledgerRecoveryFamily(d.savings);
+  const tree = (t) => ({ script: hex.encode(t.script), address: t.address });
+  const pending = {}, quarantine = {};
+  for (const claimant of familyClaimants(Boolean(c.recovery))) {
+    const f = family.recovery[claimant], key = `savings-${claimant}`;
+    Object.assign(pending, { [key]: { ...tree(f.pending), delay: f.delay } });
+    Object.assign(quarantine, { [key]: { ...tree(f.quarantine), guardians: [...f.guardians] } });
+  }
+  return {
+    schema: LEDGER_RECOVERY_SCHEMA,
+    network: c.network,
+    vaultId: c.vaultId,
+    templateVersion: LEDGER_NATIVE_TEMPLATE,
+    policyVersion: POLICY_VERSION,
+    protectionTier: c.recovery ? "advanced" : "standard",
+    keys: {
+      phoneBip340: a.phoneBip340Pub,
+      phoneDirectP256: a.phoneDirectP256,
+      hardware: a.externalOwnerWalletPub,
+      ...a.recoveryKeyPub ? { recovery: a.recoveryKeyPub } : {},
+      vaultCosignerBase: a.vaultCosignerBasePub,
+      arkadeCosignerBase: a.arkadeCosignerBasePub
+    },
+    csv: { ...PROGRAM_CSV },
+    policy: {
+      program: p.program,
+      schema: p.schema,
+      period: p.period,
+      digest: c.policyDigest,
+      recipientDustSats: DUST_SATS,
+      recipientCapSats: p.txRecipientCapSats,
+      periodAllowanceSats: p.periodAllowanceSats,
+      absoluteFeeCapSats: p.absoluteFeeCapSats,
+      feerateCapSatVb: p.feerateCapSatPerV
+    },
+    transitionSequence: TRANSITION_SEQUENCE,
+    ledgerSavings: d.savings,
+    spendingAuthorities: a,
+    boarding: d.boarding,
+    enrollmentDescriptorHash: hashLedgerSavingsEnrollment(d),
+    savings: tree(family.receive),
+    savingsChange: tree(family.change),
+    pending,
+    quarantine
+  };
+}
+function validateLedgerRecoveryDescriptor(raw2) {
+  const d = raw2;
+  if (!d || d.schema !== LEDGER_RECOVERY_SCHEMA) throw new Error("Ledger recovery descriptor required");
+  const rebuilt = buildLedgerRecoveryDescriptor({
+    schema: LEDGER_ENROLLMENT_SCHEMA,
+    vaultId: d.vaultId,
+    savings: d.ledgerSavings,
+    spendingAuthorities: d.spendingAuthorities,
+    boarding: d.boarding
+  });
+  if (canonicalLedgerValue(d) !== canonicalLedgerValue(rebuilt)) throw new Error("Ledger recovery descriptor changed");
+  return rebuilt;
+}
+function hashLedgerRecoveryDescriptor(raw2) {
+  return hex.encode(sha256(new TextEncoder().encode(canonicalLedgerValue(validateLedgerRecoveryDescriptor(raw2)))));
+}
+
 // src/lib/vault/openEnrollmentSession.ts
 init_define_import_meta_env();
 
@@ -48760,6 +52305,34 @@ init_define_import_meta_env();
 
 // src/lib/vault/tenantEnrollment.ts
 init_define_import_meta_env();
+
+// src/lib/vault/program/spendingRecoveryDescriptor.ts
+init_define_import_meta_env();
+var SPENDING_RECOVERY_SCHEMA = "vaulted-spending/recovery-v1";
+function buildSpendingRecoveryDescriptor(value) {
+  const enrollment = validateSpendingEnrollment(value);
+  const p = enrollment.spendingPolicy;
+  return {
+    schema: SPENDING_RECOVERY_SCHEMA,
+    templateVersion: SPENDING_ONLY_TEMPLATE,
+    network: enrollment.network,
+    vaultId: enrollment.vaultId,
+    protectionTier: "light",
+    keys: { phoneBip340: enrollment.phonePub, phoneDirectP256: enrollment.phoneDirectP256 },
+    policy: {
+      program: p.program,
+      schema: p.schema,
+      period: p.period,
+      digest: enrollment.spendingPolicyDigest,
+      recipientDustSats: DUST_SATS,
+      recipientCapSats: p.txRecipientCapSats,
+      periodAllowanceSats: p.periodAllowanceSats,
+      absoluteFeeCapSats: p.absoluteFeeCapSats,
+      feerateCapSatVb: p.feerateCapSatPerV
+    },
+    enrollment
+  };
+}
 
 // src/lib/vault/enrollmentStore.ts
 init_define_import_meta_env();
@@ -48859,6 +52432,7 @@ function buildVaultProgramDescriptor(input) {
     input.network
   );
   const protectionTier = requireProtectionTierMatchesRecovery(input.protectionTier, keys.recovery);
+  if (protectionTier === "light") throw new Error("Light does not enroll protected Savings");
   const family = buildDescriptorFamily({
     vaultId: input.vaultId,
     phonePub: keys.phoneBip340,
@@ -49083,6 +52657,23 @@ function encodeRawVaultProgramDescriptor(d) {
 function hashVaultProgramDescriptor(d) {
   return bytesToHex3(sha256(encodeVaultProgramDescriptor(d)));
 }
+function familyFromDescriptor(d) {
+  const valid = validateVaultProgramDescriptor(d);
+  return buildDescriptorFamily({
+    vaultId: valid.vaultId,
+    phonePub: valid.keys.phoneBip340,
+    hardwarePub: valid.keys.hardware,
+    recoveryPub: valid.keys.recovery,
+    phoneDirectP256: valid.keys.phoneDirectP256,
+    vaultCosignerBase: valid.keys.vaultCosignerBase,
+    arkadeCosignerBase: valid.keys.arkadeCosignerBase,
+    network: valid.network,
+    templateVersion: valid.templateVersion,
+    connectorType: valid.connectorType,
+    absoluteFeeCapSats: valid.policy.absoluteFeeCapSats,
+    feerateCapSatPerV: valid.policy.feerateCapSatVb
+  });
+}
 function buildDescriptorFamily(input) {
   if (!isConnectorTemplate(input.templateVersion)) {
     if (input.connectorType !== void 0) throw new Error("connector type on a legacy descriptor");
@@ -49094,106 +52685,6 @@ function buildDescriptorFamily(input) {
 
 // src/lib/vault/program/enroll.ts
 init_sha2();
-
-// src/lib/vault/vtxo/board.ts
-init_define_import_meta_env();
-init_secp256k1();
-init_sha2();
-init_base();
-
-// src/lib/vault/vtxo/walletWorkerNames.ts
-init_define_import_meta_env();
-
-// src/lib/vault/vtxo/board.ts
-var BOARDING_PROGRAM = "vault-board-v1";
-var BOARDING_SCHEMA = "arkade-vault/board-v1";
-var BOARDING_TEMPLATE = "vault-board-v1-boarding-vault-and-operator";
-var BOARDING_EXIT_DELAY = networkPins("mutinynet").boardExitDelay;
-var BOARDING_EXIT_DELAY_UNIT = "seconds";
-var MUTINYNET_OPERATOR_SIGNER_PUB = networkPins("mutinynet").operatorSignerPub;
-var BOARDING_KEY_SALT = sha256(encodeUtf8("arkade-vault/vault-board-v1/boarding-key/hkdf-sha256-v1"));
-var SECP256K1_ORDER = BigInt("0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141");
-function boardingProgramDigestFor(network) {
-  const pins = networkPins(network);
-  return bytesToHex3(
-    sha256(
-      encodeUtf8(
-        JSON.stringify({
-          schema: BOARDING_SCHEMA,
-          program: BOARDING_PROGRAM,
-          template: BOARDING_TEMPLATE,
-          exitDelay: pins.boardExitDelay,
-          exitDelayUnit: BOARDING_EXIT_DELAY_UNIT
-        })
-      )
-    )
-  );
-}
-var BOARDING_PROGRAM_DIGEST = boardingProgramDigestFor("mutinynet");
-function requireCompressedKey(value, name) {
-  const key = requireLowerHex(value, name, 33);
-  const bytes2 = hexToBytes3(key);
-  if (bytes2[0] !== 2 && bytes2[0] !== 3 || !secp256k1.utils.isValidPublicKey(bytes2, true)) {
-    throw new Error(`${name} is not a compressed secp256k1 key`);
-  }
-  return key;
-}
-function requireBoardingDescriptor(raw2, expected) {
-  if (!raw2 || typeof raw2 !== "object") throw new Error("vault-board-v1 descriptor required");
-  const pins = networkPins(expected.network);
-  const descriptor = raw2;
-  if (descriptor.schema !== BOARDING_SCHEMA || descriptor.program !== BOARDING_PROGRAM || descriptor.template !== BOARDING_TEMPLATE || descriptor.network !== expected.network || descriptor.exitDelay !== pins.boardExitDelay || descriptor.exitDelayUnit !== BOARDING_EXIT_DELAY_UNIT) {
-    throw new Error("vault-board-v1 descriptor does not match this release");
-  }
-  const boardingPub = requireCompressedKey(descriptor.boardingPub, "boardingPub");
-  const recoveryPub = requireCompressedKey(descriptor.recoveryPhonePub, "recoveryPhonePub");
-  const cosignerPub = requireCompressedKey(descriptor.vaultBoardCosignerPub, "vaultBoardCosignerPub");
-  const operatorPub = requireCompressedKey(descriptor.operatorPub, "operatorPub");
-  if (operatorPub !== pins.operatorSignerPub) {
-    throw new Error("vault-board-v1 Operator does not match this release");
-  }
-  if (boardingPub !== expected.boardingPub || recoveryPub !== requireCompressedKey(expected.phonePub, "phoneBip340Pub")) {
-    throw new Error("vault-board-v1 descriptor keys do not match this wallet");
-  }
-  const xOnly3 = [boardingPub, recoveryPub, cosignerPub, operatorPub].map((key) => key.slice(2));
-  if (new Set(xOnly3).size !== xOnly3.length) throw new Error("vault-board-v1 roles must use distinct keys");
-  const program = createBoardingProgramScript(
-    {
-      name: BOARDING_PROGRAM,
-      boardingPubKey: hexToBytes3(boardingPub).slice(1),
-      cosignerPubKey: hexToBytes3(cosignerPub).slice(1),
-      recoveryPubKey: hexToBytes3(recoveryPub).slice(1)
-    },
-    hexToBytes3(pins.operatorSignerPub).slice(1),
-    { type: "seconds", value: BigInt(pins.boardExitDelay) }
-  );
-  const script = requireLowerHex(descriptor.script, "vault-board-v1 script", 34);
-  const address = program.onchainAddress(getNetwork(pins.sdkNetwork));
-  if (hex.encode(program.pkScript) !== script || descriptor.address !== address) {
-    throw new Error("vault-board-v1 script or address does not match its exact program");
-  }
-  return descriptor;
-}
-function requireBoardingStatus(status, expectedBoardingPub) {
-  if (status.vtxoBoardingProgram !== BOARDING_PROGRAM || !status.vtxoBoardingActive) {
-    throw new Error("vault is not enrolled for vault-board-v1");
-  }
-  const descriptor = requireBoardingDescriptor(status.vtxoBoardingDescriptor, {
-    vaultId: status.vaultId,
-    phonePub: String(status.phoneBip340Pub || ""),
-    boardingPub: expectedBoardingPub,
-    network: status.network
-  });
-  if (descriptor.script !== String(status.vtxoBoardingScript || "").toLowerCase() || descriptor.address !== status.vtxoBoardingAddress || descriptor.exitDelay !== status.vtxoBoardingExitDelay || descriptor.exitDelayUnit !== status.vtxoBoardingExitDelayUnit) {
-    throw new Error("vault-board-v1 status descriptor changed");
-  }
-  if (!status.vtxoBoardingDescriptorHash || !/^[0-9a-f]{64}$/.test(status.vtxoBoardingDescriptorHash)) {
-    throw new Error("vault-board-v1 descriptor hash required");
-  }
-  return descriptor;
-}
-
-// src/lib/vault/program/enroll.ts
 function appendLE32(parts, value) {
   const bytes2 = new Uint8Array(4);
   new DataView(bytes2.buffer).setUint32(0, value, true);
@@ -49231,9 +52722,9 @@ function hashBoardingEnrollmentDescriptor(descriptor) {
     payload.set(part, offset);
     offset += part.length;
   }
-  const digest = bytesToHex3(sha256(payload));
+  const digest2 = bytesToHex3(sha256(payload));
   payload.fill(0);
-  return digest;
+  return digest2;
 }
 
 // src/lib/vault/program/connectorEnroll.ts
@@ -49276,11 +52767,11 @@ function concatParts(parts) {
   }
   return out;
 }
-function hashConnectorBoarding(vaultId, savingsHash, boarding) {
+function hashConnectorBoarding(vaultId2, savingsHash, boarding) {
   if (!/^[0-9a-f]{64}$/.test(savingsHash)) fail("connector savings hash required");
   const fields = [
     BOARDING_ENROLLMENT_SCHEMA,
-    vaultId,
+    vaultId2,
     savingsHash,
     boarding.schema,
     boarding.program,
@@ -49310,18 +52801,18 @@ function hashConnectorBoardComposite(digestHex, boardingHashHex) {
   payload.fill(0);
   return out;
 }
-function toOrigin(origin) {
+function toOrigin(origin2) {
   return {
-    publicKey: hex.decode(requireCompressedHex(origin.connectorPub, "connectorPub")),
-    fingerprint: requireUint32(origin.connectorFingerprint, "connectorFingerprint"),
-    path: [...origin.connectorPath]
+    publicKey: hex.decode(requireCompressedHex(origin2.connectorPub, "connectorPub")),
+    fingerprint: requireUint32(origin2.connectorFingerprint, "connectorFingerprint"),
+    path: [...origin2.connectorPath]
   };
 }
 function buildConnectorEnrollmentPreview(input) {
   const network = input.network === "mainnet" || input.network === "mutinynet" ? input.network : fail("unsupported network");
   const protectionTier = requireProtectionTierMatchesRecovery(input.protectionTier, input.recoveryPub || "");
-  const policy = validateSpendingPolicy(input.spendingPolicy, network);
-  const origin = toOrigin(input.origin);
+  const policy2 = validateSpendingPolicy(input.spendingPolicy, network);
+  const origin2 = toOrigin(input.origin);
   if (input.origin.connectorType !== "p2wpkh" && input.origin.connectorType !== "p2tr")
     fail("connector type must be p2tr or p2wpkh");
   const familyInput = {
@@ -49335,11 +52826,11 @@ function buildConnectorEnrollmentPreview(input) {
     phoneDirectP256: requireCompressedHex(input.phoneDirectP256, "phoneDirectP256"),
     vaultCosignerBase: requireCompressedHex(input.vaultCosignerBase, "vaultCosignerBase"),
     arkadeCosignerBase: requireCompressedHex(input.arkadeCosignerBase, "arkadeCosignerBase"),
-    absoluteFeeCapSats: policy.absoluteFeeCapSats,
-    feerateCapSatPerV: policy.feerateCapSatPerV
+    absoluteFeeCapSats: policy2.absoluteFeeCapSats,
+    feerateCapSatPerV: policy2.feerateCapSatPerV
   };
   const family = buildConnectorFamily(familyInput);
-  const digest = connectorEnrollmentDigest({ ...familyInput, protectionTier, spendingPolicy: policy }, origin);
+  const digest2 = connectorEnrollmentDigest({ ...familyInput, protectionTier, spendingPolicy: policy2 }, origin2);
   const hasRecovery = Boolean(input.recoveryPub);
   const pending = {};
   const quarantine = {};
@@ -49375,15 +52866,15 @@ function buildConnectorEnrollmentPreview(input) {
     arkadeCosigner: { origin: input.arkadeOrigin.trim(), version: input.arkadeVersion.trim() },
     csv: { ...PROGRAM_CSV },
     policy: {
-      program: policy.program,
-      schema: policy.schema,
-      period: policy.period,
-      digest: spendingPolicyDigest(policy, network),
+      program: policy2.program,
+      schema: policy2.schema,
+      period: policy2.period,
+      digest: spendingPolicyDigest(policy2, network),
       recipientDustSats: DUST_SATS,
-      recipientCapSats: policy.txRecipientCapSats,
-      periodAllowanceSats: policy.periodAllowanceSats,
-      absoluteFeeCapSats: policy.absoluteFeeCapSats,
-      feerateCapSatVb: policy.feerateCapSatPerV
+      recipientCapSats: policy2.txRecipientCapSats,
+      periodAllowanceSats: policy2.periodAllowanceSats,
+      absoluteFeeCapSats: policy2.absoluteFeeCapSats,
+      feerateCapSatVb: policy2.feerateCapSatPerV
     },
     p2a: { script: P2A_SCRIPT_HEX, valueSats: P2A_VALUE_SATS, outputIndex: P2A_OUTPUT_INDEX },
     transitionSequence: TRANSITION_SEQUENCE,
@@ -49393,16 +52884,16 @@ function buildConnectorEnrollmentPreview(input) {
   };
   const savingsHash = hex.encode(sha256(encodeRawVaultProgramDescriptor(descriptor)));
   const boardingHash = input.boarding ? hashConnectorBoarding(input.vaultId, savingsHash, input.boarding) : "";
-  const compositeHash = input.boarding ? hashConnectorBoardComposite(digest, boardingHash) : "";
+  const compositeHash = input.boarding ? hashConnectorBoardComposite(digest2, boardingHash) : "";
   return {
     family,
-    origin,
-    digest,
+    origin: origin2,
+    digest: digest2,
     savingsHash,
     boardingHash,
     compositeHash,
     descriptor,
-    policy,
+    policy: policy2,
     protectionTier
   };
 }
@@ -49475,7 +52966,7 @@ function requirePinShape(pin) {
     fail("connector enrollment pin required");
   if (!pin.savingsAddress.trim() || !/^[0-9a-f]+$/.test(pin.savingsScript)) fail("connector enrollment pin required");
 }
-function verifyConnectorStatus(status, pin, options) {
+function verifyConnectorStatus(status, pin, options2) {
   requirePinShape(pin);
   if (!status?.enrolled) fail("vault is not enrolled");
   if (status.vaultId !== pin.vaultId) fail("connector vault id does not match enrollment");
@@ -49496,11 +52987,11 @@ function verifyConnectorStatus(status, pin, options) {
   const arkadeCosignerBase = String(status.arkadeCosignerBasePub || "");
   if (!phonePub || !phoneDirectP256 || !vaultCosignerBase || !arkadeCosignerBase)
     fail("connector status is missing enrolled facts");
-  const policy = validateSpendingPolicy(status.spendingPolicy, pin.network);
-  if (status.spendingPolicyDigest && status.spendingPolicyDigest !== spendingPolicyDigest(policy, pin.network))
+  const policy2 = validateSpendingPolicy(status.spendingPolicy, pin.network);
+  if (status.spendingPolicyDigest && status.spendingPolicyDigest !== spendingPolicyDigest(policy2, pin.network))
     fail("connector spending policy changed");
-  const arkadeOrigin = String(options?.arkadeOrigin ?? status.arkadeCosignerOrigin ?? "").trim();
-  const arkadeVersion = String(options?.arkadeVersion ?? status.arkadeCosignerVersion ?? "").trim();
+  const arkadeOrigin = String(options2?.arkadeOrigin ?? status.arkadeCosignerOrigin ?? "").trim();
+  const arkadeVersion = String(options2?.arkadeVersion ?? status.arkadeCosignerVersion ?? "").trim();
   if (!arkadeOrigin || !arkadeVersion) fail("connector status is missing Arkade identity");
   const recoveryPub = String(status.recoveryPub || status.recoveryKeyPub || "") || void 0;
   let boarding;
@@ -49508,7 +52999,7 @@ function verifyConnectorStatus(status, pin, options) {
     boarding = requireBoardingDescriptor(status.vtxoBoardingDescriptor, {
       vaultId: pin.vaultId,
       phonePub,
-      boardingPub: options?.boardingPub ?? status.vtxoBoardingDescriptor.boardingPub,
+      boardingPub: options2?.boardingPub ?? status.vtxoBoardingDescriptor.boardingPub,
       network: pin.network
     });
   }
@@ -49524,7 +53015,7 @@ function verifyConnectorStatus(status, pin, options) {
     arkadeCosignerBase,
     arkadeOrigin,
     arkadeVersion,
-    spendingPolicy: policy,
+    spendingPolicy: policy2,
     origin: {
       connectorPub: pin.connectorPub,
       connectorType: pin.connectorType,
@@ -49566,7 +53057,37 @@ init_define_import_meta_env();
 init_define_import_meta_env();
 var RECOVERY_KIT_NAME = "arkade-recovery-kit";
 var RECOVERY_KIT_VERSION = 3;
+function isSpendingRecoveryKit(kit) {
+  return kit.version === 5;
+}
+function isLedgerRecoveryKit(kit) {
+  return kit.version === 4;
+}
 function buildRecoveryKit(descriptor) {
+  if (descriptor.schema === SPENDING_RECOVERY_SCHEMA) {
+    const d2 = buildSpendingRecoveryDescriptor(descriptor.enrollment);
+    if (canonicalLedgerValue(d2) !== canonicalLedgerValue(descriptor))
+      throw new Error("Spending Recovery Kit descriptor changed");
+    return {
+      name: RECOVERY_KIT_NAME,
+      version: 5,
+      descriptor: d2,
+      descriptorHash: spendingEnrollmentHash(d2.enrollment),
+      spendingPolicyDigest: d2.policy.digest,
+      protectionTier: "light"
+    };
+  }
+  if (descriptor.schema === LEDGER_RECOVERY_SCHEMA) {
+    const d2 = validateLedgerRecoveryDescriptor(descriptor);
+    return {
+      name: RECOVERY_KIT_NAME,
+      version: 4,
+      descriptor: d2,
+      descriptorHash: hashLedgerRecoveryDescriptor(d2),
+      spendingPolicyDigest: d2.policy.digest,
+      protectionTier: d2.protectionTier
+    };
+  }
   const d = validateVaultProgramDescriptor(descriptor);
   return {
     name: RECOVERY_KIT_NAME,
@@ -49582,7 +53103,20 @@ function parseRecoveryKit(raw2) {
     return buildRecoveryKit(connectorRecoveryDescriptor(raw2));
   const kit = raw2;
   if (!kit || kit.name !== RECOVERY_KIT_NAME) throw new Error("not a Recovery Kit");
+  if (kit.version === 5) {
+    const built2 = buildRecoveryKit(kit.descriptor);
+    if (canonicalLedgerValue(kit) !== canonicalLedgerValue(built2))
+      throw new Error("Spending Recovery Kit binding changed");
+    return built2;
+  }
+  if (kit.version === 4) {
+    const built2 = buildRecoveryKit(validateLedgerRecoveryDescriptor(kit.descriptor));
+    if (canonicalLedgerValue(kit) !== canonicalLedgerValue(built2))
+      throw new Error("Ledger Recovery Kit binding changed");
+    return built2;
+  }
   if (kit.version !== RECOVERY_KIT_VERSION) throw new Error("unsupported Recovery Kit version");
+  if (kit.descriptor.schema !== PROGRAM_SCHEMA) throw new Error("Recovery Kit version does not match its descriptor");
   const built = buildRecoveryKit(kit.descriptor);
   if (kit.descriptorHash && kit.descriptorHash !== built.descriptorHash) {
     throw new Error("Recovery Kit hash does not match the rebuilt descriptor");
@@ -49594,6 +53128,10 @@ function parseRecoveryKit(raw2) {
     throw new Error("Recovery Kit protection tier does not match the rebuilt descriptor");
   }
   return built;
+}
+function requireSavingsRecoveryKit(kit) {
+  if (isSpendingRecoveryKit(kit)) throw new Error("This wallet has no protected Savings contract");
+  return kit;
 }
 
 // src/lib/vault/webauthn.ts
@@ -49630,10 +53168,10 @@ function prfFrom(cred) {
   const bytes2 = first instanceof Uint8Array ? first : new Uint8Array(first);
   return bytes2.length ? Uint8Array.from(bytes2) : null;
 }
-function passkeyGetOptions(options, mode = "any") {
+function passkeyGetOptions(options2, mode = "any") {
   const resolved = mode === true ? "local" : mode === false ? "any" : mode;
   const next = {
-    ...options,
+    ...options2,
     userVerification: "required",
     hints: resolved === "local" ? ["client-device"] : resolved === "hybrid" ? ["hybrid"] : ["client-device", "hybrid"]
   };
@@ -49646,23 +53184,18 @@ function passkeyGetOptions(options, mode = "any") {
   return next;
 }
 
-// src/lib/vault/tenantEnrollment.ts
-var PRF_SALT = new TextEncoder().encode("arkade-2fa-vault/prf/v1");
-var HKDF_INFO = new TextEncoder().encode("arkade-2fa-vault/kek/v1");
-var DIRECT_INFO = new TextEncoder().encode("arkade-2fa-vault/direct-p256/v1");
-
-// src/lib/vault/prfEnvelope.ts
+// src/lib/vault/ledgerClient.ts
 init_define_import_meta_env();
+var import_buffer = __toESM(require_buffer());
 
-// src/lib/vault/ceremony/directauth.ts
+// src/lib/vault/ledgerSavings.ts
 init_define_import_meta_env();
-var DIRECT_P256_HKDF_PREFIX = new TextEncoder().encode("arkade-2fa-vault/direct-p256/v1");
+init_base();
+init_btc_signer();
+init_payment();
 
-// src/lib/vault/prfEnvelope.ts
-var PRF_SALT_UTF8 = "arkade-2fa-vault/prf/v1";
-var KEK_HKDF_INFO_UTF8 = "arkade-2fa-vault/kek/v1";
-var PRF_SALT2 = new TextEncoder().encode(PRF_SALT_UTF8);
-var KEK_HKDF_INFO = new TextEncoder().encode(KEK_HKDF_INFO_UTF8);
+// src/lib/vault/savingsSpend.ts
+init_define_import_meta_env();
 
 // src/lib/vault/light/keyBackup.ts
 init_define_import_meta_env();
@@ -49670,7 +53203,7 @@ init_secp256k1();
 init_base();
 var NAME = "vaulted-light-owner-key";
 var VERSION = 1;
-var DOMAIN = "vaulted-light/owner-key-encryption/v1";
+var DOMAIN2 = "vaulted-light/owner-key-encryption/v1";
 function requirePurpose(value) {
   if (value !== "passkey-prf" && value !== "recovery-secret") throw new Error("unsupported Light backup purpose");
 }
@@ -49686,7 +53219,7 @@ async function deriveKey(material, salt, purpose) {
   try {
     const key = await crypto.subtle.importKey("raw", copy, "HKDF", false, ["deriveKey"]);
     return await crypto.subtle.deriveKey(
-      { name: "HKDF", hash: "SHA-256", salt, info: new TextEncoder().encode(`${DOMAIN}/${purpose}`) },
+      { name: "HKDF", hash: "SHA-256", salt, info: new TextEncoder().encode(`${DOMAIN2}/${purpose}`) },
       key,
       { name: "AES-GCM", length: 256 },
       false,
@@ -49743,6 +53276,335 @@ async function unlockLightOwnerKey(value, material, purpose, descriptor) {
     throw new Error("Unable to unlock this Light key backup");
   }
 }
+
+// src/lib/vault/savingsSpend.ts
+init_base();
+init_btc_signer();
+
+// src/lib/vault/bitcoin.ts
+init_define_import_meta_env();
+init_base();
+init_btc_signer();
+function isVaultBitcoinAddress(value, network) {
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+  try {
+    const net = network ? vaultAddressNetwork(network) : trimmed.startsWith("tb1") ? TEST_NETWORK : trimmed.startsWith("bc1") || /^[13]/.test(trimmed) ? NETWORK : null;
+    if (!net) return false;
+    Address(net).decode(trimmed);
+    return true;
+  } catch {
+    return false;
+  }
+}
+function scriptHexFromAddress(address, network) {
+  const trimmed = address.trim();
+  try {
+    const decoded = Address(vaultAddressNetwork(network)).decode(trimmed);
+    return hex.encode(OutScript.encode(decoded));
+  } catch {
+    throw new Error("not a bitcoin address");
+  }
+}
+function bitcoinDustSats(address, network) {
+  const script = hex.decode(scriptHexFromAddress(address, network));
+  const type = OutScript.decode(script).type;
+  const outputVbytes = 8 + 1 + script.length;
+  const spendVbytes = type === "wpkh" || type === "wsh" || type === "tr" ? 67 : 148;
+  return 3 * (outputVbytes + spendVbytes);
+}
+
+// src/lib/vault/ceremony/directauth.ts
+init_define_import_meta_env();
+var DIRECT_P256_HKDF_PREFIX = new TextEncoder().encode("arkade-2fa-vault/direct-p256/v1");
+function verifyDirectP256(pub, digest2, signature) {
+  const key = requireBytes(pub, "direct-auth pub");
+  const message = requireBytes(digest2, "digest");
+  const compact = requireBytes(signature, "signature");
+  if (key.length !== 33) throw new Error("direct-auth pub must be 33 bytes");
+  if (message.length !== 32) throw new Error("Arkade digest must be 32 bytes");
+  if (compact.length !== 64) throw new Error("direct signature must be 64 compact bytes");
+  return p256.verify(compact, message, key, { prehash: false, lowS: true, format: "compact" });
+}
+function requireBytes(value, name) {
+  if (value instanceof Uint8Array) return value;
+  if (value instanceof ArrayBuffer) return new Uint8Array(value);
+  throw new Error(`${name} required`);
+}
+
+// src/lib/vault/program/liveKit.ts
+init_define_import_meta_env();
+
+// src/lib/vault/taprootSignatures.ts
+init_define_import_meta_env();
+init_base();
+init_btc_signer();
+init_payment();
+function xOnlyTapscriptPub(value, name) {
+  const key = String(value || "").trim().toLowerCase();
+  const xonly = /^(02|03)[0-9a-f]{64}$/.test(key) ? key.slice(2) : key;
+  if (!/^[0-9a-f]{64}$/.test(xonly)) throw new Error(`${name} must be a compressed or x-only public key`);
+  return xonly;
+}
+function tapscriptSignatureRecords(tx, inputIndex) {
+  return (tx.getInput(inputIndex).tapScriptSig || []).map(([data, signature]) => `${hex.encode(data.pubKey)}:${hex.encode(data.leafHash)}:${hex.encode(signature)}`).sort();
+}
+function requireExactDefaultTapscriptSignatures(tx, inputIndex, expectedPubs) {
+  const input = tx.getInput(inputIndex);
+  if (input.tapKeySig) throw new Error(`input ${inputIndex} must not contain a Taproot key-path signature`);
+  if (input.sighashType !== void 0 && input.sighashType !== SigHash.DEFAULT) {
+    throw new Error(`input ${inputIndex} must use SIGHASH_DEFAULT`);
+  }
+  if (input.tapLeafScript?.length !== 1) throw new Error(`input ${inputIndex} must carry exactly one tapleaf`);
+  const expected = expectedPubs.map((pub, index) => xOnlyTapscriptPub(pub, `signer ${index}`)).sort();
+  const signatures = input.tapScriptSig || [];
+  const actual = signatures.map(([data]) => hex.encode(data.pubKey)).sort();
+  if (actual.length !== expected.length || actual.some((pub, index) => pub !== expected[index])) {
+    throw new Error(`input ${inputIndex} has the wrong tapscript signer set`);
+  }
+  const leaf = input.tapLeafScript[0];
+  const scriptWithVersion = leaf[1];
+  const leafHash = tapLeafHash(scriptFromTapLeafScript(leaf), scriptWithVersion[scriptWithVersion.length - 1]);
+  verifyTapscriptSignatures(tx, inputIndex, expected, [], [SigHash.DEFAULT], leafHash);
+}
+
+// src/lib/vault/signIn.ts
+init_define_import_meta_env();
+
+// src/lib/vault/passkeyBinding.ts
+init_define_import_meta_env();
+var encoder = new TextEncoder();
+var BINDING_DOMAIN = encoder.encode("arkade-vault/recovery-binding/v4");
+var CONNECTOR_BINDING_DOMAIN = encoder.encode("arkade-vault/recovery-binding/v5");
+var LEDGER_BINDING_DOMAIN = encoder.encode("arkade-vault/recovery-binding/v6");
+var PROOF_DOMAIN = encoder.encode("arkade-2fa-vault/passkey-proof/v1");
+var ZERO2 = Uint8Array.of(0);
+
+// src/lib/vault/signIn.ts
+var PRF_SALT = new TextEncoder().encode("arkade-2fa-vault/prf/v1");
+var HKDF_INFO = new TextEncoder().encode("arkade-2fa-vault/kek/v1");
+
+// src/lib/vault/savingsSpend.ts
+var PRF_SALT2 = new TextEncoder().encode("arkade-2fa-vault/prf/v1");
+var TX_OPTS = { version: 2, allowUnknownInputs: true, allowUnknownOutputs: true };
+function requireSavingsAdminLeaf(tree) {
+  const leaf = tree.tapLeafScript?.find(([, script]) => hex.encode(script.slice(0, -1)) === hex.encode(tree.admin));
+  if (!leaf) throw new Error("admin leaf is missing from the tree");
+  return leaf;
+}
+function buildNativeSavingsPsbt(input) {
+  const recipientDustSats = bitcoinDustSats(input.destAddress, input.network);
+  if (!Number.isSafeInteger(input.amountSats) || input.amountSats < recipientDustSats) {
+    throw new Error(`at least \u20BF${recipientDustSats}`);
+  }
+  if (!Number.isSafeInteger(input.feeSats) || input.feeSats < 0) throw new Error("fee required");
+  const total = input.amountSats + input.feeSats;
+  if (!Number.isSafeInteger(total)) throw new Error("invalid Savings total");
+  if (input.coins.length === 0) throw new Error("confirmed Savings coins required");
+  const coins = [...input.coins].sort((a, b) => a.txid.localeCompare(b.txid) || a.vout - b.vout);
+  const seen = /* @__PURE__ */ new Set();
+  let inputValue = 0;
+  for (const coin of coins) {
+    if (!/^[0-9a-f]{64}$/.test(coin.txid) || !Number.isInteger(coin.vout) || coin.vout < 0 || coin.vout > 4294967295) {
+      throw new Error("invalid Savings outpoint");
+    }
+    if (!Number.isSafeInteger(coin.value) || coin.value <= 0) throw new Error("invalid Savings coin value");
+    const outpoint2 = `${coin.txid}:${coin.vout}`;
+    if (seen.has(outpoint2)) throw new Error("duplicate Savings outpoint");
+    seen.add(outpoint2);
+    inputValue += coin.value;
+  }
+  if (!Number.isSafeInteger(inputValue) || inputValue < total) throw new Error("not enough confirmed Savings");
+  const change = inputValue - total;
+  if (change > 0 && change < DUST_SATS) throw new Error("leave \u20BF330 of change, or send the rest");
+  const tx = new Transaction(TX_OPTS);
+  for (const coin of coins) {
+    const { witnessScript, ...metadata } = input.inputForCoin(coin);
+    tx.addInput({
+      ...metadata,
+      txid: hex.decode(coin.txid),
+      index: coin.vout,
+      witnessUtxo: { script: witnessScript, amount: BigInt(coin.value) },
+      sequence: 4294967295
+    });
+  }
+  tx.addOutput({
+    script: hex.decode(scriptHexFromAddress(input.destAddress, input.network)),
+    amount: BigInt(input.amountSats)
+  });
+  if (change >= DUST_SATS) tx.addOutput({ ...input.changeMetadata, script: input.changeScript, amount: BigInt(change) });
+  return hex.encode(tx.toPSBT());
+}
+function inspectSavingsPsbt(psbtHex) {
+  const tx = Transaction.fromPSBT(hex.decode(psbtHex), TX_OPTS);
+  if (tx.inputsLength < 1) throw new Error("Savings spend needs an input");
+  if (tx.outputsLength < 1 || tx.outputsLength > 2) throw new Error("unexpected savings outputs");
+  const inputs = Array.from({ length: tx.inputsLength }, (_, index) => {
+    const current = tx.getInput(index);
+    if (!current.txid || current.index === void 0 || !current.witnessUtxo) {
+      throw new Error("incomplete Savings input");
+    }
+    return {
+      txid: hex.encode(current.txid),
+      vout: current.index,
+      value: Number(current.witnessUtxo.amount),
+      script: hex.encode(current.witnessUtxo.script),
+      tapInternalKey: current.tapInternalKey ? hex.encode(current.tapInternalKey) : "",
+      tapLeafScript: (current.tapLeafScript || []).map(([control, script]) => ({
+        version: control.version,
+        internalKey: hex.encode(control.internalKey),
+        merklePath: control.merklePath.map((node) => hex.encode(node)),
+        script: hex.encode(script)
+      })),
+      sequence: current.sequence,
+      sigs: (current.tapScriptSig || []).length
+    };
+  });
+  const outputs = Array.from({ length: tx.outputsLength }, (_, index) => {
+    const current = tx.getOutput(index);
+    if (current.amount === void 0 || !current.script) throw new Error("incomplete Savings output");
+    return { amount: Number(current.amount), script: hex.encode(current.script) };
+  });
+  return {
+    inputs,
+    outputs,
+    fee: inputs.reduce((sum, current) => sum + current.value, 0) - outputs.reduce((sum, current) => sum + current.amount, 0)
+  };
+}
+function requireSameNativeSavingsIntent(unsignedHex, signedHex, destAddress, amountSats, network, signersForInput) {
+  const beforeTx = Transaction.fromPSBT(hex.decode(unsignedHex), TX_OPTS);
+  const afterTx = Transaction.fromPSBT(hex.decode(signedHex), TX_OPTS);
+  if (hex.encode(beforeTx.unsignedTx) !== hex.encode(afterTx.unsignedTx)) {
+    throw new Error("signed PSBT changed the unsigned Savings transaction");
+  }
+  const before = inspectSavingsPsbt(unsignedHex);
+  const after = inspectSavingsPsbt(signedHex);
+  const unsignedInputs = before.inputs.map((current) => ({ ...current, sigs: 0 }));
+  const signedInputs = after.inputs.map((current) => ({ ...current, sigs: 0 }));
+  if (JSON.stringify(unsignedInputs) !== JSON.stringify(signedInputs)) {
+    throw new Error("signed PSBT changed a Savings input");
+  }
+  if (JSON.stringify(before.outputs) !== JSON.stringify(after.outputs) || before.fee !== after.fee || after.fee < 0) {
+    throw new Error("signed PSBT changed an output or fee");
+  }
+  const destination = after.outputs[0];
+  if (destination.amount !== amountSats) throw new Error("signed amount does not match");
+  const want = scriptHexFromAddress(destAddress, network);
+  if (destination.script !== want) throw new Error("signed destination does not match");
+  for (let index = 0; index < afterTx.inputsLength; index++) {
+    const { phonePub, hardwarePub } = signersForInput(index);
+    requireExactDefaultTapscriptSignatures(beforeTx, index, [phonePub]);
+    requireExactDefaultTapscriptSignatures(afterTx, index, [phonePub, hardwarePub]);
+    const returned = new Set(tapscriptSignatureRecords(afterTx, index));
+    if (tapscriptSignatureRecords(beforeTx, index).some((record) => !returned.has(record))) {
+      throw new Error("hardware changed the phone Savings signature");
+    }
+  }
+}
+
+// src/lib/vault/ledgerSavings.ts
+var TX_OPTS2 = { version: 2, allowUnknownInputs: true, allowUnknownOutputs: true };
+function treeAt(contract, branch, index) {
+  if (branch !== 0 && branch !== 1 || index !== 0) throw new Error("unenrolled Ledger Savings coordinate");
+  return branch === 0 ? contract.receive : contract.change;
+}
+function normalKey(contract, role, branch) {
+  return ledgerSavingsChild(ledgerAccountKey(contract.context[role], contract.context.network), branch);
+}
+function originFor(contract, role, branch, leaf) {
+  const origin2 = contract.context[role];
+  return [
+    normalKey(contract, role, branch).publicKey.slice(1),
+    {
+      hashes: [tapLeafHash(leaf)],
+      der: { fingerprint: Number.parseInt(origin2.fingerprint, 16), path: [...origin2.path, branch, 0] }
+    }
+  ];
+}
+function buildLedgerSavingsPsbt(input) {
+  const { context, spendingPolicy } = input.contract;
+  const family = buildLedgerNativeFamily(context, spendingPolicy);
+  return buildNativeSavingsPsbt({
+    ...input,
+    network: context.network,
+    changeScript: family.change.script,
+    inputForCoin: (coin) => {
+      const tree = treeAt(family, coin.branch, coin.index);
+      const parent = Transaction.fromRaw(hex.decode(coin.parentTxHex), TX_OPTS2);
+      if (parent.id !== coin.txid || coin.vout >= parent.outputsLength) throw new Error("Savings parent mismatch");
+      const prevout = parent.getOutput(coin.vout);
+      if (prevout.amount !== BigInt(coin.value) || !prevout.script || hex.encode(prevout.script) !== hex.encode(tree.script))
+        throw new Error("Savings prevout does not match the enrolled address and value");
+      return {
+        nonWitnessUtxo: parent.toBytes(true, true),
+        witnessScript: tree.script,
+        tapInternalKey: tree.tapInternalKey,
+        tapLeafScript: [requireSavingsAdminLeaf(tree)],
+        tapBip32Derivation: [originFor(input.contract, "hardware", coin.branch, tree.admin)]
+      };
+    },
+    changeMetadata: {
+      tapInternalKey: family.change.tapInternalKey,
+      tapTree: [family.change.admin, ...family.change.initiate].map((script, i) => ({
+        depth: !context.recovery && i === 2 ? 1 : 2,
+        version: 192,
+        script
+      })),
+      tapBip32Derivation: [originFor(input.contract, "hardware", 1, family.change.admin)]
+    }
+  });
+}
+function inputCoins(input) {
+  return [...input.coins].sort((a, b) => a.txid.localeCompare(b.txid) || a.vout - b.vout);
+}
+function requireLedgerSavingsPhoneApproval(input, phonePsbt) {
+  const canonical2 = Transaction.fromPSBT(hex.decode(buildLedgerSavingsPsbt(input)), TX_OPTS2);
+  const supplied = Transaction.fromPSBT(hex.decode(phonePsbt), TX_OPTS2);
+  if (hex.encode(canonical2.unsignedTx) !== hex.encode(supplied.unsignedTx))
+    throw new Error("phone approval changed the Savings transaction");
+  inputCoins(input).forEach((coin, index) => {
+    canonical2.updateInput(index, { tapScriptSig: supplied.getInput(index).tapScriptSig });
+    requireExactDefaultTapscriptSignatures(supplied, index, [
+      hex.encode(normalKey(input.contract, "phone", coin.branch).publicKey)
+    ]);
+    requireExactDefaultTapscriptSignatures(canonical2, index, [
+      hex.encode(normalKey(input.contract, "phone", coin.branch).publicKey)
+    ]);
+  });
+  if (hex.encode(canonical2.toPSBT()) !== hex.encode(supplied.toPSBT()))
+    throw new Error("Savings signing metadata changed");
+  return canonical2;
+}
+function acceptLedgerSavingsSignatures(input, phonePsbt, signedPsbt) {
+  const phone = requireLedgerSavingsPhoneApproval(input, phonePsbt);
+  const signed = Transaction.fromPSBT(hex.decode(signedPsbt), TX_OPTS2);
+  const coins = inputCoins(input);
+  requireSameNativeSavingsIntent(
+    hex.encode(phone.toPSBT()),
+    signedPsbt,
+    input.destAddress,
+    input.amountSats,
+    input.contract.context.network,
+    (index) => ({
+      phonePub: hex.encode(normalKey(input.contract, "phone", coins[index].branch).publicKey),
+      hardwarePub: hex.encode(normalKey(input.contract, "hardware", coins[index].branch).publicKey)
+    })
+  );
+  coins.forEach((_, i) => phone.updateInput(i, { tapScriptSig: signed.getInput(i).tapScriptSig }));
+  return hex.encode(phone.toPSBT());
+}
+
+// src/lib/vault/tenantEnrollment.ts
+var PRF_SALT3 = new TextEncoder().encode("arkade-2fa-vault/prf/v1");
+var HKDF_INFO2 = new TextEncoder().encode("arkade-2fa-vault/kek/v1");
+var DIRECT_INFO = new TextEncoder().encode("arkade-2fa-vault/direct-p256/v1");
+
+// src/lib/vault/prfEnvelope.ts
+init_define_import_meta_env();
+var PRF_SALT_UTF8 = "arkade-2fa-vault/prf/v1";
+var KEK_HKDF_INFO_UTF8 = "arkade-2fa-vault/kek/v1";
+var PRF_SALT4 = new TextEncoder().encode(PRF_SALT_UTF8);
+var KEK_HKDF_INFO = new TextEncoder().encode(KEK_HKDF_INFO_UTF8);
 
 // src/lib/vault/light/enrollment.ts
 function validateLightEnrollment(value) {
@@ -49802,6 +53664,73 @@ async function fetchTxHex(txid) {
 
 // src/lib/vault/recovery/exitArchive.ts
 init_define_import_meta_env();
+
+// src/lib/vault/recovery/pagedIndexer.ts
+init_define_import_meta_env();
+async function allPages(fetchPage) {
+  const values = [];
+  let index;
+  const seen = /* @__PURE__ */ new Set();
+  for (let count = 0; count < 64; count++) {
+    const result = await fetchPage(index);
+    values.push(...result.values);
+    if (values.length > 4096) throw new Error("Recovery pagination limit exceeded");
+    const page = result.page;
+    if (!page) return values;
+    if (!Number.isSafeInteger(page.current) || page.current < 0 || !Number.isSafeInteger(page.total) || page.total < 0 || !Number.isSafeInteger(page.next) || page.next < 0 || seen.has(page.current))
+      throw new Error("Invalid recovery pagination");
+    seen.add(page.current);
+    if (page.next === 0 || page.current === page.total && page.next === page.current) return values;
+    if (page.next <= page.current || page.next > page.total || !result.values.length)
+      throw new Error("Recovery pagination did not advance");
+    index = page.next;
+  }
+  throw new Error("Recovery pagination limit exceeded");
+}
+function pagedRecoveryIndexer(indexer) {
+  return new Proxy(indexer, {
+    get(target, key) {
+      if (key === "getVtxoChain")
+        return async (outpoint2) => ({
+          chain: await allPages(async (pageIndex) => {
+            const result = await target.getVtxoChain(
+              outpoint2,
+              pageIndex === void 0 ? void 0 : { pageIndex, pageSize: 100 }
+            );
+            return { values: result.chain, page: result.page };
+          })
+        });
+      if (key === "getVirtualTxs")
+        return async (ids) => ({
+          txs: await allPages(async (pageIndex) => {
+            const result = await target.getVirtualTxs(
+              ids,
+              pageIndex === void 0 ? void 0 : { pageIndex, pageSize: 100 }
+            );
+            return { values: result.txs, page: result.page };
+          })
+        });
+      const value = Reflect.get(target, key);
+      return typeof value === "function" ? value.bind(target) : value;
+    }
+  });
+}
+function recoveryChainResolver(indexer, repository, extraSources = []) {
+  const completeBranches = new Proxy(repository, {
+    get(target, key) {
+      if (key === "getBranch")
+        return async (outpoint2) => {
+          const branch = await target.getBranch(outpoint2);
+          return branch.some((node) => node.type === ChainedTxType.Commitment) ? branch : [];
+        };
+      const value = Reflect.get(target, key);
+      return typeof value === "function" ? value.bind(target) : value;
+    }
+  });
+  return createExitChainResolver({ indexer: pagedRecoveryIndexer(indexer), repository: completeBranches, extraSources });
+}
+
+// src/lib/vault/recovery/exitArchive.ts
 init_base();
 var maxArchiveBytes = 12e6;
 var outpoint = (v) => `${v.txid}:${v.vout}`;
@@ -49948,9 +53877,9 @@ function exitArchiveProviders(archive, d) {
       if (!signal.aborted)
         await new Promise((resolve) => signal.addEventListener("abort", () => resolve(), { once: true }));
     },
-    getVtxos: async (options) => ({
+    getVtxos: async (options2) => ({
       vtxos: coins.filter(
-        (coin) => options?.outpoints?.some((v) => outpoint(v) === outpoint(coin)) || options?.scripts?.includes(coin.script)
+        (coin) => options2?.outpoints?.some((v) => outpoint(v) === outpoint(coin)) || options2?.scripts?.includes(coin.script)
       )
     }),
     getVtxoChain: async (coin) => ({ chain: archive.branches[outpoint(coin)] ?? [] }),
@@ -49967,6 +53896,14 @@ async function captureExitArchive(d, repository, previous) {
   requireExitArchiveInfo(info, d);
   const getCoins = async () => (await indexer.getVtxos({ scripts: [d.scriptPubKey] })).vtxos.filter((v) => !v.isSpent);
   const coins = await getCoins();
+  const archive = await captureExitArchiveForCoins(d, repository, previous, coins, info, indexer);
+  const fingerprint2 = (values) => values.map((v) => `${outpoint(v)}:${v.value}:${v.script}`).sort().join("|");
+  if (fingerprint2(coins) !== fingerprint2(await getCoins()))
+    throw new Error("Your balance changed while saving recovery data");
+  return archive;
+}
+async function captureExitArchiveForCoins(d, repository, previous, coins, info, indexer) {
+  requireExitArchiveInfo(info, d);
   if (coins.length > 512) throw new Error("Recovery output limit exceeded");
   const previousCoins = previous ? validateExitArchive(previous, d).coins : [];
   const removed = previousCoins.filter((old) => !coins.some((coin) => outpoint(coin) === outpoint(old)));
@@ -49975,7 +53912,11 @@ async function captureExitArchive(d, repository, previous) {
     if (removed.some((old) => !resolved.some((coin) => outpoint(coin) === outpoint(old) && coin.isSpent)))
       throw new Error("An earlier output is missing. Previous recovery data has been retained.");
   }
-  const resolver = createExitChainResolver({ indexer, repository });
+  const resolver = recoveryChainResolver(
+    indexer,
+    repository,
+    previous ? [exitArchiveProviders(previous, d).source] : []
+  );
   const branches = {};
   const wanted = /* @__PURE__ */ new Set();
   for (const coin of coins) {
@@ -49994,9 +53935,6 @@ async function captureExitArchive(d, repository, previous) {
       transactions[Transaction2.fromPSBT(base64.decode(psbt)).id] = psbt;
     }
   }
-  const fingerprint2 = (values) => values.map((v) => `${outpoint(v)}:${v.value}:${v.script}`).sort().join("|");
-  if (fingerprint2(coins) !== fingerprint2(await getCoins()))
-    throw new Error("Your balance changed while saving recovery data");
   const archive = {
     version: 1,
     descriptorHash: d.descriptorHash,
@@ -50081,18 +54019,22 @@ async function prepareExitArchivePrevouts(archive, binding2, readCommitment = fe
 // src/lib/vault/recovery/journals.ts
 init_define_import_meta_env();
 
-// node_modules/.pnpm/@arkade-os+swap@0.0.10_nostr-tools@2.17.2_typescript@5.9.3_/node_modules/@arkade-os/swap/dist/index.js
+// node_modules/.pnpm/@arkade-os+swap@0.0.10_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_@noble+hashes_93628cf3d3403ffa90c86a170ace1087/node_modules/@arkade-os/swap/dist/index.js
 init_define_import_meta_env();
 
-// node_modules/.pnpm/@arkade-os+swap@0.0.10_nostr-tools@2.17.2_typescript@5.9.3_/node_modules/@arkade-os/swap/dist/chunk-5NPYNQ5V.js
+// node_modules/.pnpm/@arkade-os+swap@0.0.10_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_@noble+hashes_93628cf3d3403ffa90c86a170ace1087/node_modules/@arkade-os/swap/dist/chunk-5NPYNQ5V.js
 init_define_import_meta_env();
 init_base();
+init_sha2();
 init_legacy();
 init_btc_signer();
+init_base();
+init_legacy();
 var ONCHAIN_ORDER_MARGIN_SECONDS = 2 * 60 * 60;
 var ONCHAIN_CLAIM_MARGIN_SECONDS = 90 * 60;
 var LOCKTIME_THRESHOLD = 5e8;
 var ONCHAIN_DUST_SATS = BigInt(330);
+var paymentHashOf = (preimage) => hex.encode(sha256(preimage));
 var h160FromPaymentHash = (paymentHash) => ripemd160(hex.decode(paymentHash));
 var L1_NETWORKS = {
   bitcoin: NETWORK,
@@ -50159,7 +54101,7 @@ function onchainHtlcScript(params, network) {
     refundLocktime: params.refundLocktime
   };
 }
-var HKDF_INFO2 = new TextEncoder().encode("covclaimd/preimage/v1");
+var HKDF_INFO3 = new TextEncoder().encode("covclaimd/preimage/v1");
 var ARKADE_BTC = "arkade:BTC";
 var LIGHTNING_BTC = "lightning:BTC";
 var ONCHAIN_BTC = "onchain:BTC";
@@ -50168,15 +54110,370 @@ var LIGHTNING_SEND_PAIR = rfqPair(ARKADE_BTC, LIGHTNING_BTC);
 var LIGHTNING_RECEIVE_PAIR = rfqPair(LIGHTNING_BTC, ARKADE_BTC);
 var ONCHAIN_SEND_PAIR = rfqPair(ARKADE_BTC, ONCHAIN_BTC);
 var ONCHAIN_RECEIVE_PAIR = rfqPair(ONCHAIN_BTC, ARKADE_BTC);
+var AddressMismatch = class extends Error {
+  derived;
+  quoted;
+  constructor(derived, quoted) {
+    super("solver lockup address does not match local derivation \u2014 refusing to fund");
+    this.name = "AddressMismatch";
+    this.derived = derived;
+    this.quoted = quoted;
+  }
+};
 var MIN_HEADROOM_SECONDS = 90 * 60;
+var gateError = (reason, message) => {
+  const error = new Error(message);
+  error.reason = reason;
+  return error;
+};
+var assertFinite = (value, reason, label) => {
+  if (value !== void 0 && !Number.isFinite(value)) {
+    throw gateError(reason, `${label} is not a finite number (${String(value)})`);
+  }
+};
 var SEQUENCE_GRANULARITY_SECONDS = 512;
 var SOLO_REFUND_HEADROOM_SECONDS = 8 * SEQUENCE_GRANULARITY_SECONDS;
+var unilateralRefundDelay = (claimDelay) => claimDelay;
+var unilateralRefundWithoutReceiverDelay = (claimDelay) => claimDelay + SOLO_REFUND_HEADROOM_SECONDS;
 var MIN_CLAIM_WINDOW_SECONDS = 30 * 60;
+var verifyReceiveInvoice = (input) => {
+  let decoded;
+  try {
+    decoded = input.decode(input.invoice);
+  } catch (error) {
+    throw gateError(
+      "invoice_undecodable",
+      `solver sent an undecodable invoice: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+  assertFinite(decoded.expiresAt, "invoice_undecodable", "the decoded invoice expiry");
+  assertFinite(input.quote.valid_until, "quote_malformed", "quote valid_until");
+  if (decoded.paymentHash !== input.paymentHash) {
+    throw gateError(
+      "invoice_hash_mismatch",
+      `solver's invoice pays ${decoded.paymentHash}, not this swap's ${input.paymentHash}`
+    );
+  }
+  if (decoded.amountSats <= 0) {
+    throw gateError("invoice_amount_mismatch", "solver's invoice names no amount");
+  }
+  if (decoded.amountSats !== input.quote.from_amount) {
+    throw gateError(
+      "invoice_amount_mismatch",
+      `solver's invoice asks for ${decoded.amountSats}, not the quoted from_amount ${input.quote.from_amount}`
+    );
+  }
+  return { payDeadline: Math.min(decoded.expiresAt, input.quote.valid_until) };
+};
+function receiveVtxoScript(params) {
+  const seconds = (value) => ({
+    type: "seconds",
+    value: BigInt(value)
+  });
+  return new VHTLC.ScriptV2({
+    sender: params.solverPubkey,
+    receiver: params.payoutPubkey,
+    server: params.serverPubkey,
+    preimageHash: ripemd160(hex.decode(params.paymentHash)),
+    refundLocktime: BigInt(params.refundLocktime),
+    unilateralClaimDelay: seconds(params.claimDelay),
+    unilateralRefundDelay: seconds(unilateralRefundDelay(params.claimDelay)),
+    unilateralRefundWithoutReceiverDelay: seconds(
+      unilateralRefundWithoutReceiverDelay(params.claimDelay)
+    ),
+    nonInteractiveClaim: {
+      receiverPkScript: params.payoutPkScript,
+      emulatorPubkey: params.emulatorPubkey
+    },
+    nonInteractiveRefund: {
+      senderPkScript: params.solverRefundPkScript,
+      emulatorPubkey: params.emulatorPubkey
+    }
+  });
+}
 
-// node_modules/.pnpm/@arkade-os+swap@0.0.10_nostr-tools@2.17.2_typescript@5.9.3_/node_modules/@arkade-os/swap/dist/chunk-6ZUS47GA.js
+// node_modules/.pnpm/@arkade-os+swap@0.0.10_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_@noble+hashes_93628cf3d3403ffa90c86a170ace1087/node_modules/@arkade-os/swap/dist/chunk-6ZUS47GA.js
 init_define_import_meta_env();
 
-// node_modules/.pnpm/@arkade-os+swap@0.0.10_nostr-tools@2.17.2_typescript@5.9.3_/node_modules/@arkade-os/swap/dist/index.js
+// node_modules/.pnpm/@arkade-os+solver-discovery@0.2.3/node_modules/@arkade-os/solver-discovery/dist/types.js
+init_define_import_meta_env();
+var AMOUNT_PATTERN = /^(0|[1-9][0-9]{0,29})$/;
+function isAmount(v) {
+  return typeof v === "string" && AMOUNT_PATTERN.test(v);
+}
+var LIMIT_KEYS2 = {
+  base: { min: "min_base_amount", max: "max_base_amount" },
+  quote: { min: "min_quote_amount", max: "max_quote_amount" }
+};
+function assetIdOf(value) {
+  const id = value?.id;
+  return typeof id === "string" ? id : void 0;
+}
+function isSameAssetMarket(market) {
+  const baseId = assetIdOf(market.base_asset);
+  return baseId !== void 0 && baseId === assetIdOf(market.quote_asset);
+}
+
+// node_modules/.pnpm/@arkade-os+solver-discovery@0.2.3/node_modules/@arkade-os/solver-discovery/dist/pricing.js
+init_define_import_meta_env();
+var DEFAULT_SAFETY_BPS = 50;
+var DECIMAL = /^([+-]?)(\d*)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/;
+function gcd2(a, b) {
+  a = a < 0n ? -a : a;
+  b = b < 0n ? -b : b;
+  while (b) {
+    [a, b] = [b, a % b];
+  }
+  return a;
+}
+function normalize2({ num: num2, den }) {
+  if (den === 0n)
+    throw new Error("rational with zero denominator");
+  if (den < 0n) {
+    num2 = -num2;
+    den = -den;
+  }
+  const g = gcd2(num2, den);
+  return g > 1n ? { num: num2 / g, den: den / g } : { num: num2, den };
+}
+function pow10(n) {
+  if (!Number.isInteger(n) || n < 0)
+    throw new Error(`pow10 requires a non-negative integer, got ${n}`);
+  return 10n ** BigInt(n);
+}
+function parseDecimal(value) {
+  if (typeof value === "number") {
+    if (!Number.isFinite(value))
+      throw new Error(`not a finite number: ${value}`);
+    value = String(value);
+  }
+  const s = value.trim();
+  const m = DECIMAL.exec(s);
+  if (!m)
+    throw new Error(`not a decimal number: ${JSON.stringify(value)}`);
+  const [, sign2, intPart = "", fracPart = "", expPart] = m;
+  if (intPart === "" && fracPart === "") {
+    throw new Error(`not a decimal number: ${JSON.stringify(value)}`);
+  }
+  if (intPart.length + fracPart.length > 64) {
+    throw new Error(`number has too many digits: ${JSON.stringify(value)}`);
+  }
+  const rawExp = expPart ? parseInt(expPart, 10) : 0;
+  if (Math.abs(rawExp) > 1024) {
+    throw new Error(`exponent out of range: ${JSON.stringify(value)}`);
+  }
+  const mantissa = BigInt((intPart || "0") + fracPart);
+  const exp = rawExp - fracPart.length;
+  const signed = sign2 === "-" ? -mantissa : mantissa;
+  const r = exp >= 0 ? { num: signed * pow10(exp), den: 1n } : { num: signed, den: pow10(-exp) };
+  return normalize2(r);
+}
+function deriveAtomicPrice(feedValue, opts) {
+  const f = parseDecimal(feedValue);
+  const price = normalize2({ num: f.num, den: f.den * pow10(opts.price_decimals) });
+  if (price.num <= 0n)
+    throw new Error("price feed value must be positive");
+  return price;
+}
+function toBigIntAmount(value, label) {
+  let out;
+  if (typeof value === "bigint")
+    out = value;
+  else if (typeof value === "number") {
+    if (!Number.isInteger(value))
+      throw new Error(`${label} must be an integer amount, got ${value}`);
+    out = BigInt(value);
+  } else
+    out = BigInt(value.trim());
+  if (out < 0n)
+    throw new Error(`${label} must be non-negative, got ${out}`);
+  return out;
+}
+function computeWantAmount(input) {
+  const { give, price, feeBps } = input;
+  const safetyBps = input.safetyBps ?? DEFAULT_SAFETY_BPS;
+  const deposit = toBigIntAmount(input.deposit, "deposit");
+  const feeFlat = input.feeFlat === void 0 ? 0n : toBigIntAmount(input.feeFlat, "feeFlat");
+  const netBps = 1e4 - feeBps - safetyBps;
+  if (netBps <= 0)
+    return 0n;
+  const net = BigInt(netBps);
+  const flat = flatInReceivedUnits(feeFlat, give, price);
+  const gross = give === "base" ? deposit * price.num * net / (price.den * 10000n) : deposit * price.den * net / (price.num * 10000n);
+  return gross > flat ? gross - flat : 0n;
+}
+function flatInReceivedUnits(feeFlat, give, price) {
+  if (feeFlat === 0n)
+    return 0n;
+  if (give === "base")
+    return feeFlat;
+  return (feeFlat * price.den + price.num - 1n) / price.num;
+}
+function otherSide(side) {
+  return side === "base" ? "quote" : "base";
+}
+function sideLimits(market, side) {
+  const min = market[LIMIT_KEYS2[side].min];
+  const max = market[LIMIT_KEYS2[side].max];
+  if (!isAmount(min) || !isAmount(max) || max === "0")
+    return null;
+  const minBig = BigInt(min);
+  const maxBig = BigInt(max);
+  if (minBig === 0n || minBig > maxBig)
+    return null;
+  return { min: minBig, max: maxBig };
+}
+function rationalToDecimalString(r, fractionDigits = 8) {
+  const neg = r.num < 0n;
+  const num2 = neg ? -r.num : r.num;
+  const scaled = num2 * pow10(fractionDigits) / r.den;
+  const s = scaled.toString().padStart(fractionDigits + 1, "0");
+  const whole2 = s.slice(0, s.length - fractionDigits);
+  const frac = fractionDigits > 0 ? "." + s.slice(s.length - fractionDigits) : "";
+  return (neg ? "-" : "") + whole2 + frac;
+}
+
+// node_modules/.pnpm/@arkade-os+solver-discovery@0.2.3/node_modules/@arkade-os/solver-discovery/dist/assets.js
+init_define_import_meta_env();
+function toAtomic(display, decimals) {
+  const { num: num2, den } = parseDecimal(display);
+  if (num2 < 0n)
+    throw new Error(`amount must be non-negative, got ${display}`);
+  const scale = pow10(decimals);
+  const scaledNum = num2 * scale;
+  if (scaledNum % den !== 0n) {
+    throw new Error(`amount ${display} has more precision than ${decimals} decimals allow`);
+  }
+  return scaledNum / den;
+}
+function fromAtomic(atomic, decimals, opts = {}) {
+  let out = rationalToDecimalString({ num: atomic, den: pow10(decimals) }, decimals);
+  if ((opts.trim ?? true) && out.includes(".")) {
+    out = out.replace(/0+$/, "").replace(/\.$/, "");
+  }
+  return out;
+}
+function displayPrice(price, assetDecimals) {
+  const diff = assetDecimals.baseDecimals - assetDecimals.quoteDecimals;
+  return diff >= 0 ? { num: price.num * pow10(diff), den: price.den } : { num: price.num, den: price.den * pow10(-diff) };
+}
+function displayPriceString(price, assetDecimals, fractionDigits = 8) {
+  return rationalToDecimalString(displayPrice(price, assetDecimals), fractionDigits);
+}
+
+// node_modules/.pnpm/@arkade-os+solver-discovery@0.2.3/node_modules/@arkade-os/solver-discovery/dist/offer.js
+init_define_import_meta_env();
+function amount(asset, atomic) {
+  return {
+    asset,
+    atomic,
+    display: fromAtomic(atomic, asset.decimals)
+  };
+}
+function inputAmount(value, decimals) {
+  return typeof value === "bigint" ? value : toAtomic(value, decimals);
+}
+function resolveOfferAmount(input) {
+  if (input.giveAmount !== void 0) {
+    if (input.wantAmount !== void 0)
+      throw new Error("pass exactly one of giveAmount or wantAmount");
+    return { kind: "give", value: input.giveAmount };
+  }
+  if (input.wantAmount !== void 0)
+    return { kind: "want", value: input.wantAmount };
+  throw new Error("pass exactly one of giveAmount or wantAmount");
+}
+function ceilDiv(num2, den) {
+  if (den <= 0n)
+    throw new Error("cannot divide by a non-positive denominator");
+  return num2 === 0n ? 0n : (num2 + den - 1n) / den;
+}
+function depositForWant(input) {
+  if (input.wantAmount === 0n)
+    return 0n;
+  const netBps = 1e4 - input.feeBps - input.safetyBps;
+  if (netBps <= 0) {
+    throw new Error("cannot satisfy wantAmount when fee_bps + safetyBps is >= 100%");
+  }
+  const net = BigInt(netBps);
+  const gross = input.wantAmount + flatInReceivedUnits(input.feeFlat, input.give, input.price);
+  if (input.give === "base") {
+    return ceilDiv(gross * input.price.den * 10000n, input.price.num * net);
+  }
+  return ceilDiv(gross * input.price.num * 10000n, input.price.den * net);
+}
+function planOffer(input) {
+  const { market, give } = input;
+  const base = market.base_asset;
+  const quote = market.quote_asset;
+  for (const key of ["base_asset", "quote_asset"]) {
+    const d = market[key]?.decimals;
+    if (typeof d !== "number" || !Number.isInteger(d) || d < 0) {
+      throw new Error(`${key}.decimals must be a non-negative integer`);
+    }
+  }
+  if (market.fee_flat !== void 0 && !isAmount(market.fee_flat)) {
+    throw new Error("fee_flat must be a canonical decimal-string amount");
+  }
+  const feeFlat = market.fee_flat === void 0 ? 0n : BigInt(market.fee_flat);
+  const depositAsset = give === "base" ? base : quote;
+  const receiveAsset = give === "base" ? quote : base;
+  const safetyBps = input.safetyBps ?? DEFAULT_SAFETY_BPS;
+  let price;
+  if (isSameAssetMarket(market)) {
+    price = { num: 1n, den: 1n };
+  } else {
+    if (input.feedValue === void 0 || typeof market.price_decimals !== "number") {
+      throw new Error("a cross-asset market needs feedValue and price_decimals to price");
+    }
+    price = deriveAtomicPrice(input.feedValue, { price_decimals: market.price_decimals });
+  }
+  const offerAmount = resolveOfferAmount(input);
+  let depositAtomic;
+  let receiveAtomic;
+  if (offerAmount.kind === "give") {
+    depositAtomic = inputAmount(offerAmount.value, depositAsset.decimals);
+    receiveAtomic = computeWantAmount({
+      deposit: depositAtomic,
+      give,
+      price,
+      feeBps: market.fee_bps,
+      safetyBps,
+      feeFlat
+    });
+  } else {
+    receiveAtomic = inputAmount(offerAmount.value, receiveAsset.decimals);
+    depositAtomic = depositForWant({
+      wantAmount: receiveAtomic,
+      give,
+      price,
+      feeBps: market.fee_bps,
+      safetyBps,
+      feeFlat
+    });
+  }
+  const priceDisplay = displayPriceString(price, {
+    baseDecimals: base.decimals,
+    quoteDecimals: quote.decimals
+  });
+  const bounds = sideLimits(market, otherSide(give));
+  return {
+    market,
+    give,
+    deposit: amount(depositAsset, depositAtomic),
+    receive: amount(receiveAsset, receiveAtomic),
+    price,
+    priceDisplay,
+    safetyBps,
+    limits: {
+      min: bounds && amount(receiveAsset, bounds.min),
+      max: bounds && amount(receiveAsset, bounds.max),
+      withinLimits: bounds !== null && receiveAtomic >= bounds.min && receiveAtomic <= bounds.max
+    }
+  };
+}
+
+// node_modules/.pnpm/@arkade-os+swap@0.0.10_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curves@2.0.1_@noble+hashes_93628cf3d3403ffa90c86a170ace1087/node_modules/@arkade-os/swap/dist/index.js
 init_base();
 init_base();
 var swap_want_asset_program_default = {
@@ -50491,9 +54788,19 @@ var REFUND_MTP_LAG_SECONDS = 2 * 60 * 60;
 
 // src/lib/vault/light/exitRepository.ts
 init_define_import_meta_env();
+
+// src/lib/vault/recovery/retainedRepository.ts
+init_define_import_meta_env();
+var RetainedExitRepository = class extends IndexedDBVirtualTxRepository {
+  async pruneForSpentVtxo(outpoint2) {
+    void outpoint2;
+  }
+};
+
+// src/lib/vault/light/exitRepository.ts
 function lightExitRepository(descriptor) {
   const valid = validateLightDescriptor(descriptor);
-  return new IndexedDBVirtualTxRepository(`vaulted-light:${valid.vaultId}:exit-paths`);
+  return new RetainedExitRepository(`vaulted-light:${valid.vaultId}:exit-paths`);
 }
 
 // src/lib/vault/vtxo/exitRepository.ts
@@ -50507,6 +54814,10 @@ init_define_import_meta_env();
 
 // src/lib/error.ts
 init_define_import_meta_env();
+
+// src/lib/vault/lightningReceive.ts
+init_define_import_meta_env();
+init_base();
 
 // src/lib/vault/lightningInvoice.ts
 init_define_import_meta_env();
@@ -50565,6 +54876,227 @@ function decodeVaultLightningInvoice(rawInvoice, network, nowSeconds2 = Math.flo
   return { raw: invoice, paymentHash, amountSats, expiresAt };
 }
 
+// src/lib/vault/lightningConfig.ts
+init_define_import_meta_env();
+
+// src/lib/vault/ln-solver-bitcoin.card.json
+var ln_solver_bitcoin_card_default = {
+  version: 0,
+  name: "beta-solver",
+  discovery_pubkey: "66422c952f8dcb96e4d0c3f049cd1e265b8461b916d9913c65c2494b64b4e3ce",
+  transports: {
+    nostr: {
+      relays: ["wss://nostr.arkade.sh"]
+    }
+  },
+  markets: [
+    {
+      pair: "BTC/lightning:BTC",
+      base_asset: { id: "btc", name: "Bitcoin", ticker: "BTC", decimals: 8 },
+      quote_asset: { id: "btc", name: "Bitcoin", ticker: "BTC", decimals: 8 },
+      quote_corridor: "lightning",
+      fee_bps: 30,
+      min_base_amount: "500",
+      max_base_amount: "50000",
+      min_quote_amount: "500",
+      max_quote_amount: "50000"
+    }
+  ],
+  sig: "c2df73c8b719d89e4d64ac6ee143bbf1820f98f5443f5e5476649d178b9a21d3cc3d7bc13180c464874365629f319718083a928b4d50b8f2e303f6c7e8c774ab"
+};
+
+// src/lib/vault/ln-solver-mutinynet.card.json
+var ln_solver_mutinynet_card_default = {
+  version: 0,
+  name: "ln-solver-mutinynet",
+  discovery_pubkey: "3f831510a6d7678d0c90d7d6fbc4057720517e2e30681ef4c87cc57aaf57e8d5",
+  transports: {
+    nostr: {
+      relays: ["wss://nostr.arkade.sh"]
+    }
+  },
+  markets: [
+    {
+      pair: "BTC/lightning:BTC",
+      base_asset: {
+        id: "btc",
+        name: "Bitcoin",
+        ticker: "BTC",
+        decimals: 8
+      },
+      quote_asset: {
+        id: "btc",
+        name: "Bitcoin",
+        ticker: "BTC",
+        decimals: 8
+      },
+      quote_corridor: "lightning",
+      fee_bps: 30,
+      min_base_amount: "1000",
+      max_base_amount: "50000",
+      min_quote_amount: "1000",
+      max_quote_amount: "25000"
+    },
+    {
+      pair: "BTC/onchain:BTC",
+      base_asset: {
+        id: "btc",
+        name: "Bitcoin",
+        ticker: "BTC",
+        decimals: 8
+      },
+      quote_asset: {
+        id: "btc",
+        name: "Bitcoin",
+        ticker: "BTC",
+        decimals: 8
+      },
+      quote_corridor: "onchain",
+      fee_bps: 0,
+      min_base_amount: "1000",
+      max_base_amount: "50000",
+      min_quote_amount: "1000",
+      max_quote_amount: "50000"
+    }
+  ],
+  sig: "e0e8a4307c9e21368624877576fe45466bc729e8f50bea28b190d4deb054023fd177366f270808884ed006e249fbe6c9fd2d0483de0d8db6eb0021706853862b"
+};
+
+// src/lib/vault/lightningConfig.ts
+var MUTINYNET_LIGHTNING_MARKET = ln_solver_mutinynet_card_default.markets[0];
+var BITCOIN_LIGHTNING_MARKET = ln_solver_bitcoin_card_default.markets[0];
+function lightningSdkNetwork(network) {
+  return sdkNetworkName(network);
+}
+function fundingCeilingSats(market, maxQuoteSats) {
+  const plan = planOffer({
+    market,
+    give: "base",
+    wantAmount: BigInt(maxQuoteSats),
+    safetyBps: 0
+  });
+  return Number(plan.deposit.atomic);
+}
+var MUTINYNET_LIGHTNING_SOLVER = {
+  network: "mutinynet",
+  pubkey: "3f831510a6d7678d0c90d7d6fbc4057720517e2e30681ef4c87cc57aaf57e8d5",
+  relays: ["wss://nostr.arkade.sh"],
+  minSats: 1e3,
+  maxSats: 25e3,
+  maxFundingSats: fundingCeilingSats(MUTINYNET_LIGHTNING_MARKET, 25e3),
+  market: MUTINYNET_LIGHTNING_MARKET
+};
+var BITCOIN_LIGHTNING_SOLVER = {
+  network: "bitcoin",
+  pubkey: "66422c952f8dcb96e4d0c3f049cd1e265b8461b916d9913c65c2494b64b4e3ce",
+  relays: ["wss://nostr.arkade.sh"],
+  minSats: 500,
+  maxSats: 5e4,
+  maxFundingSats: fundingCeilingSats(BITCOIN_LIGHTNING_MARKET, 5e4),
+  market: BITCOIN_LIGHTNING_MARKET
+};
+var MUTINYNET_LIGHTNING_CARD = {
+  card: ln_solver_mutinynet_card_default,
+  network: "mutinynet",
+  label: "bundled:ln-solver-mutinynet"
+};
+var BITCOIN_LIGHTNING_CARD = {
+  card: ln_solver_bitcoin_card_default,
+  network: "bitcoin",
+  label: "bundled:ln-solver-bitcoin"
+};
+var LIGHTNING_CARDS = {
+  mutinynet: { card: MUTINYNET_LIGHTNING_CARD, expectedPub: MUTINYNET_LIGHTNING_SOLVER.pubkey },
+  bitcoin: { card: BITCOIN_LIGHTNING_CARD, expectedPub: BITCOIN_LIGHTNING_SOLVER.pubkey }
+};
+
+// src/lib/vault/lightningReceive.ts
+var hex32 = (v) => typeof v === "string" && /^[0-9a-f]{64}$/.test(v);
+var whole = (v) => Number.isSafeInteger(v) && Number(v) > 0;
+function receiveProfile(record) {
+  const p = record.profile.vaultLightningReceive;
+  if (record.kind !== "lightning_receive" || !p || p.version !== 1 || !hex32(record.rfqId) || !["bitcoin", "mutinynet"].includes(p.network) || typeof p.vaultId !== "string" || !p.vaultId || typeof p.invoice !== "string" || !p.invoice || p.invoice.length > 12e3 || !whole(p.estimatedPaySats) || !/^0[23][0-9a-f]{64}$/.test(p.phonePub) || !whole(record.amount) || !whole(p.invoiceExpiresAt) || !p.quote || !whole(p.quote.from_amount) || !whole(p.quote.to_amount) || p.quote.from_amount < p.quote.to_amount || p.quote.to_amount !== record.amount || !whole(p.quote.refund_locktime) || typeof p.payoutAddress !== "string" || !p.payoutAddress) {
+    throw new Error("Invalid Lightning receive record.");
+  }
+  return p;
+}
+function deriveVaultLightningReceive(input) {
+  const { quote } = input;
+  const pins = networkPins(input.network === "bitcoin" ? "mainnet" : input.network);
+  if (!/^(?:0[23])?[0-9a-f]{64}$/.test(quote.solver_pubkey) || !whole(quote.refund_locktime) || !hex32(input.paymentHash)) {
+    throw new Error("Lightning receive quote has invalid binding fields.");
+  }
+  const refund = quote.profile?.solver_refund_pk_script;
+  if (typeof refund !== "string" || !/^[0-9a-f]{2,20000}$/.test(refund) || refund.length % 2) {
+    throw new Error("Lightning receive quote has no valid solver refund script.");
+  }
+  const payout = ArkAddress.decode(input.payoutAddress);
+  if (payout.hrp !== pins.arkHrp || hex.encode(payout.serverPubKey) !== pins.operatorSignerPub.slice(2)) {
+    throw new Error("Lightning receive destination belongs to another network or Operator.");
+  }
+  const eight = receiveVtxoScript({
+    solverPubkey: toXOnly(hex.decode(quote.solver_pubkey)),
+    refundLocktime: quote.refund_locktime,
+    serverPubkey: hex.decode(pins.operatorSignerPub).slice(1),
+    paymentHash: input.paymentHash,
+    claimDelay: input.claimDelay,
+    emulatorPubkey: hex.decode(pins.emulatorSignerPub).slice(1),
+    solverRefundPkScript: hex.decode(refund),
+    payoutPubkey: toXOnly(hex.decode(input.phonePub)),
+    payoutPkScript: payout.pkScript
+  });
+  const nine = new VHTLC.ScriptV2({
+    ...eight.options,
+    nonInteractiveRefund: { ...eight.options.nonInteractiveRefund, withoutReceiver: true }
+  });
+  const server = hex.decode(pins.operatorSignerPub).slice(1);
+  const script = [eight, nine].find(
+    (candidate2) => candidate2.address(pins.arkHrp, server).encode() === quote.profile?.lockup_address
+  );
+  if (!script)
+    throw new AddressMismatch(eight.address(pins.arkHrp, server).encode(), String(quote.profile?.lockup_address));
+  return script;
+}
+function validateReceiveRecord(record, contract, binding2) {
+  const p = receiveProfile(record);
+  const hashlock = record.profile.hashlock;
+  if (!hashlock || !hex32(hashlock.preimageHex) || paymentHashOf(hex.decode(hashlock.preimageHex)) !== hashlock.paymentHash || p.vaultId !== binding2.vaultId || p.network !== lightningSdkNetwork(binding2.network) || p.phonePub !== binding2.phonePub || hex.encode(ArkAddress.decode(p.payoutAddress).pkScript) !== binding2.spendingScript || record.profile.payoutAddress !== p.payoutAddress || record.profile.expectedAmount !== record.amount || record.profile.signer?.signingDescriptor !== `tr(${binding2.phonePub.slice(2)})`) {
+    throw new Error("Lightning receive recovery material does not match this wallet.");
+  }
+  const actualScript = VHTLCV2ContractHandler.createScript(contract.params);
+  const options2 = actualScript.options;
+  const script = deriveVaultLightningReceive({
+    quote: p.quote,
+    paymentHash: hashlock.paymentHash,
+    payoutAddress: p.payoutAddress,
+    phonePub: p.phonePub,
+    network: p.network,
+    claimDelay: Number(options2.unilateralClaimDelay.value)
+  });
+  const invoice = decodeVaultLightningInvoice(p.invoice, p.network, 0);
+  const { payDeadline } = verifyReceiveInvoice({
+    invoice: p.invoice,
+    decode: () => invoice,
+    paymentHash: hashlock.paymentHash,
+    quote: p.quote
+  });
+  if (!whole(p.estimatedPaySats) || p.quote.rfq_id !== record.rfqId || p.quote.pair !== "lightning:BTC->arkade:BTC" || hex.encode(actualScript.pkScript) !== contract.script || contract.type !== "vhtlc-v2" || contract.metadata?.genericallySpendable !== false || contract.script !== hex.encode(script.pkScript) || record.lockupAddress !== contract.address || record.lockupAddress !== p.quote.profile?.lockup_address || p.quote.to_amount !== record.amount || p.invoiceExpiresAt !== payDeadline || hex.encode(script.pkScript) !== hex.encode(ArkAddress.decode(record.lockupAddress).pkScript)) {
+    throw new Error("Lightning receive contract or invoice changed.");
+  }
+  if (p.claim) {
+    if (!hex32(p.claim.txid) || typeof p.claim.arkTx !== "string" || !Array.isArray(p.claim.checkpoints) || p.claim.checkpoints.length !== 1)
+      throw new Error("Invalid saved Lightning claim.");
+    const tx = Transaction2.fromPSBT(base64.decode(p.claim.arkTx));
+    const checkpoint = Transaction2.fromPSBT(base64.decode(p.claim.checkpoints[0]));
+    const coin = checkpoint.getInput(0).witnessUtxo;
+    const payout = tx.getOutput(0);
+    const witness = getArkPsbtFields(tx, 0, ConditionWitness);
+    if (tx.id !== p.claim.txid || tx.inputsLength !== 1 || tx.outputsLength !== 3 || checkpoint.inputsLength !== 1 || checkpoint.outputsLength !== 2 || hex.encode(tx.getInput(0).txid) !== checkpoint.id || tx.getInput(0).index !== 0 || !coin || coin.amount < BigInt(record.amount) || hex.encode(coin.script) !== contract.script || payout.amount !== coin.amount || hex.encode(payout.script) !== binding2.spendingScript || witness.length !== 1 || witness[0].length !== 1 || hex.encode(witness[0][0]) !== hashlock.preimageHex)
+      throw new Error("Saved Lightning claim does not match its contract and payout.");
+  }
+  return script;
+}
+
 // src/lib/vault/lightningLifecycle.ts
 var VAULT_LIGHTNING_PROFILE = "vaultLightning";
 var VAULT_LIGHTNING_PROFILE_VERSION = 2;
@@ -50592,42 +55124,64 @@ function storedLightningProfile(record) {
 
 // src/lib/vault/vtxo/spend.ts
 init_define_import_meta_env();
+
+// src/lib/vault/recovery/finalization.ts
+init_define_import_meta_env();
+
+// src/lib/vault/recovery/fileStore.ts
+init_define_import_meta_env();
+init_sha2();
+init_base();
+async function recoveryFileStore(key, next) {
+  return store(key, next, false);
+}
+async function store(key, next, importing) {
+  const importKey = importing ? `import:${key}:${hex.encode(sha256(new TextEncoder().encode(JSON.stringify(next))))}` : null;
+  const db = await new Promise((resolve, reject) => {
+    const request = indexedDB.open("vaulted-complete-recovery", 1);
+    request.onupgradeneeded = () => request.result.createObjectStore("files");
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+  try {
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction("files", next === void 0 ? "readonly" : "readwrite");
+      const files = tx.objectStore("files");
+      let result = null;
+      let failure;
+      const request = files.get(key);
+      request.onsuccess = () => {
+        try {
+          const previous = request.result;
+          result = previous ?? null;
+          if (next === void 0) return;
+          if (importKey) files.put(next, importKey);
+          if (importing && previous !== void 0) return;
+          if (previous !== void 0) files.put(previous, `previous:${key}`);
+          files.put(next, key);
+          result = next;
+        } catch (error) {
+          failure = error;
+          tx.abort();
+        }
+      };
+      tx.oncomplete = () => resolve(result);
+      tx.onerror = () => reject(failure ?? tx.error);
+      tx.onabort = () => reject(failure ?? tx.error);
+    });
+  } finally {
+    db.close();
+  }
+}
+
+// src/lib/vault/vtxo/spend.ts
 init_btc_signer();
 init_payment();
 init_base();
 
-// src/lib/vault/savingsSpend.ts
-init_define_import_meta_env();
-
-// src/lib/vault/bitcoin.ts
-init_define_import_meta_env();
-init_btc_signer();
-function isVaultBitcoinAddress(value, network) {
-  const trimmed = value.trim();
-  if (!trimmed) return false;
-  try {
-    const net = network ? vaultAddressNetwork(network) : trimmed.startsWith("tb1") ? TEST_NETWORK : trimmed.startsWith("bc1") || /^[13]/.test(trimmed) ? NETWORK : null;
-    if (!net) return false;
-    Address(net).decode(trimmed);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-// src/lib/vault/program/liveKit.ts
-init_define_import_meta_env();
-
-// src/lib/vault/taprootSignatures.ts
-init_define_import_meta_env();
-
-// src/lib/vault/savingsSpend.ts
-var PRF_SALT3 = new TextEncoder().encode("arkade-2fa-vault/prf/v1");
-var HKDF_INFO3 = new TextEncoder().encode("arkade-2fa-vault/kek/v1");
-
 // src/lib/vault/vtxo/feePolicy.ts
 init_define_import_meta_env();
-var encoder = new TextEncoder();
+var encoder2 = new TextEncoder();
 
 // src/lib/vault/vtxo/lock.ts
 init_define_import_meta_env();
@@ -50636,7 +55190,7 @@ init_define_import_meta_env();
 init_define_import_meta_env();
 init_secp256k1();
 init_base();
-var encoder2 = new TextEncoder();
+var encoder3 = new TextEncoder();
 var VTXO_RESERVE_TAG = "arkade-vault/vtxo-reserve/v1";
 var VTXO_RESERVE_VERSION = 1;
 var VTXO_RESERVE_PURPOSE = "spend";
@@ -50669,14 +55223,14 @@ function operationBytes(operationId) {
   return hex.decode(operationId);
 }
 function vtxoReserveDigest(input) {
-  const vaultId = encoder2.encode(input.vaultId);
-  if (vaultId.length === 0) throw new Error("vault id required");
+  const vaultId2 = encoder3.encode(input.vaultId);
+  if (vaultId2.length === 0) throw new Error("vault id required");
   if (input.destScript.length === 0) throw new Error("destination script required");
   const payload = concat6(
     uint32LE(VTXO_RESERVE_VERSION),
     field(operationBytes(input.operationId)),
-    field(vaultId),
-    field(encoder2.encode(VTXO_RESERVE_PURPOSE)),
+    field(vaultId2),
+    field(encoder3.encode(VTXO_RESERVE_PURPOSE)),
     field(input.destScript),
     uint64LE(input.amountSats)
   );
@@ -50689,100 +55243,6 @@ function verifyVtxoReserveSignature(input, phoneSignature, phonePub) {
 
 // src/lib/vault/vtxo/sdkOperationAdapter.ts
 init_define_import_meta_env();
-
-// src/lib/vault/vtxo/script.ts
-init_define_import_meta_env();
-init_base();
-var VAULT_POLICY_V1_EXIT_DELAY_UNIT = "seconds";
-var VAULT_POLICY_V1_BIP68_SECONDS_MOD = 512n;
-function requireXOnly(value, name) {
-  if (!(value instanceof Uint8Array) || value.length !== 32) {
-    throw new Error(`${name} must be a 32-byte x-only pubkey`);
-  }
-  return value;
-}
-function policyPins(params) {
-  if (params.network) return networkPins(params.network);
-  const matches = SUPPORTED_NETWORKS.filter(
-    (network) => BigInt(networkPins(network).policyExitDelay) === params.exitDelay
-  );
-  if (matches.length === 1) return networkPins(matches[0]);
-  throw new Error(
-    `vault-policy-v1 exit delay is frozen at ${networkPins("mutinynet").policyExitDelay} or ${networkPins("mainnet").policyExitDelay} seconds`
-  );
-}
-function assertVaultPolicyV1Params(params) {
-  const userPub = requireXOnly(params.userPub, "userPub");
-  const vtxoVaultCosignerPub = requireXOnly(params.vtxoVaultCosignerPub, "vtxoVaultCosignerPub");
-  const arkdServerPub = requireXOnly(params.arkdServerPub, "arkdServerPub");
-  const delegatePub = requireXOnly(params.delegatePub, "delegatePub");
-  const exitDevicePub = requireXOnly(params.exitDevicePub, "exitDevicePub");
-  const exitHardwarePub = requireXOnly(params.exitHardwarePub, "exitHardwarePub");
-  const exitRecoveryPub = params.exitRecoveryPub ? requireXOnly(params.exitRecoveryPub, "exitRecoveryPub") : void 0;
-  if (params.exitDelayUnit !== VAULT_POLICY_V1_EXIT_DELAY_UNIT) {
-    throw new Error("vault-policy-v1 exit delay unit must be seconds");
-  }
-  if (params.exitDelay % VAULT_POLICY_V1_BIP68_SECONDS_MOD !== 0n) {
-    throw new Error("vault-policy-v1 exit delay must be a BIP68 seconds multiple of 512");
-  }
-  const pins = policyPins(params);
-  if (params.exitDelay < BigInt(pins.arkdMinExitDelay)) {
-    throw new Error("vault-policy-v1 exit delay is below the arkd minimum");
-  }
-  if (params.exitDelay !== BigInt(pins.policyExitDelay)) {
-    throw new Error(`vault-policy-v1 exit delay is frozen at ${pins.policyExitDelay} seconds`);
-  }
-  const pinned = hex.decode(pins.delegatePub.slice(2));
-  if (delegatePub.length !== pinned.length || !delegatePub.every((b, i) => b === pinned[i])) {
-    throw new Error("delegatePub must be the pinned public delegate");
-  }
-  return {
-    userPub,
-    vtxoVaultCosignerPub,
-    arkdServerPub,
-    delegatePub,
-    network: pins.network,
-    exitDelay: BigInt(pins.policyExitDelay),
-    exitDelayUnit: VAULT_POLICY_V1_EXIT_DELAY_UNIT,
-    exitDevicePub,
-    exitHardwarePub,
-    ...exitRecoveryPub ? { exitRecoveryPub } : {}
-  };
-}
-var VaultPolicyV1Script = class extends VtxoScript {
-  params;
-  forfeitScript;
-  exitScript;
-  delegateScript;
-  constructor(params) {
-    const typed = assertVaultPolicyV1Params(params);
-    const forfeit = MultisigTapscript.encode({
-      pubkeys: [typed.userPub, typed.vtxoVaultCosignerPub, typed.arkdServerPub]
-    });
-    const exit = CSVMultisigTapscript.encode({
-      timelock: { type: typed.exitDelayUnit, value: typed.exitDelay },
-      pubkeys: typed.exitRecoveryPub ? [typed.exitHardwarePub, typed.exitRecoveryPub] : [typed.exitDevicePub, typed.exitHardwarePub]
-    });
-    const delegate2 = MultisigTapscript.encode({
-      pubkeys: [typed.userPub, typed.vtxoVaultCosignerPub, typed.delegatePub, typed.arkdServerPub]
-    });
-    super([forfeit.script, exit.script, delegate2.script]);
-    this.params = typed;
-    this.forfeitScript = hex.encode(forfeit.script);
-    this.exitScript = hex.encode(exit.script);
-    this.delegateScript = hex.encode(delegate2.script);
-  }
-  /** Collaborative spend/intent leaf. SDK-native name matches DefaultVtxo.forfeit(). */
-  forfeit() {
-    return this.findLeaf(this.forfeitScript);
-  }
-  exit() {
-    return this.findLeaf(this.exitScript);
-  }
-  delegate() {
-    return this.findLeaf(this.delegateScript);
-  }
-};
 
 // src/lib/vault/vtxo/spend.ts
 var VTXO_DUST_SATS = 330;
@@ -50826,8 +55286,8 @@ function persistedReservationFactsAreValid(record) {
   }
   return inputTotal === record.amountSats + record.feeSats + record.changeSats;
 }
-function parsePersistedVtxoSpend(vaultId, parsed) {
-  if (parsed && parsed.vaultId === vaultId && isVtxoOperationId(parsed.operationId) && parsed.stage && parsed.destAddress && typeof parsed.amountSats === "number" && (parsed.reservePhoneSignature === void 0 || /^[0-9a-f]{128}$/.test(parsed.reservePhoneSignature)) && persistedReservationFactsAreValid(parsed) && (parsed.stage === "pre-reserve" || parsed.bundleDigest && (parsed.stage === "reserved" || parsed.arkTxid))) {
+function parsePersistedVtxoSpend(vaultId2, parsed) {
+  if (parsed && parsed.vaultId === vaultId2 && isVtxoOperationId(parsed.operationId) && parsed.stage && parsed.destAddress && typeof parsed.amountSats === "number" && (parsed.reservePhoneSignature === void 0 || /^[0-9a-f]{128}$/.test(parsed.reservePhoneSignature)) && persistedReservationFactsAreValid(parsed) && (parsed.stage === "pre-reserve" || parsed.bundleDigest && (parsed.stage === "reserved" || parsed.arkTxid))) {
     return parsed;
   }
   return void 0;
@@ -50891,12 +55351,12 @@ function validateSpendingRecoveryJournal(status, raw2) {
       xOnly2(networkPins(status.network).operatorSignerPub, "Operator")
     );
     validation.assertArkTransaction(unsigned, "unsigned");
-    for (const { original, candidate } of checkpointPairsInCanonicalOrder(
+    for (const { original, candidate: candidate2 } of checkpointPairsInCanonicalOrder(
       rebuilt.checkpoints.map((tx) => base64.encode(tx.toPSBT())),
       record.unsignedCheckpointPsbts,
       "Recovery"
     ))
-      validation.assertCheckpointTransaction(candidate, original, "unsigned");
+      validation.assertCheckpointTransaction(candidate2, original, "unsigned");
     if (record.authorizedPsbt)
       validation.assertArkTransaction(Transaction2.fromPSBT(base64.decode(record.authorizedPsbt)), "vault-authorized");
     if (record.operatorArkPsbt)
@@ -50966,6 +55426,9 @@ function vaultPolicyV1ScriptFromStatus(status) {
   const pins = requireEnrolledSpendingStatus(status);
   const address = ArkAddress.decode(String(status.spendingArkAddress || ""));
   if (address.hrp !== pins.arkHrp) throw new Error("spending Ark address does not match this network");
+  const spendingOnly = status.templateVersion === SPENDING_ONLY_TEMPLATE;
+  if (spendingOnly) requireSpendingEnrollmentStatus(status);
+  else if (status.protectionTier === "light") throw new Error("Light requires its shared Spending enrollment");
   const params = {
     userPub: xOnly2(status.phoneBip340Pub, "phone pubkey"),
     vtxoVaultCosignerPub: xOnly2(status.vtxoVaultCosignerPub, "VTXO VaultCosigner pubkey"),
@@ -50975,7 +55438,7 @@ function vaultPolicyV1ScriptFromStatus(status) {
     exitDelayUnit: VAULT_POLICY_V1_EXIT_DELAY_UNIT,
     network: pins.network,
     exitDevicePub: xOnly2(status.phoneBip340Pub, "phone pubkey"),
-    exitHardwarePub: xOnly2(status.externalOwnerWalletPub, "hardware pubkey"),
+    ...spendingOnly ? { exitMode: "device" } : { exitHardwarePub: xOnly2(status.externalOwnerWalletPub, "hardware pubkey") },
     ...status.recoveryKeyPub || status.recoveryPub ? { exitRecoveryPub: xOnly2(status.recoveryKeyPub || status.recoveryPub, "recovery pubkey") } : {}
   };
   const script = new VaultPolicyV1Script(params);
@@ -51076,16 +55539,16 @@ function sameTapLeafScripts(a, b) {
     );
   });
 }
-function requireInputShapeMatches(expected, candidate, context) {
-  if (!sameOptionalBytes(expected.txid, candidate.txid) || expected.index !== candidate.index || expected.sequence !== candidate.sequence || expected.sighashType !== candidate.sighashType || !sameOptionalBytes(expected.tapInternalKey, candidate.tapInternalKey) || !sameOptionalBytes(expected.tapMerkleRoot, candidate.tapMerkleRoot)) {
+function requireInputShapeMatches(expected, candidate2, context) {
+  if (!sameOptionalBytes(expected.txid, candidate2.txid) || expected.index !== candidate2.index || expected.sequence !== candidate2.sequence || expected.sighashType !== candidate2.sighashType || !sameOptionalBytes(expected.tapInternalKey, candidate2.tapInternalKey) || !sameOptionalBytes(expected.tapMerkleRoot, candidate2.tapMerkleRoot)) {
     throw new Error(`${context} changed an input`);
   }
-  if (expected.witnessUtxo === void 0 || candidate.witnessUtxo === void 0) {
-    if (expected.witnessUtxo !== candidate.witnessUtxo) throw new Error(`${context} changed an input prevout`);
-  } else if (expected.witnessUtxo.amount !== candidate.witnessUtxo.amount || !sameBytes(expected.witnessUtxo.script, candidate.witnessUtxo.script)) {
+  if (expected.witnessUtxo === void 0 || candidate2.witnessUtxo === void 0) {
+    if (expected.witnessUtxo !== candidate2.witnessUtxo) throw new Error(`${context} changed an input prevout`);
+  } else if (expected.witnessUtxo.amount !== candidate2.witnessUtxo.amount || !sameBytes(expected.witnessUtxo.script, candidate2.witnessUtxo.script)) {
     throw new Error(`${context} changed an input prevout`);
   }
-  if (!sameTapLeafScripts(expected.tapLeafScript, candidate.tapLeafScript)) {
+  if (!sameTapLeafScripts(expected.tapLeafScript, candidate2.tapLeafScript)) {
     throw new Error(`${context} changed an input tapleaf`);
   }
 }
@@ -51132,54 +55595,54 @@ function inputSpendLeafHash(tx, inputIndex) {
 }
 function requireAuthorizedPendingProof(unsignedCheckpointPsbts, authorizedPendingProof, status) {
   const expected = pendingProofFromCheckpoints(unsignedCheckpointPsbts);
-  const candidate = Transaction2.fromPSBT(base64.decode(authorizedPendingProof));
-  if (candidate.id !== expected.id || candidate.inputsLength !== expected.inputsLength || candidate.outputsLength !== expected.outputsLength) {
+  const candidate2 = Transaction2.fromPSBT(base64.decode(authorizedPendingProof));
+  if (candidate2.id !== expected.id || candidate2.inputsLength !== expected.inputsLength || candidate2.outputsLength !== expected.outputsLength) {
     throw new Error("Vault authorization changed the pending proof");
   }
   for (let index = 0; index < expected.inputsLength; index++) {
-    requireInputShapeMatches(expected.getInput(index), candidate.getInput(index), "Vault authorization");
+    requireInputShapeMatches(expected.getInput(index), candidate2.getInput(index), "Vault authorization");
   }
-  if (!sameBytes(pendingProofWithoutTapscriptSignatures(expected), pendingProofWithoutTapscriptSignatures(candidate))) {
+  if (!sameBytes(pendingProofWithoutTapscriptSignatures(expected), pendingProofWithoutTapscriptSignatures(candidate2))) {
     throw new Error("Vault authorization changed the pending proof PSBT");
   }
   const phonePub = xOnly2(status.phoneBip340Pub, "phone pubkey");
   const vaultPub = xOnly2(status.vtxoVaultCosignerPub, "VTXO VaultCosigner pubkey");
-  for (let index = 0; index < candidate.inputsLength; index++) {
+  for (let index = 0; index < candidate2.inputsLength; index++) {
     requireExactTapscriptSigners(
-      candidate,
+      candidate2,
       index,
       [phonePub, vaultPub],
       [SigHash.ALL],
       inputSpendLeafHash(expected, index)
     );
   }
-  return base64.encode(candidate.toPSBT());
+  return base64.encode(candidate2.toPSBT());
 }
-function requireCheckpointShapeMatches(original, candidate, context = "Operator") {
-  if (original.id !== candidate.id || original.inputsLength !== 1 || candidate.inputsLength !== 1) {
+function requireCheckpointShapeMatches(original, candidate2, context = "Operator") {
+  if (original.id !== candidate2.id || original.inputsLength !== 1 || candidate2.inputsLength !== 1) {
     throw new Error(`${context} changed the checkpoint transaction`);
   }
   const expected = original.getInput(0);
-  const submitted = candidate.getInput(0);
+  const submitted = candidate2.getInput(0);
   if (!expected.witnessUtxo || !submitted.witnessUtxo || expected.witnessUtxo.amount !== submitted.witnessUtxo.amount || !sameBytes(expected.witnessUtxo.script, submitted.witnessUtxo.script)) {
     throw new Error(`${context} changed the checkpoint prevout`);
   }
   if (expected.tapLeafScript?.length !== 1 || submitted.tapLeafScript?.length !== 1 || !sameBytes(expected.tapLeafScript[0][1], submitted.tapLeafScript[0][1])) {
     throw new Error(`${context} changed the checkpoint tapleaf`);
   }
-  if (!sameBytes(transactionWithoutTapscriptSignatures(original), transactionWithoutTapscriptSignatures(candidate))) {
+  if (!sameBytes(transactionWithoutTapscriptSignatures(original), transactionWithoutTapscriptSignatures(candidate2))) {
     throw new Error(`${context} changed the checkpoint PSBT`);
   }
 }
-function requireOperatorSignedCheckpoint(original, candidate, operatorPub) {
-  requireCheckpointShapeMatches(original, candidate);
-  const submitted = candidate.getInput(0);
+function requireOperatorSignedCheckpoint(original, candidate2, operatorPub) {
+  requireCheckpointShapeMatches(original, candidate2);
+  const submitted = candidate2.getInput(0);
   const signatures = submitted.tapScriptSig;
   if (signatures?.length !== 1 || !sameBytes(signatures[0][0].pubKey, operatorPub)) {
     throw new Error("checkpoint requires exactly the Operator signature");
   }
   verifyTapscriptSignatures(
-    candidate,
+    candidate2,
     0,
     [hex.encode(operatorPub)],
     void 0,
@@ -51187,14 +55650,14 @@ function requireOperatorSignedCheckpoint(original, candidate, operatorPub) {
     inputSpendLeafHash(original, 0)
   );
 }
-function requireArkShapeMatches(original, candidate, context) {
-  if (original.id !== candidate.id || original.inputsLength !== candidate.inputsLength || original.outputsLength !== candidate.outputsLength) {
+function requireArkShapeMatches(original, candidate2, context) {
+  if (original.id !== candidate2.id || original.inputsLength !== candidate2.inputsLength || original.outputsLength !== candidate2.outputsLength) {
     throw new Error(`${context} changed the Ark transaction`);
   }
   for (let index = 0; index < original.inputsLength; index++) {
-    requireInputShapeMatches(original.getInput(index), candidate.getInput(index), context);
+    requireInputShapeMatches(original.getInput(index), candidate2.getInput(index), context);
   }
-  if (!sameBytes(transactionWithoutTapscriptSignatures(original), transactionWithoutTapscriptSignatures(candidate))) {
+  if (!sameBytes(transactionWithoutTapscriptSignatures(original), transactionWithoutTapscriptSignatures(candidate2))) {
     throw new Error(`${context} changed the Ark PSBT`);
   }
 }
@@ -51207,23 +55670,23 @@ function createVaultSdkOperationValidation(status, unsignedArk, operatorPub) {
   const phonePub = xOnly2(status.phoneBip340Pub, "phone pubkey");
   const vaultPub = xOnly2(status.vtxoVaultCosignerPub, "VTXO VaultCosigner pubkey");
   return {
-    assertArkTransaction(candidate, stage) {
-      requireArkShapeMatches(unsignedArk, candidate, `${stage} SDK validation`);
-      if (stage === "unsigned") requireNoTapscriptSignatures(candidate, "unsigned Ark transaction");
+    assertArkTransaction(candidate2, stage) {
+      requireArkShapeMatches(unsignedArk, candidate2, `${stage} SDK validation`);
+      if (stage === "unsigned") requireNoTapscriptSignatures(candidate2, "unsigned Ark transaction");
       else {
         const signers = stage === "vault-authorized" ? [phonePub, vaultPub] : [phonePub, vaultPub, operatorPub];
-        for (let index = 0; index < candidate.inputsLength; index++) {
-          requireExactTapscriptSigners(candidate, index, signers, void 0, inputSpendLeafHash(unsignedArk, index));
+        for (let index = 0; index < candidate2.inputsLength; index++) {
+          requireExactTapscriptSigners(candidate2, index, signers, void 0, inputSpendLeafHash(unsignedArk, index));
         }
       }
     },
-    assertCheckpointTransaction(candidate, expectedUnsigned, stage) {
-      requireCheckpointShapeMatches(expectedUnsigned, candidate, stage);
-      if (stage === "unsigned") requireNoTapscriptSignatures(candidate, "unsigned checkpoint");
-      else if (stage === "operator-signed") requireOperatorSignedCheckpoint(expectedUnsigned, candidate, operatorPub);
+    assertCheckpointTransaction(candidate2, expectedUnsigned, stage) {
+      requireCheckpointShapeMatches(expectedUnsigned, candidate2, stage);
+      if (stage === "unsigned") requireNoTapscriptSignatures(candidate2, "unsigned checkpoint");
+      else if (stage === "operator-signed") requireOperatorSignedCheckpoint(expectedUnsigned, candidate2, operatorPub);
       else {
         requireExactTapscriptSigners(
-          candidate,
+          candidate2,
           0,
           [operatorPub, phonePub, vaultPub],
           void 0,
@@ -51239,29 +55702,29 @@ function checkpointPairsInCanonicalOrder(expectedCheckpointPsbts, candidateCheck
   }
   const candidates = /* @__PURE__ */ new Map();
   for (const raw2 of candidateCheckpointPsbts) {
-    const candidate = Transaction2.fromPSBT(base64.decode(raw2));
-    if (candidates.has(candidate.id)) throw new Error(`${context} returned a duplicate checkpoint`);
-    candidates.set(candidate.id, candidate);
+    const candidate2 = Transaction2.fromPSBT(base64.decode(raw2));
+    if (candidates.has(candidate2.id)) throw new Error(`${context} returned a duplicate checkpoint`);
+    candidates.set(candidate2.id, candidate2);
   }
   const expectedIds = /* @__PURE__ */ new Set();
   const ordered = expectedCheckpointPsbts.map((raw2) => {
     const original = Transaction2.fromPSBT(base64.decode(raw2));
     if (expectedIds.has(original.id)) throw new Error("local checkpoint identity is duplicated");
     expectedIds.add(original.id);
-    const candidate = candidates.get(original.id);
-    if (!candidate) throw new Error(`${context} returned an unknown or missing checkpoint`);
-    requireCheckpointShapeMatches(original, candidate, context);
+    const candidate2 = candidates.get(original.id);
+    if (!candidate2) throw new Error(`${context} returned an unknown or missing checkpoint`);
+    requireCheckpointShapeMatches(original, candidate2, context);
     candidates.delete(original.id);
-    return { original, candidate };
+    return { original, candidate: candidate2 };
   });
   if (candidates.size !== 0) throw new Error(`${context} returned an unknown checkpoint`);
   return ordered;
 }
 function matchOperatorSignedCheckpoints(expectedCheckpointPsbts, candidateCheckpointPsbts, operatorPub) {
   return checkpointPairsInCanonicalOrder(expectedCheckpointPsbts, candidateCheckpointPsbts, "Operator").map(
-    ({ original, candidate }) => {
-      requireOperatorSignedCheckpoint(original, candidate, operatorPub);
-      return base64.encode(candidate.toPSBT());
+    ({ original, candidate: candidate2 }) => {
+      requireOperatorSignedCheckpoint(original, candidate2, operatorPub);
+      return base64.encode(candidate2.toPSBT());
     }
   );
 }
@@ -51272,15 +55735,15 @@ function requireFullyAuthorizedCheckpoints(pending, status, operatorPub, checkpo
   const phonePub = xOnly2(status.phoneBip340Pub, "phone pubkey");
   const vaultPub = xOnly2(status.vtxoVaultCosignerPub, "VTXO VaultCosigner pubkey");
   return checkpointPairsInCanonicalOrder(pending.unsignedCheckpointPsbts, checkpointPsbts, "Vault authorization").map(
-    ({ original, candidate }) => {
+    ({ original, candidate: candidate2 }) => {
       requireExactTapscriptSigners(
-        candidate,
+        candidate2,
         0,
         [operatorPub, phonePub, vaultPub],
         void 0,
         inputSpendLeafHash(original, 0)
       );
-      return base64.encode(candidate.toPSBT());
+      return base64.encode(candidate2.toPSBT());
     }
   );
 }
@@ -51300,30 +55763,33 @@ init_base();
 
 // src/lib/vault/program/kitBackup.ts
 init_define_import_meta_env();
-
-// src/lib/vault/signIn.ts
-init_define_import_meta_env();
-
-// src/lib/vault/passkeyBinding.ts
-init_define_import_meta_env();
-var encoder3 = new TextEncoder();
-var BINDING_DOMAIN = encoder3.encode("arkade-vault/recovery-binding/v4");
-var CONNECTOR_BINDING_DOMAIN = encoder3.encode("arkade-vault/recovery-binding/v5");
-var PROOF_DOMAIN = encoder3.encode("arkade-2fa-vault/passkey-proof/v1");
-var ZERO2 = Uint8Array.of(0);
-
-// src/lib/vault/signIn.ts
-var PRF_SALT4 = new TextEncoder().encode("arkade-2fa-vault/prf/v1");
-var HKDF_INFO4 = new TextEncoder().encode("arkade-2fa-vault/kek/v1");
-
-// src/lib/vault/program/kitBackup.ts
 function kitFromFacts(input) {
+  if (input.status?.templateVersion === SPENDING_ONLY_TEMPLATE) {
+    try {
+      const d = requireSpendingEnrollmentStatus(input.status);
+      if (input.enrollment?.phoneBip340Pub && input.enrollment.phoneBip340Pub !== d.phonePub || input.enrollment?.phoneDirectP256 && input.enrollment.phoneDirectP256 !== d.phoneDirectP256 || input.hardwarePub || input.recoveryPub)
+        return null;
+      return buildRecoveryKit(buildSpendingRecoveryDescriptor(d));
+    } catch {
+      return null;
+    }
+  }
+  if (input.status?.templateVersion === LEDGER_NATIVE_TEMPLATE) {
+    try {
+      const descriptor = buildLedgerRecoveryDescriptor(ledgerEnrollmentFromStatus(input.status));
+      if (input.enrollment?.phoneBip340Pub && input.enrollment.phoneBip340Pub !== descriptor.keys.phoneBip340 || input.hardwarePub && input.hardwarePub !== descriptor.keys.hardware || input.recoveryPub && input.recoveryPub !== descriptor.keys.recovery)
+        return null;
+      return buildRecoveryKit(descriptor);
+    } catch {
+      return null;
+    }
+  }
   const recoveryPub = input.recoveryPub || input.status?.recoveryPub || "";
   const hardwarePub = input.hardwarePub || input.status?.externalOwnerWalletPub || "";
   const phonePub = input.enrollment?.phoneBip340Pub || input.status?.phoneBip340Pub || "";
   const phoneDirectP256 = input.enrollment?.phoneDirectP256 || input.status?.phoneDirectP256 || "";
   if (!hardwarePub) return null;
-  const vaultId = input.status?.vaultId || input.enrollment?.vaultId || "";
+  const vaultId2 = input.status?.vaultId || input.enrollment?.vaultId || "";
   const liveBases = Boolean(input.status?.vaultCosignerBasePub && input.status?.arkadeCosignerBasePub);
   const liveTemplate = String(input.status?.templateVersion || "");
   const signerOrigin = String(input.status?.arkadeCosignerOrigin || "").trim();
@@ -51331,10 +55797,10 @@ function kitFromFacts(input) {
   const spendingPolicy = input.status?.spendingPolicy;
   const statusSpendingPolicyDigest = String(input.status?.spendingPolicyDigest || "").trim();
   const protectionTier = input.status?.protectionTier;
-  if (liveBases && phonePub && phoneDirectP256 && vaultId && signerOrigin && signerVersion && spendingPolicy && spendingPolicy.program === "vault-policy-v1" && statusSpendingPolicyDigest && protectionTier && protectionTier !== "light" && isSupportedVaultNetwork(input.status?.network) && (liveTemplate === SAVINGS_TEMPLATE || isConnectorTemplate(liveTemplate))) {
+  if (liveBases && phonePub && phoneDirectP256 && vaultId2 && signerOrigin && signerVersion && spendingPolicy && spendingPolicy.program === "vault-policy-v1" && statusSpendingPolicyDigest && protectionTier && protectionTier !== "light" && isSupportedVaultNetwork(input.status?.network) && (liveTemplate === SAVINGS_TEMPLATE || isConnectorTemplate(liveTemplate))) {
     try {
       const descriptor = buildVaultProgramDescriptor({
-        vaultId,
+        vaultId: vaultId2,
         network: input.status.network,
         phonePub,
         hardwarePub,
@@ -51368,6 +55834,102 @@ function kitFromFacts(input) {
   return null;
 }
 
+// src/lib/vault/vtxo/boardingJournal.ts
+init_define_import_meta_env();
+
+// src/lib/vault/recovery/lifecycleStore.ts
+init_define_import_meta_env();
+
+// src/lib/vault/recovery/coverage.ts
+init_define_import_meta_env();
+var point = (coin) => `${coin.txid}:${coin.vout}`;
+function spendingRecoveryCoverage(archive, binding2, expected) {
+  const known = /* @__PURE__ */ new Map();
+  if (expected !== null) {
+    if (expected.length > 512) throw new Error("Recovery output limit exceeded");
+    for (const coin of expected) {
+      if (!/^[0-9a-f]{64}$/.test(coin.txid) || !Number.isSafeInteger(coin.vout) || coin.vout < 0 || coin.vout > 4294967295 || !Number.isSafeInteger(coin.value) || coin.value <= 0 || coin.value > 21e14 || coin.script !== binding2.scriptPubKey)
+        throw new Error("Known recovery output does not match this wallet");
+      const prior = known.get(point(coin));
+      if (prior && prior.value !== coin.value) throw new Error("Known recovery outputs disagree");
+      known.set(point(coin), coin);
+    }
+  }
+  const result = {
+    scope: "spending-paths",
+    state: "missing",
+    capturedAt: null,
+    archivedSats: 0,
+    coveredSats: expected === null ? null : 0,
+    missing: [...known.keys()].sort(),
+    mismatched: [],
+    stale: []
+  };
+  if (!archive) return result;
+  let saved;
+  try {
+    saved = validateExitArchive(archive, binding2).coins;
+  } catch {
+    return { ...result, state: "invalid" };
+  }
+  result.capturedAt = archive.capturedAt;
+  result.archivedSats = saved.reduce((total, coin) => total + coin.value, 0);
+  if (expected === null) return { ...result, state: "unknown" };
+  const byPoint = new Map(saved.map((coin) => [point(coin), coin]));
+  result.missing = [];
+  for (const [id, coin] of known) {
+    const match2 = byPoint.get(id);
+    if (!match2) result.missing.push(id);
+    else if (match2.value !== coin.value || match2.script !== coin.script) result.mismatched.push(id);
+    else result.coveredSats += coin.value;
+  }
+  result.stale = saved.filter((coin) => !known.has(point(coin))).map(point).sort();
+  result.missing.sort();
+  result.mismatched.sort();
+  result.state = result.missing.length || result.mismatched.length || result.stale.length ? "incomplete" : "current";
+  return result;
+}
+function requireSpendingRecoveryCoverage(archive, binding2, expected) {
+  if (spendingRecoveryCoverage(archive, binding2, expected).state !== "current")
+    throw new Error("Transaction paths are catching up with your wallet. The previous backup is retained.");
+}
+
+// src/lib/vault/recovery/lifecycleStore.ts
+var recoveryTransitionKey = (database2, script) => `lifecycle:${database2}:${script}`;
+function readRecoveryTransition(database2, script) {
+  return recoveryFileStore(recoveryTransitionKey(database2, script));
+}
+async function loadLifecycleArchive(database2, binding2) {
+  if (!await readRecoveryTransition(database2, binding2.scriptPubKey)) return null;
+  const run2 = async () => {
+    const transition = await readRecoveryTransition(database2, binding2.scriptPubKey);
+    if (!transition) return null;
+    const repository = new IndexedDBWalletRepository(database2);
+    try {
+      const coins = (await repository.getVtxosForScript(binding2.scriptPubKey)).filter((v) => !v.isSpent && !v.spentBy);
+      const source = transition.prepared ?? transition.archive;
+      if (!source) throw new Error("Recovery paths are still syncing. Previous paths are retained.");
+      validateExitArchive(source, { ...binding2, descriptorHash: recoveryTransitionKey(database2, binding2.scriptPubKey) });
+      const archive = { ...source, descriptorHash: binding2.descriptorHash };
+      requireSpendingRecoveryCoverage(archive, binding2, coins);
+      requireSpendingRecoveryCoverage(archive, binding2, transition.outputs);
+      if (transition.pending)
+        await recoveryFileStore(recoveryTransitionKey(database2, binding2.scriptPubKey), {
+          ...transition,
+          pending: false,
+          archive: source,
+          prepared: void 0,
+          error: void 0
+        });
+      return archive;
+    } finally {
+      await repository[Symbol.asyncDispose]();
+    }
+  };
+  if (!navigator.locks) throw new Error("Web Locks required for recovery persistence");
+  return navigator.locks.request(`vaulted:recovery-write:${database2}`, run2);
+}
+
 // src/lib/vault/vtxo/recoveryArchive.ts
 function vaultRecoveryBinding(kit, status) {
   const valid = parseRecoveryKit(kit);
@@ -51379,7 +55941,12 @@ function vaultRecoveryBinding(kit, status) {
     throw new Error("Recovery Operator does not match this release");
   const boarding = requireBoardingStatus(status, String(status.vtxoBoardingDescriptor?.boardingPub || ""));
   if (isConnectorTemplate(status.templateVersion)) connectorPinFromVerifiedStatus(status);
-  else if (hashBoardingEnrollmentDescriptor({
+  else if (isLedgerRecoveryKit(valid)) {
+    if (valid.descriptor.enrollmentDescriptorHash !== status.ledgerSavings?.descriptorHash)
+      throw new Error("Ledger recovery enrollment composite changed");
+  } else if (isSpendingRecoveryKit(valid)) {
+    requireSpendingEnrollmentStatus(status);
+  } else if (hashBoardingEnrollmentDescriptor({
     schema: "arkade-vault/enrollment-with-board-v1",
     vaultId: status.vaultId,
     savings: valid.descriptor,
@@ -51404,6 +55971,642 @@ function vaultRecoveryBinding(kit, status) {
 
 // src/lib/vault/recovery/journals.ts
 init_base();
+
+// src/lib/vault/ledgerSavingsWallet.ts
+init_define_import_meta_env();
+init_base();
+init_btc_signer();
+init_psbt();
+
+// src/lib/vault/history.ts
+init_define_import_meta_env();
+
+// src/lib/vault/payments.ts
+init_define_import_meta_env();
+
+// src/lib/vault/ledgerSavingsWallet.ts
+var OPTIONS = { version: 2, allowUnknownInputs: true, allowUnknownOutputs: true };
+var MAX_MONEY = 21e14;
+function rawTransaction(raw2) {
+  if (typeof raw2 !== "string" || raw2.length > 8e6 || !/^(?:[0-9a-f]{2})+$/.test(raw2))
+    throw new Error("Invalid Savings parent transaction");
+  const tx = Transaction.fromRaw(hex.decode(raw2), OPTIONS);
+  if (hex.encode(tx.toBytes(true, true)) !== raw2) throw new Error("Noncanonical Savings transaction");
+  return tx;
+}
+function paymentFacts(payment) {
+  validateLedgerSavingsContract(payment.contract);
+  const normalized = {
+    contract: payment.contract,
+    coins: payment.coins.map((coin) => ({
+      txid: coin.txid,
+      vout: coin.vout,
+      value: coin.value,
+      ...coin.confirmedHeight === void 0 ? {} : { confirmedHeight: coin.confirmedHeight },
+      branch: coin.branch,
+      index: coin.index,
+      parentTxHex: coin.parentTxHex
+    })),
+    destAddress: payment.destAddress,
+    amountSats: payment.amountSats,
+    feeSats: payment.feeSats
+  };
+  if (canonicalLedgerValue(payment) !== canonicalLedgerValue(normalized))
+    throw new Error("Ledger Savings payment contains unsupported metadata");
+  if (payment.coins.length > 128 || !Number.isSafeInteger(payment.feeSats) || payment.feeSats <= 0)
+    throw new Error("Invalid Ledger Savings payment fee or input count");
+  if (payment.coins.some((coin) => coin.value > MAX_MONEY) || payment.coins.reduce((sum, coin) => sum + coin.value, 0) > MAX_MONEY)
+    throw new Error("Ledger Savings amount exceeds the Bitcoin supply");
+  for (const coin of payment.coins) rawTransaction(coin.parentTxHex);
+  const tx = Transaction.fromPSBT(hex.decode(buildLedgerSavingsPsbt(payment)), OPTIONS);
+  const measured = tx.clone();
+  for (let i = 0; i < measured.inputsLength; i++) {
+    const leaf = measured.getInput(i).tapLeafScript[0];
+    measured.updateInput(i, {
+      finalScriptWitness: [
+        new Uint8Array(64),
+        new Uint8Array(64),
+        leaf[1].slice(0, -1),
+        TaprootControlBlock.encode(leaf[0])
+      ]
+    });
+  }
+  const vsize2 = measured.vsize;
+  if (payment.feeSats > payment.contract.spendingPolicy.absoluteFeeCapSats || payment.feeSats > vsize2 * payment.contract.spendingPolicy.feerateCapSatPerV)
+    throw new Error("Ledger Savings payment fee exceeds the enrolled caps");
+  return { tx, vsize: vsize2, changeSats: tx.outputsLength === 2 ? Number(tx.getOutput(1).amount) : 0 };
+}
+function digest(contract) {
+  return hex.encode(ledgerSavingsContextDigest(contract.context));
+}
+function validateRecord(contract, raw2) {
+  if (!raw2 || raw2.version !== 1 || raw2.contextDigest !== digest(contract) || canonicalLedgerValue(raw2.payment?.contract) !== canonicalLedgerValue(contract))
+    throw new Error("Saved Ledger Savings payment belongs to another enrollment");
+  const facts = paymentFacts(raw2.payment);
+  if (raw2.candidateId !== facts.tx.id || !["prepared", "signing", "signed", "broadcast"].includes(raw2.phase))
+    throw new Error("Saved Ledger Savings candidate changed");
+  const rebuilt = {
+    version: 1,
+    candidateId: facts.tx.id,
+    contextDigest: raw2.contextDigest,
+    payment: raw2.payment,
+    phase: raw2.phase
+  };
+  if (raw2.phase === "prepared") {
+    if (raw2.phonePsbt || raw2.signedPsbt || raw2.txHex) throw new Error("Prepared Savings payment contains signatures");
+  } else if (raw2.phonePsbt) {
+    requireLedgerSavingsPhoneApproval(raw2.payment, raw2.phonePsbt);
+    rebuilt.phonePsbt = raw2.phonePsbt;
+  }
+  if (raw2.phase === "signed" || raw2.phase === "broadcast") {
+    if (!raw2.phonePsbt || !raw2.signedPsbt || !raw2.txHex) throw new Error("Signed Savings payment is incomplete");
+    const accepted = acceptLedgerSavingsSignatures(raw2.payment, raw2.phonePsbt, raw2.signedPsbt);
+    const tx = Transaction.fromPSBT(hex.decode(accepted), OPTIONS);
+    tx.finalize();
+    if (accepted !== raw2.signedPsbt || tx.hex !== raw2.txHex)
+      throw new Error("Saved Savings signatures or transaction changed");
+    rebuilt.signedPsbt = accepted;
+    rebuilt.txHex = tx.hex;
+  }
+  if (canonicalLedgerValue(raw2) !== canonicalLedgerValue(rebuilt))
+    throw new Error("Saved Savings payment metadata changed");
+  return structuredClone(rebuilt);
+}
+function validateLedgerSavingsPaymentJournal(contract, raw2) {
+  contract = validateLedgerSavingsContract(contract);
+  const encoded = JSON.stringify(raw2);
+  if (!encoded || encoded.length > 12e6) throw new Error("Saved Savings journal is missing or too large");
+  const value = raw2;
+  if (!value || value.version !== 1 || !Array.isArray(value.history) || value.history.length > 100)
+    throw new Error("Invalid Savings journal");
+  const rebuilt = {
+    version: 1,
+    pending: value.pending === null ? null : validateRecord(contract, value.pending),
+    history: value.history.map((record) => validateRecord(contract, record))
+  };
+  if (canonicalLedgerValue(value) !== canonicalLedgerValue(rebuilt)) throw new Error("Saved Savings journal changed");
+  const records = [...rebuilt.history, ...rebuilt.pending ? [rebuilt.pending] : []];
+  if (new Set(records.map((record) => record.candidateId)).size !== records.length)
+    throw new Error("Duplicate Savings journal candidate");
+  return rebuilt;
+}
+
+// src/lib/vault/ledgerRecoveryWallet.ts
+init_define_import_meta_env();
+init_base();
+init_btc_signer();
+
+// src/lib/vault/program/ledgerRecoveryDevice.ts
+init_define_import_meta_env();
+var import_buffer2 = __toESM(require_buffer());
+
+// src/lib/vault/program/onchainRecovery.ts
+init_define_import_meta_env();
+init_base();
+init_btc_signer();
+init_payment();
+
+// src/lib/vault/program/spend.ts
+init_define_import_meta_env();
+init_base();
+init_btc_signer();
+var TX_OPTS3 = { version: 2, lockTime: 0, allowUnknownInputs: true, allowUnknownOutputs: true };
+function familyKey(claimant) {
+  return `savings-${claimant}`;
+}
+function requireCoin(coin) {
+  const txid = coin.txid.trim().toLowerCase();
+  if (!/^[0-9a-f]{64}$/.test(txid)) throw new Error("txid must be 32-byte hex");
+  if (!Number.isInteger(coin.vout) || coin.vout < 0) throw new Error("vout required");
+  if (!Number.isInteger(coin.value) || coin.value < DUST_SATS) throw new Error("coin value required");
+  return { txid, vout: coin.vout, value: coin.value };
+}
+function requireFee(feeSats) {
+  if (!Number.isInteger(feeSats) || feeSats < 0) throw new Error("fee required");
+  if (feeSats > ABSOLUTE_FEE_CEILING_SATS) throw new Error("fee exceeds the absolute cap");
+  return feeSats;
+}
+function tapLeafForScript(tapLeafScript, script) {
+  const leaf = tapLeafScript?.find((entry) => hex.encode(entry[1].slice(0, -1)) === hex.encode(script));
+  if (!leaf) throw new Error("tap leaf missing from tree");
+  return leaf;
+}
+function buildGuardianExitPsbt(input) {
+  const coin = requireCoin(input.coin);
+  const feeSats = requireFee(input.feeSats);
+  const destSats = coin.value - feeSats;
+  if (destSats < bitcoinDustSats(input.destAddress, input.network)) throw new Error("cancel dest is below dust");
+  const key = familyKey(input.claimant);
+  const source = input.family.pending[key];
+  if (!source.guardianExit) throw new Error("this vault cannot cancel pending recovery without the services");
+  const dest = hex.decode(scriptHexFromAddress(input.destAddress, input.network));
+  const leaf = tapLeafForScript(source.tapLeafScript, source.guardianExit);
+  const tx = new Transaction(TX_OPTS3);
+  tx.addInput({
+    txid: hex.decode(coin.txid),
+    index: coin.vout,
+    witnessUtxo: { script: source.script, amount: BigInt(coin.value) },
+    tapInternalKey: source.tapInternalKey,
+    tapLeafScript: [leaf],
+    sequence: 4294967293
+  });
+  tx.addOutput({ script: dest, amount: BigInt(destSats) });
+  return { psbtHex: hex.encode(tx.toPSBT()), destSats };
+}
+function buildClaimPsbt(input) {
+  const coin = requireCoin(input.coin);
+  const feeSats = requireFee(input.feeSats);
+  const destSats = coin.value - feeSats;
+  if (destSats < bitcoinDustSats(input.destAddress, input.network)) throw new Error("claim dest is below dust");
+  const key = familyKey(input.claimant);
+  const source = input.family.pending[key];
+  const dest = hex.decode(scriptHexFromAddress(input.destAddress, input.network));
+  const leaf = tapLeafForScript(source.tapLeafScript, source.claim);
+  const tx = new Transaction(TX_OPTS3);
+  tx.addInput({
+    txid: hex.decode(coin.txid),
+    index: coin.vout,
+    witnessUtxo: { script: source.script, amount: BigInt(coin.value) },
+    tapInternalKey: source.tapInternalKey,
+    tapLeafScript: [leaf],
+    sequence: pendingDelay(input.claimant)
+  });
+  tx.addOutput({ script: dest, amount: BigInt(destSats) });
+  return { psbtHex: hex.encode(tx.toPSBT()), destSats };
+}
+
+// src/lib/vault/program/onchainRecovery.ts
+var options = { version: 2, lockTime: 0, allowUnknownInputs: true, allowUnknownOutputs: true };
+function pathFacts(kit, path) {
+  const d = requireSavingsRecoveryKit(kit).descriptor;
+  if (isLedgerRecoveryKit(kit)) {
+    const { context, spendingPolicy } = kit.descriptor.ledgerSavings;
+    const family2 = ledgerRecoveryFamily({ context, spendingPolicy });
+    let selected;
+    if (path.program === "savings-admin") {
+      const change = path.change ?? 0;
+      if (change !== 0 && change !== 1) throw new Error("Unenrolled Ledger Savings coordinate");
+      const tree2 = change === 0 ? family2.receive : family2.change;
+      selected = {
+        tree: tree2,
+        leaf: tree2.admin,
+        signers: ["phone", "hardware"],
+        sequence: 4294967293,
+        branch: change,
+        walletPolicy: family2.walletPolicy
+      };
+    } else {
+      const recovery = family2.recovery[path.claimant];
+      if (!recovery) throw new Error("Unenrolled Ledger recovery claimant");
+      if (path.program === "pending-claim")
+        selected = {
+          tree: recovery.pending,
+          leaf: recovery.pending.claim,
+          signers: [path.claimant],
+          sequence: recovery.delay,
+          branch: LEDGER_RECOVERY_BRANCH.claim,
+          walletPolicy: recovery.pending.walletPolicy
+        };
+      else if (path.program === "pending-cancel")
+        selected = {
+          tree: recovery.pending,
+          leaf: recovery.pending.cancel,
+          signers: [...recovery.guardians],
+          sequence: 4294967293,
+          branch: LEDGER_RECOVERY_BRANCH.cancel,
+          walletPolicy: recovery.pending.walletPolicy
+        };
+      else if (path.program === "quarantine")
+        selected = {
+          tree: recovery.quarantine,
+          leaf: recovery.quarantine.admin,
+          signers: [...recovery.guardians],
+          sequence: 4294967293,
+          branch: LEDGER_RECOVERY_BRANCH.quarantine,
+          walletPolicy: recovery.quarantine.walletPolicy
+        };
+      else throw new Error("Unknown Ledger recovery path");
+    }
+    const derived = selected.signers.map((role) => {
+      const origin2 = context[role], account = ledgerAccountKey(origin2, context.network);
+      const key2 = selected.branch <= 1 ? ledgerSavingsChild(account, selected.branch) : ledgerRecoveryChild(
+        account,
+        path.program === "pending-claim" ? "claim" : path.program === "pending-cancel" ? "cancel" : "quarantine"
+      );
+      return { publicKey: key2.publicKey, origin: origin2 };
+    });
+    const origins = derived.map((item) => [
+      item.publicKey.slice(1),
+      {
+        hashes: [tapLeafHash(selected.leaf)],
+        der: {
+          fingerprint: Number.parseInt(item.origin.fingerprint, 16),
+          path: [...item.origin.path, selected.branch, 0]
+        }
+      }
+    ]);
+    return { ...selected, pubs: derived.map((item) => hex.encode(item.publicKey.slice(1))), origins };
+  }
+  const family = familyFromDescriptor(d);
+  if (path.program === "savings-admin") {
+    if (isConnectorTemplate(d.templateVersion))
+      throw new Error("Connector Savings requires its saved payment and cosigner authorization");
+    return {
+      tree: family.savings,
+      leaf: family.savings.admin,
+      signers: ["phone", "hardware"],
+      sequence: 4294967293
+    };
+  }
+  if (!["phone", "hardware", "recovery"].includes(path.claimant)) throw new Error("Invalid recovery claimant");
+  const key = `savings-${path.claimant}`;
+  if (!d.pending[key]) throw new Error("This vault has no recovery path for that key");
+  if (path.program === "quarantine") {
+    const tree2 = family.quarantine[key];
+    return { tree: tree2, leaf: tree2.admin, signers: tree2.guardians, sequence: 4294967293 };
+  }
+  const tree = family.pending[key];
+  if (path.program === "pending-claim")
+    return { tree, leaf: tree.claim, signers: [path.claimant], sequence: tree.delay };
+  if (path.program !== "pending-cancel" || !tree.guardianExit)
+    throw new Error("This vault has no service-independent cancellation path");
+  return {
+    tree,
+    leaf: tree.guardianExit,
+    signers: pendingGuardians(path.claimant, Boolean(d.keys.recovery)),
+    sequence: 4294967293
+  };
+}
+function build(input) {
+  const kit = requireSavingsRecoveryKit(parseRecoveryKit(input.kit));
+  const facts = pathFacts(kit, input.path);
+  if (!/^(?:[0-9a-f]{2})+$/.test(input.parentHex) || input.parentHex.length > 8e6)
+    throw new Error("Canonical parent transaction required");
+  const parent = Transaction.fromRaw(hex.decode(input.parentHex), options);
+  if (!Number.isSafeInteger(input.vout) || input.vout < 0 || input.vout >= parent.outputsLength)
+    throw new Error("Recovery parent output missing");
+  const output = parent.getOutput(input.vout);
+  if (!output.script || hex.encode(output.script) !== hex.encode(facts.tree.script) || output.amount === void 0)
+    throw new Error("Recovery parent does not pay the selected program");
+  if (output.amount <= 0n || output.amount > 21000000n * 100000000n) throw new Error("Invalid recovery value");
+  if (!Number.isSafeInteger(input.feeSats) || input.feeSats < 0 || input.feeSats > kit.descriptor.policy.absoluteFeeCapSats)
+    throw new Error("Recovery fee exceeds the vault cap");
+  const amount2 = output.amount - BigInt(input.feeSats);
+  if (amount2 < BigInt(bitcoinDustSats(input.destination, kit.descriptor.network)))
+    throw new Error("Recovery output is below dust");
+  let tx;
+  if (!isLedgerRecoveryKit(kit) && (input.path.program === "pending-claim" || input.path.program === "pending-cancel")) {
+    const builder = input.path.program === "pending-claim" ? buildClaimPsbt : buildGuardianExitPsbt;
+    const built = builder({
+      family: familyFromDescriptor(kit.descriptor),
+      claimant: input.path.claimant,
+      coin: { txid: parent.id, vout: input.vout, value: Number(output.amount) },
+      destAddress: input.destination,
+      feeSats: input.feeSats,
+      network: kit.descriptor.network
+    });
+    tx = Transaction.fromPSBT(hex.decode(built.psbtHex), options);
+    tx.updateInput(0, { nonWitnessUtxo: hex.decode(input.parentHex) });
+  } else {
+    tx = new Transaction(options);
+    tx.addInput({
+      txid: parent.id,
+      index: input.vout,
+      sequence: facts.sequence,
+      witnessUtxo: { script: output.script, amount: output.amount },
+      nonWitnessUtxo: hex.decode(input.parentHex),
+      tapInternalKey: facts.tree.tapInternalKey,
+      tapLeafScript: [tapLeafForScript(facts.tree.tapLeafScript, facts.leaf)],
+      ..."origins" in facts ? { tapBip32Derivation: facts.origins.map(([pub, derivation]) => [pub, derivation]) } : {}
+    });
+    tx.addOutput({ script: hex.decode(scriptHexFromAddress(input.destination, kit.descriptor.network)), amount: amount2 });
+  }
+  const pubs = "pubs" in facts ? facts.pubs : facts.signers.map((role) => {
+    const pub = role === "phone" ? kit.descriptor.keys.phoneBip340 : kit.descriptor.keys[role];
+    if (!pub) throw new Error("Missing required recovery key");
+    return pub.slice(2);
+  });
+  return { tx, kit, ...facts, pubs, parentTxid: parent.id };
+}
+function validateSavingsRecovery(raw2) {
+  if (!raw2 || raw2.name !== "vaulted-savings-recovery" || raw2.version !== 1 && raw2.version !== 2 || typeof raw2.psbt !== "string" || raw2.psbt.length > 1e7)
+    throw new Error("Invalid Savings recovery file");
+  const rebuilt = build(raw2);
+  if (raw2.version !== (isLedgerRecoveryKit(rebuilt.kit) ? 2 : 1))
+    throw new Error("Savings recovery file version changed");
+  const tx = Transaction.fromPSBT(hex.decode(raw2.psbt), options);
+  const signatures = tx.getInput(0).tapScriptSig || [];
+  const signedPubs = signatures.map(([key]) => hex.encode(key.pubKey));
+  if (signedPubs.some((pub) => !rebuilt.pubs.includes(pub))) throw new Error("Unexpected recovery signer");
+  if (signatures.length) rebuilt.tx.updateInput(0, { tapScriptSig: signatures });
+  if (hex.encode(tx.toPSBT()) !== hex.encode(rebuilt.tx.toPSBT()))
+    throw new Error("Recovery transaction or signing metadata changed");
+  if (signatures.length) requireExactDefaultTapscriptSignatures(tx, 0, signedPubs);
+  return { ...rebuilt, tx, signedPubs, complete: signedPubs.length === rebuilt.pubs.length };
+}
+
+// src/lib/vault/ledgerRecovery.ts
+init_define_import_meta_env();
+init_base();
+init_btc_signer();
+init_payment();
+init_psbt();
+init_script();
+var TX_OPTS4 = { version: 2, lockTime: 0, allowUnknownInputs: true, allowUnknownOutputs: true };
+var SEQUENCE = 4294967293;
+var MAX_MONEY_SATS = 21e14;
+var PHONE_AUTHORIZATION_TAG = "vaulted/ledger-guardian-savings-v1/phone-authorization";
+function canonicalHex(value, name, maxBytes) {
+  if (typeof value !== "string" || !value.length || value.length > maxBytes * 2 || !/^(?:[0-9a-f]{2})+$/.test(value))
+    throw new Error(`${name} must be canonical hex`);
+  return hex.decode(value);
+}
+function recoveryPlan(input) {
+  const { context, spendingPolicy } = input.contract;
+  const family = buildLedgerNativeFamily(context, spendingPolicy);
+  const { action } = input;
+  if (!action || !familyClaimants(Boolean(context.recovery)).includes(action.claimant))
+    throw new Error("unenrolled Ledger recovery claimant");
+  const recovery = family.recovery[action.claimant];
+  const guardianParent = ledgerSavingsGuardianParent(context);
+  if (action.kind === "initiate") {
+    if (action.remainingUser !== void 0 || action.change !== 0 && action.change !== 1)
+      throw new Error("invalid Ledger recovery initiation action");
+    const source = action.change === 0 ? family.receive : family.change;
+    const user = action.claimant;
+    const userBranch = user === "recovery" ? action.change : action.change + 2;
+    return {
+      source,
+      destination: recovery.pending,
+      walletPolicy: family.walletPolicy,
+      leaf: source.initiate[familyClaimants(Boolean(context.recovery)).indexOf(action.claimant)],
+      user,
+      userBranch,
+      userKey: ledgerSavingsChild(ledgerAccountKey(context[user], context.network), userBranch),
+      guardianParent,
+      guardianBranch: ledgerGuardianInitiateBranch(context, action.claimant, action.change),
+      guardianKey: ledgerGuardianInitiateChild(context, guardianParent, action.claimant, action.change)
+    };
+  }
+  if (action.kind !== "clawback" || action.change !== 0 || !recovery.guardians.includes(action.remainingUser))
+    throw new Error("invalid Ledger recovery cancellation authority");
+  return {
+    source: recovery.pending,
+    destination: recovery.quarantine,
+    walletPolicy: recovery.pending.walletPolicy,
+    leaf: recovery.pending.clawbacks[recovery.guardians.indexOf(action.remainingUser)],
+    user: action.remainingUser,
+    userBranch: LEDGER_RECOVERY_BRANCH.clawback,
+    userKey: ledgerRecoveryChild(ledgerAccountKey(context[action.remainingUser], context.network), "clawback"),
+    guardianParent,
+    guardianBranch: ledgerGuardianClawbackBranch(context, action.claimant, action.remainingUser),
+    guardianKey: ledgerGuardianClawbackChild(context, guardianParent, action.claimant, action.remainingUser)
+  };
+}
+function canonicalRecovery(input) {
+  const plan = recoveryPlan(input);
+  const { coin, feeSats, contract } = input;
+  if (!/^[0-9a-f]{64}$/.test(coin.txid) || !Number.isInteger(coin.vout) || coin.vout < 0 || coin.vout > 4294967295)
+    throw new Error("invalid Ledger recovery outpoint");
+  if (!Number.isSafeInteger(coin.value) || coin.value <= 0 || coin.value > MAX_MONEY_SATS)
+    throw new Error("invalid Ledger recovery coin value");
+  if (!Number.isSafeInteger(feeSats) || feeSats <= 0 || feeSats > contract.spendingPolicy.absoluteFeeCapSats)
+    throw new Error("Ledger recovery fee exceeds the absolute cap");
+  const amountSats = coin.value - feeSats;
+  if (!plan.destination.address || amountSats < bitcoinDustSats(plan.destination.address, contract.context.network))
+    throw new Error("Ledger recovery destination is below dust");
+  const parentBytes = canonicalHex(coin.parentTxHex, "Ledger recovery parent", 4e6);
+  const parent = Transaction.fromRaw(parentBytes, TX_OPTS4);
+  if (parent.id !== coin.txid || coin.vout >= parent.outputsLength || hex.encode(parent.toBytes(true, true)) !== coin.parentTxHex)
+    throw new Error("Ledger recovery parent mismatch");
+  const prevout = parent.getOutput(coin.vout);
+  if (prevout.amount !== BigInt(coin.value) || !prevout.script || hex.encode(prevout.script) !== hex.encode(plan.source.script))
+    throw new Error("Ledger recovery prevout does not match enrollment and value");
+  const leaf = tapLeafForScript(plan.source.tapLeafScript, plan.leaf);
+  const hashes2 = [tapLeafHash(plan.leaf)];
+  const origin2 = contract.context[plan.user];
+  const tx = new Transaction(TX_OPTS4);
+  tx.addInput({
+    txid: coin.txid,
+    index: coin.vout,
+    sequence: SEQUENCE,
+    nonWitnessUtxo: parentBytes,
+    witnessUtxo: { script: plan.source.script, amount: BigInt(coin.value) },
+    tapInternalKey: plan.source.tapInternalKey,
+    tapLeafScript: [leaf],
+    tapBip32Derivation: [
+      [
+        plan.userKey.publicKey.slice(1),
+        {
+          hashes: hashes2,
+          der: { fingerprint: Number.parseInt(origin2.fingerprint, 16), path: [...origin2.path, plan.userBranch, 0] }
+        }
+      ],
+      [
+        plan.guardianKey.publicKey.slice(1),
+        { hashes: hashes2, der: { fingerprint: plan.guardianParent.fingerprint, path: [plan.guardianBranch, 0] } }
+      ]
+    ]
+  });
+  tx.addOutput({ script: plan.destination.script, amount: BigInt(amountSats) });
+  const measured = tx.clone();
+  measured.updateInput(0, {
+    finalScriptWitness: [new Uint8Array(64), new Uint8Array(64), plan.leaf, TaprootControlBlock.encode(leaf[0])]
+  });
+  const vsize2 = measured.vsize;
+  if (BigInt(feeSats) > BigInt(contract.spendingPolicy.feerateCapSatPerV) * BigInt(vsize2))
+    throw new Error("Ledger recovery fee exceeds the feerate cap");
+  return { ...plan, tx, vsize: vsize2, amountSats };
+}
+function buildLedgerRecoveryPsbt(input) {
+  return hex.encode(canonicalRecovery(input).tx.toPSBT());
+}
+function inspectLedgerRecoveryTransition(input) {
+  const plan = canonicalRecovery(input);
+  return {
+    walletPolicy: plan.walletPolicy,
+    sourceAddress: plan.source.address,
+    destinationAddress: plan.destination.address,
+    amountSats: plan.amountSats,
+    feeSats: input.feeSats,
+    vsize: plan.vsize,
+    user: plan.user,
+    userBranch: plan.userBranch,
+    guardianBranch: plan.guardianBranch
+  };
+}
+function requireSignatureSet(tx, pubs) {
+  const input = tx.getInput(0);
+  if (input.finalScriptWitness?.length || input.finalScriptSig?.length || input.partialSig?.length)
+    throw new Error("Ledger recovery requires unfinalized tapscript signatures");
+  for (const [key, signature] of input.tapScriptSig || []) {
+    if (key.pubKey.length !== 32 || key.leafHash.length !== 32 || signature.length !== 64)
+      throw new Error("Ledger recovery signatures must use DEFAULT");
+  }
+  requireExactDefaultTapscriptSignatures(
+    tx,
+    0,
+    pubs.map((pub) => hex.encode(pub))
+  );
+}
+function importSignatures(canonical2, suppliedHex, pubs) {
+  const supplied = Transaction.fromPSBT(canonicalHex(suppliedHex, "Ledger recovery approval", 41e5), TX_OPTS4);
+  if (hex.encode(canonical2.unsignedTx) !== hex.encode(supplied.unsignedTx))
+    throw new Error("Ledger recovery approval changed the transaction");
+  requireSignatureSet(supplied, pubs);
+  canonical2.updateInput(0, { tapScriptSig: supplied.getInput(0).tapScriptSig });
+  requireSignatureSet(canonical2, pubs);
+  if (hex.encode(canonical2.toPSBT()) !== hex.encode(supplied.toPSBT()))
+    throw new Error("Ledger recovery signing metadata changed");
+  return canonical2;
+}
+function requireLedgerRecoveryUserApproval(input, userPsbt) {
+  const plan = canonicalRecovery(input);
+  return importSignatures(plan.tx, userPsbt, [plan.userKey.publicKey]);
+}
+function acceptLedgerRecoveryGuardianSignatures(input, userPsbt, signedPsbt) {
+  const plan = canonicalRecovery(input);
+  const approved = importSignatures(plan.tx.clone(), userPsbt, [plan.userKey.publicKey]);
+  const retained = approved.getInput(0).tapScriptSig[0];
+  const result = importSignatures(plan.tx, signedPsbt, [plan.userKey.publicKey, plan.guardianKey.publicKey]);
+  const returned = result.getInput(0).tapScriptSig.find(([key]) => hex.encode(key.pubKey) === hex.encode(retained[0].pubKey));
+  if (!returned || hex.encode(returned[1]) !== hex.encode(retained[1]))
+    throw new Error("Guardian changed the retained Ledger recovery user signature");
+  return hex.encode(result.toPSBT());
+}
+function u32be(value) {
+  const bytes2 = new Uint8Array(4);
+  new DataView(bytes2.buffer).setUint32(0, value, false);
+  return bytes2;
+}
+function phoneAuthorizationDigest(input, plan) {
+  if (plan.user !== "phone") throw new Error("Phone authentication is not permitted for this recovery action");
+  const utf82 = new TextEncoder();
+  const fields = [
+    ledgerSavingsContextDigest(input.contract.context),
+    utf82.encode(input.action.kind),
+    utf82.encode(input.action.claimant),
+    utf82.encode(input.action.kind === "clawback" ? input.action.remainingUser : ""),
+    u32be(input.action.change),
+    plan.tx.unsignedTx,
+    RawOutput.encode(plan.tx.getInput(0).witnessUtxo)
+  ];
+  return taggedHash4(PHONE_AUTHORIZATION_TAG, ...fields.flatMap((field2) => [u32be(field2.length), field2]));
+}
+function attachLedgerRecoveryPhoneProof(input, userPsbt, signature) {
+  const plan = canonicalRecovery(input);
+  const digest2 = phoneAuthorizationDigest(input, plan);
+  const approved = importSignatures(plan.tx, userPsbt, [plan.userKey.publicKey]);
+  const proof = canonicalHex(signature, "Ledger recovery phone proof", 64);
+  if (proof.length !== 64 || !verifyDirectP256(hex.decode(input.contract.context.phoneDirectP256), digest2, proof))
+    throw new Error("Ledger recovery phone authentication failed");
+  return { psbtHex: hex.encode(approved.toPSBT()), phoneAuthorization: { digest: hex.encode(digest2), signature } };
+}
+
+// src/lib/vault/recovery/signatureImport.ts
+init_define_import_meta_env();
+
+// src/lib/vault/ledgerRecoveryWallet.ts
+function candidate(record) {
+  return Transaction.fromPSBT(hex.decode(buildLedgerRecoveryPsbt(record.transition))).id;
+}
+function validateLedgerRecoveryRecord(raw2) {
+  const record = structuredClone(raw2);
+  if (!record || record.version !== 1) throw new Error("Unsupported Ledger recovery record");
+  validateLedgerSavingsContract(record.transition.contract);
+  const view3 = inspectLedgerRecoveryTransition(record.transition);
+  let tx = Transaction.fromPSBT(hex.decode(buildLedgerRecoveryPsbt(record.transition)));
+  if (record.userPsbt) tx = requireLedgerRecoveryUserApproval(record.transition, record.userPsbt);
+  if (record.phoneAuthorization) {
+    if (!record.userPsbt || view3.user !== "phone" || canonicalLedgerValue(
+      attachLedgerRecoveryPhoneProof(record.transition, record.userPsbt, record.phoneAuthorization.signature).phoneAuthorization
+    ) !== canonicalLedgerValue(record.phoneAuthorization))
+      throw new Error("Ledger recovery phone proof changed");
+  }
+  if (record.guardianPsbt) {
+    if (!record.userPsbt || view3.user === "phone" && !record.phoneAuthorization)
+      throw new Error("Ledger recovery approval is incomplete");
+    tx = Transaction.fromPSBT(
+      hex.decode(acceptLedgerRecoveryGuardianSignatures(record.transition, record.userPsbt, record.guardianPsbt))
+    );
+    tx.finalize();
+    if (record.txHex !== hex.encode(tx.extract())) throw new Error("Ledger recovery transaction changed");
+  } else if (record.txHex) throw new Error("Ledger recovery transaction has no Guardian approval");
+  const rebuilt = {
+    version: 1,
+    transition: record.transition,
+    ...record.userPsbt ? { userPsbt: record.userPsbt } : {},
+    ...record.phoneAuthorization ? { phoneAuthorization: record.phoneAuthorization } : {},
+    ...record.guardianPsbt ? { guardianPsbt: record.guardianPsbt, txHex: record.txHex } : {}
+  };
+  if (canonicalLedgerValue(rebuilt) !== canonicalLedgerValue(record))
+    throw new Error("Unsupported Ledger recovery fields");
+  return rebuilt;
+}
+function validateLedgerRecoveryJournal(contract, raw2) {
+  const journal = raw2;
+  if (!journal || journal.version !== 1 || !Array.isArray(journal.records) || journal.records.length > 1e3)
+    throw new Error("Invalid Ledger recovery journal");
+  const records = journal.records.map(validateLedgerRecoveryRecord), ids = /* @__PURE__ */ new Set();
+  for (const record of records) {
+    if (canonicalLedgerValue(record.transition.contract) !== canonicalLedgerValue(contract) || ids.has(candidate(record)))
+      throw new Error("Ledger recovery journal identity changed");
+    ids.add(candidate(record));
+  }
+  if (journal.standalone && (!Array.isArray(journal.standalone) || journal.standalone.length > 1e3))
+    throw new Error("Invalid stand-alone recovery journal");
+  const standalone = journal.standalone?.map((file2) => {
+    const view3 = validateSavingsRecovery(file2);
+    if (!isLedgerRecoveryKit(view3.kit) || canonicalLedgerValue(view3.kit.descriptor.ledgerSavings) !== canonicalLedgerValue(contract) || ids.has(view3.tx.id))
+      throw new Error("Stand-alone recovery identity changed");
+    ids.add(view3.tx.id);
+    return structuredClone(file2);
+  });
+  const result = { version: 1, records, ...standalone ? { standalone } : {} };
+  if (canonicalLedgerValue(raw2) !== canonicalLedgerValue(result))
+    throw new Error("Unsupported Ledger recovery journal fields");
+  return result;
+}
 
 // src/lib/vault/recovery/lightningArchive.ts
 init_define_import_meta_env();
@@ -51435,12 +56638,13 @@ function requireBinding(binding2) {
 function contractIdentity(contract) {
   return canonical({ type: contract.type, params: contract.params, script: contract.script, address: contract.address });
 }
-function validateRecord(record, contract, binding2) {
+function validateRecord2(record, contract, binding2) {
   const pins = requireBinding(binding2);
   if (!record || !isHex32(record.rfqId) || !["pending", "needs_counterparty", "settled", "refunded", "failed"].includes(record.state) || !Number.isSafeInteger(record.createdAt) || record.createdAt < 0 || !Number.isSafeInteger(record.updatedAt) || record.updatedAt < record.createdAt || encoder4.encode(JSON.stringify(record)).length > 96 * 1024)
     throw new Error("Invalid Lightning recovery record");
   for (const txid of [record.fundingArkTxid, record.refundArkTxid, ...record.lockupSpendArkTxids ?? []])
     if (txid !== void 0 && !isHex32(txid)) throw new Error("Invalid Lightning transaction reference");
+  if (record.kind === "lightning_receive") return validateReceiveRecord(record, contract, binding2);
   const profile = storedLightningProfile(record);
   const invoice = decodeVaultLightningInvoice(profile.invoice, profile.network, 0);
   if (profile.network !== pins.sdkNetwork || rfqSignerOf(record)?.signingDescriptor !== `tr(${binding2.phonePub.slice(2)})`)
@@ -51461,7 +56665,7 @@ function validateRecord(record, contract, binding2) {
   return script;
 }
 function lightningExitBinding(entry, binding2) {
-  validateRecord(entry.record, entry.contract, binding2);
+  validateRecord2(entry.record, entry.contract, binding2);
   return {
     network: binding2.network,
     scriptPubKey: entry.contract.script,
@@ -51513,6 +56717,13 @@ function recoveryLightningBinding(status) {
 function validateRecoveryJournals(status, data) {
   validateSpendingRecoveryJournal(status, data.spendingJournal);
   validateLightningRecoveryJournal(data.lightningJournal, recoveryLightningBinding(status));
+  if (status.ledgerSavings) {
+    const contract = ledgerEnrollmentFromStatus(status).savings;
+    if (data.ledgerSavingsJournal !== void 0)
+      validateLedgerSavingsPaymentJournal(contract, data.ledgerSavingsJournal);
+    if (data.ledgerRecoveryJournal !== void 0) validateLedgerRecoveryJournal(contract, data.ledgerRecoveryJournal);
+  } else if (data.ledgerSavingsJournal !== void 0 || data.ledgerRecoveryJournal !== void 0)
+    throw new Error("Ledger journal on another program");
   return data;
 }
 
@@ -51588,7 +56799,7 @@ async function unlockLightWithPasskey(record) {
       challenge: crypto.getRandomValues(new Uint8Array(32)),
       allowCredentials: [allowPasskey(id)],
       userVerification: "required",
-      extensions: prfExtension(PRF_SALT2, id)
+      extensions: prfExtension(PRF_SALT4, id)
     })
   });
   if (!credential || hex.encode(new Uint8Array(credential.rawId)) !== valid.enrollment.credId)
@@ -51607,62 +56818,6 @@ init_base();
 
 // src/lib/vault/light/recoveryArchive.ts
 init_define_import_meta_env();
-
-// src/lib/vault/recovery/coverage.ts
-init_define_import_meta_env();
-var point = (coin) => `${coin.txid}:${coin.vout}`;
-function spendingRecoveryCoverage(archive, binding2, expected) {
-  const known = /* @__PURE__ */ new Map();
-  if (expected !== null) {
-    if (expected.length > 512) throw new Error("Recovery output limit exceeded");
-    for (const coin of expected) {
-      if (!/^[0-9a-f]{64}$/.test(coin.txid) || !Number.isSafeInteger(coin.vout) || coin.vout < 0 || coin.vout > 4294967295 || !Number.isSafeInteger(coin.value) || coin.value <= 0 || coin.value > 21e14 || coin.script !== binding2.scriptPubKey)
-        throw new Error("Known recovery output does not match this wallet");
-      const prior = known.get(point(coin));
-      if (prior && prior.value !== coin.value) throw new Error("Known recovery outputs disagree");
-      known.set(point(coin), coin);
-    }
-  }
-  const result = {
-    scope: "spending-paths",
-    state: "missing",
-    capturedAt: null,
-    archivedSats: 0,
-    coveredSats: expected === null ? null : 0,
-    missing: [...known.keys()].sort(),
-    mismatched: [],
-    stale: []
-  };
-  if (!archive) return result;
-  let saved;
-  try {
-    saved = validateExitArchive(archive, binding2).coins;
-  } catch {
-    return { ...result, state: "invalid" };
-  }
-  result.capturedAt = archive.capturedAt;
-  result.archivedSats = saved.reduce((total, coin) => total + coin.value, 0);
-  if (expected === null) return { ...result, state: "unknown" };
-  const byPoint = new Map(saved.map((coin) => [point(coin), coin]));
-  result.missing = [];
-  for (const [id, coin] of known) {
-    const match2 = byPoint.get(id);
-    if (!match2) result.missing.push(id);
-    else if (match2.value !== coin.value || match2.script !== coin.script) result.mismatched.push(id);
-    else result.coveredSats += coin.value;
-  }
-  result.stale = saved.filter((coin) => !known.has(point(coin))).map(point).sort();
-  result.missing.sort();
-  result.mismatched.sort();
-  result.state = result.missing.length || result.mismatched.length || result.stale.length ? "incomplete" : "current";
-  return result;
-}
-function requireSpendingRecoveryCoverage(archive, binding2, expected) {
-  if (spendingRecoveryCoverage(archive, binding2, expected).state !== "current")
-    throw new Error("Transaction paths are catching up with your wallet. The previous backup is retained.");
-}
-
-// src/lib/vault/light/recoveryArchive.ts
 function binding(descriptor) {
   const d = validateLightDescriptor(descriptor);
   return { ...d, descriptorHash: lightDescriptorDigest(d) };
@@ -51703,7 +56858,12 @@ async function storeLightRecoveryArchive(archive, d) {
   try {
     await new Promise((resolve, reject) => {
       const tx = db.transaction("archive", "readwrite");
-      tx.objectStore("archive").put(archive, "current");
+      const store2 = tx.objectStore("archive");
+      const prior = store2.get("current");
+      prior.onsuccess = () => {
+        if (prior.result) store2.put(prior.result, "previous");
+        store2.put(archive, "current");
+      };
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
       tx.onabort = () => reject(tx.error);
@@ -51733,11 +56893,7 @@ function captureLightRecoveryArchive(d, expected) {
 async function capture(d, expected) {
   const repository = lightExitRepository(d);
   try {
-    const archive = await captureExitArchive(
-      binding(d),
-      repository,
-      await loadLightRecoveryArchive(d).catch(() => null)
-    );
+    const archive = await loadLifecycleArchive(vaultWalletDatabase(d.vaultId), binding(d)) ?? await captureExitArchive(binding(d), repository, await loadLightRecoveryArchive(d).catch(() => null));
     assertLightArchiveMatchesVtxos(archive, d, expected);
     await storeLightRecoveryArchive(archive, d);
     return archive;
@@ -51812,7 +56968,7 @@ async function prepareLightRecoveryWithOwner(record, owner2, recoveryAddress, su
       networkPins(record.descriptor.network).arkHrp
     ).encode();
     await manager.createContract(lightContract(script, address));
-    const options = {
+    const options2 = {
       wallet,
       onchainWallet,
       sweepAddress: recoveryAddress,
@@ -51820,12 +56976,12 @@ async function prepareLightRecoveryWithOwner(record, owner2, recoveryAddress, su
       mode: "graph",
       networkName: network
     };
-    const quote = await UnilateralExit.estimate(options);
+    const quote = await UnilateralExit.estimate(options2);
     if (quote.vtxos.some((v) => v.skipped))
       throw new Error(
         "Some outputs cannot be included in an emergency exit at the current network fee. Keep the recovery file and try again with a larger balance or lower fees."
       );
-    const pkg = await UnilateralExit.prepare(options);
+    const pkg = await UnilateralExit.prepare(options2);
     if (pkg.mode !== "graph" || pkg.vtxos.some((v) => v.skipped) || pkg.vtxos.length !== coins.length)
       throw new Error("Emergency exit did not include every current output");
     file2.exitPackage = deserializeExitPackage(serializeExitPackage(pkg));
@@ -51949,15 +57105,15 @@ function parseLightEncryptedBackup(value) {
   if (JSON.stringify(value).length > MAX_LIGHT_BACKUP_BYTES || file2.name !== "vaulted-light-backup" || file2.version !== 2 || Object.keys(file2).length !== 5 || !/^[0-9a-f]{24}$/.test(file2.nonce) || typeof file2.ciphertext !== "string" || !/^[A-Za-z0-9+/]+={0,2}$/.test(file2.ciphertext))
     throw new Error("Invalid encrypted Light backup");
   const record = validateLightEnrollment(file2.header);
-  const { origin, rpId } = file2.header;
-  if (typeof origin !== "string" || typeof rpId !== "string" || new URL(origin).origin !== origin || new URL(origin).hostname !== rpId)
+  const { origin: origin2, rpId } = file2.header;
+  if (typeof origin2 !== "string" || typeof rpId !== "string" || new URL(origin2).origin !== origin2 || new URL(origin2).hostname !== rpId)
     throw new Error("Invalid backup passkey origin");
-  const header = { ...record, origin, rpId };
+  const header = { ...record, origin: origin2, rpId };
   return { name: file2.name, version: file2.version, header, nonce: file2.nonce, ciphertext: file2.ciphertext };
 }
 async function decryptLightBackup(value, key) {
   const file2 = parseLightEncryptedBackup(value);
-  const compressed2 = new Uint8Array(
+  const compressed3 = new Uint8Array(
     await crypto.subtle.decrypt(
       { name: "AES-GCM", iv: Uint8Array.from(hex.decode(file2.nonce)), additionalData: aad(file2.header) },
       key,
@@ -51966,13 +57122,13 @@ async function decryptLightBackup(value, key) {
   );
   let plain;
   try {
-    plain = await compressRecoveryData(compressed2, true);
+    plain = await compressRecoveryData(compressed3, true);
     const decoded = validateLightRecoveryFile(JSON.parse(new TextDecoder().decode(plain)));
     if (!decoded.archive || JSON.stringify(validateLightEnrollment(decoded)) !== JSON.stringify(validateLightEnrollment(file2.header)))
       throw new Error("Recovery backup identity or transaction data changed");
     return decoded;
   } finally {
-    compressed2.fill(0);
+    compressed3.fill(0);
     plain?.fill(0);
   }
 }
@@ -51989,6 +57145,40 @@ async function openLocalLightBackup(value, withOwner) {
   } finally {
     owner2.fill(0);
   }
+}
+
+// src/lib/vault/light/portable.ts
+init_define_import_meta_env();
+
+// src/lib/vault/recovery/portable.ts
+init_define_import_meta_env();
+
+// src/lib/vault/recovery/backupCodec.ts
+init_define_import_meta_env();
+
+// src/lib/vault/program/connectorStore.ts
+init_define_import_meta_env();
+
+// src/lib/vault/program/connectorPayment.ts
+init_define_import_meta_env();
+
+// src/lib/vault/recovery/backupCodec.ts
+var encoder6 = new TextEncoder();
+
+// src/lib/vault/recovery/portable.ts
+var MAX_PORTABLE_RECOVERY_BYTES = 32e6;
+
+// src/lib/vault/light/portable.ts
+function parseLightRecoveryPackage(raw2) {
+  const value = raw2;
+  if (!value || value.name !== "vaulted-light-recovery-package" || value.version !== 1 || Object.keys(value).sort().join(",") !== "archive,backup,name,version" || JSON.stringify(value).length > MAX_PORTABLE_RECOVERY_BYTES)
+    throw new Error("Invalid Light recovery package");
+  const backup = parseLightEncryptedBackup(value.backup);
+  const archive = validateLightRecoveryArchive(value.archive, backup.header.descriptor).archive;
+  return { name: value.name, version: 1, archive, backup };
+}
+function unwrapLightRecoveryPackage(raw2) {
+  return raw2?.name === "vaulted-light-recovery-package" ? parseLightRecoveryPackage(raw2).backup : raw2;
 }
 
 // src/lib/vault/light/recoveryProgress.ts
@@ -52095,7 +57285,7 @@ el("file").onchange = () => void run(async () => {
   el("exit").hidden = true;
   const selected = el("file").files?.[0];
   if (!selected || selected.size > 32e6) throw new Error("Choose a Light recovery file smaller than 32 MB");
-  raw = JSON.parse(await selected.text());
+  raw = unwrapLightRecoveryPackage(JSON.parse(await selected.text()));
   if (raw.name === "vaulted-light-backup") {
     const encrypted = parseLightEncryptedBackup(raw);
     requireReleaseNetwork(encrypted.header.descriptor.network);
@@ -52194,6 +57384,17 @@ el("stop").onclick = () => controller?.abort();
 
 @scure/bip32/index.js:
   (*! scure-bip32 - MIT License (c) 2022 Patricio Palladino, Paul Miller (paulmillr.com) *)
+
+ieee754/index.js:
+  (*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> *)
+
+buffer/index.js:
+  (*!
+   * The buffer module from node.js, for the browser.
+   *
+   * @author   Feross Aboukhadijeh <https://feross.org>
+   * @license  MIT
+   *)
 
 @noble/secp256k1/index.js:
   (*! noble-secp256k1 - MIT License (c) 2019 Paul Miller (paulmillr.com) *)
