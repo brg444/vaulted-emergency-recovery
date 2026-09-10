@@ -2977,15 +2977,15 @@ function ecdh(Point5, ecdhOpts = {}) {
       return false;
     }
   }
-  function isValidPublicKey(publicKey, isCompressed) {
+  function isValidPublicKey(publicKey2, isCompressed) {
     const { publicKey: comp, publicKeyUncompressed } = lengths2;
     try {
-      const l = publicKey.length;
+      const l = publicKey2.length;
       if (isCompressed === true && l !== comp)
         return false;
       if (isCompressed === false && l !== publicKeyUncompressed)
         return false;
-      return !!Point5.fromBytes(publicKey);
+      return !!Point5.fromBytes(publicKey2);
     } catch (error2) {
       return false;
     }
@@ -2997,13 +2997,13 @@ function ecdh(Point5, ecdhOpts = {}) {
     return Point5.BASE.multiply(Fn4.fromBytes(secretKey)).toBytes(isCompressed);
   }
   function isProbPub(item) {
-    const { secretKey, publicKey, publicKeyUncompressed } = lengths2;
+    const { secretKey, publicKey: publicKey2, publicKeyUncompressed } = lengths2;
     if (!isBytes(item))
       return void 0;
-    if ("_lengths" in Fn4 && Fn4._lengths || secretKey === publicKey)
+    if ("_lengths" in Fn4 && Fn4._lengths || secretKey === publicKey2)
       return void 0;
     const l = abytes(item, void 0, "key").length;
-    return l === publicKey || l === publicKeyUncompressed;
+    return l === publicKey2 || l === publicKeyUncompressed;
   }
   function getSharedSecret(secretKeyA, publicKeyB, isCompressed = true) {
     if (isProbPub(secretKeyA) === true)
@@ -3207,9 +3207,9 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
     const sig = drbg(seed, k2sig);
     return sig.toBytes(opts.format);
   }
-  function verify(signature, message, publicKey, opts = {}) {
+  function verify(signature, message, publicKey2, opts = {}) {
     const { lowS, prehash, format } = validateSigOpts(opts, defaultSigOpts);
-    publicKey = abytes(publicKey, void 0, "publicKey");
+    publicKey2 = abytes(publicKey2, void 0, "publicKey");
     message = validateMsgAndHash(message, prehash);
     if (!isBytes(signature)) {
       const end = signature instanceof Signature2 ? ", use sig.toBytes()" : "";
@@ -3218,7 +3218,7 @@ function ecdsa(Point5, hash, ecdsaOpts = {}) {
     validateSigLength(signature, format);
     try {
       const sig = Signature2.fromBytes(signature, format);
-      const P3 = Point5.fromBytes(publicKey);
+      const P3 = Point5.fromBytes(publicKey2);
       if (lowS && sig.hasHighS())
         return false;
       const { r, s } = sig;
@@ -3457,11 +3457,11 @@ function schnorrSign(message, secretKey, auxRand = randomBytes(32)) {
     throw new Error("sign: Invalid signature produced");
   return sig;
 }
-function schnorrVerify(signature, message, publicKey) {
+function schnorrVerify(signature, message, publicKey2) {
   const { Fp, Fn: Fn4, BASE } = Pointk1;
   const sig = abytes(signature, 64, "signature");
   const m = abytes(message, void 0, "message");
-  const pub = abytes(publicKey, 32, "publicKey");
+  const pub = abytes(publicKey2, 32, "publicKey");
   try {
     const P3 = lift_x(num(pub));
     const r = num(sig.subarray(0, 32));
@@ -6231,10 +6231,10 @@ var init_payment = __esm({
         throw new Error("P2PK: invalid publicKey");
       return { type: "pk", script: OutScript.encode({ type: "pk", pubkey }) };
     };
-    p2pkh = (publicKey, network = NETWORK) => {
-      if (!isValidPubkey(publicKey, PubT.ecdsa))
+    p2pkh = (publicKey2, network = NETWORK) => {
+      if (!isValidPubkey(publicKey2, PubT.ecdsa))
         throw new Error("P2PKH: invalid publicKey");
-      const hash = hash160(publicKey);
+      const hash = hash160(publicKey2);
       return {
         type: "pkh",
         script: OutScript.encode({ type: "pkh", hash }),
@@ -6283,12 +6283,12 @@ var init_payment = __esm({
         hash
       };
     };
-    p2wpkh = (publicKey, network = NETWORK) => {
-      if (!isValidPubkey(publicKey, PubT.ecdsa))
+    p2wpkh = (publicKey2, network = NETWORK) => {
+      if (!isValidPubkey(publicKey2, PubT.ecdsa))
         throw new Error("P2WPKH: invalid publicKey");
-      if (publicKey.length === 65)
+      if (publicKey2.length === 65)
         throw new Error("P2WPKH: uncompressed public key");
-      const hash = hash160(publicKey);
+      const hash = hash160(publicKey2);
       return {
         type: "wpkh",
         script: OutScript.encode({ type: "wpkh", hash }),
@@ -16234,14 +16234,14 @@ var require_scureKeys = __commonJS({
       const result = a % n;
       return result >= 0n ? result : result + n;
     }
-    function tweakPrivateKey(privateKey, tweak, publicKey) {
+    function tweakPrivateKey(privateKey, tweak, publicKey2) {
       if (tweak.length !== 32)
         throw new Error("Error: invalid tweak value");
       const tweakNum = (0, utils_js_1.bytesToNumberBE)(tweak);
       if (tweakNum <= 0n || tweakNum >= CURVE_N)
         throw new Error("Error: invalid tweak value");
       let d = (0, utils_js_1.bytesToNumberBE)(privateKey);
-      if (publicKey[0] === 3)
+      if (publicKey2[0] === 3)
         d = mod2(-d, CURVE_N);
       const tweaked = mod2(d + tweakNum, CURVE_N);
       if (tweaked === 0n)
@@ -16252,10 +16252,10 @@ var require_scureKeys = __commonJS({
       if (!secp256k1_js_1.secp256k1.utils.isValidSecretKey(privateKey))
         throw new Error("Error: invalid private key");
       const compressedPublicKey = secp256k1_js_1.secp256k1.getPublicKey(privateKey, true);
-      const publicKey = compressed3 ? compressedPublicKey : secp256k1_js_1.secp256k1.getPublicKey(privateKey, false);
+      const publicKey2 = compressed3 ? compressedPublicKey : secp256k1_js_1.secp256k1.getPublicKey(privateKey, false);
       const xOnlyPubkey = compressedPublicKey.slice(1, 33);
       return {
-        publicKey,
+        publicKey: publicKey2,
         privateKey,
         sign(hash) {
           return secp256k1_js_1.secp256k1.sign(hash, privateKey, {
@@ -16265,7 +16265,7 @@ var require_scureKeys = __commonJS({
           });
         },
         verify(hash, signature) {
-          return secp256k1_js_1.secp256k1.verify(signature, hash, publicKey, {
+          return secp256k1_js_1.secp256k1.verify(signature, hash, publicKey2, {
             prehash: false,
             lowS: true,
             format: "compact"
@@ -16282,18 +16282,18 @@ var require_scureKeys = __commonJS({
         }
       };
     }
-    function wrapScurePublicKey(publicKey) {
-      if (!secp256k1_js_1.secp256k1.utils.isValidPublicKey(publicKey))
+    function wrapScurePublicKey(publicKey2) {
+      if (!secp256k1_js_1.secp256k1.utils.isValidPublicKey(publicKey2))
         throw new Error("Error: invalid public key point");
-      const compressedPubkey = publicKey.length === 33 ? publicKey : secp256k1_js_1.secp256k1.Point.fromHex(base_1.hex.encode(publicKey)).toBytes(true);
+      const compressedPubkey = publicKey2.length === 33 ? publicKey2 : secp256k1_js_1.secp256k1.Point.fromHex(base_1.hex.encode(publicKey2)).toBytes(true);
       const xOnlyPubkey = compressedPubkey.slice(1, 33);
       return {
-        publicKey,
+        publicKey: publicKey2,
         sign() {
           throw new Error("Error: private key is required for signing");
         },
         verify(hash, signature) {
-          return secp256k1_js_1.secp256k1.verify(signature, hash, publicKey, {
+          return secp256k1_js_1.secp256k1.verify(signature, hash, publicKey2, {
             prehash: false,
             lowS: true,
             format: "compact"
@@ -17510,9 +17510,9 @@ var require_psbt2 = __commonJS({
           value: raw.witnessUtxo.amount
         };
       if (raw.bip32Derivation)
-        input.bip32Derivation = raw.bip32Derivation.map(([pubkey, { fingerprint: fingerprint2, path }]) => ({
+        input.bip32Derivation = raw.bip32Derivation.map(([pubkey, { fingerprint: fingerprint3, path }]) => ({
           pubkey,
-          masterFingerprint: (0, common_1.uint32ToBytesBE)(fingerprint2),
+          masterFingerprint: (0, common_1.uint32ToBytesBE)(fingerprint3),
           path: pathArrayToString(path)
         }));
       if (raw.tapBip32Derivation)
@@ -27483,9 +27483,9 @@ function aux(secret, rand) {
     res[i] = secret[i] ^ rand2[i];
   return res;
 }
-var nonceHash = (rand, publicKey, aggPublicKey, i, msgPrefixed, extraIn) => taggedInt("MuSig/nonce", rand, new Uint8Array([publicKey.length]), publicKey, new Uint8Array([aggPublicKey.length]), aggPublicKey, msgPrefixed, numberToBytesBE(extraIn.length, 4), extraIn, new Uint8Array([i]));
-function nonceGen(publicKey, secretKey, aggPublicKey = new Uint8Array(0), msg, extraIn = new Uint8Array(0), rand = randomBytes(32)) {
-  abytes(publicKey, PUBKEY_LEN);
+var nonceHash = (rand, publicKey2, aggPublicKey, i, msgPrefixed, extraIn) => taggedInt("MuSig/nonce", rand, new Uint8Array([publicKey2.length]), publicKey2, new Uint8Array([aggPublicKey.length]), aggPublicKey, msgPrefixed, numberToBytesBE(extraIn.length, 4), extraIn, new Uint8Array([i]));
+function nonceGen(publicKey2, secretKey, aggPublicKey = new Uint8Array(0), msg, extraIn = new Uint8Array(0), rand = randomBytes(32)) {
+  abytes(publicKey2, PUBKEY_LEN);
   abytesOptional(secretKey, 32);
   abytes(aggPublicKey);
   if (![0, 32].includes(aggPublicKey.length))
@@ -27496,10 +27496,10 @@ function nonceGen(publicKey, secretKey, aggPublicKey = new Uint8Array(0), msg, e
   if (secretKey !== void 0)
     rand = aux(secretKey, rand);
   const msgPrefixed = msg !== void 0 ? concatBytes(Uint8Array.of(1), numberToBytesBE(msg.length, 8), msg) : Uint8Array.of(0);
-  const k1 = nonceHash(rand, publicKey, aggPublicKey, 0, msgPrefixed, extraIn);
-  const k2 = nonceHash(rand, publicKey, aggPublicKey, 1, msgPrefixed, extraIn);
+  const k1 = nonceHash(rand, publicKey2, aggPublicKey, 0, msgPrefixed, extraIn);
+  const k2 = nonceHash(rand, publicKey2, aggPublicKey, 1, msgPrefixed, extraIn);
   return {
-    secret: SecretNonce.encode({ k1, k2, publicKey }),
+    secret: SecretNonce.encode({ k1, k2, publicKey: publicKey2 }),
     public: PubNonce.encode({ R1: mulBase(k1), R2: mulBase(k2) })
   };
 }
@@ -27581,7 +27581,7 @@ var Session = class {
       throw new Error("The signer's pubkey must be included in the list of pubkeys");
     return keyAggCoeffInternal(pk, this.secondKey, this.L);
   }
-  partialSigVerifyInternal(partialSig, publicNonce, publicKey) {
+  partialSigVerifyInternal(partialSig, publicNonce, publicKey2) {
     const { Q, gAcc, b, R, e } = this;
     const s = Fn3.fromBytes(partialSig, true);
     if (!Fn3.isValid(s))
@@ -27589,7 +27589,7 @@ var Session = class {
     const { R1, R2 } = PubNonce.decode(publicNonce);
     const Re_s_ = R1.add(R2.multiply(b));
     const Re_s = hasEven2(R.y) ? Re_s_ : Re_s_.negate();
-    const P3 = Point3.fromBytes(publicKey);
+    const P3 = Point3.fromBytes(publicKey2);
     const a = this.getSessionKeyAggCoeff(P3);
     const g = Fn3.mul(evenScalar(Q, 1n), gAcc);
     const left = mulBase(s);
@@ -28292,10 +28292,10 @@ var signSchnorrAsync = async (message, secretKey, auxRand = randomBytes2(L)) => 
 var callSyncAsyncFn = (res, later) => {
   return res instanceof Promise ? res.then(later) : later(res);
 };
-var _verifSchnorr = (signature, message, publicKey, challengeFn) => {
+var _verifSchnorr = (signature, message, publicKey2, challengeFn) => {
   const sig = abytes4(signature, L2, "signature");
   const msg = abytes4(message, void 0, "message");
-  const pub = abytes4(publicKey, L, "publicKey");
+  const pub = abytes4(publicKey2, L, "publicKey");
   try {
     const x = bytesToNumBE(pub);
     const y = lift_x2(x);
@@ -32602,8 +32602,8 @@ var globalEnvironment = new Environment({
 init_define_import_meta_env();
 
 // node_modules/.pnpm/@arkade-os+sdk@file+vendor+arkade-os-sdk.tgz_@ledgerhq+ledger-bitcoin@0.3.1_@noble+curv_fc4df9b2eb0e18173aae9c0c7b63d969/node_modules/@arkade-os/sdk/dist/chunk-MJ2M4DEH.js
-function generateNonces(publicKey) {
-  const nonces = nonceGen(publicKey);
+function generateNonces(publicKey2) {
+  const nonces = nonceGen(publicKey2);
   return { secNonce: nonces.secret, pubNonce: nonces.public };
 }
 function aggregateNonces(pubNonces) {
@@ -32783,9 +32783,9 @@ var TreeSignerSession = class _TreeSignerSession {
   generateNonces() {
     if (!this.graph) throw ErrMissingVtxoGraph;
     const myNonces = /* @__PURE__ */ new Map();
-    const publicKey = secp256k1.getPublicKey(this.secretKey);
+    const publicKey2 = secp256k1.getPublicKey(this.secretKey);
     for (const g of this.graph.iterator()) {
-      const nonces = generateNonces(publicKey);
+      const nonces = generateNonces(publicKey2);
       myNonces.set(g.txid, nonces);
     }
     return myNonces;
@@ -32937,9 +32937,9 @@ var SingleKey = class _SingleKey {
 };
 var ReadonlySingleKey = class _ReadonlySingleKey {
   /** Create a readonly identity from a compressed public key. */
-  constructor(publicKey) {
-    this.publicKey = publicKey;
-    if (publicKey.length !== 33) {
+  constructor(publicKey2) {
+    this.publicKey = publicKey2;
+    if (publicKey2.length !== 33) {
       throw new Error("Invalid public key length");
     }
   }
@@ -32955,8 +32955,8 @@ var ReadonlySingleKey = class _ReadonlySingleKey {
    * const readonlyKey = ReadonlySingleKey.fromPublicKey(pubkey);
    * ```
    */
-  static fromPublicKey(publicKey) {
-    return new _ReadonlySingleKey(publicKey);
+  static fromPublicKey(publicKey2) {
+    return new _ReadonlySingleKey(publicKey2);
   }
   xOnlyPublicKey() {
     return Promise.resolve(this.publicKey.slice(1));
@@ -48149,6 +48149,7 @@ var PINS = {
     checkpointForfeitPub: "02dfcaec558c7e78cf3e38b898ba8a43cfb5727266bae32c5c5b3aeb32c558aa0b",
     checkpointTapscript: "03080040b27520dfcaec558c7e78cf3e38b898ba8a43cfb5727266bae32c5c5b3aeb32c558aa0bac",
     checkpointDelaySeconds: 4096,
+    emulatorOrigin: "https://emulator.mutinynet.arkade.sh",
     emulatorSignerPub: "03f823b9b2febc81f4af967e77aed2f541cbd3397c6d8f5a72e32eb7b471af889a",
     policyExitDelay: 4608,
     boardExitDelay: 604672,
@@ -48169,6 +48170,7 @@ var PINS = {
     checkpointForfeitPub: "03b43a8363118c084a04d4f6a50ebfa58e81957f8cceceb2aee0ab64c9fd2d9977",
     checkpointTapscript: "039e0440b27520b43a8363118c084a04d4f6a50ebfa58e81957f8cceceb2aee0ab64c9fd2d9977ac",
     checkpointDelaySeconds: 605184,
+    emulatorOrigin: "https://emulator.arkade.computer",
     emulatorSignerPub: "0239c196415da47b26456a101daaa12ba9e445bfe153197f1e2b750bf40e52092e",
     policyExitDelay: 605184,
     boardExitDelay: 7776256,
@@ -48189,13 +48191,14 @@ function networkPins(network) {
 // src/lib/vault/protectionTier.ts
 init_define_import_meta_env();
 function requireProtectionTier(value) {
-  if (value !== "standard" && value !== "advanced") throw new Error("unsupported protection tier");
+  if (value !== "light" && value !== "standard" && value !== "advanced") throw new Error("unsupported protection tier");
   return value;
 }
 function requireProtectionTierMatchesRecovery(tier, recoveryPub) {
   const selected = requireProtectionTier(tier);
   const hasRecovery = typeof recoveryPub === "string" && recoveryPub.trim().length > 0;
-  if (selected === "standard" && hasRecovery) throw new Error("Standard protection must not include a recovery key");
+  if ((selected === "standard" || selected === "light") && hasRecovery)
+    throw new Error("Standard protection must not include a recovery key");
   if (selected === "advanced" && !hasRecovery) throw new Error("Advanced protection requires a recovery key");
   return selected;
 }
@@ -48325,7 +48328,13 @@ function assertVaultPolicyV1Params(params) {
   const arkdServerPub = requireXOnly(params.arkdServerPub, "arkdServerPub");
   const delegatePub = requireXOnly(params.delegatePub, "delegatePub");
   const exitDevicePub = requireXOnly(params.exitDevicePub, "exitDevicePub");
-  const exitHardwarePub = requireXOnly(params.exitHardwarePub, "exitHardwarePub");
+  if (params.exitMode !== void 0 && params.exitMode !== "hardware" && params.exitMode !== "device") {
+    throw new Error("unsupported Spending recovery mode");
+  }
+  const exitHardwarePub = params.exitMode === "device" ? void 0 : requireXOnly(params.exitHardwarePub, "exitHardwarePub");
+  if (params.exitMode === "device" && (params.exitHardwarePub || params.exitRecoveryPub || !exitDevicePub.every((b, i) => b === userPub[i]))) {
+    throw new Error("device recovery requires only the enrolled Spending owner");
+  }
   const exitRecoveryPub = params.exitRecoveryPub ? requireXOnly(params.exitRecoveryPub, "exitRecoveryPub") : void 0;
   if (params.exitDelayUnit !== VAULT_POLICY_V1_EXIT_DELAY_UNIT) {
     throw new Error("vault-policy-v1 exit delay unit must be seconds");
@@ -48353,7 +48362,8 @@ function assertVaultPolicyV1Params(params) {
     exitDelay: BigInt(pins.policyExitDelay),
     exitDelayUnit: VAULT_POLICY_V1_EXIT_DELAY_UNIT,
     exitDevicePub,
-    exitHardwarePub,
+    ...params.exitMode ? { exitMode: params.exitMode } : {},
+    ...exitHardwarePub ? { exitHardwarePub } : {},
     ...exitRecoveryPub ? { exitRecoveryPub } : {}
   };
 }
@@ -48369,7 +48379,7 @@ var VaultPolicyV1Script = class extends VtxoScript {
     });
     const exit = CSVMultisigTapscript.encode({
       timelock: { type: typed.exitDelayUnit, value: typed.exitDelay },
-      pubkeys: typed.exitRecoveryPub ? [typed.exitHardwarePub, typed.exitRecoveryPub] : [typed.exitDevicePub, typed.exitHardwarePub]
+      pubkeys: typed.exitMode === "device" ? [typed.exitDevicePub] : typed.exitRecoveryPub ? [typed.exitHardwarePub, typed.exitRecoveryPub] : [typed.exitDevicePub, typed.exitHardwarePub]
     });
     const delegate2 = MultisigTapscript.encode({
       pubkeys: [typed.userPub, typed.vtxoVaultCosignerPub, typed.delegatePub, typed.arkdServerPub]
@@ -49815,317 +49825,141 @@ init_btc_signer();
 // src/lib/vault/vtxo/spendingRecovery.ts
 init_define_import_meta_env();
 
-// src/lib/vault/recovery/archivePrevouts.ts
+// src/lib/vault/program/kit.ts
 init_define_import_meta_env();
-init_btc_signer();
+
+// src/lib/vault/spendingEnrollment.ts
+init_define_import_meta_env();
+init_secp256k1();
+init_sha2();
 init_base();
-
-// src/lib/vault/esplora.ts
-init_define_import_meta_env();
-
-// src/lib/vault/bounded.ts
-init_define_import_meta_env();
-var MAX_API_RESPONSE_BYTES = 1024 * 1024;
-
-// src/lib/vault/esplora.ts
-var ESPLORA_TX_PAGE_SIZE = 25;
-var MAX_ESPLORA_TX_PAGES = Math.ceil(RECENT_HISTORY_LIMIT / ESPLORA_TX_PAGE_SIZE);
-
-// src/lib/vault/recovery/exitArchive.ts
-init_define_import_meta_env();
-init_base();
-var maxArchiveBytes = 12e6;
-var outpoint = (v) => `${v.txid}:${v.vout}`;
-var canonicalId = (id) => /^[0-9a-f]{64}$/.test(id);
-function unpack(raw) {
-  return JSON.parse(raw, (_, v) => {
-    if (v && typeof v === "object" && Object.keys(v).length === 1 && "lightBigInt" in v) {
-      if (typeof v.lightBigInt !== "string" || !/^-?[0-9]{1,20}$/.test(v.lightBigInt))
-        throw new Error("Invalid saved recovery number");
-      return BigInt(v.lightBigInt);
-    }
-    return v;
+var SPENDING_ONLY_TEMPLATE = "vaulted-spending-v1";
+var SPENDING_ENROLLMENT_SCHEMA = "arkade-vault/spending-enrollment-v1";
+function publicKey(value, curve = secp256k1) {
+  if (typeof value !== "string" || !/^(02|03)[0-9a-f]{64}$/.test(value) || !curve.utils.isValidPublicKey(hex.decode(value))) {
+    throw new Error("Spending enrollment requires canonical compressed public keys");
+  }
+  return value;
+}
+function exactKeys(input, canonical) {
+  if (Object.keys(input).length !== Object.keys(canonical).length || Object.keys(canonical).some((key) => !Object.hasOwn(input, key))) {
+    throw new Error("Spending enrollment contains unsupported fields");
+  }
+}
+function validateSpendingEnrollment(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    throw new Error("Spending enrollment descriptor required");
+  const d = value;
+  const network = requireSupportedVaultNetwork(d.network);
+  const pins = networkPins(network);
+  if (d.schema !== SPENDING_ENROLLMENT_SCHEMA || d.template !== SPENDING_ONLY_TEMPLATE || d.protectionTier !== "light" || d.exitMode !== "device" || d.exitDelayUnit !== "seconds" || d.exitDelay !== pins.policyExitDelay || !/^[0-9a-f]{32}$/.test(d.vaultId)) {
+    throw new Error("Spending enrollment configuration does not match this release");
+  }
+  const phonePub = publicKey(d.phonePub), phoneDirectP256 = publicKey(d.phoneDirectP256, p256);
+  const cosignerPub = publicKey(d.cosignerPub), operatorPub = publicKey(d.operatorPub), delegatePub = publicKey(d.delegatePub);
+  if (operatorPub !== pins.operatorSignerPub || delegatePub !== pins.delegatePub || new Set([phonePub, cosignerPub, operatorPub, delegatePub].map((key) => key.slice(2))).size !== 4) {
+    throw new Error("Spending enrollment signer configuration changed");
+  }
+  const policy2 = validateSpendingPolicy(d.spendingPolicy, network);
+  const digest = spendingPolicyDigest(policy2, network);
+  if (d.spendingPolicyDigest !== digest) throw new Error("Spending enrollment policy digest changed");
+  const script = new VaultPolicyV1Script({
+    userPub: hex.decode(phonePub.slice(2)),
+    vtxoVaultCosignerPub: hex.decode(cosignerPub.slice(2)),
+    arkdServerPub: hex.decode(operatorPub.slice(2)),
+    delegatePub: hex.decode(delegatePub.slice(2)),
+    exitDevicePub: hex.decode(phonePub.slice(2)),
+    exitMode: "device",
+    network,
+    exitDelay: BigInt(d.exitDelay),
+    exitDelayUnit: "seconds"
   });
-}
-function requireExitArchiveInfo(info, d) {
-  const pins = networkPins(d.network);
-  if (info.network !== pins.operatorGetInfoNetwork || info.signerPubkey !== pins.operatorSignerPub || info.checkpointTapscript !== pins.checkpointTapscript || info.forfeitPubkey !== pins.checkpointForfeitPub)
-    throw new Error("Recovery data does not match this release");
-}
-function validateExitArchive(value, d) {
-  if (!value || JSON.stringify(value).length > maxArchiveBytes || value.version !== 1 || value.descriptorHash !== d.descriptorHash || !Number.isFinite(Date.parse(value.capturedAt)))
-    throw new Error("Recovery data does not match this wallet");
-  const info = unpack(value.info);
-  requireExitArchiveInfo(info, d);
-  const rawCoins = unpack(value.coins);
-  if (!Array.isArray(rawCoins) || rawCoins.length > 512) throw new Error("Recovery output limit exceeded");
-  const coins = rawCoins.map((coin) => ({
-    ...coin,
-    createdAt: new Date(coin.createdAt),
-    ...coin.expiresAt ? { expiresAt: new Date(coin.expiresAt) } : {}
-  }));
-  const seen = /* @__PURE__ */ new Set();
-  const transactions = /* @__PURE__ */ new Map();
-  if (!value.transactions || Object.keys(value.transactions).length > 4096)
-    throw new Error("Recovery transaction limit exceeded");
-  for (const [id, psbt] of Object.entries(value.transactions)) {
-    if (!canonicalId(id) || typeof psbt !== "string" || psbt.length > 1e6)
-      throw new Error("Invalid saved recovery transaction");
-    const tx = Transaction2.fromPSBT(base64.decode(psbt));
-    if (tx.id !== id) throw new Error("Recovery transaction changed");
-    transactions.set(id, tx);
-  }
-  for (const coin of coins) {
-    const key = outpoint(coin);
-    if (!canonicalId(coin.txid) || !Number.isSafeInteger(coin.vout) || coin.vout < 0 || coin.vout > 4294967295 || !Number.isSafeInteger(coin.value) || coin.value <= 0 || coin.value > 21e14 || coin.script !== d.scriptPubKey || coin.isSpent || coin.spentBy || seen.has(key))
-      throw new Error("Saved recovery output changed");
-    seen.add(key);
-    const chain2 = value.branches?.[key];
-    if (!Array.isArray(chain2) || !chain2.length || chain2.length > 4096 || new Set(chain2.map((node) => node.txid)).size !== chain2.length || !chain2.some((node) => node.txid === coin.txid))
-      throw new Error("Recovery path is incomplete");
-    for (const node of chain2) {
-      if (!canonicalId(node.txid) || !Array.isArray(node.spends) || node.spends.some((id) => !canonicalId(id)) || !Object.values(ChainTxType).includes(node.type) || node.type === ChainTxType.UNSPECIFIED || node.type !== ChainTxType.COMMITMENT && !transactions.has(node.txid))
-        throw new Error("Recovery path is incomplete");
-    }
-    const nodes = new Map(chain2.map((node) => [node.txid, node]));
-    if (!chain2.some((node) => node.type === ChainTxType.COMMITMENT))
-      throw new Error("Recovery path has no Bitcoin commitment");
-    for (const node of chain2) {
-      if (node.type === ChainTxType.COMMITMENT) continue;
-      const tx = transactions.get(node.txid);
-      const physical = /* @__PURE__ */ new Set();
-      for (let i = 0; i < tx.inputsLength; i++) {
-        const id = tx.getInput(i).txid;
-        if (!id) throw new Error("Recovery transaction input is incomplete");
-        physical.add(hex.encode(id));
-      }
-      if (!physical.size || [...physical].some((id) => !nodes.has(id)) || [...physical].sort().join("|") !== [...new Set(node.spends)].sort().join("|"))
-        throw new Error("Recovery ancestry does not match its transaction inputs");
-    }
-    const visiting = /* @__PURE__ */ new Set();
-    const visited = /* @__PURE__ */ new Set();
-    const visit = (id) => {
-      if (visited.has(id)) return;
-      if (visiting.has(id)) throw new Error("Recovery ancestry contains a cycle");
-      visiting.add(id);
-      const node = nodes.get(id);
-      if (!node) throw new Error("Recovery ancestry is incomplete");
-      if (node.type !== ChainTxType.COMMITMENT) node.spends.forEach(visit);
-      visiting.delete(id);
-      visited.add(id);
-    };
-    visit(coin.txid);
-    const output = transactions.get(coin.txid)?.getOutput(coin.vout);
-    if (!output || output.amount !== BigInt(coin.value) || hex.encode(output.script) !== d.scriptPubKey)
-      throw new Error("Recovery output does not match its transaction");
-  }
-  return { archive: value, info, coins };
-}
-function exitArchiveProviders(archive, d) {
-  const { info, coins } = validateExitArchive(archive, d);
-  const source = {
-    name: "vaulted-device-archive",
-    getVtxoChain: async (coin) => archive.branches[outpoint(coin)] ?? null,
-    getVirtualTxs: async (ids) => new Map(ids.flatMap((id) => archive.transactions[id] ? [[id, archive.transactions[id]]] : []))
+  const address = new ArkAddress(hex.decode(operatorPub.slice(2)), script.tweakedPublicKey, pins.arkHrp).encode();
+  if (hex.encode(script.pkScript) !== d.script || address !== d.address)
+    throw new Error("Spending enrollment script or address changed");
+  const b = requireBoardingDescriptor(d.boarding, {
+    vaultId: d.vaultId,
+    network,
+    phonePub,
+    boardingPub: d.boarding?.boardingPub
+  });
+  const boarding = {
+    schema: b.schema,
+    program: b.program,
+    template: b.template,
+    network: b.network,
+    boardingPub: b.boardingPub,
+    recoveryPhonePub: b.recoveryPhonePub,
+    vaultBoardCosignerPub: b.vaultBoardCosignerPub,
+    operatorPub: b.operatorPub,
+    exitDelay: b.exitDelay,
+    exitDelayUnit: b.exitDelayUnit,
+    script: b.script,
+    address: b.address
   };
-  function localOnly(methods) {
-    return new Proxy(methods, {
-      get(target, key) {
-        if (key === "then") return void 0;
-        if (key in target) return Reflect.get(target, key);
-        return () => {
-          throw new Error(`Saved recovery data cannot supply ${String(key)}`);
-        };
-      }
-    });
+  exactKeys(b, boarding);
+  const canonical = {
+    schema: d.schema,
+    template: d.template,
+    vaultId: d.vaultId,
+    network,
+    protectionTier: "light",
+    phonePub,
+    phoneDirectP256,
+    cosignerPub,
+    operatorPub,
+    delegatePub,
+    exitMode: "device",
+    exitDelay: d.exitDelay,
+    exitDelayUnit: "seconds",
+    spendingPolicy: policy2,
+    spendingPolicyDigest: digest,
+    script: d.script,
+    address,
+    boarding
+  };
+  exactKeys(d, canonical);
+  return canonical;
+}
+function spendingEnrollmentHash(value) {
+  return hex.encode(sha256(new TextEncoder().encode(JSON.stringify(validateSpendingEnrollment(value)))));
+}
+function requireSpendingEnrollmentStatus(status) {
+  const d = validateSpendingEnrollment(status.spendingDescriptor);
+  if (!status.enrolled || status.templateVersion !== d.template || status.protectionTier !== d.protectionTier || status.vaultId !== d.vaultId || status.network !== d.network || status.phoneBip340Pub !== d.phonePub || status.phoneDirectP256 !== d.phoneDirectP256 || status.vtxoVaultCosignerPub !== d.cosignerPub || status.vtxoDelegatePub !== d.delegatePub || status.spendingArkScript !== d.script || status.spendingArkAddress !== d.address || status.spendingPolicyDigest !== d.spendingPolicyDigest || spendingPolicyDigest(validateSpendingPolicy(status.spendingPolicy, d.network), d.network) !== d.spendingPolicyDigest || status.externalOwnerWalletPub || status.recoveryKeyPub || status.recoveryPub || status.savingsAddress || status.savingsScript || status.vtxoExitDelay !== d.exitDelay || status.vtxoExitDelayUnit !== d.exitDelayUnit || status.vtxoBoardingDescriptorHash !== spendingEnrollmentHash(d)) {
+    throw new Error("Spending status does not match its enrollment");
   }
-  const arkProvider = localOnly({
-    getInfo: async () => info,
-    // This immutable snapshot cannot announce a live signer rotation.
-    onServerInfoChanged: () => () => {
-    }
-  });
-  const indexerProvider = localOnly({
-    subscribeForScripts: async () => "saved-vault-recovery",
-    unsubscribeForScripts: async () => {
-    },
-    getSubscription: async function* (_id, signal) {
-      if (!signal.aborted)
-        await new Promise((resolve) => signal.addEventListener("abort", () => resolve(), { once: true }));
-    },
-    getVtxos: async (options) => ({
-      vtxos: coins.filter(
-        (coin) => options?.outpoints?.some((v) => outpoint(v) === outpoint(coin)) || options?.scripts?.includes(coin.script)
-      )
-    }),
-    getVtxoChain: async (coin) => ({ chain: archive.branches[outpoint(coin)] ?? [] }),
-    getVirtualTxs: async (ids) => ({
-      txs: ids.flatMap((id) => archive.transactions[id] ? [archive.transactions[id]] : [])
-    })
-  });
-  return { arkProvider, indexerProvider, source, coins };
+  requireBoardingStatus(status, d.boarding.boardingPub);
+  return d;
 }
 
-// src/lib/vault/recovery/archivePrevouts.ts
-function hydrateArchivedPrevouts(tx, transactions) {
-  let changed = false;
-  for (let i = 0; i < tx.inputsLength; i++) {
-    const input = tx.getInput(i);
-    const parentId = hex.encode(input.txid);
-    const parentPsbt = transactions[parentId];
-    if (!parentPsbt) {
-      if (!input.witnessUtxo && !input.nonWitnessUtxo) throw new Error("Recovery parent output is missing");
-      continue;
-    }
-    const parent = Transaction2.fromPSBT(base64.decode(parentPsbt));
-    if (parent.id !== parentId || input.index === void 0 || input.index >= parent.outputsLength)
-      throw new Error("Recovery parent output changed");
-    const previous = parent.getOutput(input.index);
-    if (input.nonWitnessUtxo && Transaction2.fromRaw(RawTx.encode(input.nonWitnessUtxo)).id !== parentId)
-      throw new Error("Recovery parent transaction changed");
-    for (const claimed of [input.witnessUtxo, input.nonWitnessUtxo?.outputs[input.index]]) {
-      if (claimed && (claimed.amount !== previous.amount || hex.encode(claimed.script) !== hex.encode(previous.script)))
-        throw new Error("Recovery parent output metadata changed");
-    }
-    if (!input.witnessUtxo && !input.nonWitnessUtxo) {
-      tx.updateInput(i, { witnessUtxo: { amount: previous.amount, script: previous.script } });
-      changed = true;
-    }
-  }
-  return changed;
-}
-
-// src/lib/vault/recovery/graphPackage.ts
+// src/lib/vault/program/spendingRecoveryDescriptor.ts
 init_define_import_meta_env();
-init_btc_signer();
-init_base();
-function canonicalRecoveryGraph(input) {
-  const { archive, archiveBinding, phonePub, pkg, sweeps, feeLimits } = input;
-  const { coins } = validateExitArchive(archive, archiveBinding);
-  const pins = networkPins(archiveBinding.network);
-  if (!Number.isSafeInteger(feeLimits.absoluteFeeCapSats) || feeLimits.absoluteFeeCapSats < 0 || !Number.isFinite(feeLimits.feerateCapSatVb) || feeLimits.feerateCapSatVb < 1 || !pkg || pkg.version !== 1 || pkg.mode !== "graph" || pkg.network !== pins.sdkNetwork || !Number.isFinite(pkg.feeRate) || pkg.feeRate < 1 || pkg.feeRate > feeLimits.feerateCapSatVb || !Number.isSafeInteger(pkg.createdAt) || pkg.createdAt <= 0 || sweeps.length !== coins.length || !coins.length || !/^(02|03)[0-9a-f]{64}$/.test(phonePub))
-    throw new Error("Recovery package does not cover the saved outputs");
-  const destination = scriptHexFromAddress(pkg.sweepAddress, archiveBinding.network);
-  const signed2 = /* @__PURE__ */ new Map();
-  for (const item of sweeps) {
-    const key = `${item.coin.txid}:${item.coin.vout}`;
-    const coin = coins.find((coin2) => `${coin2.txid}:${coin2.vout}` === key);
-    if (!coin || coin.value !== item.coin.value || signed2.has(key) || item.tx.inputsLength !== 1 || item.tx.outputsLength !== 1 || hex.encode(item.tx.getInput(0).txid) !== coin.txid || item.tx.getInput(0).index !== coin.vout || hex.encode(item.tx.getOutput(0).script) !== destination || item.tx.getOutput(0).amount !== BigInt(coin.value - item.fee) || !Number.isSafeInteger(item.fee) || item.fee < 0 || item.fee > feeLimits.absoluteFeeCapSats || item.fee > Math.ceil(item.tx.vsize * feeLimits.feerateCapSatVb))
-      throw new Error("Recovery sweep transaction or fee changed");
-    item.tx.extract();
-    signed2.set(key, item);
-  }
-  const parents = /* @__PURE__ */ new Map();
-  for (const coin of coins) {
-    const outpoint2 = `${coin.txid}:${coin.vout}`;
-    const chain2 = new Map(archive.branches[outpoint2].map((node) => [node.txid, node]));
-    const visited = /* @__PURE__ */ new Set();
-    const visit = (id) => {
-      if (visited.has(id)) return;
-      visited.add(id);
-      const node = chain2.get(id);
-      if (node.type === ChainTxType.COMMITMENT) return;
-      node.spends.forEach(visit);
-      const existing = parents.get(id);
-      if (existing) {
-        if (existing.type !== node.type) throw new Error("Recovery ancestors disagree about transaction type");
-        existing.forVtxos.add(outpoint2);
-        return;
-      }
-      const tx = Transaction2.fromPSBT(base64.decode(archive.transactions[id]));
-      hydrateArchivedPrevouts(tx, archive.transactions);
-      if (node.type === ChainTxType.TREE) {
-        const input2 = tx.getInput(0);
-        if (!input2.tapKeySig) throw new Error("Recovery tree signature missing");
-        tx.updateInput(0, { finalScriptWitness: [input2.tapKeySig] });
-      } else tx.finalize();
-      parents.set(id, { tx, forVtxos: /* @__PURE__ */ new Set([outpoint2]), type: node.type });
-    };
-    visit(coin.txid);
-  }
-  const network = getNetwork(pins.sdkNetwork);
-  const feeAddress = p2tr(hex.decode(phonePub).slice(1), void 0, network).address;
-  const childVsize = Number(
-    TxWeightEstimator.create().addP2AInput().addKeySpendInput(true).addOutputAddress(feeAddress, network).vsize().value
-  );
-  const funding = [...parents.values()].reduce(
-    (sum, parent) => sum + Math.ceil(pkg.feeRate * (parent.tx.vsize + childVsize)),
-    0
-  );
-  if (!Number.isSafeInteger(funding)) throw new Error("Recovery fee estimate exceeds supported amount");
-  const vtxos = coins.map((coin) => {
-    const outpoint2 = `${coin.txid}:${coin.vout}`, item = signed2.get(outpoint2);
-    return { outpoint: outpoint2, value: coin.value, sweepFee: item.fee, path: item.path, delay: item.delay };
-  });
-  const steps = [...parents.values()].map(({ tx, forVtxos }) => ({
-    kind: "bump",
-    parentTxid: tx.id,
-    parentHex: hex.encode(tx.extract()),
-    forVtxos: [...forVtxos].sort()
-  }));
-  for (const vtxo of vtxos) {
-    const item = signed2.get(vtxo.outpoint);
-    steps.push({
-      kind: "sweep",
-      vtxo: vtxo.outpoint,
-      txid: item.tx.id,
-      hex: hex.encode(item.tx.extract()),
-      dependsOnTxid: item.coin.txid,
-      delay: item.delay
-    });
-  }
+var SPENDING_RECOVERY_SCHEMA = "vaulted-spending/recovery-v1";
+function buildSpendingRecoveryDescriptor(value) {
+  const enrollment = validateSpendingEnrollment(value);
+  const p = enrollment.spendingPolicy;
   return {
-    version: 1,
-    mode: "graph",
-    network: pins.sdkNetwork,
-    createdAt: pkg.createdAt,
-    feeRate: pkg.feeRate,
-    sweepAddress: pkg.sweepAddress,
-    steps,
-    vtxos,
-    totals: {
-      txCount: parents.size * 2 + coins.length,
-      fundingRequiredSats: funding,
-      totalFeeSats: funding + vtxos.reduce((sum, v) => sum + v.sweepFee, 0),
-      recoveredSats: vtxos.reduce((sum, v) => sum + v.value - v.sweepFee, 0)
-    }
+    schema: SPENDING_RECOVERY_SCHEMA,
+    templateVersion: SPENDING_ONLY_TEMPLATE,
+    network: enrollment.network,
+    vaultId: enrollment.vaultId,
+    protectionTier: "light",
+    keys: { phoneBip340: enrollment.phonePub, phoneDirectP256: enrollment.phoneDirectP256 },
+    policy: {
+      program: p.program,
+      schema: p.schema,
+      period: p.period,
+      digest: enrollment.spendingPolicyDigest,
+      recipientDustSats: DUST_SATS,
+      recipientCapSats: p.txRecipientCapSats,
+      periodAllowanceSats: p.periodAllowanceSats,
+      absoluteFeeCapSats: p.absoluteFeeCapSats,
+      feerateCapSatVb: p.feerateCapSatPerV
+    },
+    enrollment
   };
 }
-
-// src/lib/vault/vtxo/spendingRecovery.ts
-init_base();
-
-// src/lib/vault/vtxo/contractHandler.ts
-init_define_import_meta_env();
-
-// src/lib/vault/vtxo/spend.ts
-init_define_import_meta_env();
-
-// src/lib/vault/light/contract.ts
-init_define_import_meta_env();
-var LIGHT_PROFILE = "vaulted-light-v1";
-
-// src/lib/vault/light/status.ts
-init_define_import_meta_env();
-
-// src/lib/vault/light/keyBackup.ts
-init_define_import_meta_env();
-
-// src/lib/vault/vtxo/spend.ts
-init_base();
-
-// src/lib/vault/ceremony/directauth.ts
-init_define_import_meta_env();
-var DIRECT_P256_HKDF_PREFIX = new TextEncoder().encode("arkade-2fa-vault/direct-p256/v1");
-
-// src/lib/vault/api.ts
-init_define_import_meta_env();
-
-// src/lib/vault/status.ts
-init_define_import_meta_env();
-
-// src/lib/vault/productionDomains.ts
-init_define_import_meta_env();
 
 // src/lib/vault/program/connector.ts
 init_define_import_meta_env();
@@ -50705,36 +50539,10 @@ function connectorEnrollmentDigest(input, origin2) {
   return hex.encode(sha256(concat4(...chunks)));
 }
 
-// src/lib/vault/pin.ts
+// src/lib/vault/program/connectorEnrollmentCore.ts
 init_define_import_meta_env();
-var PIN_FIELD_NAMES = [
-  "vaultId",
-  "network",
-  "protectionTier",
-  "spendingPolicyCanonical",
-  "spendingPolicyDigest",
-  "savingsAddress",
-  "savingsScript",
-  "vtxoVaultCosignerPub",
-  "vtxoExitDelay",
-  "vtxoExitDelayUnit",
-  "spendingArkAddress",
-  "spendingArkScript",
-  "vtxoDelegatePub",
-  "vtxoBoardingActive",
-  "vtxoBoardingProgram",
-  "vtxoBoardingAddress",
-  "vtxoBoardingScript",
-  "vtxoBoardingExitDelay",
-  "vtxoBoardingExitDelayUnit"
-];
-var STORED_PIN_FIELD_NAMES = [...PIN_FIELD_NAMES, "pinHash"];
-
-// src/lib/vault/cosignerClient.ts
-init_define_import_meta_env();
-
-// src/lib/vault/savingsSpend.ts
-init_define_import_meta_env();
+init_base();
+init_sha2();
 
 // src/lib/vault/program/descriptor.ts
 init_define_import_meta_env();
@@ -50828,6 +50636,7 @@ function buildVaultProgramDescriptor(input) {
     input.network
   );
   const protectionTier = requireProtectionTierMatchesRecovery(input.protectionTier, keys.recovery);
+  if (protectionTier === "light") throw new Error("Light does not enroll protected Savings");
   const family = buildDescriptorFamily({
     vaultId: input.vaultId,
     phonePub: keys.phoneBip340,
@@ -51061,16 +50870,7 @@ function buildDescriptorFamily(input) {
   return buildConnectorFamily({ ...input, connectorType: input.connectorType });
 }
 
-// src/lib/vault/program/kitStore.ts
-init_define_import_meta_env();
-
-// src/lib/vault/program/kit.ts
-init_define_import_meta_env();
-
 // src/lib/vault/program/connectorEnrollmentCore.ts
-init_define_import_meta_env();
-init_base();
-init_sha2();
 var BOARDING_ENROLLMENT_SCHEMA = "arkade-vault/enrollment-with-board-v1";
 function fail(message) {
   throw new Error(message);
@@ -51291,10 +51091,26 @@ function connectorRecoveryDescriptor(raw) {
 // src/lib/vault/program/kit.ts
 var RECOVERY_KIT_NAME = "arkade-recovery-kit";
 var RECOVERY_KIT_VERSION = 3;
+function isSpendingRecoveryKit(kit) {
+  return kit.version === 5;
+}
 function isLedgerRecoveryKit(kit) {
   return kit.version === 4;
 }
 function buildRecoveryKit(descriptor) {
+  if (descriptor.schema === SPENDING_RECOVERY_SCHEMA) {
+    const d2 = buildSpendingRecoveryDescriptor(descriptor.enrollment);
+    if (canonicalLedgerValue(d2) !== canonicalLedgerValue(descriptor))
+      throw new Error("Spending Recovery Kit descriptor changed");
+    return {
+      name: RECOVERY_KIT_NAME,
+      version: 5,
+      descriptor: d2,
+      descriptorHash: spendingEnrollmentHash(d2.enrollment),
+      spendingPolicyDigest: d2.policy.digest,
+      protectionTier: "light"
+    };
+  }
   if (descriptor.schema === LEDGER_RECOVERY_SCHEMA) {
     const d2 = validateLedgerRecoveryDescriptor(descriptor);
     return {
@@ -51321,6 +51137,12 @@ function parseRecoveryKit(raw) {
     return buildRecoveryKit(connectorRecoveryDescriptor(raw));
   const kit = raw;
   if (!kit || kit.name !== RECOVERY_KIT_NAME) throw new Error("not a Recovery Kit");
+  if (kit.version === 5) {
+    const built2 = buildRecoveryKit(kit.descriptor);
+    if (canonicalLedgerValue(kit) !== canonicalLedgerValue(built2))
+      throw new Error("Spending Recovery Kit binding changed");
+    return built2;
+  }
   if (kit.version === 4) {
     const built2 = buildRecoveryKit(validateLedgerRecoveryDescriptor(kit.descriptor));
     if (canonicalLedgerValue(kit) !== canonicalLedgerValue(built2))
@@ -51341,6 +51163,372 @@ function parseRecoveryKit(raw) {
   }
   return built;
 }
+
+// src/lib/vault/recovery/archivePrevouts.ts
+init_define_import_meta_env();
+init_btc_signer();
+init_base();
+
+// src/lib/vault/esplora.ts
+init_define_import_meta_env();
+
+// src/lib/vault/bounded.ts
+init_define_import_meta_env();
+var MAX_API_RESPONSE_BYTES = 1024 * 1024;
+
+// src/lib/vault/esplora.ts
+var ESPLORA_TX_PAGE_SIZE = 25;
+var MAX_ESPLORA_TX_PAGES = Math.ceil(RECENT_HISTORY_LIMIT / ESPLORA_TX_PAGE_SIZE);
+
+// src/lib/vault/recovery/exitArchive.ts
+init_define_import_meta_env();
+
+// src/lib/vault/recovery/pagedIndexer.ts
+init_define_import_meta_env();
+
+// src/lib/vault/recovery/exitArchive.ts
+init_base();
+var maxArchiveBytes = 12e6;
+var outpoint = (v) => `${v.txid}:${v.vout}`;
+var canonicalId = (id) => /^[0-9a-f]{64}$/.test(id);
+function unpack(raw) {
+  return JSON.parse(raw, (_, v) => {
+    if (v && typeof v === "object" && Object.keys(v).length === 1 && "lightBigInt" in v) {
+      if (typeof v.lightBigInt !== "string" || !/^-?[0-9]{1,20}$/.test(v.lightBigInt))
+        throw new Error("Invalid saved recovery number");
+      return BigInt(v.lightBigInt);
+    }
+    return v;
+  });
+}
+function requireExitArchiveInfo(info, d) {
+  const pins = networkPins(d.network);
+  if (info.network !== pins.operatorGetInfoNetwork || info.signerPubkey !== pins.operatorSignerPub || info.checkpointTapscript !== pins.checkpointTapscript || info.forfeitPubkey !== pins.checkpointForfeitPub)
+    throw new Error("Recovery data does not match this release");
+}
+function validateExitArchive(value, d) {
+  if (!value || JSON.stringify(value).length > maxArchiveBytes || value.version !== 1 || value.descriptorHash !== d.descriptorHash || !Number.isFinite(Date.parse(value.capturedAt)))
+    throw new Error("Recovery data does not match this wallet");
+  const info = unpack(value.info);
+  requireExitArchiveInfo(info, d);
+  const rawCoins = unpack(value.coins);
+  if (!Array.isArray(rawCoins) || rawCoins.length > 512) throw new Error("Recovery output limit exceeded");
+  const coins = rawCoins.map((coin) => ({
+    ...coin,
+    createdAt: new Date(coin.createdAt),
+    ...coin.expiresAt ? { expiresAt: new Date(coin.expiresAt) } : {}
+  }));
+  const seen = /* @__PURE__ */ new Set();
+  const transactions = /* @__PURE__ */ new Map();
+  if (!value.transactions || Object.keys(value.transactions).length > 4096)
+    throw new Error("Recovery transaction limit exceeded");
+  for (const [id, psbt] of Object.entries(value.transactions)) {
+    if (!canonicalId(id) || typeof psbt !== "string" || psbt.length > 1e6)
+      throw new Error("Invalid saved recovery transaction");
+    const tx = Transaction2.fromPSBT(base64.decode(psbt));
+    if (tx.id !== id) throw new Error("Recovery transaction changed");
+    transactions.set(id, tx);
+  }
+  for (const coin of coins) {
+    const key = outpoint(coin);
+    if (!canonicalId(coin.txid) || !Number.isSafeInteger(coin.vout) || coin.vout < 0 || coin.vout > 4294967295 || !Number.isSafeInteger(coin.value) || coin.value <= 0 || coin.value > 21e14 || coin.script !== d.scriptPubKey || coin.isSpent || coin.spentBy || seen.has(key))
+      throw new Error("Saved recovery output changed");
+    seen.add(key);
+    const chain2 = value.branches?.[key];
+    if (!Array.isArray(chain2) || !chain2.length || chain2.length > 4096 || new Set(chain2.map((node) => node.txid)).size !== chain2.length || !chain2.some((node) => node.txid === coin.txid))
+      throw new Error("Recovery path is incomplete");
+    for (const node of chain2) {
+      if (!canonicalId(node.txid) || !Array.isArray(node.spends) || node.spends.some((id) => !canonicalId(id)) || !Object.values(ChainTxType).includes(node.type) || node.type === ChainTxType.UNSPECIFIED || node.type !== ChainTxType.COMMITMENT && !transactions.has(node.txid))
+        throw new Error("Recovery path is incomplete");
+    }
+    const nodes = new Map(chain2.map((node) => [node.txid, node]));
+    if (!chain2.some((node) => node.type === ChainTxType.COMMITMENT))
+      throw new Error("Recovery path has no Bitcoin commitment");
+    for (const node of chain2) {
+      if (node.type === ChainTxType.COMMITMENT) continue;
+      const tx = transactions.get(node.txid);
+      const physical = /* @__PURE__ */ new Set();
+      for (let i = 0; i < tx.inputsLength; i++) {
+        const id = tx.getInput(i).txid;
+        if (!id) throw new Error("Recovery transaction input is incomplete");
+        physical.add(hex.encode(id));
+      }
+      if (!physical.size || [...physical].some((id) => !nodes.has(id)) || [...physical].sort().join("|") !== [...new Set(node.spends)].sort().join("|"))
+        throw new Error("Recovery ancestry does not match its transaction inputs");
+    }
+    const visiting = /* @__PURE__ */ new Set();
+    const visited = /* @__PURE__ */ new Set();
+    const visit = (id) => {
+      if (visited.has(id)) return;
+      if (visiting.has(id)) throw new Error("Recovery ancestry contains a cycle");
+      visiting.add(id);
+      const node = nodes.get(id);
+      if (!node) throw new Error("Recovery ancestry is incomplete");
+      if (node.type !== ChainTxType.COMMITMENT) node.spends.forEach(visit);
+      visiting.delete(id);
+      visited.add(id);
+    };
+    visit(coin.txid);
+    const output = transactions.get(coin.txid)?.getOutput(coin.vout);
+    if (!output || output.amount !== BigInt(coin.value) || hex.encode(output.script) !== d.scriptPubKey)
+      throw new Error("Recovery output does not match its transaction");
+  }
+  return { archive: value, info, coins };
+}
+function exitArchiveProviders(archive, d) {
+  const { info, coins } = validateExitArchive(archive, d);
+  const source = {
+    name: "vaulted-device-archive",
+    getVtxoChain: async (coin) => archive.branches[outpoint(coin)] ?? null,
+    getVirtualTxs: async (ids) => new Map(ids.flatMap((id) => archive.transactions[id] ? [[id, archive.transactions[id]]] : []))
+  };
+  function localOnly(methods) {
+    return new Proxy(methods, {
+      get(target, key) {
+        if (key === "then") return void 0;
+        if (key in target) return Reflect.get(target, key);
+        return () => {
+          throw new Error(`Saved recovery data cannot supply ${String(key)}`);
+        };
+      }
+    });
+  }
+  const arkProvider = localOnly({
+    getInfo: async () => info,
+    // This immutable snapshot cannot announce a live signer rotation.
+    onServerInfoChanged: () => () => {
+    }
+  });
+  const indexerProvider = localOnly({
+    subscribeForScripts: async () => "saved-vault-recovery",
+    unsubscribeForScripts: async () => {
+    },
+    getSubscription: async function* (_id, signal) {
+      if (!signal.aborted)
+        await new Promise((resolve) => signal.addEventListener("abort", () => resolve(), { once: true }));
+    },
+    getVtxos: async (options) => ({
+      vtxos: coins.filter(
+        (coin) => options?.outpoints?.some((v) => outpoint(v) === outpoint(coin)) || options?.scripts?.includes(coin.script)
+      )
+    }),
+    getVtxoChain: async (coin) => ({ chain: archive.branches[outpoint(coin)] ?? [] }),
+    getVirtualTxs: async (ids) => ({
+      txs: ids.flatMap((id) => archive.transactions[id] ? [archive.transactions[id]] : [])
+    })
+  });
+  return { arkProvider, indexerProvider, source, coins };
+}
+
+// src/lib/vault/recovery/archivePrevouts.ts
+function hydrateArchivedPrevouts(tx, transactions) {
+  let changed = false;
+  for (let i = 0; i < tx.inputsLength; i++) {
+    const input = tx.getInput(i);
+    const parentId = hex.encode(input.txid);
+    const parentPsbt = transactions[parentId];
+    if (!parentPsbt) {
+      if (!input.witnessUtxo && !input.nonWitnessUtxo) throw new Error("Recovery parent output is missing");
+      continue;
+    }
+    const parent = Transaction2.fromPSBT(base64.decode(parentPsbt));
+    if (parent.id !== parentId || input.index === void 0 || input.index >= parent.outputsLength)
+      throw new Error("Recovery parent output changed");
+    const previous = parent.getOutput(input.index);
+    if (input.nonWitnessUtxo && Transaction2.fromRaw(RawTx.encode(input.nonWitnessUtxo)).id !== parentId)
+      throw new Error("Recovery parent transaction changed");
+    for (const claimed of [input.witnessUtxo, input.nonWitnessUtxo?.outputs[input.index]]) {
+      if (claimed && (claimed.amount !== previous.amount || hex.encode(claimed.script) !== hex.encode(previous.script)))
+        throw new Error("Recovery parent output metadata changed");
+    }
+    if (!input.witnessUtxo && !input.nonWitnessUtxo) {
+      tx.updateInput(i, { witnessUtxo: { amount: previous.amount, script: previous.script } });
+      changed = true;
+    }
+  }
+  return changed;
+}
+
+// src/lib/vault/recovery/graphPackage.ts
+init_define_import_meta_env();
+init_btc_signer();
+init_base();
+function canonicalRecoveryGraph(input) {
+  const { archive, archiveBinding, phonePub, pkg, sweeps, feeLimits } = input;
+  const { coins } = validateExitArchive(archive, archiveBinding);
+  const pins = networkPins(archiveBinding.network);
+  if (!Number.isSafeInteger(feeLimits.absoluteFeeCapSats) || feeLimits.absoluteFeeCapSats < 0 || !Number.isFinite(feeLimits.feerateCapSatVb) || feeLimits.feerateCapSatVb < 1 || !pkg || pkg.version !== 1 || pkg.mode !== "graph" || pkg.network !== pins.sdkNetwork || !Number.isFinite(pkg.feeRate) || pkg.feeRate < 1 || pkg.feeRate > feeLimits.feerateCapSatVb || !Number.isSafeInteger(pkg.createdAt) || pkg.createdAt <= 0 || sweeps.length !== coins.length || !coins.length || !/^(02|03)[0-9a-f]{64}$/.test(phonePub))
+    throw new Error("Recovery package does not cover the saved outputs");
+  const destination = scriptHexFromAddress(pkg.sweepAddress, archiveBinding.network);
+  const signed2 = /* @__PURE__ */ new Map();
+  for (const item of sweeps) {
+    const key = `${item.coin.txid}:${item.coin.vout}`;
+    const coin = coins.find((coin2) => `${coin2.txid}:${coin2.vout}` === key);
+    if (!coin || coin.value !== item.coin.value || signed2.has(key) || item.tx.inputsLength !== 1 || item.tx.outputsLength !== 1 || hex.encode(item.tx.getInput(0).txid) !== coin.txid || item.tx.getInput(0).index !== coin.vout || hex.encode(item.tx.getOutput(0).script) !== destination || item.tx.getOutput(0).amount !== BigInt(coin.value - item.fee) || !Number.isSafeInteger(item.fee) || item.fee < 0 || item.fee > feeLimits.absoluteFeeCapSats || item.fee > Math.ceil(item.tx.vsize * feeLimits.feerateCapSatVb))
+      throw new Error("Recovery sweep transaction or fee changed");
+    item.tx.extract();
+    signed2.set(key, item);
+  }
+  const parents = /* @__PURE__ */ new Map();
+  for (const coin of coins) {
+    const outpoint2 = `${coin.txid}:${coin.vout}`;
+    const chain2 = new Map(archive.branches[outpoint2].map((node) => [node.txid, node]));
+    const visited = /* @__PURE__ */ new Set();
+    const visit = (id) => {
+      if (visited.has(id)) return;
+      visited.add(id);
+      const node = chain2.get(id);
+      if (node.type === ChainTxType.COMMITMENT) return;
+      node.spends.forEach(visit);
+      const existing = parents.get(id);
+      if (existing) {
+        if (existing.type !== node.type) throw new Error("Recovery ancestors disagree about transaction type");
+        existing.forVtxos.add(outpoint2);
+        return;
+      }
+      const tx = Transaction2.fromPSBT(base64.decode(archive.transactions[id]));
+      hydrateArchivedPrevouts(tx, archive.transactions);
+      if (node.type === ChainTxType.TREE) {
+        const input2 = tx.getInput(0);
+        if (!input2.tapKeySig) throw new Error("Recovery tree signature missing");
+        tx.updateInput(0, { finalScriptWitness: [input2.tapKeySig] });
+      } else tx.finalize();
+      parents.set(id, { tx, forVtxos: /* @__PURE__ */ new Set([outpoint2]), type: node.type });
+    };
+    visit(coin.txid);
+  }
+  const network = getNetwork(pins.sdkNetwork);
+  const feeAddress = p2tr(hex.decode(phonePub).slice(1), void 0, network).address;
+  const childVsize = Number(
+    TxWeightEstimator.create().addP2AInput().addKeySpendInput(true).addOutputAddress(feeAddress, network).vsize().value
+  );
+  const funding = [...parents.values()].reduce(
+    (sum, parent) => sum + Math.ceil(pkg.feeRate * (parent.tx.vsize + childVsize)),
+    0
+  );
+  if (!Number.isSafeInteger(funding)) throw new Error("Recovery fee estimate exceeds supported amount");
+  const vtxos = coins.map((coin) => {
+    const outpoint2 = `${coin.txid}:${coin.vout}`, item = signed2.get(outpoint2);
+    return { outpoint: outpoint2, value: coin.value, sweepFee: item.fee, path: item.path, delay: item.delay };
+  });
+  const steps = [...parents.values()].map(({ tx, forVtxos }) => ({
+    kind: "bump",
+    parentTxid: tx.id,
+    parentHex: hex.encode(tx.extract()),
+    forVtxos: [...forVtxos].sort()
+  }));
+  for (const vtxo of vtxos) {
+    const item = signed2.get(vtxo.outpoint);
+    steps.push({
+      kind: "sweep",
+      vtxo: vtxo.outpoint,
+      txid: item.tx.id,
+      hex: hex.encode(item.tx.extract()),
+      dependsOnTxid: item.coin.txid,
+      delay: item.delay
+    });
+  }
+  return {
+    version: 1,
+    mode: "graph",
+    network: pins.sdkNetwork,
+    createdAt: pkg.createdAt,
+    feeRate: pkg.feeRate,
+    sweepAddress: pkg.sweepAddress,
+    steps,
+    vtxos,
+    totals: {
+      txCount: parents.size * 2 + coins.length,
+      fundingRequiredSats: funding,
+      totalFeeSats: funding + vtxos.reduce((sum, v) => sum + v.sweepFee, 0),
+      recoveredSats: vtxos.reduce((sum, v) => sum + v.value - v.sweepFee, 0)
+    }
+  };
+}
+
+// src/lib/vault/vtxo/spendingRecovery.ts
+init_base();
+
+// src/lib/vault/vtxo/contractHandler.ts
+init_define_import_meta_env();
+
+// src/lib/vault/vtxo/spend.ts
+init_define_import_meta_env();
+
+// src/lib/vault/light/contract.ts
+init_define_import_meta_env();
+var LIGHT_PROFILE = "vaulted-light-v1";
+
+// src/lib/vault/recovery/finalization.ts
+init_define_import_meta_env();
+
+// src/lib/vault/light/status.ts
+init_define_import_meta_env();
+
+// src/lib/vault/light/exitRepository.ts
+init_define_import_meta_env();
+
+// src/lib/vault/recovery/retainedRepository.ts
+init_define_import_meta_env();
+
+// src/lib/vault/vtxo/exitRepository.ts
+init_define_import_meta_env();
+
+// src/lib/vault/recovery/fileStore.ts
+init_define_import_meta_env();
+
+// src/lib/vault/light/keyBackup.ts
+init_define_import_meta_env();
+
+// src/lib/vault/vtxo/spend.ts
+init_base();
+
+// src/lib/vault/ceremony/directauth.ts
+init_define_import_meta_env();
+var DIRECT_P256_HKDF_PREFIX = new TextEncoder().encode("arkade-2fa-vault/direct-p256/v1");
+
+// src/lib/vault/api.ts
+init_define_import_meta_env();
+
+// src/lib/vault/status.ts
+init_define_import_meta_env();
+
+// src/lib/vault/productionDomains.ts
+init_define_import_meta_env();
+
+// src/lib/vault/pin.ts
+init_define_import_meta_env();
+var PIN_FIELD_NAMES = [
+  "vaultId",
+  "network",
+  "protectionTier",
+  "spendingPolicyCanonical",
+  "spendingPolicyDigest",
+  "savingsAddress",
+  "savingsScript",
+  "vtxoVaultCosignerPub",
+  "vtxoExitDelay",
+  "vtxoExitDelayUnit",
+  "spendingArkAddress",
+  "spendingArkScript",
+  "vtxoDelegatePub",
+  "vtxoBoardingActive",
+  "vtxoBoardingProgram",
+  "vtxoBoardingAddress",
+  "vtxoBoardingScript",
+  "vtxoBoardingExitDelay",
+  "vtxoBoardingExitDelayUnit"
+];
+var STORED_PIN_FIELD_NAMES = [...PIN_FIELD_NAMES, "pinHash"];
+
+// src/lib/vault/cosignerClient.ts
+init_define_import_meta_env();
+
+// src/lib/vault/savingsSpend.ts
+init_define_import_meta_env();
+
+// src/lib/vault/program/kitStore.ts
+init_define_import_meta_env();
 
 // src/lib/vault/program/liveKit.ts
 init_define_import_meta_env();
@@ -51521,6 +51709,9 @@ function vaultPolicyV1ScriptFromStatus(status) {
   const pins = requireEnrolledSpendingStatus(status);
   const address = ArkAddress.decode(String(status.spendingArkAddress || ""));
   if (address.hrp !== pins.arkHrp) throw new Error("spending Ark address does not match this network");
+  const spendingOnly = status.templateVersion === SPENDING_ONLY_TEMPLATE;
+  if (spendingOnly) requireSpendingEnrollmentStatus(status);
+  else if (status.protectionTier === "light") throw new Error("Light requires its shared Spending enrollment");
   const params = {
     userPub: xOnly(status.phoneBip340Pub, "phone pubkey"),
     vtxoVaultCosignerPub: xOnly(status.vtxoVaultCosignerPub, "VTXO VaultCosigner pubkey"),
@@ -51530,7 +51721,7 @@ function vaultPolicyV1ScriptFromStatus(status) {
     exitDelayUnit: VAULT_POLICY_V1_EXIT_DELAY_UNIT,
     network: pins.network,
     exitDevicePub: xOnly(status.phoneBip340Pub, "phone pubkey"),
-    exitHardwarePub: xOnly(status.externalOwnerWalletPub, "hardware pubkey"),
+    ...spendingOnly ? { exitMode: "device" } : { exitHardwarePub: xOnly(status.externalOwnerWalletPub, "hardware pubkey") },
     ...status.recoveryKeyPub || status.recoveryPub ? { exitRecoveryPub: xOnly(status.recoveryKeyPub || status.recoveryPub, "recovery pubkey") } : {}
   };
   const script = new VaultPolicyV1Script(params);
@@ -51549,6 +51740,16 @@ init_base();
 // src/lib/vault/program/kitBackup.ts
 init_define_import_meta_env();
 function kitFromFacts(input) {
+  if (input.status?.templateVersion === SPENDING_ONLY_TEMPLATE) {
+    try {
+      const d = requireSpendingEnrollmentStatus(input.status);
+      if (input.enrollment?.phoneBip340Pub && input.enrollment.phoneBip340Pub !== d.phonePub || input.enrollment?.phoneDirectP256 && input.enrollment.phoneDirectP256 !== d.phoneDirectP256 || input.hardwarePub || input.recoveryPub)
+        return null;
+      return buildRecoveryKit(buildSpendingRecoveryDescriptor(d));
+    } catch {
+      return null;
+    }
+  }
   if (input.status?.templateVersion === LEDGER_NATIVE_TEMPLATE) {
     try {
       const descriptor = buildLedgerRecoveryDescriptor(ledgerEnrollmentFromStatus(input.status));
@@ -51609,8 +51810,51 @@ function kitFromFacts(input) {
   return null;
 }
 
-// src/lib/vault/vtxo/exitRepository.ts
+// src/lib/vault/vtxo/boardingJournal.ts
 init_define_import_meta_env();
+init_btc_signer();
+init_base();
+init_sha2();
+var LIMIT = 24e6;
+var fingerprint2 = (request2) => hex.encode(sha256(new TextEncoder().encode(JSON.stringify(request2))));
+function validateBoardingTranscripts(records, descriptor) {
+  if (!Array.isArray(records) || records.length > 1024 || JSON.stringify(records).length > LIMIT)
+    throw new Error("Boarding recovery evidence exceeds its storage limit");
+  const seen = /* @__PURE__ */ new Set();
+  for (const record of records) {
+    if (!record?.request || typeof record.requestHash !== "string" || record.requestHash !== fingerprint2(record.request) || seen.has(record.requestHash))
+      throw new Error("Boarding recovery evidence changed");
+    seen.add(record.requestHash);
+    const { request: request2 } = record;
+    const batch = request2.validatedBatch;
+    if (typeof request2.handle !== "string" || !request2.handle || typeof request2.psbt !== "string" || !Array.isArray(request2.signedForfeits) || request2.signedForfeits.length || !Array.isArray(request2.inputIndexes) || request2.inputIndexes.length !== 1 || !batch || typeof batch.batchId !== "string" || !batch.batchId || !Number.isSafeInteger(batch.batchExpiry) || batch.batchExpiry <= 0 || batch.batchExpiry > 4294967295 || typeof batch.unsignedCommitmentTx !== "string" || !Array.isArray(batch.vtxoTree) || batch.vtxoTree.length === 0 || !Array.isArray(batch.expectedRecipients) || batch.expectedRecipients.length !== 1 || !batch.expectedRecipients[0] || typeof batch.expectedRecipients[0].address !== "string" || !batch.expectedRecipients[0].address || !Number.isSafeInteger(batch.expectedRecipients[0].amountSats) || batch.expectedRecipients[0].amountSats <= 0)
+      throw new Error("Invalid boarding recovery request");
+    const tx = Transaction.fromPSBT(base64.decode(request2.psbt), { allowUnknown: true });
+    const unsigned = Transaction.fromPSBT(base64.decode(request2.validatedBatch.unsignedCommitmentTx), {
+      allowUnknown: true
+    });
+    const index = request2.inputIndexes[0];
+    if (!Number.isSafeInteger(index) || index < 0 || index >= tx.inputsLength || tx.id !== unsigned.id)
+      throw new Error("Boarding recovery commitment changed");
+    const script = tx.getInput(index).witnessUtxo?.script;
+    if (!script || hex.encode(script) !== descriptor.script)
+      throw new Error("Boarding recovery belongs to a different deposit script");
+    const nodeIds = /* @__PURE__ */ new Set();
+    for (const node of batch.vtxoTree) {
+      if (!node || typeof node.txid !== "string" || !/^[0-9a-f]{64}$/.test(node.txid) || nodeIds.has(node.txid) || typeof node.tx !== "string" || !node.children || typeof node.children !== "object" || Array.isArray(node.children) || Object.entries(node.children).some(
+        ([index2, child]) => !/^(0|[1-9][0-9]*)$/.test(index2) || !Number.isSafeInteger(Number(index2)) || typeof child !== "string" || !/^[0-9a-f]{64}$/.test(child)
+      ))
+        throw new Error("Invalid boarding recovery tree");
+      nodeIds.add(node.txid);
+      const treeTx = Transaction.fromPSBT(base64.decode(node.tx), { allowUnknown: true });
+      if (treeTx.id !== node.txid || treeTx.inputsLength !== 1 || treeTx.getInput(0).tapKeySig?.length !== 64)
+        throw new Error("Boarding recovery tree is not signed");
+    }
+    if (batch.vtxoTree.some((node) => Object.values(node.children).some((child) => !nodeIds.has(child))))
+      throw new Error("Boarding recovery tree is incomplete");
+  }
+  return records;
+}
 
 // src/lib/vault/program/enroll.ts
 init_define_import_meta_env();
@@ -51657,6 +51901,12 @@ function hashBoardingEnrollmentDescriptor(descriptor) {
   return digest;
 }
 
+// src/lib/vault/recovery/lifecycleStore.ts
+init_define_import_meta_env();
+
+// src/lib/vault/recovery/coverage.ts
+init_define_import_meta_env();
+
 // src/lib/vault/vtxo/recoveryArchive.ts
 function vaultRecoveryBinding(kit, status) {
   const valid = parseRecoveryKit(kit);
@@ -51671,6 +51921,8 @@ function vaultRecoveryBinding(kit, status) {
   else if (isLedgerRecoveryKit(valid)) {
     if (valid.descriptor.enrollmentDescriptorHash !== status.ledgerSavings?.descriptorHash)
       throw new Error("Ledger recovery enrollment composite changed");
+  } else if (isSpendingRecoveryKit(valid)) {
+    requireSpendingEnrollmentStatus(status);
   } else if (hashBoardingEnrollmentDescriptor({
     schema: "arkade-vault/enrollment-with-board-v1",
     vaultId: status.vaultId,
@@ -51696,10 +51948,11 @@ function vaultRecoveryBinding(kit, status) {
 function validateVaultRecoveryArchive(value) {
   if (!value || value.name !== "vaulted-program-recovery-data" || value.version !== 1)
     throw new Error("Invalid program recovery data");
-  const binding = vaultRecoveryBinding(value.kit, value.status);
-  validateExitArchive(value.spending, binding);
   if (!Array.isArray(value.onchain) || value.onchain.length > 1024 || JSON.stringify(value).length > 24e6)
     throw new Error("Onchain recovery data exceeds the archive limit");
+  const binding = vaultRecoveryBinding(value.kit, value.status);
+  validateExitArchive(value.spending, binding);
+  validateBoardingTranscripts(value.boardingTranscripts ?? [], value.status.vtxoBoardingDescriptor);
   const scripts = new Set(archiveAddresses(value.kit, value.status).map((tree) => tree.script));
   const seen = /* @__PURE__ */ new Set();
   for (const coin of value.onchain) {
@@ -51718,6 +51971,7 @@ function validateVaultRecoveryArchive(value) {
   return value;
 }
 function archiveAddresses(kit, status) {
+  if (isSpendingRecoveryKit(kit)) return [requireBoardingStatus(status, kit.descriptor.enrollment.boarding.boardingPub)];
   return [
     kit.descriptor.savings,
     ...isLedgerRecoveryKit(kit) ? [kit.descriptor.savingsChange] : [],
@@ -51759,14 +52013,19 @@ function sweepFacts(archive, destination, psbt, complete) {
     amount: output.amount,
     script: hex.decode(scriptHexFromAddress(destination, archive.status.network))
   });
-  const keys = archive.kit.descriptor.keys;
-  const requiredKeys = keys.recovery ? [
-    { role: "hardware", publicKey: keys.hardware },
-    { role: "recovery", publicKey: keys.recovery }
-  ] : [
-    { role: "phone", publicKey: keys.phoneBip340 },
-    { role: "hardware", publicKey: keys.hardware }
-  ];
+  let requiredKeys;
+  if (isSpendingRecoveryKit(archive.kit)) {
+    requiredKeys = [{ role: "phone", publicKey: archive.kit.descriptor.keys.phoneBip340 }];
+  } else {
+    const keys = archive.kit.descriptor.keys;
+    requiredKeys = keys.recovery ? [
+      { role: "hardware", publicKey: keys.hardware },
+      { role: "recovery", publicKey: keys.recovery }
+    ] : [
+      { role: "phone", publicKey: keys.phoneBip340 },
+      { role: "hardware", publicKey: keys.hardware }
+    ];
+  }
   const signatures = input.tapScriptSig ?? [];
   if (signatures.length) expected.updateInput(0, { tapScriptSig: signatures });
   if (hex.encode(tx.toPSBT()) !== hex.encode(expected.toPSBT()))
@@ -51828,10 +52087,10 @@ function feeWallet(raw, role) {
   const branch = account.deriveChild(0);
   const child = branch.deriveChild(0);
   if (branch.index !== 0 || child.index !== 0 || !child.publicKey) throw new Error("Invalid Ledger fee derivation");
-  const publicKey = hex.encode(child.publicKey);
+  const publicKey2 = hex.encode(child.publicKey);
   const network = getNetwork(networkPins(context.network).sdkNetwork);
   const payment = p2tr(child.publicKey.slice(1), void 0, network);
-  return { descriptor, publicKey, feeAddress: payment.address, payment, network };
+  return { descriptor, publicKey: publicKey2, feeAddress: payment.address, payment, network };
 }
 function canonicalFee(raw) {
   const request2 = structuredClone(raw);
@@ -51916,10 +52175,10 @@ function canonicalFee(raw) {
   return { ...wallet, role: request2.role, child, feeSats, packageVsize, fundingSats, changeSats };
 }
 function inspectLedgerRecoveryFee(request2) {
-  const { child, publicKey, feeAddress, feeSats, packageVsize, fundingSats, changeSats } = canonicalFee(request2);
+  const { child, publicKey: publicKey2, feeAddress, feeSats, packageVsize, fundingSats, changeSats } = canonicalFee(request2);
   return {
     unsignedPsbt: hex.encode(child.toPSBT()),
-    publicKey,
+    publicKey: publicKey2,
     feeAddress,
     feeSats,
     packageVsize,
